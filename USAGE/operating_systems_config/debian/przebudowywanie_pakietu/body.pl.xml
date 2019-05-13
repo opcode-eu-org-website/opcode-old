@@ -1,0 +1,4 @@
+<article>
+<title>Modyfikowanie / przebudowanie pakietu:</title>
+<p>Aby zbudować jakis pakiet ("pakiet_do_poprawki") należy pobrać jego wersję źródłową (<code>apt-get source pam</code>), nanieść poprawki (albo na kod źródłowy albo tylko na opcje budowania umieszczone w "rules") a następnie zbudować pakiet binarny (<code>dpkg-buildpackage -rfakeroot</code>) i zainstalować go lub wypakować z niego potrzebne pliki. W przypadku pakietów budowanych na nasze potrzeby pomocny może być też program "debchange", umożliwiający automatyzację zmian w changelog - np. <code>debchange -v "1.0."`date +"%Y%m%dT%H%M%S"` "OPIS" &amp;&amp; dpkg-buildpackage -rfakeroot</code></p>
+</article>

@@ -1,0 +1,6 @@
+<article>
+<title>VCO - Generatory sterowane napięciem</title>
+<p>Idea tego typu układów polegna na napięciowym (na ogół prądowym, a dopiero prąd ustalany napięciowo) sterowaniu częstotliwością generowanego sygnału. Realizowane jest to poprzez wpychanie lub wyciąganie prądu z kondensatora C1 podłączonego do wejścia układu z histerezą. Wpychanie i wyciąganie prądu może być zrealizowane na rozmaite sposoby - np. tak jak przedstawiono na poniższym schemacie poprzez wzmacniacz różnicowy z lustrem lub wzmacniacz różnicowy z dwoma źródłami prądowymi (jedno będące wielokrotnością drugiego.</p>
+
+<p class="center"><img_from_src name="vco" type="sch" alt="schemat ideowy prostego vco" /></p>
+</article>

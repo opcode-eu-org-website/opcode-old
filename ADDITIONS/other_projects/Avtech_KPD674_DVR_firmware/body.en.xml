@@ -1,0 +1,288 @@
+<article>
+<title>Rescue Avtech KPD674 after firmware upgrade fail</title>
+
+<p>If firmware upgrade fail, but bootloader is OK you can tray <a href="http://pushvideoclub.com/viewtopic.php?f=99&amp;t=163&amp;p=228">USB flash on boot</a>. Unfortunately, this method does not work sometimes (the screen displays a "Reset Defaults ...", "Complete Booting System ..." and nothing about USB upgrade mode).</p>
+
+<subtitle>Serial console, u-boot menu and TFTP</subtitle>
+<p><span latex_img_width="512" class="right"><img src="./KPD674AZ-J5_connector.jpg" alt="serial connector on KPD674Z (KPD674AZ)" class="right" /></span>Good news is: DVR have serial port and bootloader (u-boot) support it and TFTP. On my KPD674Z (KPD674AZ) serial with system console is located on 4-pins J5 connector (GND, RxD, TxD, +3.3V - see photo for detail). Serial voltage-level is 3.3V and baud-rate is 38400. If you are not connected VGA, then on early startup stage serial connection can be closed (<code>FATAL: term closed  term_exitfunc: reset failed for dev UNKNOWN: Input/output error</code>) and you must reconnect to serial port. U-boot on serial console show:</p>
+<pre>012346
+
+U-Boot 2008.10 (Dec 18 2009 - 10:07:53)
+
+DRAM:  128 MB
+Flash: 16 MB
+Using default environment
+
+flash no default environment
+In:    serial
+Out:   serial
+Err:   serial
+Net:   FTGMAC#0
+checking keyboard is exist. iic type KEYBOARD_ID=00000060
+boardid=0x02
+force_output=0x30303030
+Will set the following freq...
+PLL1: 480 MHz, PLL3: 594 MHz, CPU freq: 480 MHz, AHB freq: 240 MHz, DDR freq: 480 MHz
+go...
+
+
+
+
+!VGA Detected(GPIO)
+VGA Output
+lcd200_ctrl_enable
+Not BMP Type !!
+Not support bmp 65535 Bits Per Pixel !!
+Error bitmap format using default
+bmp using RLE 8-bit/pixel
+rle total length=76801
+flash size=0x01000000
+clock info:
+PLL1: 480 MHz       PLL2: 750 MHz       PLL3: 594 MHz       DDR: 480 MHz
+CPU : 480 MHz       HCLK: 240 MHz       PCLK: 120 MHz
+UART: 118 MHz       IDE :  99 MHz       PCI :  42 MHz
+MPEG: 198 MHz       H.264 enc: 198 MHz  H.264 dec: 198 MHz
+
+Press SPACE to abort autoboot in 1 seconds</pre>
+
+<p>When you press space u-boot enter to boot menu:</p>
+<pre>Partition plan:
+Name:BootLoader         offset:0x10000000 size:0x00040000  upgrade file:fa8181_bld.bin
+Name:Initial bitmap     offset:0x10040000 size:0x00020000  upgrade file:custom_logo.bmp
+Name:Factory default    offset:0x100A0000 size:0x00060000  upgrade file:
+Name:Linux System       offset:0x10100000 size:0x00500000  upgrade file:kernel_16.bin
+Name:Application        offset:0x10600000 size:0x00900000  upgrade file:AppImg_16.bin
+Name:XML                offset:0x10F00000 size:0x00100000  upgrade file:xml_16.bin
+Name:FULL               offset:0x10000000 size:0x01000000  upgrade file:full_16.bin
+
+**********************************************
+* AVC793 Please select option...
+*   1 : Kermit Update BootLoader Firmware
+*   2 : Kermit Update Kernel Firmware
+*   3 : Kermit Update Application (AppImg)
+*   4 : Kermit Update XML
+*   5 : TFTP Configuration
+*   6 : TFTP Update BootLoader Firmware
+*   7 : TFTP Update Kernel Firmware
+*   8 : TFTP Update Application (AppImg)
+*   9 : TFTP Update XML
+*   0 : TFTP Update Initialize Bitmap
+*   a : TFTP Update FullInOne Image
+*   b : Dump to MEM &amp; Execute Use TFTP
+*   c : Reboot
+*   d : Start Linux
+*   r : Reset Default
+**********************************************
+avtech&gt;</pre>
+
+<p>Default TFTP configuration is: HSOT IP (DVR): 192.168.5.153 and SERVER IP: 192.168.5.152. So, install tftp on your PC (<code>aptitude install tftpd</code>) and configure network connection.</p>
+
+
+<subtitle>Hardware</subtitle>
+<p>First lines of kernel output allow hardware identification (it is <a href="http://www.grain-media.com/html/documentation/GM8181_GM-2009-09.pdf">GM8181</a> system on chip for surveillance DVR based on ARM core with 128MB RAM and 5 serial interfaces; it's similar to the other grain-media ARMv5TE based DVRs SoC, especially gm8161):</p>
+<pre>Linux version 2.6.14 (root@debianaa) (gcc version 3.4.4) #367 PREEMPT Wed Jan 13 10:18:14 CST 2010
+CPU: FA626TEid(wb) [66056261] revision 1 (ARMv5TE)
+Machine: Faraday GM8181
+Memory policy: ECC disabled, Data cache writeback
+GM8181 clock: PLL1OUT at 480 MHz, PLL2OUT at 750 MHz, PLL3OUT at 594 MHz
+CPU0: D VIPT write-back cache
+CPU0: I cache: 32768 bytes, associativity 4, 32 byte lines, 256 sets
+CPU0: D cache: 32768 bytes, associativity 4, 32 byte lines, 256 sets
+Built 1 zonelists
+Kernel command line: mem=128M console=uart,shift,2,io,0xF9830000,38400 initcall_debug user_debug=31
+PID hash table entries: 512 (order: 9, 8192 bytes)
+GM Clock: CPU = 480 MHz, AHBCLK = 240 MHz
+FTTMR010 timer 0 installed on IRQ 14, with clock 120000000 at 100 HZ.
+IC: GM8181(C)
+Console: colour dummy device 80x30
+Early serial console at I/O port 0xf9830000 (options '38400', shift 2)
+Dentry cache hash table entries: 16384 (order: 4, 65536 bytes)
+Inode-cache hash table entries: 8192 (order: 3, 32768 bytes)
+Memory: 128MB = 128MB total
+Memory: 125056KB available (2567K code, 474K data, 1760K init)
+Calibrating delay loop... 478.41 BogoMIPS (lpj=2392064)
+Mount-cache hash table entries: 512
+CPU: Testing write buffer coherency: ok
+NET: Registered protocol family 16
+GM AHB DMA Driver Init Ok
+APB DMA Driver Init Ok
+init APB DMA Interrupt mode
+MM_DMA CH=0
+GM PCI driver Init, version 2.0.0
+GM PCI Clock = 66MHz
+PCI: bus0: Fast back to back transfers disabled
+Not Support Slot 0
+SCSI subsystem initialized
+NetWinder Floating Point Emulator V0.97 (double precision)
+JFFS2 version 2.2. (NAND) (C) 2001-2003 Red Hat, Inc.
+JFS: nTxBlock = 977, nTxLock = 7817
+Serial: 8250/16550 driver $Revision: 1.3 $ 5 ports, IRQ sharing disabled
+ttyS0 at I/O 0xf9830000 (irq = 9) is a 16550A
+ttyS1 at I/O 0xf9840000 (irq = 10) is a 16550A
+ttyS2 at I/O 0xf9850000 (irq = 20) is a 16550A
+ttyS3 at I/O 0xf9880000 (irq = 21) is a 16550A
+ttyS4 at I/O 0xf9890000 (irq = 22) is a 16550A</pre>
+
+
+<subtitle>Firmware files</subtitle>
+
+<p><span latex_img_width="512" class="right"><a href="./KPD674AZ.jpg"><img src="./KPD674AZ_m.jpg" alt="KPD674Z (KPD674AZ)" class="right" /></a></span>Firmware package contains 4 files: fboot_4.bin, kernel_4.bin, AppImg_4.bin, xml_4.bin. Forget about "fboot_4.bin" - IF YOU HAVE WORKING U-BOOT DO NOT UPDATE THEM UNLESS IT IS ABSOLUTELY NECESSARY. All .bin files contains firmware header, for use by me <a href="ftp://ftp.spselectronics.pl/cctv/AVC_KPD_MDR/firmware/kpd-674z_tylko_do_plyt_z.zip">kpd-674z_tylko_do_plyt_z.zip</a> firmware version it length is 200 bytes. I found length of firmware header by comparing the kernel_4.bin and bootsImage from own kernel build. Probably length of header is write on first byte of .bin file. To extract bootable images you can use <code>dd if=kernel_4.bin of=/srv/tftp/kernel.img skip=200 bs=1</code>.</p>
+
+
+<h3>kernel</h3>
+<p>Avtech provided <a href="http://download.dvrtw.com.tw/GPL/076D_Series/arm-linux-2.6.tar.gz">kernel source</a>. On <a href="http://code.google.com/p/gm8161-sdk-v161">gm8161-sdk-v161</a>are available compile tools (especially uClibc-toolchain.tgz) and other version of kernel source code for this platform. After installation (in /opt) uClibc-toolchain and set PATH (<code>PATH="/opt/toolchain/bin:$PATH"; export PATH</code>) you can build own kernel boot image: <code>make bootsImage</code> and additional modules (from gm8161-sdk) via <code>./build</code> script in module directory.</p>
+
+<p>Extracted or own-made kernel image can be used to flash DVR with u-boot and TFTP (or can be boot directly from TFTP via u-boot):</p>
+<pre>avtech&gt;7
+
+Tftp upgrade Linux System
+
+HSOT IP 192.168.5.153:
+SERVER IP 192.168.5.152:
+File name kernel_16.bin:
+Using eth0 device
+TFTP from server 192.168.5.152; our IP address is 192.168.5.153
+Filename 'kernel_16.bin'.
+Load address: 0x2000000
+Loading: t RD_REQ, file: kernel_16.bin
+#################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         ##################################
+done
+Bytes transferred = 3164300 (30488c hex)
+upgrade(y/n):y
+
+upgrade fw ...
+upgrade Linux System
+erase 0x10100000 +0x00500000
+
+........................................ done
+Erased 40 sectors
+cp.b  0x02000000 0x10100000 $(filesize)
+Copy to Flash... done
+filesize=3164300</pre>
+
+
+<h3>AppImg</h3>
+<p>After extraction jffs2 filesystem image from .bin file (<code>dd if=AppImg_4.bin of=/srv/tftp/appimg.img skip=200 bs=1</code>) you can mount and modify starting script to debug and repair your DVR:</p>
+<pre>modprobe mtdblock
+modprobe jffs2
+modprobe mtdram total_size=7579 erase_size=256
+dd if=/srv/tftp/appimg.img of=/dev/mtdblock0
+mount -t jffs2 /dev/mtdblock0 /mnt/
+
+mkdir /tmp/dvrapp
+cp -a /mnt/ /tmp/dvrapp
+cd /tmp/dvrapp
+# dvrApp is main boot script in AppImg
+# adding /bin/sh execution you can enter to shell on DVR ...
+vi dvrApp
+mkfs.jffs2 -o /srv/tftp/appimg.my1.img -r .
+</pre>
+
+<p>Original or modify filesystem image can be used to flash AppImg on DVR with u-boot and TFTP:</p>
+<pre>avtechi&gt;8
+
+Tftp upgrade Application
+
+HSOT IP 192.168.5.153:
+SERVER IP 192.168.5.152:
+File name AppImg_16.bin:
+Using eth0 device
+TFTP from server 192.168.5.152; our IP address is 192.168.5.153
+Filename 'AppImg_16.bin'.
+Load address: 0x2000000
+Loading: t RD_REQ, file: AppImg_16.bin
+#################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #####################
+done
+Bytes transferred = 7760696 (766b38 hex)
+upgrade(y/n):y
+
+upgrade fw ...
+upgrade Application
+erase 0x10600000 +0x00900000
+
+........................................................................ done
+Erased 72 sectors
+cp.b  0x02000000 0x10600000 $(filesize)
+Copy to Flash... done
+filesize=7760696</pre>
+
+
+<p>In <strong>xml_4.bin</strong> isn't filesystem image, but is only one xml file, so it can't be flash directly by u-boot. Best way to update this file is copy them to DVR (for example via USB drive) and extract to /mnt/database/xml with DVRs tools:</p>
+<pre>mkdir /tmp/a
+mount /dev/sdb /tmp/a  # mount USB
+
+# extracting XML file from .bin file
+/bin/upgradeHdr -s -i/tmp/a/xml_4.bin -o/tmp/config.xml -fxml -pH264DVRAV076_4 -vxml
+
+# remove old config and import config from extracted file
+rm -fr /mnt/database/xml/*
+/mnt/mtd/Dvr/XmlFileM upload /tmp/config.xml</pre>
+
+<p>After restoring XML badabase you can check structure of /mnt/database/:</p>
+<pre>/ # ls -lR /mnt/database/
+/mnt/database/:
+drwx------    2 root     root            0 Oct 18 17:37 eventlog
+drwx------    2 root     root            0 Oct 18 21:13 xml
+
+/mnt/database/eventlog:
+-rw-------    1 root     root          804 Oct 18 21:08 log
+
+/mnt/database/xml:
+-rw-------    1 root     root          272 Oct 18 21:13 General
+-rw-------    1 root     root          215 Oct 18 21:13 LogLevels
+-rw-------    1 root     root          440 Oct 18 21:13 Notification
+-rw-------    1 root     root          117 Oct 18 21:13 MailLogd
+-rw-------    1 root     root          675 Oct 18 21:13 Account
+-rw-------    1 root     root           70 Oct 18 21:13 Bandwidth
+-rw-------    1 root     root         4625 Oct 18 21:13 Network
+-rw-------    1 root     root         1033 Oct 18 21:13 Properties
+-rw-------    1 root     root         1271 Oct 18 21:13 Video
+-rw-------    1 root     root          393 Oct 18 21:13 Brand
+-rw-------    1 root     root           96 Oct 18 21:13 Audio
+-rw-------    1 root     root        85060 Oct 18 21:13 DVR
+-rw-------    1 root     root         8210 Oct 18 21:13 AVK
+</pre>
+
+<p>This method requires the modified application image, after install correct XML you can back to original AppImg or using own modification of AppImg. Using AppImg and XML from different version firmware packages is BAD idea.</p>
+
+<subtitle>Network streaming on KPD674Z</subtitle>
+<p>KPD674Z can stream video via:</p><ul>
+	<li>rtsp with h264:  <code>rtsp://<var>192.168.1.10</var>/live/h264/ch<var>1</var></code></li>
+	<li>mjpeg over http: <code>http://<var>192.168.1.10</var>/cgi-bin/guest/Video.cgi?media=MJPEG&amp;channel=<var>1</var>&amp;resolution=<var>4CIF</var>&amp;sid=0.167763720401779</code></li>
+	<li>jpeg over http:  <code>http://<var>192.168.1.10</var>/cgi-bin/guest/Video.cgi?media=JPEG&amp;channel=<var>1</var>&amp;resolution=<var>4CIF</var>&amp;sid=0.167763720401779</code></li>
+</ul>
+<p>More info about cgi usage in <a href="http://mak.rsmu.ru/cam-api/avtech/CGI_v2.1.doc">AV TECH Corporation CGI Command Set Specification</a>.</p>
+
+</article>

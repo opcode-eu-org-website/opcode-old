@@ -1,0 +1,20 @@
+<article>
+<title>Stroboskop LED</title>
+
+<p>Jest to projekt 4-kolorowego stroboskopu opartego na LED oraz mikrokontrelerze Atmega8. Stworzony został on na potrzeby sygnalizacji w systemie alarmowym. Dodatkowo niewykorzystane porty mikrokontrelera zostały użyte do sterowania innymi urządzeniami (oświetlenie awaryjne, sygnalizatory alarmowe, itp.)</p>
+
+<ul>
+	<li><id_link id="stroboskop-sterownik.c">program sterujący praca mikrokontrolera</id_link> (Wymagane są następujące nagłówki - wykorzystywane także w innych projektach: <id_link id="my_rs485_ascii.c">my_rs485_ascii.c</id_link>)</li>
+	<li><sch_link name="stroboskop-sterownik">schemat ideowy płytki sterownika</sch_link></li>
+	<li><pcb_link name="stroboskop-sterownik">projekt płytki drukowanej</pcb_link></li>
+	<li><sch_link name="stroboskop-matryca_12V">schemat ideowy matrycy FLUX LED zasilanej z 12V</sch_link></li>
+	<li><sch_link name="stroboskop-matryca_5V">schemat ideowy matrycy FLUX LED zasilanej z 5V</sch_link></li>
+	<li><pcb_link name="matryca_flux">koncepcja realizacji matrycy z FLUX LED</pcb_link></li>
+</ul>
+
+<sch_show name="stroboskop-sterownik" />
+<sch_show name="stroboskop-matryca_12V" />
+<sch_show name="stroboskop-matryca_5V" />
+
+<p class="download"><a class="int" href="./stroboskop_LED.tgz">Pobierz</a></p>
+</article>

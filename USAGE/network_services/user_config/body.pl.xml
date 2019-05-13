@@ -1,0 +1,18 @@
+<article>
+<title>Konfiguracja w ręce użytkowników</title>
+
+<p>Jeżeli zależy nam na samodzielności użytkowników możemy spore możliwości konfiguracyjne przekazać w ich ręce. W ogólności konfiguracja użytkownika może być wprowadza w zależności od usługi na różne sposoby - w przypadku tradycyjnych usług jak poczta i www może to być dostęp shell'owy (ssh), w przypadku jabber'a (XMPP) jest to konfiguracja przez ten protokół (konsola XML/klient) w przypadku voip (SIP) możemy dokonywać konfiguracji poprzez telefon (system menu telefonicznego).</p>
+
+<p>W świetle przedstawionych tutaj rozwiązań warto również rozważyć sposób stworzenia bazy domen z powiązaniem do UID/GID (tabelka domena UID, GID jeden z UID/GID == x, mająca znaczenie informacyjne, bo automatyczne generowanie konfigu z plików użytkownika odpada) a także pamiętać też należy że wywołania adduser z odpowiednimi opcjami umożliwiają określenie identyfikatorów numerycznych jakie przypisujemy użytkownikowi/grupie:</p>
+<ul>
+	<li><code>adduser --group --gid <var>GROUP_NUM_ID</var> <var>GROUP_NAME</var></code></li>
+	<li><code>adduser --gid <var>GROUP_NUM_ID</var> [--add_extra_groups ...] <var>USER_NAME</var></code></li>
+	<li><code>adduser --ingroup <var>GROUP_NAME</var> [--add_extra_groups ...] <var>USER_NAME</var></code></li>
+</ul>
+
+<p>W przypadku omawianego w tym serwisie serwera ejabberd warto także zapewnić okresowy zrzut jego bazy danych (przechowującej m.in. ustawienia wprowadzane przez użytkowników do pliku tekstowego. Można tego dokonać okresowo wywołując: <code>ejabberdctl dump /tmp/ejabberd_`date +%Y%m%dT%H%M%S`.txt</code>. Można by także spróbować parsować tak otrzymany plik celem poumieszczania zrzutu konfiguracji w katalogach odpowiednich użytkowników.</p>
+
+<p>Można by stworzyć system generujący aliasy XMPP (zobacz: <id_link id ="ejabberd_aliases">JID aliases</id_link>) i aliasy SIP w oparciu o aliasy pocztowe (virtusertable). Główną wątpliwość budzi fakt iż raczej dość często mogą być potrzebne aliasy tylko jednego z rodzajów a nie wszystkich na raz więc może jednak lepiej utrzymywać niezależne bazy aliasów dla SMTP, XMPP i SIP. Dlatego też jak na razie nie został on prze zemnie przygotowany, ale być może kiedyś to nastąpi i go tu opublikuję.</p>
+
+<p>Oczywiście jak mówimy o konfiguracji to trzeba wspomnieć o programach takich jak <code>chsh</code> i <code>chfn</code>, umożliwiających użytkownikowi odpowiednio zmianę używanego przez niego shella oraz danych zapisanych w polu informacji dodatkowych w <kbd class="path">/etc/passwd</kbd>. Za ograniczenie sheli na jakie może być dokonywana zmiana odpowiada plik <kbd class="path">/etc/shells</kbd> a za ograniczenie pól opisu w bazie kont które może edytować użytkownik odpowiada wpis <code>CHFN_RESTRICT</code> w <kbd class="path">/etc/login.defs</kbd>. O <code>passwd</code> nie będę pisał ;-).</p>
+</article>

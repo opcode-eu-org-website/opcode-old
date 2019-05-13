@@ -1,0 +1,111 @@
+#!/bin/bash
+
+echo "FUNCTION LIST:
+	make_output_dir
+		make OUTPUT_DIR's subdirectory
+	make_rename_input_doc2rtf
+		renamed *.doc to *.rtf in INPUT_DIR
+	make_img
+	make_txt
+	make_sql
+	make_update_title"
+
+. ${DIROP_SYSTEM_DIR}convert_image.inc.sh > /dev/null
+. ${DIROP_SYSTEM_DIR}split_rtf_to_pages.inc.sh > /dev/null
+. ${DIROP_SYSTEM_DIR}covert_rtf_to_text.inc.sh > /dev/null
+. ${DIROP_SYSTEM_DIR}generate_sql.inc.sh > /dev/null
+. ${DIROP_SYSTEM_DIR}insert_lost_page.inc.sh > /dev/null
+
+# przygotowanie katalogów dla outputu
+make_output_dir() {
+	mkdir -p $OUTPUT_DIR/tif
+	mkdir -p $OUTPUT_DIR/png
+	mkdir -p $OUTPUT_DIR/txt
+}
+
+# zamiana rozszerzeń wejścia doc -> rtf
+make_rename_input_doc2rtf() {
+	for f in "$INPUT_DIR"/*.doc; do
+		mv -i "$f" "${f%.doc}.rtf"
+	done
+}
+
+# funkcja odpowiedzialna za przetwarzanie całości obrazków
+make_img() {
+	echo -e "\\033[36mPRZETWARZANIE OBRAZKÓW\\033[0m"
+	parse_all_img "$INPUT_DIR" "$OUTPUT_DIR/tif" "$OUTPUT_DIR/png"
+}
+
+# funkcja odpowiedzialna za przetwarzanie całości tekstów OCR
+make_txt() {
+	echo -e "\\033[36mPRZETWARZANIE TEKSTU OCR\\033[0m"
+	if $RTF_MULTIPAGE; then
+		mkdir /tmp/rtf_single_$PPID
+		pushd /tmp/rtf_single_$PPID > /dev/null
+		for f in "$INPUT_DIR/"*.rtf; do
+			all_page_from_rtf $f
+		done
+		parse_all_rtf "." "$OUTPUT_DIR/txt"
+		popd > /dev/null
+	else
+		parse_all_rtf "$INPUT_DIR" "$OUTPUT_DIR/txt"
+	fi
+	
+	if [ `ls "$OUTPUT_DIR/txt" | wc -l` -ne `ls "$OUTPUT_DIR/tif" | wc -l` ]; then
+		echo -e "\\033[38m WARNING: przetworzono inną ilość plików tif a inną plików txt\\033[0m"; >&2
+	fi
+}
+
+# funkcja odpowiedzialna za generację SQL dodającego pozycję
+make_sql() {
+	echo -e "\\033[36mPRZYGOTOWANIE PLIKU SQL\\033[0m"
+	
+	if [ "$1" = "no_start_book" ]; then
+		START_NEW_BOOK=false
+	fi
+	
+	print_sql_file_head > "$OUTPUT_DIR/all.sql"
+ 
+	if $START_NEW_BOOK; then
+		sql_add_book >> "$OUTPUT_DIR/all.sql"
+		sql_add_volume >> "$OUTPUT_DIR/all.sql"
+	elif $START_NEW_VOLUME; then
+		sql_add_volume >> "$OUTPUT_DIR/all.sql"
+	fi
+	
+	sql_add_pages "$OUTPUT_DIR/txt" >> "$OUTPUT_DIR/all.sql"
+	
+	if [ -f "$INPUT_CONTENTTABLE_FILE" ]; then
+		content2sql "$INPUT_CONTENTTABLE_FILE" >> "$OUTPUT_DIR/all.sql"
+		update_sql_content >> "$OUTPUT_DIR/all.sql"
+	fi
+	echo "-- VOLUME_ID:	" >> "$OUTPUT_DIR/all.sql"
+	echo "SELECT 'VOLUME_ID=\"' || $VOLUME_ID || '\"';" >> "$OUTPUT_DIR/all.sql"
+}
+
+# funkcja odpowiedzialna za generację SQL dodającego spis treści
+make_sql_content() {
+	if [ "$1" != "" ]; then
+		INPUT_CONTENTTABLE_FILE=$1
+	fi
+	print_sql_file_head > "$OUTPUT_DIR/content.sql"
+	content2sql "$INPUT_CONTENTTABLE_FILE" >> "$OUTPUT_DIR/content.sql"
+	update_sql_content >> "$OUTPUT_DIR/content.sql"
+}
+
+# funkcja odpowiedzialna za generację SQL dodającego pozycję
+make_update_title() {
+	echo -e "\\033[36mGENERACJA AKTUALIZACJI NUMERACJI STRON\\033[0m"
+	print_sql_file_head > "$OUTPUT_DIR/update.sql"
+	update_sql_page_title "$OUTPUT_DIR/txt" >> "$OUTPUT_DIR/update.sql"
+	update_sql_content >> "$OUTPUT_DIR/update.sql"
+}
+
+# funkcja odpowiedzialna za wstawianie zaginionych stron (zmiany nazw plików + SQL)
+make_insert_lost_pages() {
+	print_sql_file_head > insert_lost_pages.sql
+	move_page_in_sql > insert_lost_pages.sql
+	move_files "png" "-small.png" "../png_NEW" "${DIROP_SYSTEM_DIR}/special_pages/no_scan-small.png"
+	move_files "tif" ".tif" "../tif_NEW"
+	move_files "txt" ".txt" "../txt_NEW" "${DIROP_SYSTEM_DIR}/special_pages/no_scan.txt"
+}

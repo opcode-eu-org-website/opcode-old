@@ -1,0 +1,116 @@
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity STEROWNIK is
+	generic (
+		WAIT_CLK_DIV_120us: natural := 120000;
+		WAIT_CLK_DIV_5ms : natural := 2880000000 -- 24000 * WAIT_CLK_DIV_120us
+	);
+	port (
+		rxd_data: in std_logic_vector (7 downto 0);
+		rxd_ready: in std_logic;
+		clk, reset: in std_logic;
+		
+		lcd_data: out std_logic_vector (7 downto 0);
+		lcd_rs: out std_logic;
+		lcd_run: out std_logic
+	);
+end;
+
+architecture logic of STEROWNIK is
+	-- constant WAIT_CLK_DIV_5ms : natural := 24000 * WAIT_CLK_DIV_120us;
+	
+	type STANY is (
+		IDLE,
+		INIT_FS, -- Function Set
+		INIT_OC, -- On-Off Control (display on, cursor off)
+		INIT_MS, -- Mode Set (move right)
+		WAIT_FOR_DATA, -- Wait for data from UART
+		CLEAR, -- Clear LCD
+		WRITE, -- Write Data to LCD
+		WAIT_TIME
+	);
+	
+	signal STAN, NEXT_STAN, STAN_AFTER_WAIT: STANY;
+	signal WAIT_CLK_CNT, WAIT_CLK_DIV: integer;
+	signal REC_DATA: std_logic_vector (7 downto 0);
+begin
+	process (clk, reset)
+	begin
+		if (reset='1') then
+			STAN <= IDLE;
+		elsif ( falling_edge(clk) ) then
+			STAN <= NEXT_STAN;
+		end if;
+	end process;
+	
+	process (clk)
+	begin
+		if ( falling_edge(clk) ) then
+			case STAN is
+				when WAIT_TIME =>
+					if (WAIT_CLK_CNT = WAIT_CLK_DIV) then
+						-- doliczenie do wartosci dzielnika zegara powoduje:
+						--  wyzerowanie licznika
+						WAIT_CLK_CNT <= 0;
+						
+						NEXT_STAN <= STAN_AFTER_WAIT;
+					else
+						WAIT_CLK_CNT <= WAIT_CLK_CNT + 1;
+					end if;
+					lcd_run <= '0';
+				when IDLE =>
+					lcd_run <= '0';
+					WAIT_CLK_CNT <= 0;
+					NEXT_STAN <= INIT_FS;
+				
+				when WRITE =>
+					lcd_data <= REC_DATA;
+					lcd_rs <= '1';
+					lcd_run <= '1';
+					STAN_AFTER_WAIT <= WAIT_FOR_DATA;
+					WAIT_CLK_DIV <= WAIT_CLK_DIV_120us;
+					NEXT_STAN <= WAIT_TIME;
+				when CLEAR =>
+					lcd_data <= "00000001";
+					lcd_rs <= '0';
+					lcd_run <= '1';
+					STAN_AFTER_WAIT <= WAIT_FOR_DATA;
+					WAIT_CLK_DIV <= WAIT_CLK_DIV_5ms;
+					NEXT_STAN <= WAIT_TIME;
+				
+				when INIT_FS =>
+					lcd_data <= "001111--";
+					lcd_rs <= '0';
+					lcd_run <= '1';
+					STAN_AFTER_WAIT <= INIT_OC;
+					WAIT_CLK_DIV <= WAIT_CLK_DIV_120us;
+					NEXT_STAN <= WAIT_TIME;
+				when INIT_OC =>
+					lcd_data <= "00001100";
+					lcd_rs <= '0';
+					lcd_run <= '1';
+					STAN_AFTER_WAIT <= INIT_MS;
+					WAIT_CLK_DIV <= WAIT_CLK_DIV_120us;
+					NEXT_STAN <= WAIT_TIME;
+				when INIT_MS =>
+					lcd_data <= "00000110";
+					lcd_rs <= '0';
+					lcd_run <= '1';
+					STAN_AFTER_WAIT <= WAIT_FOR_DATA;
+					WAIT_CLK_DIV <= WAIT_CLK_DIV_120us;
+					NEXT_STAN <= WAIT_TIME;
+				
+				when WAIT_FOR_DATA =>
+					if ( rxd_ready = '1' ) then
+						REC_DATA <= rxd_data;
+						if (REC_DATA = "01111111") then
+							NEXT_STAN <= CLEAR;
+						else
+							NEXT_STAN <= WRITE;
+						end if;
+					end if;
+			end case;
+		end if;
+	end process;
+end;

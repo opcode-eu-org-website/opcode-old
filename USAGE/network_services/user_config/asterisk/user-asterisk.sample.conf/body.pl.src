@@ -1,0 +1,123 @@
+; zastąpić:  USER_NAME1 USER_NAME2 PASSWORD1 PASSWORD2 PASSWORD3 PASSWORD4 PASSWORD5
+;            sip.provider.example.com provider.example.com REAL_NAME REAL_PHONE
+; swoimi danymi konfiguracyjnymi
+; nie zastępować KONTO (jest podmieniane automatycznie na identyfikator konta)
+; więcej szczegółów w asterisk_user_conf.sh
+
+[general]
+ ; hasło do systemu konfiguracyjnego i poczty głosowej
+ password => PASSWORD5
+
+[register]
+ register => USER_NAME1:PASSWORD1@sip.provider.example.com
+ register => USER_NAME2:PASSWORD2@sip.provider.example.com/thom
+
+[dial-in]
+ exten => s,1,Set(CALLERID(all)="${CALLERID(name)} @ PROVIDER_NAME" <00${CALLERID(num)}>)
+ exten => s,n,Macro(number_classification||KONTO||anonymous|no|$["${CHANNEL}" : "([A-Za-z0-9]+)/"])
+ exten => s,n,Hangup
+
+ exten => thom,1,Set(CALLERID(all)="${CALLERID(name)} @ PROVIDER_NAME" <00${CALLERID(num)}>)
+ exten => thom,n,Set(__SUB_EXT=thom)
+ exten => thom,n,Macro(number_classification||KONTO||anonymous|no|$["${CHANNEL}" : "([A-Za-z0-9]+)/"])
+ exten => thom,n,Hangup
+ exten => thom,100,Macro(call_user|KONTO|SIP/KONTO-thom|||)
+ ; UWAGA: jezli jakies argumenty sa opcjonalne nalezy je podawac jako puste
+ ;        inaczej moga trafic argumenty makra nadrzednego (bug ??)
+
+ exten => int,1,GotoIf($["${SUB_EXT}" != "" ]?${SUB_EXT},100)
+ ; wysyłanie powiadomienia o przychodzącym połączeniu przez XMPP
+ ; wymaga aby w jabber.conf był skonfigurowany dostęp do konta jabbera
+ ; z którego będzie wysłane powiadomienie - w sekcji [asterisk]
+ ; (nazwa sekcji zgodna z 1 argumentem poniższego wywołania)
+ exten => int,n,jabbersend(asterisk|my_jid@example.net|${STRFTIME(,GMT,%F %T)} UTC: dzwnoni ${CALLERID(all)})
+ ;exten => int,n,Macro(call_user|KONTO|SIP/KONTO-tel|15|SIP/KONTO-thom&SIP/KONTO-tel|30|)
+ ;exten => int,n,Macro(call_user|KONTO|SIP/KONTO-tel|150|||)
+  exten => int,n,Macro(call_user|KONTO|SIP/KONTO-tel&SIP/KONTO-thom|150|||)
+
+ ; obsługa dzwonienia do samego siebie z asteriska celem powiadomienia o nowym mailu ...
+ exten => new_mail,1,Answer
+ exten => new_mail,n(czytaj),Playback(wprowadzenie.wav)
+ exten => new_mail,n,Playback(${komunikat})
+ exten => new_mail,n,Read(MODE|nacisnij_aby_powtorzyc.wav|1)
+ exten => new_mail,n,GotoIf($["${MODE}" != ""]?czytaj)
+ exten => new_mail,n,HangUp()
+
+
+[dial-out]
+ ; powrót dla Gosub z redirect i transfers
+ exten => i,1,Set(GO_IF_NOT_FOUND=1)
+ exten => i,2,Return
+
+ ; numery specjalne
+ exten => 1,1,NoOp
+ exten => 1,n,Macro(call_user|KONTO|SIP/KONTO-thom|150|||)
+ exten => 1,n,Hangup
+
+ ; prefiksowe wyjście na zewnątrz przez operatora SIP/IAX
+ exten => _0X.,1,Macro(number_classification||${EXTEN}|${SIPDOMAIN}||$[ 1 + ${PRIORITY} ]|$["${CHANNEL}" : "([A-Za-z0-9]+)/"])
+ exten => _0X.,n,Verbose("OUT via rrp-PROVIDER_NAME")
+ exten => _0X.,n,Set(CALLERID(all)="Robert Paciorek" <048222443895}>)
+ exten => _0X.,n,Dial(SIP/${EXTEN:1}@KONTO-sipprovider-PROVIDER_NAME||${DIAL_OPTIONS_TO_NON_LOCAL})
+ exten => _0X.,n,GotoIf($["${DIALSTATUS}" = "BUSY"]?busy:hangup)
+ exten => _0X.,n(busy),Busy
+ exten => _0X.,n(hangup),Hangup
+
+ ; dzwonienie na inne numery / URI
+ exten => _[1-9a-zA-Z.-*#+][0-9a-zA-Z.-*#+]!,1,Macro(number_classification||${EXTEN}|${SIPDOMAIN}||no|$["${CHANNEL}" : "([A-Za-z0-9]+)/"])
+ exten => _[0-9a-zA-Z.-*#+][a-zA-Z.-*#+][0-9a-zA-Z.-*#+]!,1,Macro(number_classification||${EXTEN}|${SIPDOMAIN}||no|$["${CHANNEL}" : "([A-Za-z0-9]+)/"])
+
+[dial-DIAL_NAME-out]
+ exten => 1,1,Set(CALLERID(all)="matka" <1>)
+ exten => 1,n,Macro(call_user|KONTO|SIP/KONTO-tel|150|||)
+ exten => 1,n,Hangup
+
+ exten => _0X.,1,Macro(number_classification||${EXTEN}|${SIPDOMAIN}||$[ 1 + ${PRIORITY} ]|$["${CHANNEL}" : "([A-Za-z0-9]+)/"])
+ exten => _0X.,n,Dial(SIP/${EXTEN:1}@KONTO-sipprovider-PROVIDER_NAME2||${DIAL_OPTIONS_TO_NON_LOCAL})
+ exten => _0X.,n,GotoIf($["${DIALSTATUS}" = "BUSY"]?busy:hangup)
+ exten => _0X.,n(busy),Busy
+ exten => _0X.,n(hangup),Hangup
+
+[sipprovider-PROVIDER_NAME2]
+ type=friend
+ host=sip.provider.example.com
+ username=USER_NAME2
+ secret=PASSWORD2
+ fromuser=USER_NAME2
+ fromdomain=provider.example.com
+ insecure=invite
+ context=rrp-PROVIDER_NAME-in
+ disallow=all
+ allow=g726
+ allow=g729
+[sipprovider-PROVIDER_NAME]
+ type=peer
+ host=sip.provider.example.com
+ username=USER_NAME1
+ secret=PASSWORD1
+ fromuser=USER_NAME1
+ fromdomain=provider.example.com
+ insecure=invite
+ context=rrp-PROVIDER_NAME-in
+ disallow=all
+ allow=g726
+ allow=g729
+
+
+[KONTO-tel]
+ type = friend
+ host = dynamic
+ callerid = REAL_NAME <REAL_PHONE>
+ secret = PASSWORD3
+ context = KONTO-dial-out
+[KONTO-thom]
+ type = user
+ host = dynamic
+ insecure=invite
+ callerid = REAL_NAME <REAL_PHONE>
+ context = KONTO-dial-DIAL_NAME-out
+[KONTO-thom]
+ type = peer
+ host = dynamic
+ secret = PASSWORD4
+

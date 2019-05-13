@@ -1,0 +1,6 @@
+<article>
+<title>Czytniki kart pamięci (USB Mass Storage)</title>
+<p>Urządzenia te obsługiwane są bez większych problemów, emulują one urządzenia SCSI. Warto jednak przy podłączaniu takiego czytnika (najlepiej od razu z włożoną kartą) przełączyć się na konsolę i zobaczyć co jest tam wypisane (m.in. jako jakie urządzenie widoczna jest karta). W przypadku problemów z ustaleniem typu partycji warto skorzystać z fdiska, najczęściej <code>fdisk /dev/sdX</code> (X = a,b,...) i wyświetlić listę partycji (klawisz p). Warto też umieścić odpowiednie wpisy w /etc/fstab np:</p>
+<pre>/dev/sdd1      /media/mmc      vfat    rw,user,noauto      0    0</pre>
+	
+</article>

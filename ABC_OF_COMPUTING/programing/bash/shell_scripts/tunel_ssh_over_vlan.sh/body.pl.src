@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# skrypt zestawia tunel ssh na połączeniu poprzest most WiFi
+# most WiFi dostepny jest poprzez tagowane VLANy
+# 172.16.16.0/28 - adresy w VLANie po naszej stronie
+# 172.16.16.32/30 - adresy mostu WiFi
+# 172.16.16.16/28 - adresy w VLANie po drugiej stronie
+
+NUM=${1:-0}
+
+# ID VLANu po naszej stronie
+VLAN_ID=116
+# nasze IP w VLANie (z maską w notacji CIDR)
+VLAN_IP="10.10.1.9/28"
+# IP Acess Pointa w naszym VLANie
+VLAN_AP="10.10.1.1"
+
+# IP sieci połączeniowej WiFi
+WIFI_NET="10.10.1.32/30"
+
+# IP sieci VLANu po drugiej stronie
+REMOTE_NET="10.10.1.16/28"
+# IP serwera tunelowego SSH
+REMOTE_IP="10.10.1.30"
+# dodatkowe opcje SSH
+SSH_ARGS="-p4022"
+
+# adresy tunelu SSH
+TUN_LOCAL_IP="10.10.1.33"
+TUN_REMOTE_IP="10.10.1.34"
+
+# zestawienie VLANu do WIFI
+modprobe 8021q
+vconfig add eth0 $VLAN_ID
+ifconfig eth0.$VLAN_ID   up  $VLAN_IP
+ip route add $WIFI_NET   via $VLAN_AP
+ip route add $REMOTE_NET via $VLAN_AP
+ifconfig eth0.$VLAN_ID mtu 1492
+
+# zestawienie Tunelu SSH
+# wymagany wpis w sshd_config po stronie zdalnej (172.16.16.30):
+#   PermitTunnel yes
+screen ssh -w $NUM:$NUM root@$REMOTE_IP $SSH_ARGS -t \
+	'ifconfig tun'"$NUM"' up '"$TUN_REMOTE_IP"' netmask 255.255.255.252; bash'
+# jakby logowac po kluczach to mozna by dodac screenowi -d -m 
+#    a tak to tgrzeba podac haslo i Ctrl+D ...
+ifconfig tun$NUM up $TUN_LOCAL_IP netmask 255.255.255.252
+ip route add 192.168.0.0/16 via $TUN_REMOTE_IP
+ip route add default        via $TUN_REMOTE_IP
+echo "nameserver 8.8.8.8" > /etc/resolv.conf
+
+echo -e "NA SERWERZE SSH:\n\t"'echo "1" > /proc/sys/net/ipv4/conf/all/forwarding'
+echo -e "NA ROUTERZE ZDALNEJ SIECI:\n\tip route add $TUN_LOCAL_IP/32 via LOCALNE.IP.SERWERA.SSH;
+	iptables -A POSTROUTING -t nat -o eth1 -s $TUN_LOCAL_IP -d 0.0.0.0/0 -p ! esp  -j SNAT --to-source IP.ZEWN.SERWERA.NAT"
+
+ntpdate-debian
+

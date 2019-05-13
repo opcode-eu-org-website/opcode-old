@@ -1,0 +1,7 @@
+<article>
+<title>v4l2loopback</title>
+<p>v4l2loopback jest modułem umożliwiającym utworzenie oszukanego urządzenia <kbd clas="path">/dev/video</kbd>, które pokazywałoby materiał zapisywany przez jakiś program (np. jakiś plik z filmem lub przechwytywamny obraz pulpitu - <code>vlc screen://</code>). Jest to szczególnie użyteczne gdy chemy taki materiał wstawić np. do wideokonferencji prowadzonej z uzyciem linphone lub innego programu używającego v4l jako źródła sygnału. Załączony do dokumentacji modułu przykład pokazuje jak można uzyć tego modułu, wymaga on jednak podania materiału w odpowiednim formacie surowego wideo. Przy eksperymentach z takimi formatami wideo pomocne mogą być komendy:</p>
+<pre>cvlc aaaa.mp4 --vout="YUV" --yuv-file="/tmp/temp.yuv" --no-yuv-yuv4mpeg2 --yuv-chroma=I420
+mplayer -rawvideo w=1280:h=720:fps=1:i420 temp.yuv
+vlc --rawvid-width=1280 --rawvid-height=720 --rawvid-fps=1 temp.yuv --rawvid-chroma=I420</pre>
+</article>

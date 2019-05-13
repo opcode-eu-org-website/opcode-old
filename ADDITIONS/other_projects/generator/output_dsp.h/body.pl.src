@@ -1,0 +1,10 @@
+#ifndef _OUTPUT_DSP_H
+#define _OUTPUT_DSP_H
+
+#include "config.h"
+#include "signal.h"
+
+int output_dsp_init(config_t *config);
+void output_dsp_write(int dsp_dev, signal_t *signal);
+
+#endif

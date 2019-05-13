@@ -1,0 +1,18 @@
+<article>
+	<title>Biblioteczki dla uC</title>
+	
+	<p>Dział ten zawiera zbiór użytecznych, powtarzalnych fragmentów kodu w C dla projektów opartych na mikrokontrolerach AVR:</p><ul>
+		<li><id_link id="libs4avr:lcd.c">lcd.c</id_link></li>
+		<li><id_link id="libs4avr:onewire.c">onewire.c</id_link></li>
+		<li><id_link id="libs4avr:opoznienia.c">opoznienia.c</id_link></li>
+	</ul>
+	
+	<p>A także projekt standardowego moduyłu elektroniki opartej o mikrokontroler Atmega8 - zawierający złącze zasilania, interfejs RS485, złącze SPI (programowanie ISP), kwarc, diody diagnostyczne:</p><ul>
+		<li><sch_link name="atmega8_uart_spi">schemat ideowy</sch_link></li>
+		<li><pcb_link name="atmega8_uart_spi">projekt płytki</pcb_link></li>
+		<li><a class="int" href="./atmega8_uart_spi.sym">symbol</a></li>
+		<li>dodatkowo także <pcb_link name="atmega8_dev_board">projekt płytki</pcb_link> w wersji "deweloperskiej" - z wyprowadzonymi wszystkim sygnałami z Atmega8 na goldpiny</li>
+	</ul>
+	
+	<sch_show name="atmega8_uart_spi" />
+</article>

@@ -1,0 +1,7 @@
+<article>
+<title>Instalacja serwera LDAP</title>
+
+<p>Jeżeli mamy ustawiony zbyt wysoki priorytet debconfa to instalator pakietu serwera LDAP (slapd) użyje nazwy domeny (bez nazwy serwera) do utworzenia suffix'u zakładanej bazy danych. Aby użyć czegoś innego najprościej użyć <code>dpkg-reconfigure slapd</code>.</p>
+
+<p>Utworzona przy instalacji baza danych nie posiada struktury wykorzystywanej do uzyskiwania informacji o użytkownikach przez NSS oraz PAM. Można utworzyć ją manualnie lub wykorzystać Ldap Account Manager, który utworzy ją przy pierwszym zalogowaniu.</p>
+</article>

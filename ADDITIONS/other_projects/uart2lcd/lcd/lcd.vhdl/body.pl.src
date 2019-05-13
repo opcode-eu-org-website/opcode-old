@@ -1,0 +1,98 @@
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity LCD_DRV is
+	generic (
+		LCD_CLK_CNT_40ns: natural := 40;
+		LCD_CLK_CNT_230ns: natural := 230
+	);
+	port (
+		data_in: in std_logic_vector (7 downto 0);
+		rs_mode: in std_logic;
+		lcd_run: in std_logic;
+		lcd_done: out std_logic;
+		clk, reset: in std_logic;
+		
+		data_out: out std_logic_vector (7 downto 0);
+		rs_out, e_out, rw_out: out std_logic
+	);
+end;
+
+
+architecture logic of LCD_DRV is
+	type STANY is (
+		IDLE,
+		WAIT_TIME,
+		START,
+		E_UP,
+		E_DOWN
+	);
+	
+	signal LCD_CLK_CNT, LCD_CLK_DIV : integer;
+	signal LCD_STATE, LCD_STATE_NEXT, LCD_STATE_AFTER_WAIT : STANY;
+	signal LCD_DATA : std_logic_vector (7 downto 0);
+	signal LCD_RS : std_logic;
+begin
+	process (clk, reset)
+	begin
+		if ( reset = '1' ) then
+			LCD_STATE <= IDLE;
+		elsif ( falling_edge(clk) ) then
+			if (LCD_STATE /= IDLE) then
+				LCD_STATE <= LCD_STATE_NEXT;
+			else
+				if ( lcd_run = '1' ) then
+					-- startujemy licznik zwiekszany co LCD_CLK_DIV tak aby rosl o 1 nie czesciej niz co 15 ns
+					LCD_STATE <= START;
+					LCD_DATA <= data_in;
+					LCD_RS <= rs_mode;
+				end if;
+			end if;
+		end if;
+	end process;
+	
+	process (clk) begin
+		if( falling_edge(clk) ) then
+			case LCD_STATE is
+				when START =>
+					lcd_done <= '0';
+					rs_out <= LCD_RS;
+					rw_out <= '0';
+					
+					LCD_STATE_AFTER_WAIT <= E_UP;
+					LCD_CLK_DIV <= LCD_CLK_CNT_40ns;
+					LCD_STATE_NEXT <= WAIT_TIME;
+				
+				when E_UP =>
+					data_out <= LCD_DATA;
+					e_out <= '1';
+					
+					LCD_STATE_AFTER_WAIT <= E_DOWN;
+					LCD_CLK_DIV <= LCD_CLK_CNT_230ns;
+					LCD_STATE_NEXT <= WAIT_TIME;
+				
+				when E_DOWN =>
+					e_out <= '0';
+					
+					LCD_STATE_AFTER_WAIT <= IDLE;
+					LCD_CLK_DIV <= LCD_CLK_CNT_230ns;
+					LCD_STATE_NEXT <= WAIT_TIME;
+				
+				when IDLE =>
+					e_out <= '0';
+					lcd_done <= '1';
+					LCD_CLK_CNT <= 0;
+					
+					LCD_STATE_NEXT <= START;
+				
+				when WAIT_TIME =>
+					if (LCD_CLK_CNT = LCD_CLK_DIV) then
+						LCD_CLK_CNT <= 0;
+						LCD_STATE_NEXT <= LCD_STATE_AFTER_WAIT;
+					else
+						LCD_CLK_CNT <= LCD_CLK_CNT + 1;
+					end if;
+			end case;
+		end if;
+	end process;
+end;

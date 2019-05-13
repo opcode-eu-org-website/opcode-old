@@ -1,0 +1,43 @@
+/**
+ * minimalny plik .h konieczny do uruchomiaenia okienka o nazwie OknoGlowne zapisanego w pliku okno_glowne.ui
+ *
+ * KOMPILACJA: qmake -project && qmake && make
+ * POSPRZĄTANIE: make distclean && rm -f *.pro
+ *
+ * uwaga jezeli taki scalony plik nazwalibysmy .cpp a nie .h to qmake miałby problem z `moc`
+ *
+ * w dalszych zastosowaniach warto podzielic ten plik na:
+ * nagłówek klasy (okno_glowne.h), ciało kallsy (okno_glowne.cpp), funkcje main (main.cpp)
+ * (w obu pozostałych zainkludować okno_glowne.h)
+ **/
+
+#include <QApplication>
+#include <QTextCodec>
+#include <QDialog>
+
+#include "ui_okno_glowne.h"
+
+class OknoGlowne: public QDialog {
+Q_OBJECT
+ public:
+   Ui::OknoGlowne interfejs;
+   OknoGlowne(QWidget * parent, Qt::WFlags f);
+   ~OknoGlowne(){};
+};
+
+OknoGlowne::OknoGlowne(QWidget * parent = 0, Qt::WFlags f = 0 ):QDialog(parent, f | Qt::Tool) {
+	interfejs.setupUi(this);
+}
+
+int main(int argc, char *argv[]) {
+	QApplication aplikacja(argc, argv);
+	
+	QTextCodec::setCodecForTr (QTextCodec::codecForName ("UTF-8"));
+	QTextCodec::setCodecForCStrings (QTextCodec::codecForName ("UTF-8"));
+	
+	OknoGlowne okienko(0, 0);
+	
+	okienko.show();
+	
+	return aplikacja.exec();
+}

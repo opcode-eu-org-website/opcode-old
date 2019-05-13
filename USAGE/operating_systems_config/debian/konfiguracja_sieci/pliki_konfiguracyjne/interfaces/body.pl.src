@@ -1,0 +1,53 @@
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet static
+	address 192.168.0.2
+	netmask 255.255.0.0
+	
+	# wpisy network i broadcast można pominąć - wtedy ustawiany automatycznie
+	broadcast 192.168.255.255
+	network 192.168.0.0
+	
+	# trasa domyślna routingu (gdy jest dla danego interfejsu)
+	gateway 192.168.0.1
+	
+	# dns ...
+	post-up echo "nameserver 192.168.0.1" > /etc/resolv.conf
+	
+	# dodatkowe adresy IP
+	post-up ip address add broadcast + local 192.168.0.3/24 dev eth0
+	pre-down ip address del 192.168.0.3/24  dev eth0
+	
+	# zezwalamy na pingi
+	post-up echo 0 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+	post-up echo 0 > /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts
+	
+	# blokada portu ssh przy częstych próbach logowania
+	# warto w /etc/ssh/sshd_config ustawić MaxAuthTries 1
+	post-up iptables -I INPUT -p tcp --dport 22 -m state --state NEW  -m recent --set
+	post-up iptables -I INPUT -p tcp --dport 22 -m state --state NEW  -m recent --update --seconds 1800 --hitcount 3 -j DROP
+	pre-down iptables -F
+	
+	# dns-* options are implemented by the resolvconf package, if installed
+	dns-nameservers 192.168.0.1
+
+
+iface eth0 inet6 static
+	address 2001:db8::2
+	netmask 32
+	gateway 2001:db8::1
+	# konfiguracja ręczna (wyłączamy automatyczną)
+	pre-up  echo 0 > /proc/sys/net/ipv6/conf/eth0/autoconf
+	# zmijszamy MTU 9ważne przy połączeniach tunelowanych)
+	pre-up  echo 1280 > /proc/sys/net/ipv6/conf/eth0/mtu
+	# dodajemy adres zgodnościowy z IPv4
+	#post-up ip address add local ::192.168.0.1/104 dev eth0
+	# nie kożystamy z tuneli typu sit
+	post-up  rmmod sit
+	# nie kozystamy z adresów link-scope
+	post-up  for dev in `ip link sh | grep mtu | cut -f2 -d' ' | tr -d ':'`; do ip=`ip addr sh dev $dev | grep 'inet6 .* scope link' | awk '{print $2}'`; if [ "$ip" != "" ]; then ip addr del $ip dev $dev; fi; done;
+
+auto eth1
+iface eth1 inet dhcp

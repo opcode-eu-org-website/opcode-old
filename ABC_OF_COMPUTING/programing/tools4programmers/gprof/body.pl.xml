@@ -1,0 +1,5 @@
+<article>
+<title>The GNU Profiler</title>
+
+<p>Często gdy zachodzi potrzeba przyspieszenia działania jakiejś aplikacji, programista staje przed trudnym zadaniem ustalenia co w niej chodzi zbyt wolno. W zadaniu tym nieocenioną pomocą są programy profilujące. Z generowanego w trakcie pracy programu logu profilowania wyciągają informacje o liczbie wykonania poszczególnych funkcji czy też nawet pojedynczych linijek kodu. Takim właśnie programem jest gprof.</p>
+</article>

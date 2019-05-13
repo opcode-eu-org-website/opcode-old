@@ -1,0 +1,5 @@
+<article>
+<title>Równoważność gwiazda-trójkąt</title>
+
+<p>Każdy obwód typu trójkąt (trzy punkty - A, B, C połączone rezystorami AB, BC, CA) może zostać zamieniony na układ gwiazdy (czery punkty - x, a, b, c połączone rezystorami xa, xb, xc) i na odwrót. Aby obliczyć rezystancje odpowiadającejn konfiguracji zapisujemy uklad równań wyrażających równość rezystancji pomiędzy AB i ab, AC i ac, BC i bc. Równania te mają postać: <eq>R<sub>xa</sub> + R<sub>xb</sub> = (R<sub>ab</sub> * (R<sub>bc</sub> + R<sub>ca</sub>)) / (R<sub>ab</sub> + R<sub>bc</sub> + R<sub>ca</sub>)</eq>. Należy pamiętać że w trójkącie jest to równoległe połączenie <eq>R<sub>ab</sub></eq> z sumą <eq>R<sub>bc</sub> + R<sub>ca</sub></eq>.</p>
+</article>

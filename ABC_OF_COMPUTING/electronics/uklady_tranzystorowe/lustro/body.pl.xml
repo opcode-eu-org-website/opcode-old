@@ -1,0 +1,6 @@
+<article>
+<title>Lustro prądowe</title>
+<p class="center"><img_from_src name="lustro" type="sch" alt="schemat ideowy lustra prądowego" /></p>
+
+<p>T1 i T2 muszą mieć zapewnioną tą samą temperaturę (najlepiej być wykonane w ramach jednego układu scalonego. T1 pracuje jako dioda (stosujemy tranzystor aby zapewnić taką samą charakterystykę jak T2), która wraz z R1 tworzy sprzężony termicznie z T2 dzielnik sterujący tranzystorem T2. Układ ten sterowany prądem płynącym przez R1 powoduje przepływ (niemalże) takiego samego prądu poprzez RL.</p>
+</article>

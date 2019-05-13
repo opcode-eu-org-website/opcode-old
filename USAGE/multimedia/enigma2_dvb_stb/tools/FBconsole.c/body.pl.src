@@ -1,0 +1,275 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <inttypes.h>
+#include <sys/mman.h>
+#include <string.h>
+#include <linux/fb.h>
+#include <linux/vt.h>
+#include <sys/ioctl.h>
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_GLYPH_H
+
+#define DEV_FILE "/dev/fb0"
+
+#ifndef FBIO_BLIT
+#define FBIO_SET_MANUAL_BLIT _IOW('F', 0x21, __u8)
+#define FBIO_BLIT 0x22
+#endif
+
+int    fbFD;
+char*  fbBUF;
+char*  fbBUFs[2];
+struct fb_var_screeninfo vinfo;
+struct fb_fix_screeninfo finfo;
+int    fbFrameSize, fbPixelSize, fbBufNum;
+
+void switchBuffers() {
+	if (fbBufNum == 0) {
+		// new render buffor is 1
+		fbBufNum = 1;
+		
+		// display buffor 0
+		vinfo.yoffset = 0;
+	} else {
+		fbBufNum = 0;
+		vinfo.yoffset = vinfo.yres;
+	}
+	
+	// display old buffor
+	ioctl(fbFD, FBIOPAN_DISPLAY, &vinfo);
+	// set rendering to new buffor
+	fbBUF = fbBUFs[fbBufNum];
+}
+
+inline void setARGB(int idx, uint8_t a, uint8_t r, uint8_t g, uint8_t b) {
+	char* point = fbBUF + idx;
+	*(point)   = b;
+	*(point+1) = g;
+	*(point+2) = r;
+	*(point+3) = a; // 0 == transparent
+}
+
+inline void drawRectangle(int startX, int startY, int stopX, int stopY) {
+	int x, y, lineOffet, pixelOffset;
+	
+	if (stopX > vinfo.xres || stopX == 0)
+		stopX = vinfo.xres;
+	if (stopY > vinfo.yres || stopY == 0)
+		stopX = vinfo.yres;
+	if (startX < 0)
+		startX = 0;
+	if (startY < 0)
+		startY = 0;
+	
+	lineOffet = (startY) * finfo.line_length;
+	for (y = startY; y < stopY; y++) {
+		pixelOffset = lineOffet + startX * fbPixelSize;;
+		for (x = startX; x < stopX; x++) {
+			setARGB(pixelOffset, 150, 150, 150, 150);
+			pixelOffset += fbPixelSize;
+		}
+		lineOffet += finfo.line_length;
+	}
+}
+
+int printCharBitmap(FT_GlyphSlot slot, int startX, int startY) {
+	int fX, fY, fR, xOffset, lineOffet, pixelOffset;
+
+	xOffset   = startX + slot->bitmap_left;
+	lineOffet = (startY - slot->bitmap_top) * finfo.line_length;
+
+	for(fY = 0; fY < slot->bitmap.rows; fY++) {
+		pixelOffset = lineOffet + xOffset * fbPixelSize;
+		fR = fY * slot->bitmap.width;
+
+		for (fX = 0; fX < slot->bitmap.width; fX++) {
+			if (pixelOffset > fbFrameSize)
+				return 0;
+			//setARGB(pixelOffset, slot->bitmap.buffer[fR + fX], 255, 0, 0);
+			uint8_t val  = slot->bitmap.buffer[fR + fX];
+			uint8_t rval = 255 - val;
+			
+			uint8_t a = (rval < 150) ? (255) : (150 + val);
+			uint8_t r = (/* zero */ rval*150) >> 8;
+			uint8_t g = (val*255  + rval*150) >> 8;
+			
+			setARGB(pixelOffset, a, r, g, r);
+			
+			pixelOffset += fbPixelSize;
+		}
+		lineOffet += finfo.line_length;
+	}
+	
+	startX += slot->advance.x >> 6;
+	return startX;
+}
+
+void renderText(char* text, FT_Face ftFace, int startY) {
+	int           i, maxChar, xPos = 20;
+
+	maxChar = strlen( text );
+	for (i=0; i<maxChar; i++) {
+		if ( FT_Load_Char(ftFace, text[i], FT_LOAD_RENDER) ) {
+			puts("Error in FT_Load_Char");
+			continue;
+		}
+		xPos = printCharBitmap(ftFace->glyph, xPos, startY);
+		if (xPos == 0) break;
+	}
+}
+
+#define DEVICE_SURFIX 2
+
+int getConsole(char devSurfix, uint8_t *w, uint8_t *h) {
+	int fd;
+	char tmpBuf[20];
+	
+	snprintf(tmpBuf, 20, "/dev/vcsa%d", devSurfix);
+	printf("Console on %s ", tmpBuf);
+	
+	fd = open(tmpBuf, O_RDONLY);
+	if (fd < 0) {
+		perror("open: ");
+		exit(1);
+	}
+	if (read(fd, tmpBuf, 4) != 4) {
+		perror("read: ");
+		exit(2);
+	}
+	close(fd);
+	
+	*h = tmpBuf[0];
+	*w = tmpBuf[1];
+	printf(" has %d rows and %d cols\n", *h, *w);
+	
+	
+	snprintf(tmpBuf, 20, "/dev/vcs%d", devSurfix);
+	printf("Openning console on %s \n", tmpBuf);
+
+	fd = open(tmpBuf, O_RDONLY);
+	if (fd < 0) {
+		perror("open: ");
+		exit(3);
+	}
+	
+	return fd;
+}
+
+int main(int argc, char** argv) {
+	FT_Library    ftLib;
+	FT_Face       ftFace;
+
+	// FreeType open font
+	if ( FT_Init_FreeType(&ftLib) )
+		puts("Error in FT_Init_FreeType");
+
+	if ( FT_New_Face(ftLib, "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono.ttf", 0, &ftFace) )
+		puts("Error in FT_New_Face");
+
+	if ( FT_Set_Char_Size( ftFace, 0, 10 * 64, 128, 128 ) )
+		puts("Error in FT_Set_Char_Size");
+
+
+	// open device and get info
+	fbFD = open(DEV_FILE, O_RDWR);
+	if (fbFD == -1) {
+		perror("Open framebuffer device: " DEV_FILE " error");
+		exit(1);
+	}
+	
+	if (ioctl(fbFD, FBIOGET_FSCREENINFO, &finfo) == -1) {
+		perror("ioctl FBIOGET_FSCREENINFO error");
+		exit(2);
+	}
+	
+	if (ioctl(fbFD, FBIOGET_VSCREENINFO, &vinfo) == -1) {
+		perror("ioctl FBIOGET_VSCREENINFO error");
+		exit(3);
+	}
+	
+	if (vinfo.bits_per_pixel != 32) {
+		puts("We only support 32 bit per pixel");
+		exit(4);
+	}
+	
+	// open memory buffer (double buffering)
+	fbPixelSize = vinfo.bits_per_pixel / 8;
+	fbFrameSize = vinfo.xres * vinfo.yres * fbPixelSize;
+	fbBUFs[0] = fbBUF = (char*)mmap(0, fbFrameSize*2, PROT_WRITE, MAP_SHARED, fbFD, 0);
+	fbBUFs[1] = fbBUF + fbFrameSize;
+	fbBufNum = 0;
+	unsigned char reInit = 1;
+	
+	
+	int vcsFD, myFD;
+	struct vt_stat vtstat;
+	
+	uint8_t width, height, y;
+	ssize_t sizeIN, sizeOUT;
+	char    *bufIN_1, *bufIN_2, *bufOUT, *bufTMP, charTMP;
+	
+	vcsFD = getConsole(DEVICE_SURFIX, &width, &height);
+	myFD = open("/dev/tty0", O_RDONLY);
+	
+	sizeIN  = width * height;
+	bufIN_1 = malloc(sizeIN);
+	bufIN_2 = malloc(sizeIN);
+	sizeOUT = (width+1) * height;
+	bufOUT  = malloc(sizeOUT);
+	
+	while (1) {
+		ioctl(myFD, VT_GETSTATE, &vtstat);
+		if (vtstat.v_active == DEVICE_SURFIX) { // run only when DEVICE_SURFIX is active VT
+			if (reInit == 1) {
+				reInit = 0;
+				memset(fbBUFs[0], 0, fbFrameSize*2);
+				*bufIN_2 = '\0';
+				ioctl(fbFD, _IOW('F', 0x21, __u8), &reInit); // disable FBIO_SET_MANUAL_BLIT
+			}
+			lseek(vcsFD, 0, SEEK_SET);
+			if (read(vcsFD, bufIN_1, sizeIN) == sizeIN) {
+				if ( strncmp(bufIN_1, bufIN_2, sizeIN) != 0 ) { // redraw only when changed VT output
+					int renderY = 36;
+					drawRectangle(16, 16, 906, 528);
+					
+					bufTMP = bufIN_1;
+					for (y=0; y<height; y++) {
+						// save first char of next line and put in its place "end of string"
+						charTMP = bufTMP[width];
+						bufTMP[width] = '\0';
+						
+						// show line
+						renderText(bufTMP, ftFace, renderY);
+						renderY += 20;
+						
+						// set bufTMP to start of next line and restore first char of next line
+						bufTMP = bufTMP + width;
+						*bufTMP = charTMP;
+					}
+					
+					// swap bufIN_2 and bufIN_1
+					bufTMP  = bufIN_2;
+					bufIN_2 = bufIN_1;
+					bufIN_1 = bufTMP;
+					
+					switchBuffers();
+				}
+			}
+		} else {
+			reInit = 1;
+		}
+		usleep(100000);
+	}
+
+	FT_Done_Face(ftFace);
+	FT_Done_FreeType(ftLib);
+	
+	// close
+	munmap(fbBUF, fbFrameSize);
+	close(fbFD);
+	return 0;
+}
+

@@ -1,0 +1,32 @@
+<article>
+<title>Zwiększamy ilość wejść/wyjść czyli magistrale</title>
+
+<p>Typowe mikrokontolery posiadają pewien zasób <wiki pl="General Purpose Input/Output">GPIO</wiki> i innych interfejsów wbudowanych w siebie, w niektórych sytuacjach okazuje się on jednak niewystarczający - można wtedy podłączyć poprzez jakąś magistralę układy zwiększające ilość wejść/wyjść lub zastosować kilka mikrokontrolerów (często również komunikujących się poprzez jakąś magistralę). Zasadniczo mamy do wyboru:</p><ul>
+	<li>magistrala równoległa<ul>
+		<li>składa się z: szyny danych, szyny adresowej (może to być jedna szyna multipleksowana sygnałem informującym o tym czy nadajemy dane czy adres) oraz sygnały sterujące transmisją - strobe i zapis/odczyt lub strobe zapisu i strobe odczytu</li>
+		<li>korzystamy z rejestrów i buforów adresowalne (wejścia adresowe może posiadać sam ten układ lub można stosować układy z pojedynczym wejściem enable i osobny dekoder adresu)</li>
+		<li>trochę na temat ich stosowania napisałem w artykule opisującym <id_link id="smart_home:ewolucja_koncepcji:mikrokontroler">ewolucję koncepcji projektów inteligentnego domu</id_link></li>
+	</ul></li>
+	<li>rejestry przesuwne<ul>
+		<li>jako input (74HC165)<ul>
+			<li>zapamiętujemy stan wejść równoległych układu ( sygnał PL =  asynchronous parallel load input)</li>
+			<li>podajemy sygnał clock (CP =  clock input) i w jego takt czytamy koleje bity z wyjścia szeregowego (Q7 = serial output from the last stage)</li>
+		</ul></li>
+		<li>jako output (74HC595)<ul>
+			<li>wystawiamy daną na wejście szeregowe (DS = serial data input)</li>
+			<li>dajemy clock przesunięcia rejestru  (SHCP = shift register clock input)</li>
+			<li>po ustawieniu wszystkich bitów dajemy dajemy sygnał ustawienia wyjść na zadaną wartość (STCP =  storage register clock input)</li>
+		</ul></li>
+	</ul></li>
+	<li>magistrale szeregowe typu I2C, SPI, 1-wire, UART</li>
+</ul>
+
+<p>Najprostsza w użyciu wydaje się magistrala równoległa bez multipleksowania szyny adresowej i danych (ustawienie adresu, zapis danych sterowane dwoma sygnałami), jednak wymaga ona stosowania dużej ilości połączeń między modułami (typowo minimalistycznie: 8 bitów szyny danych, 3-8 bitów szyny adresowej, 2 sygnały sterujące). W przypadku podziału projektu na moduły nastręcza to problemy z ich łączeniem - można/trzeba kombinować z tworzeniem jakiegoś backplane i stosowania jakiś złączy (np. złączy krawędziowych na PCB), ale jest to dość kłopotliwe w realizacji i przy małych modułach (a tym bardziej niewielkiej ich liczbie) trochę dziwne.</p>
+
+<p>Przy konieczności dodania niewielkiej ilości modułów wejść wyjść mogą się sprawdzić rejestry przesuwne, ale w odróżnieniu od magistral szeregowych rozwiązanie to nie skaluje się dobrze.</p>
+
+<p>Najbardziej elastycznym (ale i dość drogim) rozwiązaniem jest zastosowanie magistral szeregowych (zasadniczo będących bardziej rozwiniętą formą rejestrów przesuwnych). Na przykład wspomniana magistrala I2C umożliwia podpięcie na pojedynczej linii kilkunastu układów, umożliwia multipleksowanie swojej linii celem zwiększenia pojemności i zapewnia 8 bitowe adresowanie układów na magistrali (realizowane w protokole transmisji - bez dodatkowych połączeń w tym celu).</p>
+
+<p>Podobnym zagadnieniem jest podłączanie klawiatur, ale tutaj możemy potraktować ją jako matrycę przełączników - i zasilać tylko kolejno pojedyncze rzędy szukając kolumny która jest zwarta (patrz <id_link id="manipulator_alarmowy">manipulator alarmowy</id_link>), w przypadku gdy dopuszczamy równoczesne wciśnięcie kilku z tych przełączników należy stosować diody uniemożliwiające przeniesienie potencjału zasilonego wiersza poprzez linie kolumny do innych rzędów.</p>
+
+</article>

@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# ponizszy wpis wlacza wypisywanie wykonywanych polecen
+#- bardzo przydatne przy debugowaniu skryptow ...
+set -x
+
+COS="ryba";
+
+# poniższy fragment obrazuje instrukcje case na prostym przykładzie
+case $COS in
+        kot | pies)
+                echo  "kot lub pies"
+                ;;
+        ryba)
+                echo  "ryba"
+                ;;
+        *)
+                echo  "cos innego"
+                ;;
+esac
+
+# następny fragment działa dokładnie tak samo tyle że na instrukcji if
+if [ "$COS" = "kot" -o "$COS" = "pies" ]; then
+        echo  "kot lub pies";
+elif [ "$COS" = "ryba" ];  then
+        echo  "ryba"
+else
+        echo  "cos innego"
+fi

@@ -1,0 +1,20 @@
+function ivr_play_and_read(filename, timeout)
+	app.Read("ivr_exten", filename, 1, nil, 1, timeout)
+	ivr_exten = channel["ivr_exten"]:get()
+	app.Verbose(verb, "DTMF input: " .. ivr_exten)
+	if ivr_exten == "" then
+		return false
+	else
+		return ivr_exten
+	end
+end;
+
+function ivr_play_and_goto(filename1, timeout, filename2, context)
+	ivr_exten = ivr_play_and_read(filename1, 6)
+	if ivr_exten then
+		return app.goto(context,ivr_exten,1)
+	else
+		app.Playback(filename2)
+		app.Hangup()
+	end
+end;

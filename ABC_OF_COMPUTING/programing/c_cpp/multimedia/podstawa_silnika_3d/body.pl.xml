@@ -1,0 +1,7 @@
+<article>
+<title>Podstawa silnika 3D</title>
+
+<p>Jest to praca którą wykonywałem jako pracę zaliczeniową na "Programowanie Gier Komputerowych". Głównym zagadnieniem rozwiązanym w projekcie był culling na podstawie rzutowanego na płaszczyznę stożka widzenia, wraz z dynamicznym ładowaniem obiektów. Projekt nie ma statusu ukończonego (spora część zaplanowanej funkcjonalności nie jest zaimplementowana), jednak najprawdopodobniej nie będzie rozwijany dalej. Projekt realizowany był z wykorzystaniem OpenGL.</p>
+
+<p class="download"><a class="int" href="./podstawa_silnika_3d.tgz">Pobierz</a></p>
+</article>

@@ -1,0 +1,13 @@
+<article>
+<title>Minimalizacja automatów (liczby stanów) - asynchroniczne</title>
+<ul>
+	<li>łączymy stany pseudo równoważne (mające stany stabilne w jednej kolumnie, niesprzeczne wyjścia oraz niesprzeczne stany następne), w tym etapie rozważamy zgodność warunkową</li>
+	<li>tworzymy graf zgodności (warunkiem jest niesprzeczność stanów następnych), stany o sprzecznych wyjściach umieszczamy, ale łączymy je linią przerywaną</li>
+	<li>przy automacie Mealy'ego możemy grupować stany o sprzecznych wyjściach (połączone linią przerywaną), robimy wtedy także tablicę wyjść:<ul>
+		<li>przepisujemy wyjścia stanów stabilnych</li>
+		<li>przepisujemy wyjścia stanów niestabilnych (gdy dane wyjście nie jest wyjściem stabilnego z bieżącego wejścia to kreska)</li>
+		<li>uzupełniamy kreski</li>
+	</ul></li>
+	<li>kodujemy tak aby uniknąć wyścigów krytycznych - przejścia przez stany niestabilne i/lub dodajemy dodatkowe stany</li>
+</ul>
+</article>

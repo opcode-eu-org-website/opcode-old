@@ -1,0 +1,19 @@
+#ifndef TEXTUREOBJECT_H
+#define TEXTUREOBJECT_H
+
+#include <string>
+#include <GL/gl.h>
+// nagłówek biblioreki libglpng odpowiedzialnej za obsługę plików png dla OpenGL
+#include <GL/glpng.h>
+
+using namespace std;
+
+class TextureObject {
+	private:
+		pngInfo texture_info;
+	public:
+		GLuint texture;
+		TextureObject(string name);
+		~TextureObject();
+};
+#endif

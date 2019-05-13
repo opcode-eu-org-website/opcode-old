@@ -1,0 +1,5 @@
+<article>
+<title>Astabilny</title>
+<p class="center"><img_from_src name="przerzutnik_astabilny" type="sch" alt="schemat ideowy prostego przerzutnika astabilnego" /></p>
+<p>Przerzutnik ten służy do generacji sygnału prostokątnego o zadanym wypełnieniu. poszczególne półokresy wynoszą: <eq_latex>t_x = \tau \ln({u(\infty) - u(0) \over u(\infty) - u(t_x)})</eq_latex>, gdzie <eq>u(0)</eq> - napięcie początkowe asymptota procesu, <eq_latex>u(\infty)</eq_latex> - asymptota procesu, <eq>u(t<sub>x</sub>)</eq> - napięcie w chwili zakończenia, <eq_latex>\tau = C_i R_{B_j}</eq_latex> - stała czasowa elementów podłączonych do bazy tranzystora wyjście którego rozważamy w stanie wysokim. Działanie układu jest podobne do opisanego przerzutnika montostabilnego z tym że po (ponownym) nasyceniu drugiego tranzystora powstały spadek napięcia rozpoczyna taki sam proces dla pierwszego tranzystora i kondensatora  podłączonego do jego bazy. Dodatkową wadą tego rozwiązania jest problem startu przy wypełnieniu 1/2 (jednakowych elementach) i łagodnym włączaniu.</p>
+</article>

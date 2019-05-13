@@ -1,0 +1,6 @@
+<article>
+<title>Montowanie SFTP jako systemu plików</title>
+<p>Możliwe jest montowanie zdalnych zasobów SFTP jako lokalnego systemu plików. Wymaga to zainstalowania pakietu z sshfs oraz załadowania modułu fuse (mechanizm fs opartego na fuse zastąpił opisywany tu niegdyś shfs stanowiący moduł jądra). Montowanie wykonujemy przy pomocy polecenia <code>sshfs -o workaround=rename <var>serwer</var>:<var>katalog</var> <var>punkt_montowania</var></code> (dość istotna jest opcja "workaround=rename" umożliwiająca przenoszenie plików na takim systemie). Oczywiście użytkownik wykonujący to polecenie musi mieć prawa do <kbd class="path">/dev/fuse</kbd> (należeć do grupy fuse). Warto na koniec też zwrócić uwagę iż możliwe jest korzystanie z standardowych kluczy generowanych przez <code>ssh-keygen</code> (i umieszczanych w $HOME/.ssh/ jako: authorized_keys , id_rsa , id_rsa.pub).</p>
+
+<p>W przypadku KDE możliwe jest też korzystanie z zasobów SFTP bez ich montowania - wystarczy w Konqueror'ze wpisać sftp://uzytkownik@nazwa.serwera .</p>
+</article>

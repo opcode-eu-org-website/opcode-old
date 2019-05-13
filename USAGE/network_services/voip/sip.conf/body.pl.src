@@ -1,0 +1,111 @@
+; konfiguracja kont SIP
+; http://www.voip-info.org/wiki/index.php?page=Asterisk+config+sip.conf
+
+[general]
+; słuchanie na porcie 5060 po ipv4 i ipv6 (wspólny socket) po udp, tcp, tsl
+bindport=5060
+udpbindaddr=::
+tcpenable=yes
+tcpbindaddr=::
+tlsenable=yes
+tlsbindaddr=::
+
+; połączenia przychodzące po SIPie trafią do kontekstu "incoming_from_external"
+; dla połączeń od naszych klientów ustawienie to zostanie nadpisane
+; zatem do tego kontekstu trafią rozmowy przychodzące od "obcych"
+context=incoming_from_external
+
+; używamnie rekordów SRV dla połączeń wychodzących
+srvlookup=yes
+
+; wspieramy połaczenia wideo
+videosupport=yes
+
+; akceptujemy wszystkie kodeki
+allow=all
+
+; DTMF zgodnie z RFC2833
+dtmfmode=rfc2833
+
+; nie pozwalamy na przejście na połączenia bezpośrednie p2p
+; między klientami (z pominięciem PBX)
+;
+; nawet gdy canreinvite == yes to wystąpienie jakiejkolwiek z opcji TKWtkw w Dial()
+; blokuje możliwość przejścia na połączenioe p2p
+canreinvite=no
+directmedia=no
+
+; sprawdzamy obecność klienta co 3s
+qualify=3000
+
+; dość szybkie wygasanie rejestracji - w trakcie tego czasu (wartość w sekundach)
+; dla rozmów idących do peer'a jest on identyfikowany w oparciu o ip, czyli
+; aby mógł odebrać rozmowę nie musi się autoryzować
+maxexpirey=60
+defaultexpirey=60
+
+; nie potrzebujemy wsparcia dla NAT
+nat=no
+
+
+; domena dodawana do identyfikacja dzwoniącego
+; FIXME: niestety nie działa jako lokalne dla friend, a callerid nie pozwala na ustawianie domeny
+fromdomain=moja.domena
+
+
+; plik przeznaczony do umieszczania wpisów postaci:
+;  register => [peer?][transport://]user[@domain][:secret[:authuser]]@host[:port][/extension][~expiry]
+; typowo postaci:
+;  register => login[:password[:authuser]]@host[:port][/extension]
+; powodujących rejestrację Asteriska jako perr'a u zewnętrznych operatorów SIP
+; umożliwia to zapewnienie wyjścia do ich systemów telefonicznych lub do PSTN
+#include <sip-register.conf>
+
+
+; szablon typowego telefonu i provider'a SIP
+[std-phone](!)
+        type=friend
+	; wymagamy rejestracji z użyciem loginu i hasła
+	host=dynamic
+
+; plik przeznaczony do definiowania telefonów SIPowych
+#include <sip-phone.conf>
+; typowe wpisy dla telefonów:
+;	[USERID](std-phone)
+;		; kontekst w extensions.conf do którego trafią rozmowy przychodzące od "USERID"
+;		context = input/USERID
+;		; hasło, które służy do autoryzowania się użytkownika "USERID"
+;		secret = haslo
+;		; dane wysyłane jako identyfikacja dzwoniącego
+;		callerid = Imie Nazwisko <numer albo identyfikator>
+
+
+; szablon typowego dostawcy usług SIP
+[std-provider](!)
+	type=peer
+	; pozwalamy na przyjmowanie połączeń od dostawcy bez autoryzowania
+	insecure=invite
+
+; plik przeznaczony do definiowania dostawców SIPowych
+#include <sip-provider.conf>
+; typowe wpisy dla peerów ziwązanych z "register",
+; czyli kont u operatorów zewnętrznych z którymi się łączymy:
+;	[SIP-PROVIDER](std-provider)
+;		; dane umożliwiające logowanie
+;		; (te same co w register - odpowiednio: login, password, host)
+;		username=login
+;		secret=password
+;		host=adres.domenowy.dostawcy
+;		; dane identyfikujące użytkownika u dostawcy
+;		fromuser=login
+;		fromdomain=domena.konta
+;		; przyjmowane połączenia trafią do podanego w register extension kontekstu:
+;		context=input_from/SIP-PROVIDER
+; dzwonienie przez operatora realizujemy poprzez:
+;	Dial(SIP/{$ADDRESS}@user-sipprovider-out)
+; uwaga 1: w nazwach kontekstów lepiej nie używać kropek celem łatwego odróżniania od domen SIP
+; uwaga 2: jeżeli jest kilka kont SIP od tego samego providera nie ma łatwej metody kierowanuia
+;          ich do różnych kontektstów, należy wtedy kozystać z register z /extension
+;          i w wspólnym kontekscie rozrózniać właśnie po tym extension,
+;          patrz przykład w: http://www.voip-info.org/wiki/view/Asterisk+config+sip.conf
+

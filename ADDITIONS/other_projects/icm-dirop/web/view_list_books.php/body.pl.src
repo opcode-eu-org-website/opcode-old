@@ -1,0 +1,109 @@
+<?php
+/**
+	System prezentacji zasobów DIROP na WWW
+	
+	plik odpowiedzialny za wyświetlanie (w oparciu o szablony xhtml'owe) strony
+	zawierającej dzieloną na strony po BOOKS_ITEM_PER_PAGE pozycji listę zasobów DIROPu
+	(lista ta może być przefiltrowana poprzez wybranie kategorii bądź wyszukiwania książki)
+	
+	korzysta z informacji zawartych w utworzonych wcześniej tablicach
+		$BOOK_LIST - tablicy tablic $BOOK_INFO z informacjami o książce
+		$BOOK_INFO - informacje o książce
+	ustawia wartość $PAGE_SHOWED
+**/
+
+
+
+
+$PAGE_SHOWED=true;
+xhtml_print_file_head( BOOK_LIST_TITLE );
+xhtml_print_header( BOOK_LIST_TITLE , "", "", "", "", "");
+
+/// obsługa informacji o aktualnym trybie filtrowania
+switch ($FILTER[1]) {
+	case FILTER_NOVELTY:
+		$curr = PRZEFILTROWANO_WZGLEDEM_NOWOSCI;
+		break;;
+	case FILTER_CATEGORY:
+		$curr = sprintf(PRZEFILTROWANO_WZGLEDEM_KATEGORII, $FILTER[2]);
+		break;;
+	case FILTER_SEARCH:
+		$curr = sprintf(PRZEFILTROWANO_WZGLEDEM_WYNIKOW_WYSZUKIWANIA, $FILTER[3], find_in_to_str($FILTER[2]));
+		break;;
+	default:
+		$curr = NAGLOWEK_LISTY_POZYCJI;
+		break;;
+}
+
+xhtml_print_volumes_list_head( /*NAGLOWEK_LISTY_POZYCJI,*/ $curr);
+if ($BOOK_LIST != NULL) {
+	/// obsługa podziału na podstrony - przygotowanie
+	if (isset($_GET["start"])) {
+		$start = $_GET["start"];
+	} else {
+		$start = 1;
+	}
+	if (isset($_GET["stop"])) {
+		$stop = $_GET["stop"];
+	} else {
+		$stop = $start + BOOKS_ITEM_PER_PAGE - 1;
+	}
+	$int_tmp = count($BOOK_LIST);
+	if ($stop > $int_tmp)
+		$stop = $int_tmp;
+	$curr = sprintf(POKAZANO_OD_DO_Z, $start, $stop, $int_tmp);
+	$int_tmp = 0;
+	
+	/// wypisywanie listy pozycji
+	foreach ($BOOK_LIST as $BOOK_INFO) {
+		/// podział na podstrony
+		$int_tmp++;
+		if ($int_tmp < $start) {
+			continue;
+		} else if ($int_tmp > $stop) {
+			break;
+		}
+		
+		/// przygotowanie pełnej informacji o pozucji
+		$full_info = "";
+		if ($BOOK_INFO['dc_creator'] != "")
+			$full_info .= $BOOK_INFO['dc_creator'] . ", ";
+		$full_info .= $BOOK_INFO['dc_title'] . ", ";
+		if ($BOOK_INFO['dc_publisher'] != "")
+			$full_info .= $BOOK_INFO['dc_publisher'] . ", " . $BOOK_INFO['dc_date'];
+		
+		/// wypisanie pozycji
+		if ($BOOK_INFO['single_vid'] >= -1) {
+			xhtml_print_list_entry(/*$BOOK_INFO['v.title']*/ $BOOK_INFO['dc_title'], DIROP_SCRIPT_PATH . '/' . $BOOK_INFO['v.url'] . '/', $full_info);
+		} else {
+			xhtml_print_list_entry(/*$BOOK_INFO['b.title'] . ", " . $BOOK_INFO['v.title']*/ $BOOK_INFO['dc_title'], DIROP_SCRIPT_PATH . '/' . $BOOK_INFO['b.url'] . '/' . $BOOK_INFO['v.url'] . '/', $full_info);
+		}
+	}
+} else {
+	xhtml_print_list_entry( NIESTETY_NIC_NIE_ZNALEZIONO );
+	$curr = "";
+}
+
+/// wypisanie stopki listy z linkami nawigacyjnymi podziału na strony
+/// w oparciu o przygotowane wcześniej $URL_PREFIX i $URL_SURFIX oraz DIROP_SCRIPT_PATH
+if ($stop < $int_tmp) {
+	$next=$URL_PREFIX . "?start=" . ($stop+1) . $URL_SURFIX;
+} else {
+	$next="";
+}
+if ($start > 1) {
+	$int_tmp = $start - BOOKS_ITEM_PER_PAGE;
+	if ($int_tmp < 1)
+		$int_tmp = 1;
+	$prev=$URL_PREFIX . "?start=" . $int_tmp . $URL_SURFIX;
+} else {
+	$prev="";
+}
+xhtml_print_list_foot($prev, $next, $curr);
+
+xhtml_print_library_search($FILTER);
+xhtml_print_category_navigation();
+
+xhtml_print_footer();
+
+?>

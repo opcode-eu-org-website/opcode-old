@@ -1,0 +1,17 @@
+#!/bin/sh
+
+exec 1>/var/log/smtp2sms.log
+exec 2>&1
+
+BASEDIR='/mnt/nand'
+
+ln -s $BASEDIR/modbus /opt/modbus
+
+sqlite3 /tmp/modbus.db < /opt/modbus/modbus_reader.sql
+#for addr in `seq 5 28`; do for reg in `seq 1002 2 1202`; do
+for addr in 14 `seq 17 28`; do for reg in `seq 1042 2 1046`; do
+	echo "INSERT INTO data VALUES ($addr, $reg, NULL, 0);";
+done; done | sqlite3 /tmp/modbus.db
+
+/opt/modbus/modbus_reader &
+/opt/modbus/monitor_modbus.sh 2>&1 &

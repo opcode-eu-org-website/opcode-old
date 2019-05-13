@@ -1,0 +1,182 @@
+#include "config_window.h"
+
+// funkcja zapisująca konfigurację i zamykająca to okienko
+void ConfigWindow::SaveAction() {
+	// deklaracje dotyczące XML
+	QDomDocument dokument_xml;
+	QDomElement wezel_glowny, rekord, pole;
+	QDomText pole_val;
+	
+	// element główny - korzeń
+	wezel_glowny = dokument_xml.createElement( "baza" );
+	dokument_xml.appendChild(wezel_glowny);
+	
+	for (int i=0; i<interfejs.tableWidget->rowCount(); i++) {
+		// tworzymy nowy rekord odpowiadający wierszowi tabeli
+		rekord = dokument_xml.createElement( "termin" );
+		// pobieramy ID
+		QTableWidgetItem *komorka = interfejs.tableWidget->item(i,0);
+		// i ustawiamy jako atrybut naszego rekordu
+		rekord.setAttribute( "id", komorka->text() );
+		// dodajemy rekord do bazy
+		wezel_glowny.appendChild(rekord);
+		
+		for (int j=1; j<interfejs.tableWidget->columnCount(); j++) {
+			// tworzymy pole o nazwie odpowiadającej nazwie kolumny
+			pole = dokument_xml.createElement( naglowek_tabelki[j] );
+			// dodajemy je do naszego rekordu
+			rekord.appendChild(pole);
+			
+			// pobieramy wartość pola
+			komorka = interfejs.tableWidget->item(i,j);
+			
+			// ustawiamy ją w XML
+			if ( komorka != NULL  ) {
+				pole_val = dokument_xml.createTextNode( komorka->text() );
+				pole.appendChild(pole_val);
+			}
+		}
+	}
+	// oczywiście zamiast generować cały xml od nowa można by modyfikować stary
+	// ale przy edycji z wykorzystaniem tabelki tak jest łatwiej
+	// modyfikację wykonuje się w podobny sposób jak generowanie nowego
+	// zobacz funkcje: insertBefore(), insertAfter(), replaceChild(), removeChild()
+	// oraz (dla atrybutów): removeAttribute()
+	
+	// wybór pliku do zapisania
+	QString plik_do_zapisu = QFileDialog::getSaveFileName(this,\
+		"Wybierz plik...", "./config.NEW.xml", "Dokumenty XML (*.xml)");
+	
+	if (!plik_do_zapisu.isEmpty ()) {
+		// zapisujemy do pliku
+		QFile dokument( plik_do_zapisu );
+		dokument.open( QIODevice::WriteOnly );
+		QTextStream ts( &dokument );
+		ts << dokument_xml.toString();
+		
+		// zamykamy okienko
+		close();
+	}
+}
+
+// funkcja dodająca wiersz do tabelki
+void ConfigWindow::AddTableRow() {
+	int wiersz = interfejs.tableWidget->rowCount();
+	interfejs.tableWidget->setRowCount(wiersz+1);
+	QTableWidgetItem *tmp_komorka = new QTableWidgetItem( QString::number(++max_id) );
+	interfejs.tableWidget->setItem(wiersz, 0, tmp_komorka);
+}
+
+// funkcja usuwająca wiersz z tabelki
+void ConfigWindow::DelTableRow() {
+	interfejs.tableWidget->removeRow(interfejs.tableWidget->currentRow());
+}
+
+// funkcja reagujaca na kliknięcie komórki tabelki
+void ConfigWindow::IsTableCliced(int r, int c) {
+	printf("KLIKNIĘTO %d %d\n", r, c);
+}
+
+// konstruktor
+ConfigWindow::ConfigWindow(QWidget * parent, Qt::WFlags f):QDialog(parent, f | Qt::Tool) {
+	// skonfigurowanie interfeju w oparciu o obiekt klasy wygenerowanej na podstawie pliku .ui
+	interfejs.setupUi(this);
+	
+	// powiązanie guzika z akcją
+	connect( interfejs.btn_save, SIGNAL(clicked()), this, SLOT(SaveAction()) );
+	connect( interfejs.btn_table_add, SIGNAL(clicked()), this, SLOT(AddTableRow()) );
+	connect( interfejs.btn_table_del, SIGNAL(clicked()), this, SLOT(DelTableRow()) );
+	connect( interfejs.tableWidget, SIGNAL(cellClicked(int, int)), this, SLOT(IsTableCliced(int, int)) );
+	
+	// przygotowanie tabelki
+	naglowek_tabelki << "Id" << "Rok" << "Miesiac" << "Dzien" << "Godzina" << "Minuty";
+	interfejs.tableWidget->setColumnCount(6);
+	interfejs.tableWidget->setHorizontalHeaderLabels( naglowek_tabelki );
+	interfejs.tableWidget->hideColumn(0);
+	int wiersz = 0;
+	
+	// przygotowanie drzewka
+	QStandardItemModel *terminy = new QStandardItemModel ();
+	// wstawiamy węzeł który będzie rodzicem - tak aby było to drzewko
+	QModelIndex rodzic = terminy->index(0, 0, rodzic);
+	terminy->insertRows(0, 1, rodzic);
+	terminy->insertColumns(0, 6, rodzic);
+	terminy->setData( terminy->index(0, 0, rodzic), QVariant( "TERMINY" ) );
+	rodzic = terminy->index(0, 0, rodzic);
+	terminy->insertColumns(0, 6, rodzic);
+	// wstawiamy nagłówki kolumn
+	terminy->setHeaderData (0, Qt::Horizontal, "Rok");
+	terminy->setHeaderData (1, Qt::Horizontal, "Miesiac");
+	terminy->setHeaderData (2, Qt::Horizontal, "Dzien");
+	terminy->setHeaderData (3, Qt::Horizontal, "Godzina");
+	terminy->setHeaderData (4, Qt::Horizontal, "Minuty");
+	terminy->setHeaderData (5, Qt::Horizontal, "Id");
+	
+	// wczytanie pliku xml
+	QDomDocument dokument_xml;
+	QFile dokument( "config.xml" );
+	dokument.open( QIODevice::ReadOnly );
+	dokument_xml.setContent( &dokument );
+	dokument.close();
+	
+	// bierzemy uchwyt do głównego elementu w pliku (wszystkie inne są wewnętrz niego)
+	QDomNode wezel_glowny;
+	wezel_glowny = dokument_xml.documentElement();
+	
+	// rekordy i pola
+	QDomNode rekord, pole;
+	
+	// przetwarzamy kolejne rekordy
+	rekord = wezel_glowny.firstChild();
+	do {
+		// dodajemy nowy wiersz do tabelki i drzewka
+		interfejs.tableWidget->setRowCount(wiersz+1);
+		terminy->insertRows(wiersz, 1, rodzic);
+		printf("Dodalismy wiersz %d\n", wiersz);
+		
+		// tymczasowy element związane z rekodami/polami
+		QDomElement tmp_elem;
+		tmp_elem = rekord.toElement();
+		
+		// atrybut ID - zapamiętujemy maksymalne ID
+		int id_num=tmp_elem.attribute("id").toInt();
+		if (id_num > max_id) {
+			max_id = id_num;
+		}
+		printf(" id = %d\n", id_num);
+		
+		// atrybut ID (numeryczny) w ukrytej kolumnie
+		QTableWidgetItem *tmp_komorka = new QTableWidgetItem( QString::number(id_num) );
+		interfejs.tableWidget->setItem(wiersz, 0, tmp_komorka);
+		
+		// atrybut ID w drzewku
+		terminy->setData( terminy->index(wiersz, naglowek_tabelki.count()-1, rodzic), QVariant( QString::number(id_num) ) );
+		
+		for (char i=1; i<naglowek_tabelki.count(); i++) {
+			// pole o nazwie określonej w nagłówku tabeli
+			pole = rekord.namedItem(naglowek_tabelki[i]);
+			tmp_elem = pole.toElement();
+			// wypisujemy nazwę pola oraz jego zawartość jako napis C kodowany w UTF-8
+			puts( ( " -> " + tmp_elem.tagName() + ": " + tmp_elem.text() ).toUtf8().constData() );
+			
+			// wstawiamy dane do tabelki
+			QTableWidgetItem *tmp_komorka = new QTableWidgetItem(tmp_elem.text());
+			interfejs.tableWidget->setItem(wiersz, i, tmp_komorka);
+			
+			// wstawiamy dane do drzewka
+			terminy->setData( terminy->index(wiersz, i-1, rodzic), QVariant(tmp_elem.text()) );
+		}
+		wiersz++;
+		
+		// następny rekord (o dowolnej nazwie)
+		rekord = rekord.nextSibling();
+	} while (!rekord.isNull());
+	
+	// włączamy sortowanie tabelki
+	interfejs.tableWidget->setSortingEnabled(true);
+	interfejs.tableWidget->sortItems(1);
+	
+	// przypisujemy model do drzewka
+	interfejs.treeView->setModel( terminy );
+	interfejs.treeView->setColumnHidden(naglowek_tabelki.count()-1, true);
+}

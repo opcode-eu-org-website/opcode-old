@@ -1,0 +1,29 @@
+[general]
+; zakres numerow uzywanych do odbierania zaparkowanych rozmow
+parkpos => 7800-7899
+
+; czas na odebranie zaparkowanej rozmowy
+parkingtime => 300
+
+; Maksymalny odstep (ms) miedzy cyframi prefiksu przejscia do "feature"
+featuredigittimeout = 1500
+
+; Maksymalny odstep (sek) miedzy cyframi numeru na ktory transferujemy
+transferdigittimeout => 4
+
+[featuremap]
+; przekazywanie na inny numer
+blindxfer => *1
+
+; przekazywanie na inny numer z wczesniejszym polaczeniem sie z tym numerem 
+atxfer => *2
+
+; rozlaczenie z numerem na ktory przekazujemy i powrot do przekazywanego (przy atxfer)
+; FIXME nie działa powrót :-(
+disconnect => *0
+
+; parkowanie rozmowy
+parkcall => *3
+
+[applicationmap]
+

@@ -1,0 +1,8 @@
+<article>
+<p>Dość praktycznym zastosowaniem pętli w bashu jest wywoływanie czegoś dla każdej linii wejścia - np.
+<code>grep <span class="sym">-</span>r <span class="str">'warunek'</span> <span class="sym">* |</span> cut <span class="sym">-</span>f1 <span class="sym">-</span>d<span class="str">':'</span> <span class="sym">|</span> uniq <span class="sym">|</span> <span class="kwa">while</span> <span class="kwb">read</span> f <span class="sym">;</span> <span class="kwa">do</span> <span class="kwb">echo $f</span><span class="sym">;</span> sed <span class="str">'s#szukany#zamiennik#g'</span> <span class="str">&quot;$f&quot;</span><span class="sym"> &gt; /</span>tmp<span class="sym">/</span>zam<span class="sym">;</span> mv <span class="sym">-</span>f <span class="sym">/</span>tmp<span class="sym">/</span>zam <span class="str">&quot;$f&quot;</span><span class="sym">;</span> <span class="kwa">done</span></code>
+<!-- grep -r 'warunek' * | cut -f1 -d':' | uniq | while read f ; do echo $f; sed 's#szukany"/#zamiennik#g' "$f" > /tmp/zam; mv -f /tmp/zam "$f"; done -->.
+Kod ten wyszukuje rekurencyjnie pliki zawierające "warunek" oraz zamienia w nich wszystkie wystąpienia "szukany" na "zammiennik". Warto tutaj zwrócić uwagę na wykorzystanie pętli while oraz jednolinijkowy zapis (wygodny przy pracy interaktywnej z bashem).</p>
+
+<p>Więcej informacji o warunkach jakie możemy zawrzeć w [] wykorzystywanym zarówno w pętlach jak i warunkach typu if patrz: <man section="1">test</man>.</p>
+</article>

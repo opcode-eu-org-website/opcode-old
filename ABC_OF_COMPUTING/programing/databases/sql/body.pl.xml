@@ -1,0 +1,145 @@
+<article>
+<title>SQL</title>
+
+<p><wiki pl="SQL">SQL</wiki> jest językiem zapytań, wykorzystywanym do komunikacji z bazą danych, może być używany w trybie interaktywnym, lub poprzez zapytania wykonywane przez aplikację na potrzeby jej funkcjonowania. Istnieje wiele implementacji systemów bazodanowych korzystających z SQL, praktycznie każdy z nich posiada jakieś własne rozszerzenia tego standardu, lub nie implementuje pewnych jego fragmentów. Do pracy interaktywnej na ogół wykorzystuje się oprogramowanie opracowane specjalnie dla danej bazy danych i często dostarczane wraz z nią, natomiast do przesyłania zapytań z aplikacji wykorzystać można biblioteki dedykowane danemu serwerowi bazodanowemu (np. C API MySQL lub wbudowane biblioteki php dla baz danych) lub sterownik standardu <wiki pl="ODBC">ODBC</wiki>.</p>
+
+<p>SQL posiada polecenia umożliwiające tworzenie, modyfikowanie i usuwanie baz danych oraz tabel, jak również wstawiania, kasowania pobierania i modyfikowania danych, umożliwia także nakładanie ograniczeń (więzów) na wprowadzane dane. SQL nie rozróżnia wielkości liter w nazwach poleceń.</p>
+
+<pre>
+	-- utworzenie bazy danych
+	CREATE DATABASE `TESTOWA`;
+	
+	-- zmiana nazwy bazy danych
+	ALTER DATABASE `TESTOWA` RENAME TO `test-db`;
+	
+	-- wybranie jej jako domyślnej, inaczej do tabeli aaa trzeba by się odwoływać przez test-db.aaa
+	USE `test-db`;
+	
+	-- tworzymy tabele uzytkownicy
+	--  z określonym kluczem głównym na kolumnie UID, która jest automatycznie zwiększana
+	--  indeksem na kolumnie name (która może mieć wartość nieokreśloną)
+	--  unikalnością na kolumnie PESEL (która nie może być pusta)
+	CREATE TABLE `uzytkownicy` (
+		`UID` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+		`name` VARCHAR( 25 ) NULL ,
+		`PESEL` BIGINT( 11 ) UNSIGNED NOT NULL ,
+		INDEX ( `name` ) ,
+		UNIQUE ( `PESEL` )
+	);
+	
+	-- dodaliśmy kolumnę password typu tekstowego
+	-- o zmiennej długości wynoszącej maksymalnie 30 znaków
+	--  została ona wstawiona po kolumnie name
+	ALTER TABLE `uzytkownicy` ADD `password` VARCHAR( 30 ) NOT NULL AFTER `name`;
+	
+	-- zmieniliśmy definicję kolumny name tak aby napisy porównywane były wg kodowania utf8
+	--  z uwzględnieniem kolejności języka polskiego
+	ALTER TABLE `uzytkownicy` CHANGE `name` `name` VARCHAR( 25 )
+		CHARACTER SET utf8 COLLATE utf8_polish_ci NULL DEFAULT NULL;
+	
+	-- wymagamy aby uzytkownicy byli urodzeni przed 1992 rokiem
+	--  (ze względu na budowę peselu i prostotę tego warunku dopuszczamy urodzonych po 1999 ...)
+	ALTER TABLE `uzytkownicy` ADD CONSTRAINT `wiek` CHECK(PESEL&lt;92000000000);
+	
+	-- tworzymy kolejna tabelkę - na dane teleadresowe
+	CREATE TABLE `dane` (`UID` INT UNSIGNED NOT NULL,
+		`type` TINYINT UNSIGNED NULL, `value` VARCHAR(50));
+	
+	-- dodajemy wiąz unikalności określający iż cała 
+	--  kombinacja identyfikatora użytkownika typu i wartości pola ma być unikalna ...
+	ALTER TABLE `dane` ADD CONSTRAINT `unikalnosc` UNIQUE(`UID`, `type`, `value`);
+	
+	-- bawimy się wstawianiem i modyfikacją danych
+	INSERT INTO `uzytkownicy` VALUES (NULL, NULL, NULL, 91000000000);
+	INSERT INTO `uzytkownicy` VALUES (NULL, NULL, "super tajne", 91000000000);
+	
+	INSERT INTO `dane` (`UID`, `value`) VALUES (0, NULL);
+	INSERT INTO `uzytkownicy` VALUES (NULL, 'rrp', "super tajne", 10000000000);
+	
+	-- korzystamy z podzapytania przy wstawianiu
+	INSERT INTO `dane` VALUES (
+		(SELECT UID FROM `uzytkownicy` WHERE name='rrp'),
+		1, 'rrp@localhost' );
+	
+	-- podzapytań możemy używać także w warunkach oraz w części zwracającej wyniki
+	SELECT name FROM `uzytkownicy` WHERE UID=(SELECT max(UID) FROM `uzytkownicy`);
+	
+	-- robimy join'a (połączenie kilku tabelek), korzystając z aliasów
+	SELECT u.UID, u.name, d.value FROM `uzytkownicy` AS u
+		JOIN `dane` AS d ON u.UID=d.UID;
+	SELECT u.UID, u.name, d.value FROM `uzytkownicy` AS u
+		LEFT JOIN `dane` AS d ON u.UID=d.UID;
+	
+	SELECT COUNT(*) AS 'ilosc' FROM `dane`;
+	SELECT COUNT(*) AS 'ilosc' FROM `dane` WHERE value IS NOT NULL;
+</pre>
+
+<p>(uwaga poniższe były testowane tylko w <strong>PostgresSQL</strong>, ale myślę że conajwyżej po niewielkich zmianach powinny zadziałać w MySQL)</p>
+<pre>
+	-- jeżeli przed dodaniem warunku unikalności były dane z nim sprzeczne, możemy je łatwo wyszukać:
+	SELECT UID, type, value FROM dane GROUP BY UID,type,value HAVING count(UID)>1;
+
+	-- dodajemy komentarz do kolumny
+	COMMENT ON COLUMN `uzytkownicy`.PESEL IS 'w przyszłości zrobić kontrolę sumy';
+	
+	-- gdybyśmy zapomnieli o primary key i indeksie przy tworzeniu tabeli to możemy dadać do istniejącej:
+	--  ALTER TABLE uzytkownicy ADD INDEX(name);
+	--  ALTER TABLE uzytkownicy ADD PRIMARY KEY (UID);
+	
+	-- możemy także usuwać kolumny, więzy itd:
+	--  ALTER TABLE uzytkownicy DROP COLUMN "name";
+	
+	-- dodawanie do tabeli klucza obcego, z kasowaniem kaskadowym
+	--  usunięcie użytkownika z `uzytkownicy` spowoduje usunięcie jego wpisów z `dane`
+	--   jakby było bez "ON DELETE CASCADE" to proba usunięcia gdy są wpisy w `dane`
+	--   zakonczyłaby się błędem
+	ALTER TABLE dane ADD FOREIGN KEY (UID) REFERENCES uzytkownicy(UID) ON DELETE CASCADE;
+</pre>
+
+<p>(uwaga poniższe były testowane tylko w <strong>MySQL</strong>)</p>
+<pre>
+	-- danie użytkownika TESTER z hałem ABCDEF i pełnymi prawami do bazy TESTOWA
+	--  w PostgresSQL komenda createuser (więcej w <man>createuser</man>)
+	--  np, createuser -s -d -U postgres USERNAME utworzy uzytkownika z pełnią praw
+	CREATE USER 'TESTER'@'localhost' IDENTIFIED BY 'ABCDEF';
+	GRANT USAGE ON * . * TO 'TESTER'@'localhost' IDENTIFIED BY 'ABCDEF' WITH \
+		MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0 ;
+	GRANT ALL PRIVILEGES ON `TESTOWA` . * TO 'TESTER'@'localhost';
+	--  w PostgresSQL użytkownik ma domyślnie pełnie praw do bazy o takiej samej nazwie ...
+	--  dodatkowe uprawnienia można przyznawać analogicznie do powyższego kodu - np.
+	--   GRANT ALL PRIVILEGES ON tabela TO user;
+	--  wyświetlenie uprawnień \dp tabela
+	
+	-- zmiana hasła użytkownika
+	UPDATE USER SET password=password('GHIJKL') WHERE user='AAAAAA';
+	
+	-- zmiana swojego hasła
+	SET password = password('jakieshaselko');
+	--  w PostgresSQL: alter user "nazwa_uzytkownika" with password 'jakieshaselko';
+	
+	-- przeładowanie uprawnień (wymagane aby działało nowe hasło)
+	FLUSH PRIVILEGES;
+	
+	-- usunięcie użytkownika i przyznanych mu praw
+	DROP USER 'AAAAAA'@'localhost';
+	
+	-- wyświetlenie baz danych
+	--  w PostgresSQL polecenie \l w psql
+	SHOW DATABASES;
+	
+	-- wyświetlenie tabel
+	--  w PostgresSQL polecenie \d w psql
+	--- w SQLlite  .tables
+	SHOW TABLES;
+	
+	-- pokazanie struktury tabeli w SQLlite: .schema tabela
+	
+	-- wylosowanie zbioru rekordów (losowa kolejność 5 pierwszych)
+	SELECT * FROM `uzytkownicy` ORDER BY rand() LIMIT 5;
+	
+</pre>
+
+<p>SQL umożliwia ponadto deklarowanie zmiennych, funkcji i procedur działających po stronie serwera, tworzenie widoków ("wirtualnych" tabel opartych na zapytaniu o tabele istniejące), uruchamianie zaplanowanych działań w momencie wykonywania określonej operacji na bazie danych (trigger), korzystanie z transakcji (grup poleceń, które np. w wypadku niepowodzenia któregoś z nich mogą zostać cofnięte i są wykonywane w sposób niepodzielny). Powyższe przykłady zostały przygotowane dla MySQL 5. Więcej informacji można uzyskać korzystając np. z komendy <code>help</code> w konsoli wywołanej poleceniem <code>mysql</code> - np. <code>help CREATE TRIGGER</code>, <code>help START TRANSACTION</code>. Warto wspomnieć także o <code>mysqldump</code> zrzucającym wybraną (lub z opcja <code>--all-databases</code> wszystkie) bazę danych w postaci tekstowego SQL na standardowe wyjście oraz o <code>pg_dump -cif <var>nazawa_pliku</var> <var>bazadanych</var></code> pełniącym analogiczną funkcję w PostgresSQL.</p>
+
+<p>Zobacz też: <doc url="http://dev.mysql.com/doc/refman/5.7/en/sql-syntax.html">dokumentacja składni SQL dla MySQL</doc>, <wiki en="b:MySQL">MySQL @ Wikibooks</wiki>.</p>
+</article>

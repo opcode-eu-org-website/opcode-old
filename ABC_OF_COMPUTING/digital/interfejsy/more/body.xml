@@ -1,0 +1,156 @@
+<title>Zestawienie sieci czujnikowych</title>
+
+<style type="text/css">
+	/* obramowania tabeli */
+	table.sieciczujnikowe {
+		border-collapse:collapse;
+		table-layout:fixed;
+	}
+	table.sieciczujnikowe tr td {
+		padding:      10px;
+		border-left:  1px solid #555555;
+		border-right: 1px solid #555555;
+		text-align:center;
+	}
+	table.sieciczujnikowe tr td:first-child, table.sieciczujnikowe tr th:first-child {
+		border-left:  2px solid #000000;
+	}
+	table.sieciczujnikowe tr td:last-child, table.sieciczujnikowe tr th:last-child {
+		border-right: 2px solid #000000;
+	}
+	table.sieciczujnikowe tr td.nolast {
+		border-right: 1px solid #555555;
+	}
+	table.sieciczujnikowe tr {
+		border-left:  2px solid #000000;
+		border-right: 2px solid #000000;
+		border-top:   1px solid #555555;
+	}
+	table.sieciczujnikowe tr:first-child {
+		border-top:   2px solid #000000;
+	}
+	table.sieciczujnikowe tr:last-child {
+		border-bottom:2px solid #000000;
+	}
+	
+	/* nagłówki tabeli */
+	table.sieciczujnikowe tr th {
+		min-width:44px;
+	}
+	
+	/* komórki tabeli */
+	table.sieciczujnikowe td.warstwa, table.sieciczujnikowe th.warstwa {
+		text-align:center;
+		background-color:#dddddd;
+		max-width:160px;
+	}
+	table.sieciczujnikowe td.info, table.sieciczujnikowe th.info {
+		background-color:#dddddd;
+		max-width:200px;
+		border-right: 2px solid #000000;
+	}
+</style>
+<table class="sieciczujnikowe" latexborder="1" latexscale="1.35"><col latex="|X[1.8]" /><col latex="|X[3]" /><col /><col /><col /><col /><col /><col /><col /><col /><col /><col />
+	<tr>  <th class="warstwa">warstwa</th>       <th class="info">opis warstwy</th>
+		<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+	</tr>
+	<tr>  <td class="warstwa">aplikacyjna</td>   <td class="info"></td>
+		<td rowspan="4">inne / dane</td> <td rowspan="3" colspan="2">dane</td> <td rowspan="4">BACnet MS/TP</td> <td rowspan="4"><homepage url="http://www.p-net.org/">P-Net</homepage></td>
+		<td rowspan="4" colspan="2"><wiki pl="Profibus">Profibus</wiki></td>
+		<td rowspan="4">inne / dane</td> <td rowspan="4">BACnet PTP</td>
+		<td rowspan="3">M-Bus</td>
+	</tr>
+	<tr>  <td class="warstwa">transportowa</td>  <td class="info"></td>
+		<td skip="1"/> <td skip="1" colspan="2"/> <td skip="1"/> <td skip="1"/> <td skip="1" colspan="2"/> <td skip="1"/> <td skip="1"/> <td skip="1"/>
+	</tr>
+	<tr>  <td class="warstwa">sieciowa</td>      <td class="info"></td>
+		<td skip="1"/> <td skip="1" colspan="2"/> <td skip="1"/> <td skip="1"/> <td skip="1" colspan="2"/> <td skip="1"/> <td skip="1"/> <td skip="1"/>
+	</tr>
+	<tr>  <td class="warstwa">łącza danych</td>  <td class="info">format ramki komunikatu wraz z adresacją</td>
+		<td skip="1">RS-485 inne</td><td><wiki pl="Modbus">Modbus</wiki> RTU</td> <td>Modbus ASCII</td>
+		<td skip="1"/> <td skip="1"/> <td skip="1" colspan="2"/> <td skip="1"/> <td skip="1"/>
+		<td>IEC 60870</td>
+	</tr>
+	<tr>  <td class="warstwa">łącza danych</td>  <td class="info">format przesyłu bajtu</td>
+		<td colspan="10"><wiki pl="Universal Asynchronous Receiver and Transmitter">UART</wiki></td>
+	</tr>
+	<tr>  <td class="warstwa">fizyczna</td>      <td class="info">standard elektryczny</td>
+		<td colspan="6"><wiki pl="RS-485">RS-485</wiki></td>
+		<td>inne</td>
+		<td colspan="2"><wiki pl="RS-232">RS-232</wiki></td>
+		<td><wiki pl="M-Bus">M-Bus</wiki></td>
+	</tr>
+</table>
+
+<p></p>
+
+<table class="sieciczujnikowe" latexborder="1" latexscale="1.35"><col latex="|X[1.8]" /><col latex="|X[3]" /><col /><col /><col /><col /><col /><col /><col /><col /><col />
+	<tr>  <th class="warstwa">warstwa</th>       <th class="info">opis warstwy</th>
+		<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+	</tr>
+	<tr>  <td class="warstwa">aplikacyjna</td>   <td class="info"></td>
+		<td rowspan="3">inne / dane</td> <td rowspan="3"><wiki en="DeviceNet">DeviceNet</wiki></td> <td rowspan="3"><wiki pl="CANopen">CANopen</wiki></td>
+		<td rowspan="4">inne / dane</td>
+		<td rowspan="3">inne / dane</td>
+		<td rowspan="3">inne / dane</td>
+		<td rowspan="3">inne / dane</td>
+		<td rowspan="6">LonWorks</td>
+		<td rowspan="6">EIB / KNX</td>
+	</tr>
+	<tr>  <td class="warstwa">transportowa</td>  <td class="info"></td>
+		<td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/>
+	</tr>
+	<tr>  <td class="warstwa">sieciowa</td>      <td class="info"></td>
+		<td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/>
+	</tr>
+	<tr>  <td class="warstwa">łącza danych</td>  <td class="info">format ramki komunikatu wraz z adresacją</td>
+		<td rowspan="3" colspan="3"><wiki pl="Controller Area Network">CAN</wiki> (ISO 11898)</td>
+		<td skip="1"/>
+		<td rowspan="3"><wiki pl="I²C">I2C</wiki> / TWI</td>
+		<td rowspan="3">1Wire</td>
+		<td rowspan="3" class="nolast">USB</td>
+		<td skip="1"/> <td skip="1"/>
+	</tr>
+	<tr>  <td class="warstwa">łącza danych</td>  <td class="info">format przesyłu bajtu</td>
+		<td skip="1"/> <td skip="1"/> <td skip="1"/>
+		<td rowspan="2" class="nolast"><wiki en="Serial Peripheral Interface Bus">SPI</wiki></td>
+		<td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/>
+	</tr>
+	<tr>  <td class="warstwa">fizyczna</td>      <td class="info">standard elektryczny</td>
+		<td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/>
+	</tr>
+</table>
+
+<p></p>
+
+<table class="sieciczujnikowe" latexborder="1" latexscale="1.35"><col latex="|X[1.8]" /><col latex="|X[3]" /><col /><col /><col /><col /><col /><col /><col />
+	<tr>  <th class="warstwa">warstwa</th>       <th class="info">opis warstwy</th>
+		<th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+	</tr>
+	<tr>  <td class="warstwa">aplikacyjna</td>   <td class="info"></td>
+		<td rowspan="3">inne / dane</td>
+		<td>inne</td>
+		<td>SNMP</td>
+		<td>Modbus TCP </td>
+		<td>BacNet IP </td>
+		<td>KNXnet/IP </td>
+		<td>Profinet</td>
+	</tr>
+	<tr>  <td class="warstwa">transportowa</td>  <td class="info"></td>
+		<td skip="1"/>
+		<td rowspan="2" colspan="6">TCP / IP</td>
+	</tr>
+	<tr>  <td class="warstwa">sieciowa</td>      <td class="info"></td>
+		<td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/>
+	</tr>
+	<tr>  <td class="warstwa">łącza danych</td>  <td class="info">format ramki komunikatu wraz z adresacją</td>
+		<td rowspan="3" colspan="4"><wiki pl="Ethernet">Ethernet</wiki> / inne</td>
+		<td rowspan="3" colspan="3"><wiki pl="Ethernet">Ethernet</wiki></td>
+	</tr>
+	<tr>  <td class="warstwa">łącza danych</td>  <td class="info">format przesyłu bajtu</td>
+		<td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/>
+	</tr>
+	<tr>  <td class="warstwa">fizyczna</td>      <td class="info">standard elektryczny</td>
+		<td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/> <td skip="1"/>
+	</tr>
+</table>

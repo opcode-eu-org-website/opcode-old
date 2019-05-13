@@ -1,0 +1,25 @@
+<?php
+	header("Content-Type: text/html; charset=utf-8", 1);
+	header("HTTP/1.0 500 Internal Server Error", 1);
+	header("Status: 500 Internal Server Error", 1);
+	
+	ini_set( 'display_errors', 'Off' );
+	if ($auto_send_500_error)
+		mail(DIROP_ERROR_EMAIL, "DIROP - 500 Error", "Technical Info:\n\n". $code ."\n\n". pg_last_error() . "\n\n" . $info);
+	
+	echo "<?xml version=\"1.0\" encoding=\"utf-8\" ?>";
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl">
+<head>
+	<title>HTTP 500 error (www.dir.edu.pl)</title>
+	<link rel="home" title="Strona główna" href="/" />
+</head><body>
+
+<h1>HTTP 500 error (Internal Server Error)</h1>
+
+<?php if ($debug) echo "<pre>Technical Info:\n\n". $code ."\n\n". pg_last_error() . "\n\n" . $info .'</pre>'; ?>
+
+<hr /><p>Kontakt: <a href="mailto:<?php echo DIROP_ERROR_EMAIL; ?>"><?php echo DIROP_ERROR_EMAIL; ?><a>.</p>
+
+</body></html>

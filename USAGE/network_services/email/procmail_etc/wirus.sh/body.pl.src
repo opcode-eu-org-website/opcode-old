@@ -1,0 +1,8 @@
+#!/bin/bash
+
+file_name=`mktemp`
+cat > $file_name
+wynik=`nice -n5 clamscan --stdout --recursive --mbox $file_name`
+#echo "$wynik" > /tmp/wirusy
+echo "$wynik"
+rm -f $file_name

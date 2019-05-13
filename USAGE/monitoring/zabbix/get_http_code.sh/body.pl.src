@@ -1,0 +1,21 @@
+#!/bin/bash
+
+URL=$2
+
+TMP_FILE=`mktemp /tmp/zabbix_curl.XXXXXX`
+CODE=`curl -w '%{http_code}' -o $TMP_FILE -s "$URL"`
+
+echo $CODE
+
+FILE="/tmp/zabbix_curl.`echo "$URL" | tr '/:?' '___'`.html"
+if [ $CODE -eq 200 ]; then
+	mv $TMP_FILE ${FILE}_ok
+else
+	if [ -f ${FILE}_ok ]; then
+		mv $TMP_FILE ${FILE}_`date +"%F_%T"`
+		rm -f ${FILE}_ok
+	else
+		mv $TMP_FILE ${FILE}_error
+	fi
+fi
+

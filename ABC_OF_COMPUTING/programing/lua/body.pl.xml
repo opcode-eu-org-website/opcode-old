@@ -1,0 +1,5 @@
+<article>
+<title>Lua</title>
+
+<p><wiki en="Lua (programming language)">Lua</wiki> jest interesującym językiem skryptowym, którego dodatkowym atutem jest dobra współpraca z C (skrypty Lua mogą służyć do zapewnienia w wygodny sposób warstwy skryptowej programom tworzonym w C/C++). Przykład współpracy Lua i C pokazany jest w <id_link id="c_lua_api.lua">c_lua_api.lua</id_link> i <id_link id="c_cpp:misc:c_lua_api.c">c_lua_api.c</id_link> (warto zapoznać się także z użytą w tym przykładzie biblioteczką <doc url="http://lua-users.org/wiki/LuaGenericCall">LuaGenericCall</doc>). Poniżej prezentuje przykład bezpośredniego wykorzystania Lua jako języka skryptowego (uruchamia się go <code>lua5.1 <var>nazwa_pliku.lua</var></code>). Więcej na temat tego języka w <doc url="http://www.lua.org/manual/5.1/" mirror="programowanie/Lua/manual">Lua 5.1 Reference Manual</doc>, <wiki en="b:Lua Programming">Lua @ Wikibooks</wiki><doc url="http://lua-users.org/wiki/SampleCode">Lua-users wiki - Sample Code</doc>.</p>
+</article>

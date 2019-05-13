@@ -1,0 +1,24 @@
+<article>
+<title>Autoryzacja w MediaWiki</title>
+
+<p>Aby MediaWiki korzystało do autoryzacji użytkowników z bazy LDAP należy w <kbd class="path">LocalSettings.php</kbd> umieścić wpisy:</p><pre>
+require_once( "/usr/share/mediawiki-extensions/LdapAuthentication.php" );
+$wgAuth = new LdapAuthenticationPlugin();
+
+// podstawowa konfiguracja
+$wgLDAPDomainNames = array( "JakasNazwaGrupyAutoryzacyjnej" );
+$wgLDAPServerNames = array( "JakasNazwaGrupyAutoryzacyjnej" => "<var>adres.naszegoserwera</var>" );
+$wgLDAPBaseDNs = array( "JakasNazwaGrupyAutoryzacyjnej"=>"<var>dc=subdomena,dc=example,dc=net</var>" );
+$wgLDAPSearchStrings = array( "JakasNazwaGrupyAutoryzacyjnej" => "uid=USER-NAME,ou=people,<var>dc=subdomena,dc=example,dc=net</var>" );
+$wgLDAPEncryptionType = array( "JakasNazwaGrupyAutoryzacyjnej"=>"clear" );
+
+// wymog czlonkowstwa w grupie
+$wgLDAPRequiredGroups = array( "JakasNazwaGrupyAutoryzacyjnej"=>array("cn=<var>wikiACL</var>,ou=group,<var>dc=subdomena,dc=example,dc=net</var>") );
+$wgLDAPGroupObjectclass = array( "JakasNazwaGrupyAutoryzacyjnej"=>"posixGroup" );
+$wgLDAPLowerCaseUsername = array( "JakasNazwaGrupyAutoryzacyjnej"=>"true" );
+$wgLDAPGroupAttribute = array( "JakasNazwaGrupyAutoryzacyjnej"=>"memberUid" );
+//$wgLDAPGroupNameAttribute = array( "JakasNazwaGrupyAutoryzacyjnej"=>"cn" );
+//$wgLDAPGroupUseFullDN = array( "JakasNazwaGrupyAutoryzacyjnej"=>false );
+//$wgLDAPGroupSearchNestedGroups = array( "JakasNazwaGrupyAutoryzacyjnej"=>false );
+</pre>
+</article>

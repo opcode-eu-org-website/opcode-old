@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# $1 == MAC $2 == USER_NAME
+
+PATH="/usr/local/bin:/usr/bin:/bin"
+
+# sprawdzamy czy taki MAC nie został już zarejestrowany
+MAC_LINE=`egrep "^$1[\t ]" /home/*/.dhcp_mac /etc/dhcp3/dhcpd.conf`
+# grupa do której należy użytkownik
+GID=`egrep "^$2:" /etc/passwd | cut -f4 -d':'`
+# sciezka do pliku z MAC'ami uzytkownika
+MAC_FILE="/home/$2/.dhcp_mac"
+# sciezki do wszystkich plików z MAC'ami grup[y
+MAC_GROUP_FILES=`egrep '[^:]*:[^:]*:[^:]*:'$GID':' /etc/passwd | cut -f6 -d':' | while read f; do echo "$f/.dhcp_mac"; done`
+
+is_OK() {
+	if [ $1 = 0 ]; then
+		echo " done";
+	else
+		echo " ERROR";
+		exit
+	fi
+}
+
+if [ "$MAC_LINE" = "" ]; then
+	# ustalamy numer kolejny komputera ...
+	MAX=`cat $MAC_GROUP_FILES | awk '{printf("%s\n", $2)}' | sort -n | tail -n 1`
+	if  [ "$MAX" = "" ]; then
+		MAX=20;
+	elif [ $MAX -gt 253 ]; then
+		echo "Przekroczono maksymalną liczbę zarejestrowanych numerów IP dla tego lokalu"
+		exit
+	fi
+	MAX=$(( $MAX + 1 ));
+	
+	# zapisujemy nowy MAC
+	echo -n "Dopisywanie: $1 $MAX do $MAC_FILE ..."
+	echo -e "\n$1 $MAX" 1>> $MAC_FILE
+	is_OK $?
+	
+	# ustawiamy prawa do pliku (konieczne gdy został utworzony nowy)
+	chown "$2:$GID" "$MAC_FILE"
+	
+	# wywolujemy przbudowanie bazy MAC'adresów i reload dhcp
+	echo "Proszę czekać trwa przeładowywanie ustawień DHCP"
+	/usr/local/bin/dhcp_user_conf.sh
+	echo "Ustawienia DHCP przeładowane, proszę odnowić adres IP w kliencie"
+else
+	echo "Podany MAC adres był już zarjestrowany."
+fi

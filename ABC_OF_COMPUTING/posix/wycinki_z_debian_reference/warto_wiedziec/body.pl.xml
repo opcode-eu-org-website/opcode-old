@@ -1,0 +1,21 @@
+<article>
+<title>Warto wiedzieć:</title>
+<ul>
+	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tips.pl.html#s-cronjob">Harmonogram działań (cron, at)</a></li>
+	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tips.pl.html#s8.6.23">Łączenie plików PDF lub PS</a></li>
+	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tips.pl.html#s-setterm">Jak wyłączyć wygaszacz ekranu</a></li>
+	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tips.pl.html#s8.6.9">Ustawienie właściwego typu konsoli</a></li>
+	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tips.pl.html#s-screen">Zmiana konsoli przy pomocy screena</a>. Od razu w tym miejscu nadmienie, iż bardzo przydatną funkcją screena jest możliwośc odpalenia programu w tle i podglądania jego wyjścia, sesje taką tworzymy <code>screen -m -d <var>komenda</var></code> (przez -S możemy określić jej nazwę), następnie możemy się do niej podłączyć <code>screen -r <var>[pid]</var></code> (aby się odłączyć wciskamy Ctrl+a a potem d), aby ustalic pid możemy wylistować działające sesje <code>screen -ls</code>. Plik konfiguracyjny screen'a (<kbd class="path">~/.screenrc</kbd>) pozwala na dodanie do niego np. paska informacyjnego z zegarem itp. bajerami - przykład: <pre>backtick 2 0 1    /bin/date +%s
+ # podstaw pod %2` wynik podanej komendy, odsiwerzany co 1 sek. i wyswietlany nieskonczona ilosc cykli (0)
+caption always "%{+b}$USER@%H %{Gk}%{gw} (load: %l | tytul okna (opcja -t): %t | wynik komendy: %2`) %{.k} %-21=%{yk}%Y-%m-%d %0c %D"
+ # %{} sluza modyfikacji koloru i efektu, %-21 kaze wypisac 21 znakow przed koncem linii</pre>
+	W przypadku używania screena po su na użytkownika innego niż root na ogół dostaniemy "Cannot open your terminal '/dev/pts/*' - please check.", problem jest związany z niezmienianiem właściciela odpowiedniego urządzenia / nie tworzeniem nowego urządzenia przez su. Najprostszą metodą ominięcia tej niedogodności jest odpalenie <code>script /dev/null</code>, a dopiero potem <code>screen</code> lub <code>screen -r</code> (jedynym zauważonym skutkiem ubocznym jest jeden poziom więcej przy wylogowywaniu). Zachęcam także do zapoznania się z skryptem mojego autorstwa <id_link id="multiscreen.sh">generującym pliki konfiguracyjne screena</id_link> powodujące odpalenie screen'a z wieloma oknami w których wykonane jest wskazana komenda na zdalnych hostach z listy (poprzez ssh) - tytuł okna odpowiada nazwie zdalnego hosta.</li>
+</ul>
+<ul>
+	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tips.pl.html#s-net-test">Podstawy testowania sieci</a></li>
+	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tips.pl.html#s8.6.32">Usuwanie zawartości plików</a></li>
+	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tips.pl.html#s-chroot">chroot</a></li>
+	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tips.pl.html#s8.6.35">Jak weryfikować dowiązania (hardlink)</a></li>
+	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tips.pl.html#s8.6.36">Montowanie obrazów systemów plików</a></li>
+</ul>
+</article>

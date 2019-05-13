@@ -1,0 +1,121 @@
+#include "net_window.h"
+#include "singleton.h"
+
+
+QTcpSocket *gniazdko_tcp;
+QTcpServer *serwerek_tcp;
+// udostępnione jest też udp - używamy dość podobnie jak QTcpSocket
+// więcej szczegółów http://doc.trolltech.com/qudpsocket.html
+
+void NetWindow::connectSend() {
+	// jeżeli nie połączono to łączymy
+	if (gniazdko_tcp == NULL && serwerek_tcp == NULL) {
+		// aktualizujemy wartości zapisane w konfiguracji run-time
+		Singleton::use().port = interfejs.spin_port->value();
+		Singleton::use().adres_ip = interfejs.txt_ip->text();
+		// blokujemy interfejs
+		interfejs.spin_port->setDisabled(true);
+		interfejs.txt_ip->setDisabled(true);
+		interfejs.check_listen->setDisabled(true);
+		
+		if (interfejs.check_listen->checkState() == Qt::Unchecked) {
+			puts("client mode");
+			// tworzymy gniazdo
+			gniazdko_tcp = new QTcpSocket(); // to nie to samo co QAbstractSocket(QTcpSocket::TcpSocket)
+			connect(gniazdko_tcp, SIGNAL( readyRead() ), this, SLOT( odczytDanych() ));
+			connect(gniazdko_tcp, SIGNAL( disconnected() ), this, SLOT( rozlaczono() ));
+			// łączymy się z hostem
+			gniazdko_tcp->connectToHost(Singleton::use().adres_ip, Singleton::use().port, QIODevice::ReadWrite);
+			// czekamy na połączenie - konieczne jeżeli chcemy od razu wysłać dane
+			gniazdko_tcp->waitForConnected();
+		} else {
+			puts("server mode");
+			// tworzymy serwer
+			serwerek_tcp = new QTcpServer(this);
+			serwerek_tcp->setMaxPendingConnections(1);
+			connect(serwerek_tcp, SIGNAL(newConnection()), this, SLOT(odebranoNowePolaczenie()));
+			// ustawiamy nasłuchiwanie na wszystkich adresach i zadanym porcie
+			serwerek_tcp->listen(QHostAddress::Any, Singleton::use().port);
+			// kolorowy komunikat
+			interfejs.txt_recived->setTextColor(Qt::green);
+			interfejs.txt_recived->append("[[Serwer uruchomiony]]\n");
+		}
+	}
+	if (gniazdko_tcp != NULL) {
+		// wysyłamy dane z interfejs.txt_send
+		gniazdko_tcp->write((interfejs.txt_send->toPlainText() + "\n").toUtf8());
+		// wypisujemy w oknie historii
+		interfejs.txt_recived->setTextColor(Qt::gray);
+		interfejs.txt_recived->append(interfejs.txt_send->toPlainText() + "\n");
+		// czyścimy pole tekstowe
+		interfejs.txt_send->setText("");
+		// ustawiamy na nim focus
+		interfejs.txt_send->setFocus(Qt::OtherFocusReason);
+	}
+}
+
+void NetWindow::odebranoNowePolaczenie() {
+	if (gniazdko_tcp == NULL) {
+		// przywiązujemy odebrane połączenie do gniazdka
+		gniazdko_tcp = serwerek_tcp->nextPendingConnection();
+		connect(gniazdko_tcp, SIGNAL( readyRead() ), this, SLOT( odczytDanych() ));
+		connect(gniazdko_tcp, SIGNAL( disconnected() ), this, SLOT( rozlaczono() ));
+		// kolorowy komunikat
+		interfejs.txt_recived->setTextColor(Qt::blue);
+		interfejs.txt_recived->append("[[Zestawiono nowe połączenie]]\n");
+	} else {
+		// przywiązujemy odebrane połączenie do tymczasowego gniazdka
+		QTcpSocket *gniazdko_tcp_tmp = serwerek_tcp->nextPendingConnection();
+		connect(gniazdko_tcp_tmp, SIGNAL(disconnected()), gniazdko_tcp_tmp, SLOT(deleteLater()));
+		// wysyłamy odpowiedź
+		gniazdko_tcp_tmp->write("ten serwer obsługuje tylko jedno połączenie\n");
+		// zamykamy połączenie
+		gniazdko_tcp_tmp->disconnectFromHost();
+		// kolorowy komunikat
+		interfejs.txt_recived->setTextColor(Qt::red);
+		interfejs.txt_recived->append("[[Odrzucono nowe połączenie]]\n");
+	}
+}
+
+void NetWindow::odczytDanych() {
+	// wypisujemy otzrymane dane w kolorze czarnym
+	interfejs.txt_recived->setTextColor(Qt::black);
+	interfejs.txt_recived->append(gniazdko_tcp->readAll());
+}
+
+void NetWindow::rozlaczono() {
+	// czyścimy gniazdko, tak dla pewności działania warunków startu
+	gniazdko_tcp = NULL;
+	// jeżeli nie działa serwer odblokowujemy interfejs
+	if (serwerek_tcp == NULL) {
+		interfejs.spin_port->setDisabled(false);
+		interfejs.txt_ip->setDisabled(false);
+		interfejs.check_listen->setDisabled(false);
+	}
+	// kolorowy komunikat
+	interfejs.txt_recived->setTextColor(Qt::red);
+	interfejs.txt_recived->append("[[Rozłączono]]\n");
+}
+
+NetWindow::NetWindow(QWidget * parent = 0, Qt::WFlags f = 0 ):QDialog(parent, f) {
+	interfejs.setupUi(this);
+	
+	// wyświetlamy wartości zapisane w konfiguracji run-time
+	interfejs.txt_ip->setText(Singleton::use().adres_ip);
+	interfejs.spin_port->setValue(Singleton::use().port);
+	
+	// wynullowanie zmiennych i przypisanie akcji do guzika
+	gniazdko_tcp = NULL; serwerek_tcp = NULL;
+	connect(interfejs.btn_send, SIGNAL( clicked(bool) ), this, SLOT( connectSend() ));
+}
+
+NetWindow::~NetWindow() {
+	// jeżeli aktywne to zamykamy gniazdko
+	if (gniazdko_tcp != NULL) {
+		gniazdko_tcp->disconnectFromHost();
+	}
+	// jeżeli działa serwer to go kończymy
+	if (serwerek_tcp != NULL) {
+		serwerek_tcp->close();
+	}
+}

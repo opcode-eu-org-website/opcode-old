@@ -1,0 +1,5 @@
+<article>
+<title>Problemy wydajnościowe</title>
+<p>Jeżeli podejrzewamy że mamy doczynienia z jakimś problemem typu wydajnościowego to linux oferuje bogaty zbiór narzędzi umożliwiających przyjrzenie się temu bliżej. Polecam zapoznać się z zbiorem informacji na ich temat - <doc url="http://www.brendangregg.com/linuxperf.html" mirror="oprogramowanie/linux-perf">Linux Performance</doc>.</p>
+
+</article>

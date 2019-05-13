@@ -1,0 +1,85 @@
+<article>
+<title>WWW</title>
+
+<p>Do grupy najpopularniejszych usług serwerowych należy zaliczyć protokół <id_link id="ABC_OF_COMPUTING:networks:IP_network_services:www">HTTP</id_link> służący do przesyłania stron www i plików. Jednym z najbardziej rozbudowanych i zarazem najpopularniejszych serwerów WWW jest Apache2.</p>
+
+<p>Jego konfiguracja (przynajmniej w Debianie) odbywa się poprzez pliki i katalogi zgomadzone w <kbd class="path">/etc/apache2/</kbd>. Głównym plikiem konfiguracyjnym jest <kbd class="path">apache2.conf</kbd>, istotną rolę pełni także <kbd class="path">ports.conf</kbd> służący do definiowania portów na których ma słuchać serwer (wydaje się też on stosownym miejscem na dyrektywy <code>NameVirtualHost</code> wskazujące na jakich adresach obsługiwane mają być hosty wirtualne identyfikowane nazwami). Kolejnymi ważnymi pozycjami są katalogi: <kbd class="path">mods-enabled</kbd> (zawierający dowiązania do poleceń ładujących i konfigurujących moduły) oraz <kbd class="path">sites-enabled</kbd> (zawierający konfiguracje udostępnianych stron, vhost'ów).</p>
+
+<p>Listę modułów wraz z opisami można znależć w <a class="ext" href="http://httpd.apache.org/docs/2.0/mod/">dokumentacji serwera</a>. Należy pamiętać iż funkcjonalność taka jak: "userdir", "rewriting URL engine", kontrola dostępu (zarówno poprzez dyrektywy Deny, Alow jak i poprzez autoryzację HTTP), automatyczne indeksowanie katalogów, aliasy, obsługa CGI czy proxy zawarta jest w stosowanych modułach.</p>
+
+<p>Przykładowa konfiguracja vhosta może wyglądać:</p>
+<pre>&lt;VirtualHost *:80&gt; # wcześniej musi wystąpić dyrektywa "NameVirtualHost *:80"
+	ServerName www.nasza.domena:80
+	ServerAlias nasza.domena *.specjalne.nasza.domena
+	# *.specjalne.nasza.domena umożliwia współpracę z wpisami dnsowymi postaci:
+	# 	*.specjalne       IN      A       ....
+	# co zapewnia obsługę wszystkich adresów {teskt bez kropki}.test.n17.waw.pl przez ten vhost
+	ServerAdmin admin@nasza.domena
+	
+	DocumentRoot /var/www/moja-stronka
+	
+	# kontrola dostępu oparta na zablokowaniu portu 98 na routerze
+	# Order deny,allow
+	# Deny from all
+	# Allow from 127.0.0.1
+	
+	SSLEngine on
+	
+	SSLCertificateFile /etc/ssl/server.crt
+	SSLCertificateKeyFile /etc/ssl/server.key
+	
+	&lt;Location /status&gt;
+		SetHandler server-status
+	&lt;/Location>
+	&lt;Location /info&gt;
+		SetHandler server-info
+	&lt;/Location&gt;
+	
+	Alias /mail  "/usr/share/squirrelmail/"
+	Alias /mysql "/usr/share/phpmyadmin/"
+	Alias /pgsql "/usr/share/phppgadmin/"
+	
+	RewriteEngine On
+	RewriteRule /webmin https://%{SERVER_NAME}:10000/ [R=301,L]
+	RewriteRule /usermin https://%{SERVER_NAME}:20000/ [R=301,L]
+&lt;/VirtualHost&gt;</pre>
+
+<p>W głównej konfiguracji apache warto rozważyć ustawienie logowania przez syslog (<code>ErrorLog syslog:daemon</code>), dostroić poziom głośności logowania (<code>LogLevel ...</code>). Warto wstawić także nastepujące ustawienia i zabezpieczenia zabezpieczenia:</p>
+<pre>UseCanonicalName Off
+LogFormat   "%>s %b %T	%h %t %{Host}i \"%r\" 	\"%{Referer}i\" \"%{User-Agent}i\""
+# jeżeli chemy przekazywać logi do sysloga:
+TransferLog |/path-to/apache_syslog
+# gdzie apache_syslog jest skryptem o następującej treści:
+# /usr/bin/logger -t www -p local0.debug
+
+AddHandler cgi-script .cgi
+AddDefaultCharset UTF-8
+DirectoryIndex index.html index.cgi index.pl index.php index.xhtml
+
+ExtendedStatus On
+
+&lt;Directory /&gt;
+	Options All
+	AllowOverride All
+&lt;/Directory&gt;
+
+&lt;Location /&gt;
+	&lt;Limit CONNECT&gt;
+		Order deny,allow
+		Deny from all
+	&lt;/Limit&gt;
+&lt;/Location&gt;
+
+&lt;Location http://*&gt;
+	Order deny,allow
+	Deny from all
+&lt;/Location&gt;</pre>
+
+<p>A także ustawić zmniejszony timeout w domyślnym vhoście (identyfikowanym nazwą) - pierwszy w kolejności vhost łyka rządzania, których nagłówek Host: nie pasuje do rzadnego innego vhosta - np. <code>TimeOut 10</code>.</p>
+	
+<p>Niekiedy może zajść potrzeba dostrojenia (np. ustawień <code>Options MultiViews Indexes SymLinksIfOwnerMatch IncludesNoExec ExecCGI</code>) pewnych parametrów w konfiguracji udostępniania stron domowych użytkowników poprzez http://serwername/~user w <kbd class="path">/etc/apache2/mods-enabled/userdir.conf</kbd>. Należy także pamiętać iż ograniczenie ilości danych które możemy przesłać z formularza www do php wynika z konfiguracji tego ostatniego - zmienna <code>post_max_size = 50M</code> w <kbd class="path">/etc/php5/apache2/php.ini</kbd>.</p>
+
+<p>W razie problemów ze startem serwera radzę zwrócić uwagę ściezki gdzie zapisywane są logi - najlepiej podawać od / i upewnić się że katalogi istnieją ... . Zamieszam też zestaw prostych skryptów CGI służących do testowania działania tego mechanizmu <a class="int" href="cgi-test.tar.gz">cgi-test.tar.gz</a></p>
+
+<p>Niekiedy nie potrzeba nam tak rozbudowanego serwera jkim jest Apache - wtedy dobrym wyborem może się okazać mini-httpd (<a class="int" href="./mini-httpd.conf">przykładowy konfig</a>) lub nginx (przykładowe konfigi do ustawienia serwera z obsługą php na porcie 8888 i realizacji proxy do takiego serwera z maszyny bez php - <a class="int" href="./proxy-php.nginx">proxy-php.nginx</a>, <a class="int" href="./proxy.nginx">proxy.nginx</a> i <a class="int" href="./proxy_params.nginx">proxy_params.nginx</a>).</p>
+</article>

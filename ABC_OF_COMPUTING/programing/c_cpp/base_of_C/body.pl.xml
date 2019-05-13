@@ -1,0 +1,10 @@
+<article>
+<title>Podstawy programowania w C</title>
+<ul>
+	<li><id_link id="ABC_OF_COMPUTING:programing:c_cpp:base_of_C:podstawy.c">podstawy.c</id_link> - podstawy języka - zmienne, instrukcje preprocesora, ...</li>
+	<li><id_link id="ABC_OF_COMPUTING:programing:c_cpp:base_of_C:in_out.c">in_out.c</id_link> - podstawy języka - standardowe wejście i wyjście, również odczyt i zapis plików w C</li>
+	<li><id_link id="ABC_OF_COMPUTING:programing:c_cpp:base_of_C:petle.c">petle.c</id_link> - podstawy języka - pętle, instrukcje warunkowe, ...</li>
+	<li><id_link id="ABC_OF_COMPUTING:programing:c_cpp:base_of_C:wskaznikologia.c">wskaznikologia.c</id_link> - wskaźniki oraz: funkcje, tablice, przekazywanie do funkcji tablic i nazw innych funkcji, zmienne zależące od zmiennej ...</li>
+	<li><id_link id="ABC_OF_COMPUTING:programing:c_cpp:base_of_C:numeracja_ip.c">numeracja_ip.c</id_link> - prosty program demonstrujący adresację IPv4 oraz operatory bitowe (konwersje napisów na postać numeryczną opisane w programach dotyczących programowania usług sieciowych)</li>
+</ul>
+</article>

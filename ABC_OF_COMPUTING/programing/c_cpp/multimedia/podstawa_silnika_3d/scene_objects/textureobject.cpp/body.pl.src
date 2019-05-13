@@ -1,0 +1,9 @@
+#include "textureobject.h"
+
+TextureObject::TextureObject(string name) {
+	texture = pngBind((string("data/").append(name)).c_str(), PNG_BUILDMIPMAPS, PNG_ALPHA, &texture_info, GL_CLAMP, GL_LINEAR, GL_LINEAR);
+}
+
+TextureObject::~TextureObject() {
+	// FIXME unload tekstur
+}

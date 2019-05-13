@@ -1,0 +1,123 @@
+<?php
+/**
+	System prezentacji zasobów DIROP na WWW
+	
+	plik odpowiedzialny za wyszukiwanie pozycji (voluminu lub listy wolumniów)
+	na podstawie informacji zawartych w URL lub przekazanych przez POST
+	(także danych z formularzy wyszukiwania książki i nawigacji w ksiązce nawigacji)
+	
+	na podstawie bazy danych ustawia wartość
+		$BOOK_INFO - informacje o książce
+	lub
+		$BOOK_LIST - tablica tablic $BOOK_INFO z informacjami o książce
+**/
+
+
+
+/// formularz "idz do" ma prawo nadpisania URL
+if (isset($_POST['volume_url'])) {
+	$titles[$BASE_PATH_LEN + 1]=$_POST['volume_url'];
+}
+
+/// warunek nie pokazywania ukrytych
+if (! isset($_GET['show_all']))
+	$VOLUME_WHERE_CLAUSE = ' info_status>=0';
+else
+	$VOLUME_WHERE_CLAUSE = ' volume_id IS NOT NULL';
+	// jakiś trywialny warunek bo tak wygodniej konstrować zapytanie
+	// a i tak ten przypadek prawie nieuzywany
+
+/// wyświetlenie ostatnio dodanych
+if (isset($_GET["novelty"])) {
+	$MODE = MODE_BOOK_LIST;
+	$FILTER[1] = FILTER_NOVELTY;
+	$URL_SURFIX = "&amp;novelty";
+	if (!isset($MAX_NOVELTY))
+		$MAX_NOVELTY = DEFAULT_MAX_NOVELTY;
+	$SQL = " ORDER BY volume_id DESC LIMIT $MAX_NOVELTY;";
+} else {
+	/// warunek na tytuł książki (jeżeli podano)
+	if ($titles[$BASE_PATH_LEN + 0] != "") {
+		$VOLUME_WHERE_CLAUSE .= " AND b.url='" . protect_sql($titles[$BASE_PATH_LEN + 0]) . "'";
+		
+		/// a także na jednotomowość lub tytuł voluminu
+		/// (gdy podano drugi argument - tytuł voluminu w wielotomowej lub strony w jednotomowej)
+		if ($titles[$BASE_PATH_LEN + 1] != "") {
+			$VOLUME_WHERE_CLAUSE .= " AND (b.single_vid >= -1 OR v.url='" .  protect_sql($titles[$BASE_PATH_LEN + 1]) . "')";
+		}
+	} else {
+		/// lista ksiązek
+		$MODE = MODE_BOOK_LIST;
+		$URL_PREFIX = $titles[$BASE_PATH_LEN + 0] . $titles[$BASE_PATH_LEN + 1];
+		
+		/// warunki wyszukiwania książki
+		/// TODO szukanie wg kilku kryteriów, operatory logiczne
+		if (isset($_GET["category"])) {
+			$FILTER[1] = FILTER_CATEGORY;
+			$FILTER[2] = $_GET["category"];
+			$VOLUME_WHERE_CLAUSE .= " AND info_category LIKE '%" . protect_sql($_GET["category"]) . "%'";
+			$URL_SURFIX = "&amp;category=" . $_GET["category"];
+		}
+		if (isset($_GET["find_in"])) {
+			$FILTER[1] = FILTER_SEARCH;
+			$FILTER[2] = $_GET["find_in"];
+			$FILTER[3] = $_GET["find_text"];
+			$find_in = protect_sql($_GET["find_in"]);
+			$arr_search_text = explode(" ", strtolower(protect_sql($_GET["find_text"])));
+			foreach ($arr_search_text as $search_word)
+				$VOLUME_WHERE_CLAUSE .= " AND lower($find_in) LIKE '%" . $search_word . "%'";
+			$URL_SURFIX = "&amp;find_in=" . $_GET["find_in"] . "&amp;find_text=" . $_GET["find_text"];
+		}
+	}
+	/// zapytanie SQL
+	$SQL = " ORDER BY b.title, v.title;";
+}
+
+/// zapytanie do bazy danych (dane z złączenia tabel book i volume)
+$SQL = 'SELECT '. BOOK_INFO_SELECT .' FROM '. BOOK_INFO_SELECT_FROM .' WHERE' . $VOLUME_WHERE_CLAUSE . $SQL;
+$result = pg_query($baza_danych, $SQL) or error('db_query', $SQL);
+$int_tmp = pg_num_rows($result);
+
+/// przypadek listy książek lub lista tomów w ksiązce
+if ($int_tmp > 1 || $MODE == MODE_BOOK_LIST) {
+	if ($MODE != MODE_BOOK_LIST) {
+		/// wiele wynikow (gdy nie określono że to lista książek) oznacza ze mamy doczynienia z
+		/// pozycją wielowoluminową bez określonego woluminu ->> lista tomów w ksiązce
+		$MODE = MODE_VOLUME_LIST;
+	}
+	$BOOK_LIST =  pg_fetch_all($result);
+/// określona pojedyńcza pozycja ->> wyświetlamy pojedyńczą stronę (ew. specjalną)
+} else if ($int_tmp == 1) {
+	/// uzyskujemy informacje o pozycji
+	$BOOK_INFO = pg_fetch_array($result, null, PGSQL_ASSOC);
+	/// ustalamy czy wielowoluminowa na potrzeby dalszej analizy ścieżek
+	if ($BOOK_INFO['single_vid'] >= -1)
+		$int_tmp = $BASE_PATH_LEN + 1;
+	else
+		$int_tmp = $BASE_PATH_LEN + 2;
+	
+	if ($titles[$int_tmp] == "info_full") {
+		/// pełna informacja o pozycji
+		$MODE = MODE_INFO;
+	} else {
+		/// strona voluminu
+		$MODE = MODE_PAGE;
+		/// okreslono page_no (aktualnie wykorzystywane tylko w celach diagnostycznych)
+		if (isset($_GET["page_no"])) {
+			$PAGE_WHERE_CLAUSE = "volume_id=" . $BOOK_INFO['volume_id'] . " AND page_no=" .  protect_sql($_GET["page_no"]);
+		} else {
+			/// domyślna strona woluminu
+			$page_title = "info";
+			/// z formularza "idż do"
+			if (isset($_POST['pare_url']))
+				$page_title = protect_sql($_POST['pare_url']);
+			/// z URL
+			else if ($titles[$int_tmp] != "")
+				$page_title = protect_sql($titles[$int_tmp]);
+			
+			$PAGE_WHERE_CLAUSE = "volume_id=" . $BOOK_INFO['volume_id'] . " AND title='" . $page_title . "'";
+		}
+	}
+}
+
+?>

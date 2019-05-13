@@ -1,0 +1,49 @@
+[1]
+Description=Ustawienia okna dla twinkle
+desktop=4
+desktoprule=2
+types=1
+windowrole=mphoneform
+windowrolematch=1
+wmclass=twinkle
+wmclasscomplete=false
+wmclassmatch=1
+
+[2]
+Description=Ustawienia okna dla xawtv
+above=true
+aboverule=3
+desktop=-1
+desktoprule=3
+types=1
+wmclass=xawtv
+wmclasscomplete=false
+wmclassmatch=1
+
+[3]
+Description=Ustawienia programu dla psi
+desktop=4
+desktoprule=2
+skiptaskbar=true
+skiptaskbarrule=2
+wmclass=main psi
+wmclasscomplete=true
+wmclassmatch=1
+
+[4]
+Description=Ustawienia okna dla kmail
+desktop=4
+desktoprule=2
+minimize=true
+minimizerule=3
+skiptaskbar=true
+skiptaskbarrule=2
+types=1
+windowrole=kmail-mainwindow#1
+windowrolematch=1
+wmclass=kmail
+wmclasscomplete=false
+wmclassmatch=1
+
+[General]
+count=4

@@ -1,0 +1,89 @@
+#ifndef PAINT_WINDOW_H
+#define PAINT_WINDOW_H
+
+/**
+ * plik nagłówkowy klasy PaintWindow związanej z okienkiem "PaintWindow"
+ * opisanym w pliku timer_window.ui poprzez klasę "PaintWindow" w przestzeni nazw Ui
+**/
+
+// pliki nagłówkowe wykorzystywanych klas Qt
+#include <QDialog>
+#include <QMouseEvent>
+
+#include <QPen>
+#include <QBrush>
+#include <QColor>
+
+#include <QPoint>
+#include <QImage>
+#include <QPainter>
+#include <QPicture>
+
+#include <QGraphicsItem>
+
+#include <QFile>
+#include <QtNetwork/QHttp>
+#include <QMessageBox>
+
+#include <QProcess>
+#include <QToolButton>
+#include <QToolBar>
+
+// plik nagłówkowy zawierający opis wyglądu okienka
+// wygenerowany automatycznie w oparciu o timer_window.ui
+#include "ui_paint_window.h"
+
+// plik nagłówkowy klasy subwątka ...
+#include "info_thread.h"
+
+// deklaracja klasy
+class PaintWindow: public QMainWindow
+{
+Q_OBJECT
+ private:
+   // obrazek, pędzle, rysowanie, ...
+   QPicture *rysunek;
+   QImage *obrazek;
+   QBrush *pedzel;
+   QPen *rysik;
+
+   // pobieranie http
+   QMessageBox *info;
+   bool trawa_pobieranie;
+   QFile *plik_obrazka;
+   QHttp *http;
+
+   // ping + pasek statutu i narzędzi
+   QProcess *pingProces;
+   QString wynik_pingu;
+   int kod_powrotu_pingu;
+   QToolButton *szczegoly_pingu;
+   QStatusBar *pasek_statusu;
+   QToolBar *pasek_narzedzi;
+
+   // watek
+   InfoThread *watek;
+ public:
+   Ui::PaintWindow interfejs;
+   PaintWindow(QWidget * parent = 0, Qt::WFlags f = 0 );
+   ~PaintWindow(){};
+   void paintEvent(QPaintEvent *);
+ public slots:
+   // pobieranie http
+   void zakonczonoPobieraniePliku();
+
+   // komunikacja sieciowa
+   void showNetRun();
+
+   // ping
+   void doPing();
+   void showPing();
+   void odczytajWynikPingu();
+
+   // wątek
+   void printNewValue(QString, double);
+   void terminateInfoThread();
+   void startInfoThread();
+};
+
+#endif

@@ -1,0 +1,77 @@
+# testowany host
+HOST=dragon.icm.edu.pl
+
+# sprawdzana domena i typ rekordu
+DNS_NAME=opcode.eu.org
+DNS_TYPE=MX
+
+# sprawdzane porty usług publicznych
+PUB_PORTS=25,80,5060,5269
+PUB_PORTS=25,80
+
+# sprawdzane porty usług prywatnych
+PRIV_PORTS=22,465,993,5222
+PRIV_PORTS=22,465,993
+
+
+LOCK_FILE=/tmp/$USER.hostchecker.state
+
+[ -f $LOCK_FILE ] && read LEVEL RUN PID < $LOCK_FILE
+
+if [ "$LEVEL" = "" ]; then
+	LEVEL=0
+	RUN=0
+elif [ $LEVEL -eq 999 ]; then
+	RUN=$(( $RUN + 1 ))
+	if [ $RUN -gt 5 ]; then
+		echo "$0 work too long !!!"
+		kill -9 $PID
+		LEVEL=0
+	else
+		echo "999 $RUN $PID" > $LOCK_FILE
+		exit
+	fi
+else
+	LEVEL=$(( $LEVEL + 1 ))
+	if [ $LEVEL -gt 7 ]; then
+		LEVEL=0
+	fi
+fi
+
+echo "0 $RUN $$" > $LOCK_FILE
+
+
+
+case $(( $LEVEL % 4 )) in
+	0)
+		DNS_OPT="-6 +notcp"
+		NMAP_OPT="-6"
+		;;
+	1)
+		DNS_OPT="-4 +notcp"
+		NMAP_OPT=""
+		;;
+	2)
+		DNS_OPT="-6 +tcp"
+		NMAP_OPT="-6"
+		;;
+	3)
+		DNS_OPT="-4 +tcp"
+		NMAP_OPT=""
+		;;
+esac
+
+# check DNS
+if ! dig @$HOST $DNS_OPT +tries=0 +retry=0 +time=1 $DNS_NAME $DNS_TYPE | grep -v '^;' | grep $DNS_TYPE > /dev/null; then
+	echo "DNS check faild for HOST=$HOST DNS_NAME=$DNS_NAME DNS_TYP=$DNS_TYP"
+fi
+
+# check PORTS
+nmap $NMAP_OPT -sT -p $PUB_PORTS -oN - $HOST | egrep '^[0-9]*/(tcp|udp)' | grep -v open
+
+if [ $LEVEL -lt 2 ]; then
+	nmap $NMAP_OPT -sT -p $PRIV_PORTS -oN - $HOST | egrep '^[0-9]*/(tcp|udp)' | grep -v open
+fi
+
+echo "$LEVEL $RUN $$" > $LOCK_FILE
+

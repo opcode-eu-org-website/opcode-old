@@ -1,0 +1,5 @@
+<article>
+<title>mailman</title>
+
+<p>Mailman jest jednym z najpopularniejszych serwerów obsługujących <wiki pl="Lista dyskusyjna">pocztowe listy dyskusyjne</wiki>. Do zarządzania nim oprócz interfejsu WWW możemy kożystać także z narzędzi shellowych takich jak: <code>newlist</code>, <code>list_lists</code>, <code>config_list</code> (wyświetlenie konfiguracji listy w postaci tekstowej: <code>config_list -o - <var>NAZWALISTY</var></code>, zmiana jednego parametru: <code>echo "archive_private = 1" > /tmp/aa; config_list -i /tmp/aa <var>NAZWALISTY</var></code>). Warto także pamiętać że ustawienia domyślne z brane są z pliku <kbd class="path">/usr/lib/mailman/Mailman/Defaults.py</kbd>,a nadpisywane są przez ustawienia w <kbd class="path">/etc/mailman/mm_cfg.py</kbd>.</p>
+</article>

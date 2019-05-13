@@ -1,0 +1,62 @@
+#!/bin/sh
+
+# skrypt służy odczytywaniu i kontrolowaniu stanu wejść cyfrowych komputerka NPE
+# odczyt i ładowanie danych do zabbixa realizowane jest z wykorzystaniem dostarczonego przez producenta
+# daemona snmp wraz z stosowną biblioteką prezentującą po tym protokole m.in. stany DI
+
+
+# rozdzielana przecinkami lista odbiorców mailowych
+MAIL_TO="alarmy@example.org"
+
+# adres nadawcy
+MAIL_FROM="alarmy@example.org"
+
+# serwer pocztowy
+MAIL_VIA="192.168.119.13"
+
+# send_alert priority message_short message_full
+send_alert() {
+	echo "$2"
+	
+	# wysyłanie maila
+	echo "$3" | email -n "monitor_di.sh" -f $MAIL_FROM -r $MAIL_VIA -s "$2" $MAIL_TO
+	
+	# wysyłanie SMSa poprzez centralny skrypt z systemu smtp2sms
+	echo -e "Subject: Alarm z BMS\n\nSite number: NPE Priority $1\nAlarm block description: $2" |
+		/opt/smtp2sms/mail2sms.sh
+}
+
+
+check_mask() {
+	if [ $(( $alarm_diff & $1 )) -ne 0 ]; then
+		if [ $(( $alarm_mask & $1 )) -ne 0 ]; then
+			msg="$msg, Not Active"
+		else
+			msg="$msg, Active"
+		fi
+		return 0;
+	fi
+	return 1;
+}
+
+alarm_old_mask=15
+while true; do
+	# echo alarm_old_mask=$alarm_old_mask
+	
+	npe ?PI
+	alarm_mask=$?
+	alarm_diff=$(( $alarm_mask ^ $alarm_old_mask ))
+	alarm_old_mask=$alarm_mask
+	
+	# echo alarm_mask=$alarm_mask alarm_diff=$alarm_diff
+	
+	if [ $alarm_diff -ne 0 ]; then
+		msg="SSP, blokada"
+		check_mask 0x01 && send_alert 10 "$msg"
+		msg="POZAR, czujka konwencjonalna -1"
+		check_mask 0x02 && send_alert 10 "$msg"
+		msg="POZAR, czujka konwencjonalna -2"
+		check_mask 0x04 && send_alert 10 "$msg"
+	fi
+	sleep 1
+done 2>&1 | logger -p daemon.info -t monitor_di.sh

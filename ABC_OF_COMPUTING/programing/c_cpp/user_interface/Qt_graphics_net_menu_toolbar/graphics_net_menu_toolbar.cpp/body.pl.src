@@ -1,0 +1,36 @@
+/**
+ * Program prezentujący podstawy programowania w Qt4 - prezentuje sposoby rysowania,
+ * tworzenie menu i pasków narzędzi, wywoływanie i komunikowanie się z zewnętrznymi aplikacjami,
+ * korzystanie z http oraz gniazd sieciowych, zmienne aplikacyjne (singleton), watki
+ *
+ * jest plik główny programu z funkcją main
+ * poostałe elementy umieszczone są w plikach klas obsługujących poszczególne okienka oraz
+ * singleton i wątek
+ *
+ * KOMPILACJA: qmake -project && echo 'QT += network' >> *.pro && qmake && make
+ * POSPRZĄTANIE: make distclean && rm -f *.pro tmp.gif
+ **/
+
+// nagłówki Qt
+#include <QApplication>
+#include <QTextCodec>
+
+// nagłowek klasy związanej z głównym okienkiem aplikacji
+#include "paint_window.h"
+
+int main(int argc, char *argv[]) {
+	QApplication aplikacja(argc, argv);
+	
+	// ustawiamy kodowanie dla wyświetlanych i dla przetwarzanych napisów
+	QTextCodec::setCodecForTr (QTextCodec::codecForName ("UTF-8"));
+	QTextCodec::setCodecForCStrings (QTextCodec::codecForName ("UTF-8"));
+	
+	// tworzymy okienko w oparciu o klase PaintWindow
+	PaintWindow okienko(0, 0);
+	
+	// wyświelamy okienko
+	okienko.show();
+	
+	// uruchamiamy aplikację
+	return aplikacja.exec();
+}

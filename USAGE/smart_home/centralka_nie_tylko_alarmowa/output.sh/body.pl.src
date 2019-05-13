@@ -1,0 +1,70 @@
+#!/bin/bash
+
+[ "${output_state[*]}" = "" ] && declare -A output_state=()
+output() {
+	if [ $2 == "switch" ]; then
+		if [ ${output_state[$1]:-0} -eq 0 ]; then
+			action=1
+		else
+			action=0
+		fi
+	else
+		action=$2
+	fi
+	output_state[$1]=$action
+
+	case $1 in
+		"pokoj1")      ./modbus_rtu/write_USB2 12 19 $2 ;;
+		"pokoj2")      przek 1 bn $2 ;;
+		*)
+			echo "USAGE: $0 pokoj1 0|1|switch|val"
+			echo "USAGE: $0 pokoj2 0|1|switch"
+			;;
+	esac
+}
+
+roleta() {
+	case $1 in
+		"up")
+			przek 4 bp 1
+			przek 4 p  1
+			;;
+		"down")
+			przek 4 bp 0
+			przek 4 p  1
+			;;
+		"stop")
+			przek 4 bp 0
+			przek 4 p  0
+			;;
+		*)
+			echo "USAGE: $0 up|down|stop"
+			;;
+	esac
+}
+
+
+# ledy w panelach z przyciskami
+led_get_bit() {
+	case $1 in
+		"panel1")                echo 0x40 ;;
+		"panel2")                echo 0x80 ;;
+	esac
+}
+
+# sygnalizator podłączony do GPIO na module 1wire
+sygn_orange_line=0
+sygn_orange() {
+	case $1 in
+		"on")
+			sygn_orange_line=0x40
+			;;
+		"slow")
+			sygn_orange_line=0x10
+			;;
+		"off")
+			sygn_orange_line=0x00
+			;;
+	esac
+	i2cset -y $BUS_ADDR 0x20 $GPIO $(( $onewire_line | $sygn_orange_line ))
+}

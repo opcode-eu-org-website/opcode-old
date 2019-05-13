@@ -1,0 +1,7 @@
+<article>
+<title>Teoria informatyki</title>
+
+<p>Podstawy teoretyczne informatyki to w zasadzie duży dział matematyki poświęcony <wiki pl="Teoria automatów">teorii automatów</wiki>, <wiki pl="Teoria informacji">teorii informacji</wiki>, <wiki pl="Teoria grafów">teorii grafów</wiki>, <wiki pl="Język formalny">językom formalnym i gramatykom</wiki>, <wiki pl="Algorytm">algorytmom</wiki> , itp (w zasadzie informatykę teoretyczną można uznać za dział matematyki). Z bardziej specyficznych dla informatyki działów należy wspomnieć o <wiki pl="Teoria obliczeń">teorii obliczeń</wiki>, terorii kompilacji (blisko związanej z językami formalnymi) i <wiki pl="Struktura danych">strukturach dancyh</wiki> (blisko związanych z <wiki pl="Algorytmika">algorytmiką</wiki>).
+
+Informatyka teoretyczna zajmuje się w dużej mierze konstrukcją algorytmów,  <wiki pl="Dowód poprawności algorytmu">dowodzeniem ich poprawności</wiki> i analizą <wiki pl="Złożoność obliczeniowa">złożoności obliczeniowej</wiki>. Zobacz także: <wiki pl="Logika Hoare'a">Logika Hoare'a</wiki>, <wiki pl="Niezmiennik pętli">Niezmiennik pętli</wiki>, <wiki pl="Analiza składniowa">Analiza składniowa</wiki>, <wiki pl="Parser LR">Parser LR</wiki>, <wiki en="LL parser">LL parser</wiki>. Często do teorii informatyki zalicza się także zagadnienia związane z projektowaniem systemów operacyjnych i oprogramowania.</p>
+</article>

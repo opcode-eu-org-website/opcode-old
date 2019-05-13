@@ -1,0 +1,27 @@
+<article>
+<title>Pliki z konfiguracją sieci</title>
+
+<p>Za konfigurację sieci odpowiada plik <kbd class="path">/etc/network/interfaces</kbd>, po dokonaniu w nim zmian należy przeładować je poleceniem <code>/etc/init.d/networking</code> restart i można sprawdzić przez ifconfig :). Wyjątkiem jest konfiguracja DNS (ta używana "normalnie"), która znajduje się w pliku <kbd class="path">/etc/resolv.conf</kbd> (jeżeli z jakiś powodów serwery DNS naszego ISP nam nie odpowiadają możemy użyć ogólnodostępnych serwerów <wiki pl="OpenDNS">OpenDNS</wiki>).</p>
+
+<p>Plik <kbd class="path">/etc/network/interfaces</kbd> (<id_link id="ABC_OF_COMPUTING:networks:IP:konfiguracja_sieci:pliki_konfiguracyjne:interfaces">przykład</id_link>) zawiera konfigurację dla poszczególnych urządzeń sieciowych, sekcja dla danego urządzenia zaczyna się od <code>iface</code>, po czym następuje nazwa urządzenia (np. eth0), typ adresu (np. <code>inet</code> lub <code>inet6</code> lub ...) i rodzaju (np. <code>static</code>, <code>dhcp</code>); jeżeli po nazwie jest dwukropek i liczba (np. eth0:0) oznacza to że jest to alias konfiguracji dla danego urządzenia (odpowiada to <code>ifconfig eth0:0 <var>...</var></code>). Wpis ten może być poprzedzony linią <code>auto <var>nazw_interfejsu</var></code> powodującą automatyczne konfigurowanie interfejsu przy starcie systemu (wywołanie <code>/etc/init.d/networking start</code>), przy braku tego wpisu interfejs należy uruchamiać ręcznie przy pomocy <code>ifconfig <var>nazw_interfejsu</var> up</code>.</p>
+
+<p>Po linii określającej konfigurowane urządzenie występują linie określające jego konfigurację. Dla inet czyli IPv4:</p> <ul>
+	<li><code>address</code> - określa adres IP,</li>
+	<li><code>netmask</code> - maskę podsieci,</li>
+	<li><code>broadcast</code> - adres rozgłoszeniowy podsieci (może nie być określany),</li>
+	<li><code>network</code> - adres podsieci (opcjonalne - nie potrzebne dla jąder &gt; 2.0),</li>
+	<li><code>gateway</code> - określa bramkę (opcjonalne),</li>
+	<li><code>dns-nameservers</code> - adres serwera DNS (używany tylko rzez resolvconf).</li>
+</ul>
+<p>Możemy także korzystać z <code>post-up</code> <code>pre-down</code> itp. w celu wykonania jakiś poleceń po uruchomieniu interfejsu czy przed jego zakończeniem. W ten sposób możemy konfigurować w tym pliku rzeczy normalnie w nim nie ustawiane:</p>
+<ul>
+	<li>konfigurację DNS - <code>post-up echo "nameserver <var>192.168.0.1</var>" &gt; /etc/resolv.conf</code></li>
+	<li>dodatkowy adres IP - <code>post-up ip address add broadcast + local <var>192.168.24.101/24</var> dev <var>eth0</var></code>, warto wtedy też użyć <code>pre-down ip address del <var>192.168.24.101/24</var> dev <var>eth0</var></code></li>
+	<li>wpisy dodatkowych tras routingu - <code>post-up route add <var>...</var></code></li>
+</ul>
+<p>Dla inet6 określa się <code>address</code> (w notacji dwukropkowej), <code>netmask</code> (w postaci ilości bitów o wartości 1 w masce) oraz (opcjonalny) <code>gateway</code>. Przydatne może być też <code>hwaddress</code> określające MAC karty sieciowej (zwłaszcza przy niektórych konfiguracjach dhcp).</p>
+
+<p>Z pośród innych ustawień związanych z siecią istotną rolę odgrywa także nazwa hosta lokalnego - ustawiana jest ona w <kbd class="path">/etc/hostname</kbd> (może być podana w formie "host.domena", a doraźnie może być zmieniana komendą <code>hostname</code> oraz nazwa systemu pocztowego ustawiana w <kbd class="path">/etc/mailname</kbd>. Niektóre z programów wymagają aby nazwa ta wraz z odpowiednim przyporządkowaniem ip znalazła się także w DNSie lub pliku lokalnego rozwijania nazw - <kbd class="path">/etc/hosts</kbd> (tu też możemy podawać przypisania nazw innych hostów do ich adresów, gdy z jakiś powodów nie chcemy korzystać do tego celu z DNS).</p>
+
+<p>Zobacz też: <id_link id="posix:podstawy_debiana:wifi">konfiguracja sieci bezprzewodowej</id_link>, <man>interfaces</man>, <man>resolv.conf</man>, <man>ip</man>.</p>
+</article>

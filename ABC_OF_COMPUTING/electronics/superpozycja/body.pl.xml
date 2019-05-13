@@ -1,0 +1,4 @@
+<article>
+<title>Metoda superpozycji</title>
+<p>Pozwala ona na rozdzielenie obwodu zawierającego kilka źródeł prądu i napięcia. Obwod rozkładamy na tyle przypadków ile mamy źródeł niezależnych, w każdym z nich pozostawiamy tylko jedno (inne) źródło niezależne. Pozostałe źródła zastępujemy zwarciem (źródła napięciowe) albo rozwarciem - źródła prądowe (z punktu widzenia źródła prądowego źródło napięcia jest zwarciem - punkt potencjału V jest równoprawny punktowi potencjału masy). W każdym obwodzie znajdujemy składową (pochodzącą od niepominiętego źródła) szukanego prądu lub napięcia. Należy też zwrócić uwagę na kierunki napięć (ich znak) - prąd wypływający z rezystancji oznacza ujemne napięcie na tejże. Całkowity szukany prąd lub napięcie jest sumą składowych.</p>
+</article>

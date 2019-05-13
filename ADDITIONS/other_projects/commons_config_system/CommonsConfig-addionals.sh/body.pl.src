@@ -1,0 +1,109 @@
+#!/bin/bash
+
+# funkcja wypisująca komunikat w okienkach dialogowych KDE
+# dostosowuje typ komunikatu do jego wielkości
+#  (czy sam komunikat z z dodatkowym info z podanych plików)
+# wymaga przekierowanie wyjść do plików poptrzez
+# exec 2> /tmp/log_stderr.${PPID}pid 1> /tmp/log_stdout.${PPID}pid
+# lub przekierowania w komendach
+print_msg() {
+	if [ -s "/tmp/log_stderr.${PPID}pid" -o -s "/tmp/log_stdout.${PPID}pid" ]; then
+		kdialog --textinputbox "$1:" \
+			"`cat /tmp/log_stderr.${PPID}pid; echo -e "\n==============\n"; cat /tmp/log_stdout.${PPID}pid`"
+	else
+		kdialog --msgbox "$1"
+	fi
+	:> /tmp/log_stderr.${PPID}pid
+	:> /tmp/log_stdout.${PPID}pid
+}
+
+# funkcja pakująca linki z katalogu wraz z pakowaniem ich celów
+#  gdy cel jest w $HOME to pomijamy $HOME w ścieżce
+link_dir_backup() {
+	pushd $HOME > /dev/null
+	# pakowanie linków
+	tar -cf /tmp/konfiguracja.${PPID}pid.tar `echo "$1" | grep ^$HOME | sed "s%^$HOME/*%%g"`
+	# lista celów linków
+	FULL_LIST=`find "$1" -type l | while read f; do readlink -f "$f"; done`
+	# pakujemy cele linków - jeżeli w $HOME to bez początkowej ścieżki (musi być uruchamiane w $HOME)
+	tar -rf /tmp/konfiguracja.${PPID}pid.tar \
+		`echo "$FULL_LIST" | grep ^$HOME | sed "s%^$HOME/*%%g"`\
+		`echo "$FULL_LIST" | grep -v ^$HOME`
+	# kopiuuemy + komounikat
+	move_backup /tmp/links.${PPID}pid.tar "$2" "tar"
+	popd > /dev/null
+}
+
+##############################################
+##  FUNKCJE EKSPORTU DO PRZENOŚNEJ POSTACI  ##
+##############################################
+
+# funkcja eksportująca klucze GnuPG
+gpg_export() {
+	gpg --list-keys | awk '
+		$1=="pub" {
+			split($2, tmp, "/"); ctrl=tmp[2];
+		}
+		$1=="uid" && ctrl!=0 {
+			tmp2=""
+			for(i=2; i<=NF; i++)
+				tmp2=sprintf("%s %s",tmp2, $i)
+			printf("%s %s\n" , tmp2, ctrl)
+			ctrl=0
+		}
+	' | while read key_name; do
+		key_id=${key_name/*</}
+		key_id=${key_id/>*/}
+		key_file=${key_name// /_}
+		key_file=${key_file/<*>/}
+		key_file=`echo $key_file | tr '/' '_'`".asc"
+		
+		gpg -a --export $key_id > "/tmp/key_exp.${PPID}pid"
+		move_backup "/tmp/key_exp.${PPID}pid" "$1/$key_file" "asc"
+	done
+}
+
+# funkcja exportująca certyfikaty S-MIME
+x509_export() {
+	# zaimportowane i wymienione w trustlist.txt muszą być także CA dołączone do systemu (np. z przeglądarkami WWW)
+	# musza posiadać relax (dalej nie są sprawdzane), podobnie jak nieautoryzowanych CA (np. własny)
+	# dla oficjalnych CA dodałem dodatkową flagę po relax - CA
+	egrep -v 'relax[\t ]+CA' ~/.gnupg/trustlist.txt |cut -f1 -d' ' | while read key_finger; do
+		key_file=`gpgsm -a -k $key_finger | grep 'Subject:' | awk 'BEGIN {RS="/"; FS="="} $1=="CN" {print $2}'`
+		key_file="$key_file ${key_finger//:/}.pem"
+		
+		gpgsm -a --export $key_finger > "/tmp/key_exp.${PPID}pid"
+		move_backup "/tmp/key_exp.${PPID}pid" "$1/$key_file" "pem"
+	done 
+}
+
+# funkcja tworząca linki o nazwach opartych na polu FN w katalogu zadanym przez $1 do plików v-card w katalogu zadanym przez $2
+vcf_export() {
+	rm -f "$1"/*
+	pushd "$1" > /dev/null
+	for f in "$2"/*; do
+		name="`grep '^FN:' "$f" | cut -f 2- -d':' | tr ' ' '_' | tr -d '\n\r'`.vcf"
+		echo "$f ->> $name"
+		if [ "$name" != "" -a ! -e "$name" ]; then
+			rsync "$f" "$name"
+		else
+			rsync "$f" .
+		fi
+	done
+	popd > /dev/null
+}
+
+# funkcja eksportu do ludzkiej postaci (klucze szyfrujące)
+prepare_userfriendly_dir() {
+	rm -f $1/PrivateArchive/Cryptography/pgp/*
+	gpg_export "$1/PrivateArchive/Cryptography/pgp"
+	
+	rm -f $1/PrivateArchive/Cryptography/x509/*
+	x509_export "$1/PrivateArchive/Cryptography/x509"
+	
+	rsync "$HOME/.ssh/known_hosts" "$1/PrivateArchive/Cryptography/ssh/known_hosts"
+	
+	vcf_export "$1/PrivateArchive/AddressBook" "$SSHFS_MOUNT_DIR/configs/addressbook-dir"
+	
+	print_msg "Eksport OpenPGP, X509, SSH i AddressBook zakończony"
+}

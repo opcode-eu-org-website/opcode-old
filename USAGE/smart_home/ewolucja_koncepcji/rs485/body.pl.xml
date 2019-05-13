@@ -1,0 +1,159 @@
+<article>
+<title>Komunikacja poprzez RS485</title>
+<p>Wraz z użyciem mikrokontrolerów pojawiła się idea zdalnego sterowania poprzez <wiki pl="EIA-485">RS485</wiki> z wykorzystaniem wbudowanych układów <wiki pl="Universal Asynchronous Receiver and Transmitter">UART</wiki>. Wiązało się to z koniecznością przyjęcia/stworzenia jakiegoś protokołu do przekazywania komend. W pierwszych rozwiązaniach stosowany był prosty binarny format komunikatów - komunikaty były 4 bajtowe, a dwa pierwsze bity oznaczały typ bajtu w komunikacie (identyfikator urządzenia, identyfikator linii, komenda, odpowiedz). Implementacja tego protokołu zawarta jest w <id_link id="my_rs485_binary.c">my_rs485_binary.c</id_link>, a przykład użycia w <id_link id="sterownik_oswietlenia_v2.0.c">sterownik_oswietlenia_v2.0.c</id_link>. Rozwiązanie to ograniczało przestrzeń dostępnych adresów pod-adresów i komunikatów do 6 bitów, a także uniemożliwiało w prosty sposób przekazywania argumentu do komendy (co stało się potrzebne przy sterowaniu jasnością większej ilości linii). Niedogodnością była też niemożność prostego używania terminala (/dev/ttySx) do sterowania urządzeniami.</p>
+
+<p>Kolejnym rozwiązaniem była komunikacja tekstowa ASCII w postaci: <code>@adres#subadres#komenda#parametr;</code> lub <code>@adres#subadres#komenda;</code>, gdzie adres, subadres, komenda, parametr są liczbami z zakresu 0-255 zapisanymi dziesiętne. Implementacja tego protokołu zawarta jest w <id_link id="my_rs485_ascii.c">my_rs485_ascii.c</id_link>, a przykład użycia w <id_link id="sterownik_oswietlenia_v3.1.c">sterownik_oswietlenia_v3.1.c</id_link>.</p>
+
+<p>W obu wypadkach całość dekodowania i (typowo) wykonywania komendy odbywała się w ramach przerwań związanych z otrzymaniem znaku z portu szeregowego. Niestety ze względu na konieczność stosowania znacznych opóźnień między-znakowych w komunikacji RS485, wynikłą z potrzeby dostosowania się do najwolniejszych modułów, które muszą mieć czas na analizę otrzymanego komunikatu system ulega stosunkowo łatwo zamulaniu. W związku z tym rozważana była zmiana koncepcji odbioru komunikatów z stosowanej analizy w trakcie odbioru na szybki odbiór analizę po jego zakończeniu i potwierdzenie wykonania po odebraniu komendy, ale wymagałoby to stosowania dodatkowego timeoutu na oczekiwaniu na potwierdzenie wykonania.</p>
+
+<p>Kolejnym problemem była chęć umożliwienia nadawania komend (a nie tylko odpowiadania na nie) wielu urządzeniom. Wymusiła ona konieczność stosowania jakiejś formy arbitrażu. Zastosowane w pierwotnej wersji centralki alarmowej indywidualne linie zezwolenia na nadawanie nie zdały niestety egzaminu. Rozważane były m.in.:</p><ul>
+	<li>zastosowanie protokołu żetonowego z żetonem przekazywanym przy pomocy komendy</li>
+	<li>system oparty na centralnym masterze odpytujący każde inne urządzenie o to czy ma coś do nadania</li>
+	<li>system z stałym oknem czasowym na nadawanie (a nie rozpoczęcie nadawania) zadawanym indywidualna linią zezwolenia</li>
+	<li>jakieś usprawnienia obecnego systemu niedopuszczające do dyskryminacji i zagładzania urządzeń</li>
+</ul>
+
+<subtitle>Komunikacja binarna i switche - koncepcje niezrealizowane</subtitle>
+<p>W efekcie opisanych powyżej problemów z opóźnieniami w transmisji zrodził się pomysł <strong>wykorzystania echa (odsyłania odebranego bajtu) do</strong> weryfikacji odbioru komunikatu, jej wykonania oraz odbioru odpowiedzi, a przede wszystkim do <strong>sterowania prędkością nadawania</strong> (czekamy na potwierdzenie odbioru i przetworzenia poprzedniego bajtu). Równocześnie nastąpił powrót do komunikatów binarnych (mniejszy narzut na transmisję oraz prostsza analiza komendy). Komunikat miał składać się z 6 bajtów:</p><ul>
+	<li>pierwszy bajt - adres urządzenia (0-32) 0b000x xxxx</li>
+	<li>drugi bajt - komenda (0-32) 0b001x xxxx</li>
+	<li>3+4. dana 1 (subadres)<ul>
+		<li>młodsza polowa bajtu: 0b0100</li>
+		<li>starsza polowa bajtu: 0b0101</li>
+	</ul></li>
+	<li>5+6. dana 2 (wartość)<ul>
+		<li>młodsza polowa bajtu: 0b0110</li>
+		<li>starsza polowa bajtu: 0b0111</li>
+	</ul></li>
+</ul>
+<p>Kodowanie typu bajtu w każdym z bajtów poprawia czytelność protokołu, ułatwia interpretację komunikatu (a także umożliwia detekcję zagubionego bajtu), a także restart transmisji (znacznik pierwszego bajtu).</p>
+
+<p>Algorytm odbioru komunikatu zapisany w pseudo-c:</p>
+<pre>uint8_t rd, cmd, d1, d2;
+uint8_t mask = MY_ADDRESS;
+#ifdef USE_INTERPUT
+procedura_obslugi przerwania() {
+	rd = UDR;
+	// zakladamy ze nadawca czeka na potwierdzenie wiec nie bedzie nadawl gdy przetwarzamy
+	odblokuj_przerwania();
+#else
+while (1) {
+	rd = wait_for_data();
+#endif
+	if ((rd &amp; mask) == rd) {
+		switch (mask) {
+			/// adres
+			case MY_ADDRESS:
+				mask = 0x20 | 0x1f;
+				cmd = 0x00;
+				break;
+			/// komenda
+			case 0x20 | 0x1f:
+				mask = 0x40 | 0x0f;
+				cmd = rd &amp;0x1f;
+				break;
+			/// dana 1
+			case 0x40 | 0x0f:
+				mask = 0x40 | 0x10 | 0x0f;
+				d1 = rd &amp;0x0f;
+				break;
+			case 0x40 | 0x10 | 0x0f:
+				mask = 0x60 | 0x0f;
+				d1 = d1 | ( ( rd &lt;&lt; 4 ) &amp; 0x0f);
+				break;
+				cmd = execute_cmd1(cmd, d1, &amp;d2); // funkcja wykonuje komendę która ma odpowiedź i zapisuje ją w d2, jeżeli się udało (była taka komenda zwraz 0xff, w przeciwnym razie cmd)
+			/// dana 2
+			case 0x60 | 0x0f:
+				mask = 0x60 | 0x10 | 0x0f;
+				if (cmd == 0xff) {
+					send( 0x60 | (d2 &amp;0xf) );
+				} else {
+					d2 = rd &amp;0x0f;
+				}
+				break;
+			case 0x60 | 0x10 | 0x0f:
+				mask = MY_ADDRESS;
+				if (cmd == 0xff) {
+					send( 0x60 | ((d2&lt;&lt;4) &amp;0xf) );
+				} else {
+					d2 = d2 | ( ( rd &lt;&lt; 4 ) &amp; 0x0f);
+					execute_cmd2(cmd, d1, d2); // funkcja wykonuje komendę która nie ma odpowiedzi
+				}
+				break;
+		}
+		if (cmd != 0xff)
+			send(rd);
+	} else {
+		mask = MY_ADDRESS;
+	}
+}</pre>
+<p>Algorytm nadawania komunikatu zapisany w pseudo-c:</p>
+<pre>
+send_msg(uint8_t addr, uint8_t cmd, uint8_t d1, uint8_t d2) {
+	uint8_t buf[6], i, ret, reply = 0;
+	buf[0]=addr;
+	buf[1]=0x20 | cmd;
+	buf[2]=0x40 | (d1 &amp; 0x0f);
+	buf[3]=0x40 | 0x10 | ((d1&lt;&lt;4) &amp; 0x0f);
+	buf[4]=0x60 | (d2 &amp; 0x0f);
+	buf[5]=0x60 | 0x10 | ((d2&lt;&lt;4) &amp; 0x0f);
+	for (i=0; i&lt;6; i++);
+		send(buf[i]);
+		ret = wait_for_data_with_timeout();
+		if (i == 4 &amp;&amp; d2 == 0xff) {
+			if (ret &amp; 0xf0 ! = 0x60) {
+				// błąd transmisji
+				return i - 20;
+			}
+			reply = ret &amp; 0xf;
+		} else if (i == 5 &amp;&amp; d2 == 0xff) {
+			if (ret &amp; 0xf0 ! = 0x70) {
+				// błąd transmisji
+				return i - 20;
+			}
+			reply = reply | ( (ret&lt;&lt;4) &amp; 0xf );
+		} else if (ret != d[i]) {
+			// błąd transmisji
+			return i - 10;
+		}
+	}
+	return reply;
+}
+</pre>
+
+<p>Niestety nie rozwiązywało to problemu rywalizacji o dostęp do medium transmisyjnego, rozważano w tej kwestii:</p><ul>
+	<li>użycie <code>0b111 | ADRES</code> jako tokenu uprawniającego do nadawania</li>
+	<li>użycie linii open-collector informacja że właśnie nadaje</li>
+	<li>rezygnacja z magistrali na rzecz łącz punkt(switch)-punkt(slave):<ul>
+		<li>gwiazda z hubem/switchem (mniej lub bardziej inteligentnym) wybierającym (w oparciu o zgłoszenia na dedykowanej linii) tego kto aktualnie nadaje do wszystkich pozostałych (ew. może także rozpoznawać adresy i nadawać tylko na właściwe porty), przykładowe realizacje takiego huba: <a class="int" href="./hub_rs_uC.sch">w oparciu o sterowanie z mikrokontrolera</a> i <a class="int" href="./hub_rs_no_uC.sch">bez mikrokontrolera sterującego</a></li>
+		<li>wariant rs_ttl full-duplex: nadawanie i odbiór poprzez bufor (74hc125) do wskazanego z użyciem dekodera (74hc138, zerowe wyjście nie używane) slave'a</li>
+		<li>wariant rs_485 full-duplex: nadawanie i odbiór poprzez trancriver (sn75176) do wskazanego z użyciem dekodera (74hc138, zerowe wyjście nie używane) slave'a</li>
+		<li>wariant rs_485 half-duplex: nadawanie do wszystkich (osobne sn75176) słuchanie tylko z wybranego  z użyciem dekodera (74hc138, zerowe wyjście nie używane) slave'a; nadajniki w sn75176 (DE) sterowane z 74hc238 (zerowe wyjście nie używane), odbiorniki (~RE) sterowane z 74hc138 (zerowe wyjście nie używane), wejście E i ~E dekoderów podłączone do linii sterującej zapis/odczyt</li>
+		<li>linia sygnalizująca chęć nadawania wprowadzona na 8in encoder (74hc148, zerowe wejście podłączone do masy) i do mastera decydującego komu dać prawo nadawania uC</li>
+		<li>sygnał zgody na nadawanie (włączenia danego odbiornika) przekazywany do urządzenia slave w formie linii open-collector (hc7407)<ul>
+			<li>stan niski nie ustawiony przez slave informuje o tym że można nadawać</li>
+			<li>stan niski nie ustawiony przez mastera oznacza prośbę o transmisję odpowiedzi (aby móc wykryć zgodę na transmisję odpowiedzi musi on być przerywany celem odczytu stanu linii, zatem nie ma potrzeby osobnej zgody na transmisje odpowiedzi)</li>
+			<li>linię taka można uzyskać na Atmega8 (nadawanie 1: PORTx = 0; DDRx = 0; nadawanie 0: PORTx = 0; DDRx = 1;)</li>
+		</ul></li>
+		<li>dla każdego slave (1-7) switch ma określoną wartość dopuszczalnego czasu trwania zgody na nadawanie (timeout)<pre>
+for (i = 1; i &lt; 8; ++i) {
+	mask = 0x01 &lt;&lt; i;
+	if (read_oczekujacy_mask() &amp; mask) {
+		wykryto_koniec_ramki=0;                               /// opcjonalnie możemy śledzić koniec ramki i limitować ilość ramek od urządzenia ....
+		start_timer(timeout[i]);
+		do {
+			odbieraj_dane(i);                                 /// transmituj zapytanie
+			while(! (reply = read_oczekujacy_reply_mask()) ); /// czekaj na zgłoszenie chęci transmisji odpowiedzi
+			odbieraj_dane(reply);                             /// transmituj odpowiedź
+			while(read_oczekujacy_reply_mask() != 0);         /// czekaj na koniec transmisji odpowiedzi
+		} while (!timer_timeout &amp;&amp; !wykryto_koniec_ramki &amp;&amp; read_oczekujacy_mask() &amp; mask);
+		stop_timer(timeout[i]);
+	}
+}
+		</pre></li>
+	</ul></li>
+</ul>
+
+<subtitle>Standard</subtitle>
+<p>Aktualnym rozwiązaniem jest zastosowanie szybkiego mastera (podłączanego do innych systemów przy pomocy <id_link id="ABC_OF_COMPUTING:networks:ethernet">Ethernetu</id_link> i <id_link id="ABC_OF_COMPUTING:networks:IP">sieci TCP/IP</id_link>) mającego do dyspozycji kilka magistral RS485 i aktywnie odpytującego slave'y z wykorzystaniem standardowego protokołu <wiki pl="Modbus">Modbus</wiki> RTU. W wyjątkowych przypadkach możliwe jest także zastosowanie linii przerwaniowej od slave do mastera. Więcej informacji w <id_link id="USAGE:smart_home">inteligentny dom</id_link>.</p>
+</article>

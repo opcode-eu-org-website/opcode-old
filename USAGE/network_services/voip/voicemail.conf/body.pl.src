@@ -1,0 +1,59 @@
+; konfiguracja poczty głosowej
+; http://www.voip-info.org/wiki/index.php?page=Asterisk+config+voicemail.conf
+
+[general]
+; formaty zapisu wiadomosci
+format=wav49 ;wav|gsm|wav49
+
+; wysyłaj powiadomienia o poczcie
+sendvoicemail=yes
+
+; temat wiadomości
+emailsubject=[PBX]: Nowa wiadomosc glosowa ${VM_MAILBOX}
+
+; treść wiadomości
+emailbody=Hello\n\nYou have new voicemail message from ${VM_CALLERID}.\nRecord time: ${VM_DATE}, record long: ${VM_DUR}.\n
+
+; adres poczty do pola FROM: dla powiadomien
+serveremail=asterisk
+
+; format czasu użyty w wiadomości
+emaildateformat=%Y-%m-%d %H:%M:%S
+
+; kodowanie wiadomości
+charset=UTF-8
+
+; załączaj do maila plik dźwiękowy z zapisem zostawionej wiadomości
+attach=yes
+
+; usuwaj wiadomości po wysłaniu powiadomienia
+; uwaga: opcja ta zdeklarowna w tym miejscu może nie działać
+; należy podawać ją w opcjach każdego z użytkowników jako delete=1
+delete=yes
+
+; maksymalna ilość zalogowanych równocześnie urzytkowników
+maxlogins=3
+
+; maksymalna ilość wiadomości w skrzynce
+maxmsg=20
+
+; maksymalna długość wiadomości (w sek.)
+maxmessage=180
+
+; minimalna długość wiadomości powodująca jej pozostawienie (w sek.)
+;minmessage=3
+
+; maksymalna długość wiadomości powitalnej (w sek.)
+;maxgreet=60
+
+; długość ciszy powodująca przerwanie nagrywania (0 - wyłącza)
+;maxsilence=0
+
+; spis skrzynek - kontekst domyślny
+[default]
+; inkludujemy spis skrzynek, wpisy są postaci:
+;   nazwa/numer => haslo,opis,email_dla_powiadomien,pager_email,dodatkowe_opcje_rozdzielane|
+; typowo:
+;   USERID => SECRET,,ADRES@EMAIL,,delete=1
+#include <voicemail-local.conf>
+

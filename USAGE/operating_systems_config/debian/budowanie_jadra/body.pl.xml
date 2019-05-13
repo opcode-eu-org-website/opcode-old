@@ -1,0 +1,93 @@
+<article>
+<title>Budowanie (zmodyfikowanego) jądra</title>
+
+<p>Niekiedy zachodzi potrzeba zbudowania zmodyfikowanego (pod względem konfigu lub z nałożonymi łatami) jądra. Poniżej przedstawię drogę do zbudowania jądra 2.6.24.4 z nałożonymi łatami IMQ oraz wybranymi z łat patch-o-matic. Jądro będzie budowane metodą Debiana, a poniższy opis należy traktować jako przykład który należy dostosować do własnych potrzeb.</p>
+
+<pre>
+####################
+###  POBIERANIE  ###
+####################
+export KERNEL_DIR="$PWD/2.6.24"
+export IPTABLES_DIR="$PWD/iptables-1.4.0"
+
+wget http://www.linuximq.net/patchs/iptables-1.4.0-imq.diff
+mv iptables-1.4.0-imq.diff iptables-imq.diff
+wget http://www.linuximq.net/patchs/linux-2.6.24-imq.diff
+mv linux-2.6.24-imq.diff linux-imq.diff
+wget http://ftp.netfilter.org/pub/patch-o-matic-ng/snapshot/patch-o-matic-ng-20080405.tar.bz2
+tar -xjf patch-o-matic-ng-20080405.tar.bz2
+mv patch-o-matic-ng-20080405 patch-o-matic-ng
+
+apt-get source iptables
+wget ftp://ftp.icm.edu.pl/pub/Linux/kernel/v2.6/linux-2.6.24.4.tar.gz
+tar -xzf linux-2.6.24.4.tar.gz
+mv linux-2.6.24.4 2.6.24
+cp /boot/config-2.6.24-1-686 $KERNEL_DIR/.config
+
+#############
+###  IMQ  ###
+#############
+patch -p0 &lt; linux-imq.diff
+patch -p0 &lt; iptables-imq.diff
+
+#######################
+###  patch-o-matic  ###
+#######################
+pushd patch-o-matic-ng;
+./runme pending
+
+## base ##
+# dopasowywanie u32; od 2.6.23 w jajku
+#./runme u32
+# grupy adresów obsługiwane programem ipset
+./runme set
+
+## extra ##
+# ustawianie trasy routibgu z poziomu iptables
+./runme ROUTE
+
+## external ##
+./runme --download
+# masowe markowanie
+./runme IPMARK
+# reguły filtrowania true/false sterowanego przec /proc
+./runme condition
+# limity połączeń; od 2.6.23 w jajku
+#./runme connlimit
+# filtrowanie po czasie
+./runme time
+popd
+
+############################
+###  budowanie iptables  ###
+############################
+pushd $IPTABLES_DIR
+chmod +x $IPTABLES_DIR/extensions/.IMQ-test*
+debchange -l "imq" "IMQ"
+dpkg-buildpackage -rfakeroot
+popd
+
+#########################
+###  budowanie jądra  ###
+#########################
+pushd $KERNEL_DIR
+make oldconfig;
+vi .config
+make-kpkg oldconfig
+make-kpkg clean
+fakeroot make-kpkg --revision imq1 --initrd kernel_image
+</pre>
+
+<p>Altenatyną drogą (bardziej szczegułowo opisywaną na <doc url="http://wiki.debian.org/HowToRebuildAnOfficialDebianKernelPackage">debianowym wiki</doc>) byłoby:</p><pre>
+apt-get source linux-2.6_3.2.6-1
+dpkg-source -x linux-2.6_3.2.6-1.dsc
+cd linux-2.6-3.2.6
+fakeroot make -f debian/rules.gen setup_amd64_none
+# pachte zmiany konfigu (w debian/build/...)
+# ewntualne zmiany w makefile (cel binary-arch_amd64_none) aby budować tylko tą paczkę co potrzebujemy
+fakeroot make -f debian/rules.gen binary-arch_amd64_none
+# jeżeli chemy tylko debugować jakiś moduł to możemy komędę tę przerwać w okolicy:
+#  env -u ABINAME -u ABINAME_PART -u ARCH -u FEATURESET -u FLAVOUR -u VERSION -u LOCALVERSION DISTRIBUTION_OFFICIAL_BUILD=1 DISTRIBUTION_UPLOADER=ben@decadent.org.uk DISTRIBUTION_VERSION="3.2.6-1" make -C 'debian/build/build_amd64_none_amd64
+# wykonać ta komendę manualnie i budować moduły z użyciem normalnego make /katalog/modul.ko
+</pre>
+</article>

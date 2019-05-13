@@ -1,0 +1,17 @@
+<article>
+<title>JID aliases (ejabberd)</title>
+
+<p>Pomimo podobieństw w sposobie adresacji do poczty elektronicznej, w przypadku XMPP trudno jest wymyślić działanie aliasów analogicznych do aliasów pocztowych. Problemem jest czy i jak z aliasów ma być wysyłana widoczność - jeżeli tak samo jak z konta głównego to część zastosowań traci sens oraz to czy ma być wspólna lista kontaktów dla aliasów i konta głównego czy rozdzielne - przy wspólnej także niektóre zastosowania aliasów tracą sens. Natomiast jeżeli zdecydujemy się na oddzielną prezentację i oddzielne listy kontaktów to dochodzimy do przedstawionego tutaj rozwiązania kilku kont o wspólnym haśle i opcjonalnym przekazywaniu wiadomości off-line lub ich kopii na konto główne. W przypadku nielogowania się na takie konta i korzystania z przekazania wiadomości offline, mamy analogiczne rozwiązanie jak opracowane prze zemnie metody uzyskania aliasów w jabberd i jabberd2 (szukaj w archiwum). Warto także zainteresować się stanowiącym część ejabberd'a "mod_shared_roster"</p>
+
+<p>Kontami podstawowymi są konta o nazwach odpowiadających kontu shell'owemu (autoryzacja PAM), ponadto dla każdego z takich kont określona jest domena podstawowa. Aliasy tworzone są na podstawie pliku tekstowego zawierającego wpisy postaci:<br />
+	<code>aliasname aliasdomain realname realdomain aliasflag</code><br />
+Gdzie można używać <code>*</code> po lewej stronie (dowolny użytkownik/domena) i <code>%</code> po prawej stronie (podstawienie dopasowywanej nazwy nazwy użytkownika/domeny), natomiast aliasflag określa na które z kont mają trafiać wiadomości off-line.</p>
+
+<p>Konta aliasowe umożliwiają logowanie, posiadają własny roadster, natomiast presence wysyłany jest tylko w przypadku zalogowania bezpośrednio na konto aliasowe. Dokładniejszy opis w skrypcie przetwarzającym ten plik na potrzeby ejabberda - <id_link id="ejabberd_alias_check.sh">ejabberd_alias_check.sh</id_link> (w skrypcie tym należy także ustalić ścieżkę do pliku aliasów). Na system oprócz wspomnainego skryptu składają się dwa patch'e:</p>
+<ul>
+	<li><a class="int" href="ejabberd_alias_check.diff">ejabberd_alias_check.diff</a> - umożliwiający logowanie się na aliasowe konta definiowane w stosownym pliku, patch jest przystosowany do łatania http://ejabberd.jabber.ru/pam można go jednak dostosować do innych modułów autoryzacji, patch wymaga "ejabberd_alias_check.sh" i podania ścieżki dostępowej do niego w kodzie</li>
+	<li><a class="int" href="ejabberd_alias_forward.diff">ejabberd_alias_forward.diff</a> - implementuje opcjonalne przekazywanie oryginału lub kopii wiadomości otrzymanej na alias na konto podstawowe, docelowo ma być zastąpiony AMP (XEP-0079), patch wymaga "ejabberd_alias_check.sh" i podania ścieżki dostępowej do niego w kodzie</li>
+</ul>
+
+<p>Polecam także mój system <id_link id="xmpp_smtp">powiadomień XMPP/SMTP</id_link> zawierający m.in. łatką "ejabberd_log_offline_message.diff" powodującą zapisywanie wiadomości trybu offline także do plików tekstowych, które wykorzystuje w moim systemie do przesyłania powiadomień o nowych IM na e-mail.</p>
+</article>

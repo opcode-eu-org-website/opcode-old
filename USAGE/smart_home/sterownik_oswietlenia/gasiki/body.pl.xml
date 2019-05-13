@@ -1,0 +1,16 @@
+<article>
+<title>Dostosowanie do obciążeń indukcyjnych - gasiki RC</title>
+
+<p>Projekty modułów triakowych uwzględniają (opcjonalne) gasiki RC, zrealizowanie których powinno umożliwić stosowanie sterownika z obciążeniem indukcyjnym (<tmp>testy zostaną przeprowadzone wkrótce</tmp>). Układ RC (C6, R6 na schemacie wersji <sch_link name="modul-triak-PWM">PWM</sch_link> i <sch_link name="modul-triak-no_PWM">ON/OFF</sch_link>) włączony szeregowo do triaka pełni rolę ogranicznika przepięć oraz zapewnia poprawność wyłączenia triaka. W projekcie przewidziano także opcjonalne zabezpieczenie przed wyzwoleniem układu prądami pojemnościowymi (R7) oraz gasik optotriaka (C8 wraz z R1).</p>
+
+<p>Przy stosowaniu tego typu układów należy zapewnić rezystor odpowiedniej mocy oraz (aby uniknąć bzyczenia) kondensator na napięcie przemienne (lub odpowiednio duże napięcie). W przypadku gdy prąd pobierany przez gasik jest problemem można rozważyć użycie drugiego triaka lub przekaźnika (połączonego szeregowo i załączanego wcześniej a odłączanego później) nie posiadającego takiego układu.</p>
+
+<p>W projekcie <sch_link name="modul-triak-PWM">wersji PWM</sch_link> przewidziano także opcjonalny układ filtra LC (L9, C9), który zabezpiecza przed propagowaniem zakłóceń do sieci energetycznej gdy na skutek regulacji PWM następuje systematyczne załączanie odbiornika znacznej mocy nie w zerze.</p>
+
+<p>Zobacz w sieci: 
+	<doc url="http://www.elektroda.pl/rtvforum/topic639040.html">Jak działa układ gasikowy do stycznika?</doc>,
+	<doc url="http://www.elektroda.pl/rtvforum/viewtopic.php?t=53822">dwojnik RC do triaka (obciaz. indukcyjne)</doc>,
+	<doc url="http://www.elektroda.pl/rtvforum/topic920408.html">Triak, sterowanie fazowe i gasiki RC</doc>,
+	<doc url="http://www.elenota.pl/datasheet-pdf/31436/ON-Semiconductor/AN1048">AN1048/D - RC Snubber Networks For Thyristor Power Control and Transient Suppression</doc>,
+	<doc url="http://www.elenota.pl/datasheet-pdf/6953/Fairchild/AN-3008">Application Note AN-3008 RC Snubber Networks for Thyristor Power Control and Transient Suppression</doc></p>
+</article>

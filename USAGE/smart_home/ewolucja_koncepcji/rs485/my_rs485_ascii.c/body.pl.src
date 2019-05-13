@@ -1,0 +1,411 @@
+/** plik z funkcjami do obsługi mojego formatu komunikatów RS485
+ *  przeznaczony dla mikrokontrolerów AVR
+ **/
+
+#ifndef MY_ADDRES
+#	error "You must define MY_ADDRES"
+#endif
+
+/// domyślne ustawienie BAUD (9600 przy 3 MHz, 9600 przy 8 MHz, 300 przy 1 MHz)
+#ifndef UBRRL_VAL
+#	if   F_CPU == 3000000UL
+#		define UBRRH_VAL 0
+#		define UBRRL_VAL 19
+#	elif F_CPU == 8000000UL 
+#		define UBRRH_VAL 0
+#		define UBRRL_VAL 51
+#	elif F_CPU == 1000000UL
+#		define UBRRH_VAL 0
+#		define UBRRL_VAL 207
+#		warning "BAUD = 300 < 9600"
+#	else
+#		error "Nieznane ustawienie UBRR dla zadanego F_CPU"
+#	endif
+#endif
+
+/// dodatkowe opóżnienie po włączeniu nadajnika RS485 (dla half duplex)
+// wartości w ms od 0.004 do 32 (przy zegarze pomiędzy 1MHz a 8MHz)
+#ifndef RS_NO_WAIT_AFTER_ENABLE
+#	ifndef RS_WAIT_AFTER_ENABLE
+#		define RS_WAIT_AFTER_ENABLE 0.5
+#	endif
+#endif
+
+/// dodatkowe opóżnienie między znakami (gdy odbiorca nie nadąrza z prędkością bitrate)
+// wartości w ms od 0.004 do 32 (przy zegarze pomiędzy 1MHz a 8MHz)
+#ifndef RS_NO_WAIT_AFTER_CHAR
+#	ifndef RS_WAIT_AFTER_CHAR
+#		define RS_WAIT_AFTER_CHAR 20.0
+#	endif
+#endif
+
+/// obsługa włączania i wyłączania nadajnika RS485
+#ifndef RS_EABLE_TX
+#	if !defined(DRIVER_CTRL_PORT) || !defined(DRIVER_CTRL_PIN)
+#		error "You must define RS_EABLE_TX  or  DRIVER_CTRL_PORT and DRIVER_CTRL_PIN"
+#	endif
+#	define  RS_EABLE_TX    DRIVER_CTRL_PORT = DRIVER_CTRL_PORT | (1 << DRIVER_CTRL_PIN);
+#endif
+#ifndef RS_DISABLE_TX
+#	if !defined(DRIVER_CTRL_PORT) || !defined(DRIVER_CTRL_PIN)
+#		error "You must define RS_DISABLE_TX  or  DRIVER_CTRL_PORT and DRIVER_CTRL_PIN"
+#	endif
+#	define  RS_DISABLE_TX  DRIVER_CTRL_PORT = DRIVER_CTRL_PORT & ( ~(1 << DRIVER_CTRL_PIN));
+#endif
+
+/// obsluga restartowania watchdoga max RESET_WATCHDOG razy
+#ifdef RESET_WATCHDOG
+	extern uint8_t watchdog_cnt;
+#endif
+
+
+/** obsługa przerwania związanego z odbiorem danych z portu szeregowego
+ *  gdy skompletyujemy cała komendę wywołujemy:
+ *    void execute_rs_cmd(uint8_t cmd, uint8_t addr, uint8_t param, uint8_t uart_decode_mode)
+ *  która musi być zdefiniowana w programie sterownika danego układu
+ *
+ *  FORMAT TRANSMISJI:
+ *      @adres#subadres#komenda#parametr;
+ *    LUB
+ *      @adres#subadres#komenda;
+ *    GDZIE: adres, subadres, komenda, parametr -> liczba z zakresu 0-255 zapisana dziesiętnie jako ASCII
+ *
+ *  (ALTERNATYWNY ZNAKOWY) FORMAT TRANSMISJI:
+ *      @adres%komendaparametr
+ *    GDZIE:
+ *      adres -> liczba z zakresu 0-255 zapisana dziesiętnie jako ASCII
+ *      komenda, parametr -> pojedyńcze znaki ASCII (każdy poza @)
+ **/
+void execute_rs_cmd(uint8_t cmd, uint8_t addr, uint8_t param, uint8_t uart_decode_mode);
+volatile uint8_t uart_decode_mode;
+uint8_t addr_ind, addr, cmd, param;
+ISR(USART_RXC_vect) {
+	cli();
+	uint8_t uart_buf = UDR;
+	
+	/// dekodowanie komendy
+	if (uart_buf == '@') {
+		/// poczatek nowej komendy
+		uart_decode_mode = 1;
+		addr = 0;
+		cmd = 0;
+		param = 0;
+	} else if (uart_decode_mode == 1) {
+		/// jest nadawany adres
+		if (uart_buf == '#') {
+			// koniec adresu
+#ifdef MY_MULTICAST_ADDRES
+			if (addr == MY_ADDRES || addr == MY_MULTICAST_ADDRES) {
+#else
+			if (addr == MY_ADDRES) {
+#endif
+				// bedziemy dekodowac sub-adres
+				uart_decode_mode = 2;
+			} else {
+				// to nie byl nasz adres (ale nie koniec transmisji) wiec czekamy na @ lub ;
+				uart_decode_mode = 0xf0;
+			}
+			addr = 0;
+		} else if (uart_buf == '%') {
+			// koniec adresu
+#ifdef MY_MULTICAST_ADDRES
+			if (addr == MY_ADDRES || addr == MY_MULTICAST_ADDRES) {
+#else
+			if (addr == MY_ADDRES) {
+#endif
+				// bedziemy dekodowac komendą w postaci znaku alfanumerycznego ASCII
+				uart_decode_mode = 10;
+			} else {
+				// to nie byl nasz adres (ale nie koniec transmisji) wiec czekamy na @ lub ;
+				uart_decode_mode = 0xf0;
+			}
+			addr = 0;
+		} else if (uart_buf == ';') {
+			uart_decode_mode = 0; // wykrywanie konca transmisji nawet gdy nie do nas na potrzeby sterowania nadajnikiem
+		} else {
+			// dekodowanie adresu
+			addr = addr * 10 + uart_buf - '0';
+		}
+	} else if (uart_decode_mode == 2) {
+		/// jest nadawany sub-adres
+		if (uart_buf == '#') {
+			// koniec subadresu
+			uart_decode_mode = 3;
+		} else if (uart_buf == ';') {
+			uart_decode_mode = 0; // wykrywanie konca transmisji nawet gdy nie do nas na potrzeby sterowania nadajnikiem
+		} else {
+			// dekodowanie sub-adresu
+			addr = addr * 10 + uart_buf - '0';
+		}
+	} else if (uart_decode_mode == 3) {
+		/// jest nadawana komenda
+		if (uart_buf == '#') {
+			// komenda ma parametr
+			uart_decode_mode = 4;
+		} else if (uart_buf == ';'){
+			// komenda do wykonania
+			uart_decode_mode = 0xff;
+		} else {
+			// dekodowanie komendy
+			cmd = cmd * 10 + uart_buf - '0';
+		}
+	} else if (uart_decode_mode == 4) {
+		/// jest nadawany parametr
+		if (uart_buf == ';') {
+			uart_decode_mode = 0xff;
+		} else {
+			// dekodowanie parametru
+			param = param * 10 + uart_buf - '0';
+		}
+	} else if (uart_decode_mode == 10) {
+		cmd = uart_buf;
+		uart_decode_mode = 11;
+	} else if (uart_decode_mode == 11) {
+		param = uart_buf;
+		uart_decode_mode = 0xfe;
+	} else if (uart_buf == ';') {
+		uart_decode_mode = 0; // wykrywanie konca transmisji nawet gdy nie do nas na potrzeby sterowania nadajnikiem
+	}
+	
+	/// wykonanie komendy
+	if (uart_decode_mode > 0xf0) {
+		// wykonaj zleconą komendę
+		execute_rs_cmd(cmd, addr, param, uart_decode_mode);
+		// zaczynamy dekodowanie od poczatku
+		uart_decode_mode = 0;
+	}
+	sei();
+}
+
+
+/** obsługa inicjalizacji portu szeregowego
+ *  funkcja powinna być wywołana w inicjalizującej częśći main()
+ **/
+void rs_init() {
+	// włączenie nadajnika, odbionika UART wraz z generowaniem przerwań
+	UCSRB = (1 << TXEN) | (1 << RXEN) | (1 << RXCIE) | (1 << TXCIE);
+	// ustawienie prędkości (BAUD), UBRR = F_CPU / (16*BAUD) -1
+	UBRRH = UBRRH_VAL;
+	UBRRL = UBRRL_VAL;
+	uart_decode_mode = 0;
+}
+
+
+/** obsługa włączania i wyłączania nadajnika half-duplex
+ *  włącznie przeprowadzane jest jawnym wywołaniem rs_enable()
+ *  wyłączanie jest obsługiwane w przerwaniu związanym z końcem transmisji
+ *  wymaga aby rs_disable było uprzednio ustawione na 1
+ */
+volatile uint8_t rs_can_disable;
+void rs_enable() {
+	// zabraniamy wyłączania w przerwaniu
+	rs_can_disable = 0;
+	
+	// włączamy nadajnik
+	RS_EABLE_TX
+	
+#ifdef RS_WAIT_AFTER_ENABLE
+	// czekamy chwile aż nadajnik będzie gotowy
+	_delay_ms( RS_WAIT_AFTER_ENABLE );
+#endif
+}
+void rs_disable() {
+	// zezwalamy na wyłączenie w przerwaniu po zakończeniu nadawania
+	rs_can_disable = 1;
+	
+	while ( !( UCSRA & (1<<UDRE)) ); UDR = ';'; // FIXME sztuczka zapewniajaca wylaczenie nadajnika
+	
+	// jeżeli nadawanie już się zakończyło to od razu wyłączamy
+	if (UCSRA & (1 << TXC))
+		RS_DISABLE_TX
+}
+ISR(USART_TXC_vect) {
+	// w przerwaniu związanym z zakończeniem transmisji
+	// jeżeli mamy zgodę to wyłączamy nadajnik
+	if (rs_can_disable == 1) RS_DISABLE_TX
+}
+
+
+/** obsługa wysyłania - znaku oraz liczby 8 bitowej bez znaku
+ *  do zewnętrznego użycia
+ *    rs_switch_and_send_char()
+ *  oraz 
+ *    rs_switch_and_send_8bit_num()
+ * gdyż tylko one zapewniają właczenie nadajnika
+ **/
+void rs_send_char(uint8_t byte) {
+	// czekamy na miejsce w buforze
+	while ( !( UCSRA & (1<<UDRE)) );
+	// zlecamy bajt do wysyłania
+	UDR = byte;
+#ifdef RS_WAIT_AFTER_CHAR
+		_delay_ms( RS_WAIT_AFTER_CHAR );
+#endif
+#ifdef RESET_WATCHDOG
+	if (watchdog_cnt < RESET_WATCHDOG) {wdt_reset(); watchdog_cnt++;}
+#endif
+
+}
+
+void rs_switch_and_send_char(uint8_t byte) {
+	rs_enable();
+	rs_send_char(byte);
+	rs_disable();
+}
+
+void rs_send_8bit_num(uint8_t byte) {
+	uint8_t is_send=0;
+	uint8_t dzielnik = 100;
+	uint8_t cyfra, i;
+	
+	// wysyłamy kolejne znaki
+	for(i=0; i<3; i++) {
+		cyfra = (byte/dzielnik)%10;
+		dzielnik=dzielnik/10;
+		
+		if(is_send != 0 || cyfra != 0 || i == 2) {
+			rs_send_char(cyfra + '0');
+			is_send=1;
+		}
+	}
+}
+
+void rs_switch_and_send_8bit_num(uint8_t byte) {
+	rs_enable();
+	rs_send_8bit_num(byte);
+	rs_disable();
+}
+
+/** obsługa potwierdzania odbioru wiadomości **/
+void rs_switch_and_send_ack(uint8_t byte) {
+	rs_enable();
+	rs_send_char(0x06);
+	rs_send_char(byte);
+	rs_disable();
+}
+
+/** obsługa wysyłania komendy RS
+ *  jako że jest to nadawanie inicjalizowane przez nas sprawdzamy zgodę
+ *  jednostki zarządzającej magistralą
+ **/
+#ifdef DRIVER_PERMIT_PORT
+int8_t rs_send_cmd(uint8_t addr, uint8_t subadd, uint8_t cmd, uint8_t param, uint8_t is_param, uint16_t timeout) {
+	while ( timeout && ( DRIVER_PERMIT_PORT & (1 << DRIVER_PERMIT_PIN) ) ) {
+		timeout--;
+	}
+	if ( DRIVER_PERMIT_PORT & (1 << DRIVER_PERMIT_PIN) ) {
+		// ndawanie z naszej inicjatywy dozowolone gdy stan niski na PD3
+		return -1;
+	}
+#else
+int8_t rs_send_cmd(uint8_t addr, uint8_t subadd, uint8_t cmd, uint8_t param, uint8_t is_param) {
+#endif
+	rs_enable();
+	
+	rs_send_char('@');
+	rs_send_8bit_num(addr);
+	rs_send_char('#');
+	rs_send_8bit_num(subadd);
+	rs_send_char('#');
+	rs_send_8bit_num(cmd);
+	if (is_param) {
+		rs_send_char('#');
+		rs_send_8bit_num(param);
+	}
+	rs_send_char(';');
+	
+	rs_disable();
+	
+	return 0;
+}
+
+#ifdef DRIVER_PERMIT_PORT
+int8_t rs_send_char_cmd(uint8_t addr, uint8_t cmd, uint8_t param, uint16_t timeout) {
+	while ( timeout && ( DRIVER_PERMIT_PORT & (1 << DRIVER_PERMIT_PIN) ) ) {
+		timeout--;
+	}
+	if ( DRIVER_PERMIT_PORT & (1 << DRIVER_PERMIT_PIN) ) {
+		// ndawanie z naszej inicjatywy dozowolone gdy stan niski na PD3
+		return -1;
+	}
+#else
+int8_t rs_send_char_cmd(uint8_t addr, uint8_t cmd, uint8_t param) {
+#endif
+	rs_enable();
+	
+	rs_send_char('@');
+	rs_send_8bit_num(addr);
+	rs_send_char('%');
+	rs_send_char(cmd);
+	rs_send_char(param);
+	rs_send_char(';'); // dla automatycznej detekcji konca transmisji
+	
+	rs_disable();
+}
+
+
+#if 0
+ROZWAŻANE KONCEPCJE POPRAWY TEJ METODY TRANSMISJI:
+	// PB0
+	#define UART_CTRL_PORT  PORTB
+	#define UART_CTRL_BIT   0
+	
+	void uart_send(char c) {
+		uint8_t sreg;
+		
+		// wylaczamy przerwania
+		sreg = SREG;
+		cli();
+		
+		// wlaczamy nadajnik
+		UART_CTRL_PORT |= 1 << UART_CTRL_BIT;
+		
+		// czekamy na miejsce w buforze nadawczym
+		while ( !( UCSRA & (1<<UDRE)) );
+		
+		// TODO: tu trzeba czy nie trzeba czekac ???
+		
+		// zapisujemy do bufora nadawczego
+		UDR = c;
+		
+		// czyscimy TXC
+		UCSRA &= ~(1<<UDRE);
+		
+		// przywracamy przerwania
+		SREG = sreg;
+	}
+	
+	ISR(USART_TXC_vect) {
+		// wylaczamy nadajnik
+		UART_CTRL_PORT &= ~(1 << UART_CTRL_BIT);
+	}
+
+	/*
+		#define UART_CTRL_PIN   PINB
+		#define UART_CTRL_DDR   DDRB
+		void uart_send(char c) {
+			cli();
+			if (! UART_CTRL_PIN & (1 << UART_CTRL_BIT)) {
+				UCSRB = (1 << TXEN) | (1 << RXEN) | (1 << RXCIE) | (1 << TXCIE);
+				UART_CTRL_PORT |= 1 << UART_CTRL_BIT;
+				_delay_ms( RS_WAIT_AFTER_ENABLE ); // to naprawdę potrzebne ???
+				UDR = c;
+			}
+			sei();
+		}
+		
+		void uart_send(char c) {
+			if (! (UCSRB & (1 << TXEN)) ) {
+				UART_CTRL_PORT |= 1 << UART_CTRL_BIT;
+				UCSRB |= (1 << TXEN) | (1 << TXCIE);
+			}
+			UDR = c;
+		}
+		ISR(USART_TXC_vect) {
+			// disable transmiter on AVR
+			UCSRB &= ~((1 << TXEN) | (1 << TXCIE));
+			// disable external transmiter
+			UART_CTRL_PORT &= ~(1 << UART_CTRL_BIT);
+		}
+	*/
+#endif

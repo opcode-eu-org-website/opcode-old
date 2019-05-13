@@ -1,0 +1,43 @@
+<article>
+<title>Tworzenie mirroru zainstalowanego systemu</title>
+
+<p>Jako że w systemach POSIXowatych "wszystko jest plikiem", zdecydowaną większość z nich możemy przenosić na inny sprzęt, powielać, backupować po prostu kopiując pliki (wraz z atrybutami). W celu wykonania kopii systemu na innym dysku/partycji (przeniesienia działającego systemu) należy najpierw utworzyć system plików na tym urządzeniu z wykorzystaniem stosownych narzędzi - <code>fdisk</code>, <code>mkfs</code>, <code>tune2fs</code>, następnie podmontować gdzieś ten system plików i przy pomocy <code>cp -a</code> skopiować pliki z starego na nowy dysk (warto tutaj skorzystać z symboli wieloznacznych basha np. <code>/[a-o]*</code> tak aby wyspecyfikować wszystkie katalogi za wyjątkiem /proc /sys oraz katalogu w którym podmontowaliśmy nowy system). Po skopiowaniu systemu należy odpowiednio zmodyfikować /etc/fstab na nowym systemie oraz konfigurację bootloadera.</p>
+
+<p>Najprostszą metodą stworzenia kopi zapasowej systemu czy też przeniesienia zainstalowanego systemu na kilka maszyn (nie muszą być nawet takie same) jest wykorzystanie programu tar oraz ssh do zdalnego zapisu/odczytu pliku kopi:</p>
+<pre>	# utworzenie kopii zapasowej
+	cd / &amp;&amp; tar -cf - --exclude="./proc/*" --exclude="./sys/*" --exclude="./dev/*" --exclude="./run/*" --exclude="./mnt/*" --exclude="./media/*" --exclude="./srv/*" --exclude="./home/*" --exclude="./tmp/*" . | ssh <samp>user@host</samp> 'cat &gt; <samp>/path/to/file.tar</samp>'
+	
+	# przywrócenie systemu
+	# uprzednio fdisk, mkfs, mount nowego FS
+	cd <samp>/mount/point/of/root/fs</samp> &amp;&amp; ssh <samp>user@host</samp> 'cat <samp>/path/to/file.tar</samp>' | tar --numeric-owner -xf -
+	grub-install --root-directory=<samp>/mount/point/of/root/fs</samp> --recheck <samp>/dev/device_witch_system</samp>
+	
+	# bezpośrednie kopiowanie pomiędzy dyskami (nowy zamontowany w /mnt):
+	cd / &amp;&amp; tar -cf - --exclude="./proc/*" --exclude="./sys/*" --exclude="./dev/*" --exclude="./run/*" --exclude="./mnt/*"  --exclude="./media/*" --exclude="./srv/*" --exclude="./home/*" --exclude="./tmp/*" . | tar --numeric-owner -C /mnt/ -xf -
+</pre>
+<p>W przypadku przenoszenia w ten sposób systemu na inną maszynę może być konieczna edycja plików konfiguracyjnych związanych z siecią (dla Debiana <kbd class="path">/etc/network/interfaces</kbd>, <kbd class="path">/etc/udev/rules.d/*-persistent-net.rules</kbd>, <kbd class="path">/etc/hosts</kbd>, <kbd class="path">/etc/hostname</kbd>, ...) oraz w przypadku specyficznych ustawień innych plików ...</p>
+
+<p>Oczywiście możliwe jest także kopiowanie całych urządzeń blokowych (z odmontowanymi systemami plików) przy pomocy <code>dd</code>. Tak powstały obraz dysku może zostać zamontowany bezpośrednio z postaci pliku. Przykład montowania (dla obrazu karty SD dla Raspberry Pi):</p>
+<pre>
+IMAGE=rpi.img
+MNT=/mnt
+
+# map image to loop device
+kpartx -va $IMAGE
+
+# get loop device name, and mount partitions
+DEV=/dev/mapper/`kpartx -l $IMAGE | awk '/^loop[0-9]/ { print gensub("^(loop[0-9]*)p.*$", "\\\1", "", $1); exit; }'`
+mount ${DEV}p2 $MNT
+mount ${DEV}p1 $MNT/boot
+
+# chroot
+chroot $MNT
+
+[...]
+
+# umount and remove map
+umount $MNT/boot
+umount $MNT
+kpartx -d $IMAGE
+</pre>
+</article>

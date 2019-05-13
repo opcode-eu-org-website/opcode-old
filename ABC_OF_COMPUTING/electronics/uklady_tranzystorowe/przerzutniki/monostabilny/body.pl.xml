@@ -1,0 +1,5 @@
+<article>
+<title>Monostabilny</title>
+<p class="center"><img_from_src name="przerzutnik_monostabilny" type="sch" alt="schemat ideowy prostego przerzutnika monostabilnego" /></p>
+<p>Układ służy do generacji impulsu trwającego ustaloną długość. Działa on podobnie jak przedstawiony przerzutnik bistabilny, z taką różnicą iż krótkotrwałe zwarcie wejścia do masy powoduje obniżenie potencjału bazy T2 o napięcie do jakiego został naładowany C1 (w normalnym stanie <eq>U<sub>CC</sub>-U<sub>BE</sub></eq>. Powoduje to zatkanie T2 i przewodzenie T1, następuje także ładowanie C1 z stopniowym zwiększaniem napięcia na bazie T2 aż do osiągnięcia sytuacji pierwotnej. Należy zwrócić uwagę że po zatkaniu T1 (zaprzestaniu generowania sygnału wyjściowego) układ nie osiągnął jeszcze gotowości do generacji następnego impulsu gdyż musi nastąpił ładowanie C1 przez RC1 (należy odczekać <eq_latex>t \gtrsim  5 \tau = 5 R_{C1} C_1</eq_latex>). Wadą takiego rozwiązania są duże ujemne napięcia na bazach tranzystorów w chwili przerzutu, co (przy większych napięciach zasilania) może doprowadzić do ich przebicia.</p>
+</article>

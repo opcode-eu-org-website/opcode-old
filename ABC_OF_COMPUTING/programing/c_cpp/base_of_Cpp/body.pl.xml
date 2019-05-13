@@ -1,0 +1,11 @@
+<article>
+<title>Podstawy programowania w C++</title>
+<ul>
+	<li><id_link id="ABC_OF_COMPUTING:programing:c_cpp:base_of_Cpp:in_out.cpp">in_out.cpp</id_link> - podstawy języka - standardowe wejście i wyjście, również odczyt i zapis plików w C++, w miejscu tym warto wspomnieć także o bibliotece ułatwiającej generowanie logów <homepage url="http://logging.apache.org/log4cxx/index.html">log4cxx</homepage> oraz boost:test ułatwiającym tworzenie testów aplikacji</li>
+	<li><id_link id="ABC_OF_COMPUTING:programing:c_cpp:base_of_Cpp:klasy.cpp">klasy.cpp</id_link> - podstawy programowania obiektowego w C++ (klasy, dziedziczenie, przeciążanie, ...)</li>
+	<li><id_link id="ABC_OF_COMPUTING:programing:c_cpp:base_of_Cpp:napisy.cpp">napisy.cpp</id_link> - napisy języka C oraz C++ - string, sstream, ...</li>
+	
+	<li><id_link id="ABC_OF_COMPUTING:programing:c_cpp:base_of_Cpp:szablony.cpp">szablony.cpp</id_link> - rozwinięcie programowania obiektowego w C++ (szablony, wyjątki, ...)</li>
+	<li><id_link id="ABC_OF_COMPUTING:programing:c_cpp:base_of_Cpp:stl.cpp">stl.cpp</id_link> - elementy biblioteki standardowej C++ (dynamiczne tablice, listy, algorytmy, ..., zobacz też: <wiki pl="Standard Template Library">Standard Template Library</wiki>)</li>
+</ul>
+</article>

@@ -1,0 +1,12 @@
+<article>
+<title>Konfiguracja i sztuczki z managerem okien</title>
+
+<p>Często pomimo zastosowania całkiem bogatych opcji konfiguracyjnych managera okien nie udaje się uzyskać pożądanego zachowania niektórych okien. Chyba najbardziej konfigurowalnym managerem okien jest kwin (np. w fluxboxie brakowało mi rozbudowanych opcji regulacji wielkości okna, możliwości wywołania programu po wyświetleniu nowego okna, a także zarządzania przyciskami na belce tytułowej dla poszczególnych okien - kwin też niestety tego nie posiada) i dlatego w tych przykładach oprę się na nim. Pomocne mogą się wtedy okazać programy takie jak: <code>devilspie</code> czy też <code>wmctrl</code> oraz ... system obsługi zdarzeń, który (przynajmniej w kde) nie tylko może odtworzyć dźwięk przy otwarciu okna ale również wykonać jakiś program.</p>
+
+<p><code>wmctrl</code> umożliwia m.in. przeniesienie wybranego okna na bieżący pulpit i aktywację go, ukrywanie i pokazywanie okien, ustawianie pomijania paska zadań, przypinanie okien. Na przykład poniższy kod spowoduje przeniesienie wszystkich okien Iceweasel na pulpit 4:</p>
+<pre>wmctrl -l | grep Iceweasel | while read id reszta; do wmctrl -i -r $id -t4; done</pre>
+
+<p>W <a class="int" href="./window_show_action.sh">skrypcie</a>, który wywoływany jest w <a class="int" href="./kwin.eventsrc">zdarzeniu</a> związanym z wyświetleniem nowego okna, jest on uruchamiany gdy wywołane było okno programu Psi i aktywuje je przełączając się na jego pulpit. Konieczność stosowania takiej sztuczki wynika z tego iż przy normalnej <a class="int" href="./kwinrulesrc">konfiguracji</a> kwin'a, gdy wymuszamy otwarcie na wskazanym pulpicie to przy wywoływaniu z tray'a nie następuje przełączenie na niego i niekiedy prowadzi to nawet do zgubienia tego okna. Trudniejsze do uzyskania (ale myślę że także możliwe) byłoby wymuszenie na kmail'u aby po wywołaniu z tray'a otwierał się na bieżącym pulpicie (czego w odróżnieniu od standardowego zachowania psi nie che normalnie robić; co najciekawsze np. w fluxboxie zachowanie jest dokładnie odwrotne).</p>
+
+<p>Przy grzebaniu w menagerze okien (czy wogóle środowisku graficznym) warto popatrzeć w pliki <kbd class="path">~/.profile</kbd>, <kbd class="path">~/.xprofile</kbd>, <kbd class="path">.Xmodmap</kbd>, <kbd class="path">.Xkbma</kbd>, <kbd class="path">.Xresources</kbd>, <kbd class="path">.xsession</kbd>, <kbd class="path">.xsessionrc</kbd>, <kbd class="path">.Xsession</kbd> oraz <kbd class="path">/etc/X11/Xsession*</kbd></p>
+</article>

@@ -1,0 +1,6 @@
+<article>
+<title>Stabilizatory z wzmacniaczem błędu</title>
+<p>Na trochę zbliżonej do źródła masy wirtualnej zasadzie funkcjonuje stabilizator z wzmacniaczem błędu (będący podstawą popularnych stabilizatorów scalonych). Często w układach takich spotyka się zamiast pojedynczego tranzystora układ Darlingtona (z tego względu iż tranzystory mocy mają kiepskie bety). Ponadto zastosowanie <eq>R<sub>2</sub></eq> umożliwia stosowanie źródeł referencyjnych o napięciu inne niż chcemy osiągnąć na wyjściu, co pozwala także na zmniejszenie ich prądożerności. Funkcję wzmacniacza błędu może pełnić np. wzmacniacz operacyjny lub różnicowy. Często spotkać można różnicowy z lustrem gdyż pozwala to na osiągnięcie małego drop-out'u (różnicy między minimalnym napięciem zasilania a napięciem wyjściowym).</p>
+
+<p class="center"><img_from_src name="stabilizator_z_wmacniaczem_bledu" type="sch" alt="schemat ideowy stabilizatora z wzmacniaczem błędu" /></p>
+</article>

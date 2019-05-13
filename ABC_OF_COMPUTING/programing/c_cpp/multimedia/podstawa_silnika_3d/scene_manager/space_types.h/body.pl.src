@@ -1,0 +1,65 @@
+#ifndef SPACE_TYPES_H
+#define SPACE_TYPES_H
+
+#include <stddef.h>
+
+namespace SpaceTypes {
+	struct Line {
+		float a;
+		float b;
+		int z;
+		bool is_const_z; // const z from a to b at z
+	};
+	
+	template <typename T> class Array2D {
+		protected:
+			// wymiary tablicy
+			int num_cols;
+			int num_rows;
+			T* addr;
+		public:
+			Array2D(int num_rows, int num_cols) {
+				this->num_rows = num_rows;
+				this->num_cols = num_cols;
+				this->addr = (T*)malloc( size() );
+			}
+			~Array2D() {
+				free(this->addr);
+			}
+		
+			T* base() {
+				return addr;
+			}
+			size_t size() {
+				return num_cols * num_rows * sizeof(T);
+			}
+			size_t count() {
+				return num_cols * num_rows;
+			}
+			T* get_cell(int row, int col) {
+				return addr + row * num_cols + col;
+			}
+			void set_cell(int row, int col, T val) {
+				*(addr + row * num_cols + col) = val;
+			}
+	};
+	
+	class BoolArray2D : public Array2D<bool> {
+		public:
+			BoolArray2D(int num_rows, int num_cols) : Array2D<bool>(num_rows, num_cols) {};
+			// wykona się destruktor rodzica więc my swojego nie potrzebujemy
+			
+			// funkcja sprawdza wartosc logiczna z podanej pozycji tablicy
+			// jezeli jest prawda to zmienia na false i zwraca prawde
+			// w przeciwnym razie zwraca false
+			bool check_and_false(int row, int col) {
+				bool *ptr = addr + row * num_cols + col;
+				if (*ptr) {
+					*ptr = false;
+					return true;
+				}
+				return false;
+			}
+	};
+}
+#endif

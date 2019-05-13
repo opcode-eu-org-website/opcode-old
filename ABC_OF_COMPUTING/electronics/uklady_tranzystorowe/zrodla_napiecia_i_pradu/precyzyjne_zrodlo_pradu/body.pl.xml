@@ -1,0 +1,6 @@
+<article>
+<title>Precyzyjne źródło prądowe</title>
+<p>Przy pomocy wzmacniacza operacyjnego i tranzystora jesteśmy w stanie zrealizować precyzyjne (odporne na wahania temperaturowe itp) źródło prądowe, tak prądu wpływającego (NPN) jak i wypływającego (PNP). Ponadto możemy w łatwy, napięciowy sposób regulować prąd tego źródła (poprzez zmianę <eq>V<sub>ref</sub></eq>.</p>
+
+<p class="center"><img_from_src name="zrodlo_pradowe_precyzyjne" type="sch" alt="schemat ideowy źródła prądowego na WO" /></p>
+</article>

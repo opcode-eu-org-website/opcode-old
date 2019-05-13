@@ -1,0 +1,46 @@
+/*
+ * plik ma na celu prezentację ciekawych zagadnień z programowania w języku C / C++
+ * prezentuje metody komunikacji sieciowej (TCP/IP) - program odbierający dane przez UDP
+ *
+ */
+
+#include <sys/socket.h>
+#include <netinet/ip.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+
+#define _LOCAL_PORT_ 4033
+#define _BUF_SIZE_ 255
+
+main() {
+	int res;
+	char buf[_BUF_SIZE_];
+	
+	// gniazdo ...
+	int sh = socket(PF_INET, SOCK_DGRAM, 0);
+	if (sh<0) {
+		fprintf(stderr, "%s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+	// przypisanie adresu ...
+	struct sockaddr_in addr;
+	addr.sin_family=PF_INET;
+	addr.sin_port=htons(_LOCAL_PORT_);
+		// host to network short (porzadek bajtow) ... sa tez dla long i odwrotne ...
+	addr.sin_addr.s_addr=INADDR_ANY;
+
+	res=bind(sh, (struct sockaddr *) &addr, sizeof(struct sockaddr_in));
+
+	// odbior danych ...
+	struct sockaddr_in from;
+	socklen_t fromlen;
+	res=recvfrom(sh, buf, _BUF_SIZE_, 0, (struct sockaddr *) &from, &fromlen);
+
+	printf("%s\n", buf);
+
+	// zamkniecie gniazda
+	close(sh);
+}

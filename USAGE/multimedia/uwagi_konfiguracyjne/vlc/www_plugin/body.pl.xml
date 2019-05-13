@@ -1,0 +1,29 @@
+<article>
+<title>Wtyczka dla przeglądarek Mozilla</title>
+
+<p>Możemy osadzić odtwarzacz VLC na stronie WWW dzięki <homepage url="http://www.videolan.org/doc/vlc-user-guide/en/ch07.html">Mozilla plugin</homepage>. Do tego celu można użyć następującego kodu:</p>
+
+<pre>
+	&lt;object id="filmik1" data="<var>URL://pliku.lub.strumienia/ktory.chemy.wyswietlic</var>"
+		type="application/x-vlc-plugin" width="<var>426</var>" height="<var>316</var>"
+	&gt;&lt;/object&gt;
+</pre>
+
+<p>Takim obiektem możemy sterować przy pomocy javascript-u - np. umieścić podpisy oparte o wartość atrybutu id (skrypt szczególnie przydatny gdy na jednej stronie mamy kilka takich obiektów):</p>
+
+<pre>
+	&lt;script language="Javascript"&gt;
+		function putsNames() {
+			var vlc_video_entry = document.getElementsByTagName("object");
+			for(i=0; i &lt; vlc_video_entry.length; i++) {
+				vlc_video_entry[i].video.marquee.text = vlc_video_entry[i].id;
+				vlc_video_entry[i].video.marquee.position = "TOP";
+				vlc_video_entry[i].video.marquee.opacity = 255;
+				vlc_video_entry[i].video.marquee.color = 579329;
+				//vlc_video_entry[i].video.marquee.size = 2;
+				vlc_video_entry[i].video.marquee.enable();
+			}
+		}
+	&lt;/script&gt;
+</pre>
+</article>

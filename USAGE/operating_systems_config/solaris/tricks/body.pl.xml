@@ -1,0 +1,20 @@
+<article>
+<title>Sztuczki</title>
+
+<p>Często na Solarisie w vim w trybie edycji niepoprawnie działają strzałki - aby to naprawić należy do <kbd class="path">~/.vimrc</kbd> dodać:</p><pre>:map OD &lt;Right&gt;
+:map OC &lt;Left&gt;
+:map OB &lt;Down&gt;
+:map OA &lt;Up&gt;</pre>
+
+<p>Może się jednak zdarzyć że gdy vim uruchamiamy jako vi te kombinacje nie będą działać wtedy do <kbd class="path">~/.bashrc</kbd> należy dodać:</p><pre>VIM=`which vim`
+if [ -x $VIM ]; then
+	alias 'vi'="$VIM"
+fi</pre>
+
+<p>Jeżeli korzystamy z tcsh (lub csh) należy odpowiedni konfig przygotować dla tej powłoki, chyba że wolimy basha (a w passwd musi być tcsh bo np. na części maszyn basha nie ma) to możemy wpisać do <kbd class="path">~/.login</kbd>:</p><pre>env | grep DISPLAY > /dev/null
+if ( $? != 0 &amp;&amp; -x /bin/bash ) then
+	exec /bin/bash $argv
+endif</pre>
+
+<p>Solarisowy <strong>cron</strong> wymaga aby użytkownik który z niego korzysta miał w <kbd class="path">/etc/shadow</kbd> w polu hasła coś innego niż <code>*LK*</code>, logi crona można znaleźć w <kbd class="path">/var/cron/log</kbd>.</p>
+</article>

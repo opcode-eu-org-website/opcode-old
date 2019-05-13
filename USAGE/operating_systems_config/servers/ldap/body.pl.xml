@@ -1,0 +1,13 @@
+<article>
+<title>Sieciowe bazy danych użytkowników - NIS, LDAP</title>
+
+<p>Tradycyjnie udostpnianiem danych użytkowników dla wielu maszyn zajmował się <wiki pl="Network Information Service">NIS</wiki>. Współcześnie jego miejsce coraz częściej zajmuje <wiki pl="Lightweight Directory Access Protocol">LDAP</wiki>.</p>
+
+<p>Konfiguracja oby tych machanizmów może być oparta na pliku <kbd class="path">/etc/nsswitch.conf</kbd> w którym określamy źródła pochodzenia (takie jak file, nis, ldap, dns, ...) dla różnych usług informacyjnych (baza hostów, baza protokołów, baza użytkowników, ...). Możliwe jest także wykorzystanie PAM do konfiguracji tych mechanizów.</p>
+
+<p>O ile sam LDAP pozwala na zagnieżdzanie grup w grupach itp to jest to ciężko zastoswać do UNIXowego modelu grup uzytkowników, jednak w przypadku takiej potrzeby można stworzyć narzędzie zamieniające taką zagnierzoną strukturę na płaską listę wielu grup do których przynależy użytkownik.</p>
+
+<p>Bazę LDAP możemy przeszukiwać za pomocą komendy <code>ldapsearch</code>, natomiast pełną informację np. o bazie passwd możemy uzyskać poprzez <code>getent passwd</code> (jest to odpowiednik znanego z systemów NIS <code>ypcat</code>).</p>
+
+<p>Zobacz w Sieci: <doc url="http://wiki.debian.org/LDAP/NSS">LDAP/NSS - Debian Wiki</doc>, <doc url="http://wiki.debian.org/LDAP/PAM">LDAP/PAM - Debian Wiki</doc></p>
+</article>

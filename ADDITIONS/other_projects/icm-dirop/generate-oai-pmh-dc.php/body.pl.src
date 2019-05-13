@@ -1,0 +1,67 @@
+<?php
+
+/** KONFIG **/
+// łączenie się z bazą danych
+define('CONNECTION_STRING', 'host=localhost port=5432 dbname=dirop user=diropusr');
+// URL tego pliku - poprzedza ściezki wykozystywane w systemie
+define('DIROP_SCRIPT_PATH', '/pl');
+// URL serwera na którym zainstalowany jest system
+define('DIROP_FULL_URL_PREFIX', 'http://dir.icm.edu.pl');
+
+
+
+if ($_SERVER["argc"] == 2 ) {
+	$volume_id = $_SERVER["argv"][1];
+} else {
+	echo "USAGE: php " . $_SERVER["argv"][0] . " VOLUME\n";
+	exit;
+}
+
+define('BOOK_INFO_SELECT', 'b.book_id, b.single_vid, v.volume_id, b.title AS "b.title", b.url AS "b.url", v.title AS "v.title", v.url AS "v.url", dc_title, dc_creator, dc_subject_and_keywords, dc_description, dc_publisher, dc_contributor, dc_date, info_category, b.extra AS "b.extra"');
+define('BOOK_INFO_SELECT_FROM', 'book AS b JOIN volume AS v ON v.book_id=b.book_id');
+
+$baza_danych = pg_connect(CONNECTION_STRING) or error('db_connect');
+
+$SQL = 'SELECT '. BOOK_INFO_SELECT .' FROM '. BOOK_INFO_SELECT_FROM ." WHERE v.volume_id=$volume_id";
+$result = pg_query($baza_danych, $SQL) or error('db_query', $SQL);
+
+$num_rows = pg_num_rows($result);
+if ($num_rows == 1) {
+	$BOOK_INFO = pg_fetch_array($result, null, PGSQL_ASSOC);
+	
+	/// ustawienie zmiennych zależnych od wielovolumowości
+	if ($BOOK_INFO['single_vid'] >= -1) {
+		$name = $BOOK_INFO['v.url'] . ".xml";
+		$url = DIROP_FULL_URL_PREFIX . DIROP_SCRIPT_PATH . "/" . $BOOK_INFO['v.url'];
+	} else {
+		$name = $BOOK_INFO['b.url'] . "-" . $BOOK_INFO['v.url'] . ".xml";
+		$url = DIROP_FULL_URL_PREFIX . DIROP_SCRIPT_PATH . "/" . $BOOK_INFO['b.url'] . "/" . $BOOK_INFO['v.url'];
+	}
+	
+	$xml = '<?xml version="1.0"?>
+<oaidc:dc xmlns="http://purl.org/dc/elements/1.1/" 
+          xmlns:oaidc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+          xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                              http://www.openarchives.org/OAI/2.0/oai_dc.xsd"
+>
+	<title xml:lang="pl">' . $BOOK_INFO['dc_title'] . '</title>
+	<creator xml:lang="pl">' . $BOOK_INFO['dc_creator'] . '</creator>
+	<subject xml:lang="pl">' . $BOOK_INFO['dc_subject_and_keywords'] . '</subject>
+	<description xml:lang="pl">' . $BOOK_INFO['dc_description'] . '</description>
+	<publisher xml:lang="pl">' . $BOOK_INFO['dc_publisher'] . '</publisher>
+	<contributor xml:lang="pl">' . $BOOK_INFO['dc_contributor'] . '</contributor>
+	<date xml:lang="pl">' . $BOOK_INFO['dc_date'] . '</date>
+	<identifier>' . $url . '</identifier>
+</oaidc:dc>
+';
+	$xml = str_replace ("&", "&amp;", $xml);
+	$fp = fopen($name, 'w');
+	fwrite($fp, $xml);
+	fclose($fp);
+	echo "OK: results for volume_id=$volume_id saved in $name \n";
+} else {
+	echo "ERROR: for volume_id=$volume_id pg_num_rows is $num_rows \n";
+}
+
+?>

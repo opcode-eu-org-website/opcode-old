@@ -1,0 +1,49 @@
+-- w ten sposob tez mozna deklarowac funkcje ...
+printf = function(fmt, ...)
+	-- ten trzykropek powoduje ze jest wieloargumentowa
+	-- uwaga: to dziala w lua >= 5.1
+	return io.write(fmt:format(...))
+end
+
+printf("Ala w dniu %s miała %d koty\n", os.date("!%F %T (UTC)"), 3)
+-- wykrzyknik w napisie formatujacym date powoduje zwrocenie daty w UTC
+-- napisy formatujace sa zgodne z strftime()
+
+napisA="Kot ma Ala abcabcbbba"
+napisB=string.format("HELLO x %d", 3.5)
+
+
+napisC, num = string.gsub(napisA, "b.a", "")
+-- druga zwrocona wartoscia jest ilosc podmian - odbieramy oba agrumenty
+print( napisC )
+print( "zastapien:", num )
+print( string.gsub(napisA, "(K[^ ]*)(.*)(A[^ ]*)", "%3 %2 %1") )
+
+-- mozemy zobie dynamicznie przenazywac funkcje
+my_print = printf
+my_print("AAA %s BBB\n", napisB)
+
+-- uwaga: tablice indeksowane numerycznie indeksowane sa od 1
+-- #tablica zwraca ilosc elementow (numer ostatniego)
+tablica = { "Q", "W", "E", "R" }
+print(#tablica, tablica[1])
+
+-- dodajemy element na koncu i to innego typu (!)
+tablica[#tablica+1]=1
+print(#tablica, tablica[5])
+
+-- sa tez struktury ...
+struktura = { a="Q", b="W" }
+print(struktura["a"], struktura.b)
+
+struktura.c = tablica
+print(struktura.c[3])
+
+-- w zasadzie to tak jak tablica tez rodzaj tabeli tylko z bardziej dowolnie nazywanymi polami
+struktura["ala"] = "kota\n"
+
+-- mozemy tez dodac metode jako skladowa
+struktura.wypisz = printf
+struktura.wypisz("Ala ma %s", struktura["ala"])
+
+-- więcej na http://www.lua.org/manual/5.1/

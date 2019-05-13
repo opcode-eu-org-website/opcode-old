@@ -1,0 +1,13 @@
+<article>
+<title>Łączenie poleceń</title>
+
+<p>Do łączenia poleceń oprócz <id_link id="ABC_OF_COMPUTING:posix:bash:stdin_stdout_stderr_pipe">przekierowywania wejść i wyjść</id_link> służą także inne znaki:</p>
+<ul>
+	<li>rozdzielane średnikiem (lub niecytowanym znakiem nowej linii)- wykonywane wszystkie po kolei</li>
+	<li>rozdzielane || (LUB logiczne) wykonywane są aż któreś zwróci 1</li>
+	<li>rozdzielane &amp;&amp; (I logiczne) wykonywane są od lewej aż któreś zwróci 0</li>
+	<li>rozdzielane &amp; - polecenie poprzedzające przechodzi w tło i zwraca zero polecenie następujące wykonywane jest normalnie</li>
+</ul>
+
+<p>Polecenia możemy także grupować przy pomocy nawiasów klamrowych <code>{ polecenia; }</code> (uwaga średnik i spacje, które możemy ewentualnie zastapić znakami nowej linii są konieczne) lub nawiasów okrągłych <code>(polecenia)</code>, wtedy wykonywane są w podpowłoce (uruchomiony jest osobny proces basha).</p>
+</article>

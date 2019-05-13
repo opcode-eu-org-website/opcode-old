@@ -1,0 +1,7 @@
+<article>
+<title>Programowanie C/C++ (Linux)</title>
+
+<p>W dziale tym zajmę się programowaniem w <wiki pl="C (język programowania)">C</wiki> i <wiki pl="C++">C++</wiki> głównie dla <wiki pl="Linux">Linuxa</wiki> (ze względu na wykorzystywane funkcje systemowe tego systemu i testowanie w nim prezentowanych rozwiązań). Nie będzie to jednak typowe omówienie czy kurs tego języka, prócz krótkiego wprowadzenia w podstawy tego języka, zamieszczę tutaj szereg bogato komentowanych, niewielkich programów ilustrujących poszczególne zagadnienia. Omówię również korzystanie z ważniejszych/ciekawszych bibliotek (w tym bibliotek standardowych C i C++). Na wstępie zachęcam do zapoznania się z przykładem zamieszczonym w <id_link id="Introduction:programing">części "wstępu do techniki"</id_link> poświęconej programowaniu.
+	Zobacz także: <wiki pl="b:C" en="b:C Programming">C @ Wikibooks</wiki>, <wiki pl="b:C++" en="b:C++ Programming">C++ @ Wikibooks</wiki>, <doc url="http://en.cppreference.com/w/">C &amp; C++ reference</doc>, <doc url="http://www.cplusplus.com/">cplusplus.com</doc>.
+</p>
+</article>

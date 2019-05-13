@@ -1,0 +1,4 @@
+<article>
+<title>Efekt Millera</title>
+<p><wiki pl="Efekt Millera">Efekt Millera</wiki> występuje w układach odwracających fazę i polega na tym iż impedancja widoczna z zewnątrz jest <eq>k+1</eq> razy mniejsza (gdzie <eq>k</eq> - wzmocnienie układu) niż rzeczywista impedancja pomiędzy wejściem a wyjściem. Ponadto w tranzystorze występują pojemności pomiędzy bazą a emiterem oraz bazą a kolektorem. A jedna z nich w układach odwracających fazę ulega efektowi Millera. To odgrywa on istotną rolę w ograniczeniu górnej częstotliwości układów wzmacniaczy. <eq_latex>C_{b'e} = \frac{1}{2 \pi r_{eb'} f_T} - C_{bk}</eq_latex> Podawany w katalogach parametr <eq>f<sub>T</sub></eq> jest tylko wynikiem specyficznego pomiaru tej właśnie pojemności, a to jakie będzie związane z nią ograniczenie częstotliwości wynika z konkretnego układu w którym stosowany jest tranzystor.</p>
+</article>

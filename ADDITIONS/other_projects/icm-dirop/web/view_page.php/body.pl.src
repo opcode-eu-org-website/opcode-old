@@ -1,0 +1,189 @@
+<?php
+/**
+	System prezentacji zasobów DIROP na WWW
+	
+	plik odpowiedzialny za wyświetlanie (w oparciu o szablony xhtml'owe) strony
+	prezentującej skan wybranej strony wybranej pozycji
+	
+	korzysta z informacji zawartych w utworzonych wcześniej tablicach
+		$BOOK_INFO - informacje o książce
+	ustawia wartość $PAGE_SHOWED
+	oraz wykonuje pomocnicze zapytania do bazy danych
+**/
+
+
+
+$SQL = "SELECT * FROM page WHERE " . $PAGE_WHERE_CLAUSE;
+$result = pg_query($baza_danych, $SQL) or error('db_query', $SQL);
+if (pg_num_rows($result) == 1) {
+	/// tablica z informacjami o aktualnej stronie
+	$PAGE_INFO = pg_fetch_array($result, null, PGSQL_ASSOC);
+	
+	
+	
+	/// ustawienie zmiennych zależnych od wielovolumowości
+	if ($BOOK_INFO['single_vid'] >= -1) {
+		if ($BOOK_INFO['dc_creator'] != "") {
+			$title = $BOOK_INFO['dc_creator'] . ", " . $BOOK_INFO['v.title'];
+		} else {
+			$title = $BOOK_INFO['v.title'];
+		}
+		$url_full = "/" . $BOOK_INFO['v.url'] . "/";
+		$url_book = "";
+	} else {
+		$title = $BOOK_INFO['b.title'] . ", " . $BOOK_INFO['v.title'];
+		$url_full = "/" . $BOOK_INFO['b.url'] . "/" . $BOOK_INFO['v.url'] . "/";
+		$url_book = "/" . $BOOK_INFO['b.url'] . "/";
+	}
+	
+	/// ścieżki do obrazków
+	$img_path = IMG_PATH_PREFIX;
+	$img_path .= sprintf("/%s/%04d", $BOOK_INFO['volume_id'], $PAGE_INFO['page_no']);
+	
+	/// scieżka do PDF
+	if (is_file(DIROP_INCLUDE_DIR_PATH . IMG_PATH_PREFIX . "/" . $BOOK_INFO['volume_id'] . ".pdf")) {
+		$pdf_path = IMG_PATH_PREFIX;
+		$pdf_path .= sprintf("/%s.pdf", $BOOK_INFO['volume_id']);
+	} else {
+		$pdf_path = "";
+	}
+	
+	/// pobranie z DB informacji o nastepnej i poprzedniej stronie
+	$SQL  = "SELECT * FROM page WHERE volume_id='" . $BOOK_INFO['volume_id'];
+	$SQL .=   "' AND page_no in ('" . ($PAGE_INFO['page_no']-1) . "', '" . ($PAGE_INFO['page_no']+1) . "');";
+	$result = pg_query($baza_danych, $SQL) or error('db_query', $SQL);
+	while ($arr_tmp = pg_fetch_array($result, null, PGSQL_ASSOC)) {
+		if ($arr_tmp['page_no'] < $PAGE_INFO['page_no'])
+			$PAGE_INFO['prev_title'] = $arr_tmp['title'];
+		else
+			$PAGE_INFO['next_title'] = $arr_tmp['title'];
+	}
+	
+	/// pobieranie listy voluminów dla "idź do"
+	if ($BOOK_INFO['single_vid'] < -1) {
+		$SQL  = 'SELECT volume_id, url AS "v.url", title AS "v.title" FROM volume WHERE book_id='. $BOOK_INFO['book_id'] .' ORDER BY volume_id;';
+		$result = pg_query($baza_danych, $SQL) or error('db_query', $SQL);
+		$lista_tomow = pg_fetch_all($result);
+	} else {
+		$lista_tomow = NULL;
+	}
+	
+	/// pobranie z bazy danycyh informacji potrzebnych do generacji spisu treści
+	/*$SQL  = 'SELECT p.title AS page, c.page_title AS page_new, c.title AS name, c.content_id AS current, c.parent_id AS parent
+		FROM content AS c LEFT JOIN page AS p ON (c.content_id = p.content_id AND p.volume_id='. $BOOK_INFO['volume_id'] .')
+		WHERE p.page_no in
+			(SELECT min(page_no) FROM page
+				WHERE volume_id='. $BOOK_INFO['volume_id'] .' GROUP BY content_id
+			)
+		OR c.content_id in
+			(SELECT DISTINCT c.parent_id AS parent FROM content AS c JOIN page AS p
+				ON (c.content_id = p.content_id AND p.volume_id='. $BOOK_INFO['volume_id'] .')
+			)
+		OR c.volume_id='. $BOOK_INFO['volume_id'] .'
+		ORDER BY c.content_id
+	;';*/
+	$SQL  = 'SELECT page_title AS page, title AS name, content_id AS current, parent_id AS parent, page_no
+		FROM content WHERE volume_id='. $BOOK_INFO['volume_id'] .' ORDER BY content_id;';
+	/* zasadniczo page_no powinien być uzyskiwany z JOINa z tabelą page, ale jest 10 krotna różnica w wydajności,
+	   więc lepiej update'm wstawić kopie tej kolumny do content */
+	$result = pg_query($baza_danych, $SQL) or error('db_query', $SQL);
+	$spis_tresci = pg_fetch_all($result);
+	
+	
+	
+	/// wyświetlanie nagłówka strony
+	$PAGE_SHOWED=true;
+	xhtml_print_file_head($title . TITLE_SURFIX,
+		"volume_id=". $BOOK_INFO['volume_id'] .", book_id=". $BOOK_INFO['book_id'] \
+		.", page_no=". $PAGE_INFO['page_no'] . ", page_id=". $PAGE_INFO['page_id']);
+	
+	/// wyświetlanie ciała strony - nagłówek strony, zawartość strony
+	xhtml_print_header($title, $BOOK_INFO['b.title'], $BOOK_INFO['v.title'], $url_book, $url_full, $PAGE_INFO['title'], $pdf_path);
+	xhtml_print_content($url_full, $img_path, $PAGE_INFO['prev_title'], $PAGE_INFO['next_title']);
+	
+	/// wyświetlanie okienka wyszukiwarki
+	xhtml_print_search_box($BOOK_INFO['volume_id'], $BOOK_INFO['single_vid']);
+	
+	/// wyświetlanie nawigacji - "idź do" oraz spisu treści
+	xhtml_print_navigation_head(
+		$BOOK_INFO['b.title'], $BOOK_INFO['v.title'], $url_book, $url_full, $lista_tomow,
+		$BOOK_INFO['volume_id'], $PAGE_INFO['title'], $spis_tresci != NULL
+	);
+	if ($spis_tresci != NULL) {
+		/// przetwaraznie i wyświetlanie pobranego wcześniej z DB spisu treści
+		$parents=array();
+		$zagniezdzenie=0;
+		$last_parsed="START";
+		$curret_was_showed=-1; // -1 = nie, 0 = właśnie pokazywana, 1 = tak
+		foreach ($spis_tresci as $arr_tmp) {
+			/// jeżeli ostatni przetworzony jest rodzicem obecnego
+			if ($last_parsed == $arr_tmp['parent']) {
+				/// zwiekszamy stopień zagnieżdzenia
+				$zagniezdzenie++;
+				/// zapamiętujemy identyfikator rodzica
+				$parents[$zagniezdzenie]=$last_parsed;
+				/// ustawiamy że zaczyna nowy
+				$end_counter=-1;
+			/// jeżeli obecny rodzic jest naszym rodzicem
+			/// lub ostatni nie jest rodzicem ale rodzic się zmienił
+			} else {
+				/// ustawiamy ile poziomów do góry należy wrócić
+				/// (jeżeli $parents[$zagniezdzenie] == $arr_tmp['parent'] to 0 czyli kontynuujemy na bieżącym)
+				$end_counter=0;
+				while ($parents[$zagniezdzenie] != $arr_tmp['parent'] && $zagniezdzenie>0) {
+					$zagniezdzenie--;
+					$end_counter++;
+				}
+			}
+			
+			/// w związku z tym że o tym iż jest rodzicem dowiadujemy się dopiero po dodaniu dziecka
+			/// musimy wypisywac nie bierzący ale poprzedni rekord ... (dopiero dla niego wiemy czy jest rodzicem)
+			if ($content_page_title != "") {
+				/// jeżeli żadna pozycja nie była oznaczona jako bierząca
+				/// i numer strony w aktualnie przetwarzanej pozycji spisu treści przeszedł za numer bierzącej strony
+				/// to poprzednia (aktualnie wypisywana) pozycja będzie oznaczona jako bierząca
+				if ($curret_was_showed == -1 && $PAGE_INFO['page_no'] < $arr_tmp['page_no'])
+					$curret_was_showed = 0;
+				
+				/// wypisujemy
+				xhtml_print_navigation_entry($url_full, $end_counter, $content_page_zagniezdzenie,
+					$content_page_url, $content_page_title, $last_parsed, $curret_was_showed == 0);
+				
+				/// jeżeli wypisana była bierząca zanzaczamy że wypisano
+				if ($curret_was_showed == 0)
+					$curret_was_showed = 1;
+			} else {
+				/// gdy numer strony jest przed pierwszym numerem spisu treści
+				if ($PAGE_INFO['page_no'] < $arr_tmp['page_no'])
+					$curret_was_showed = 1;
+			}
+			
+			/// zapamiętujemy dane aktualnie przetworzonej
+			$last_parsed = $arr_tmp['current'];
+			$content_page_zagniezdzenie = $zagniezdzenie;
+			$content_page_title = $arr_tmp['name'];
+			$content_page_url = $arr_tmp['page'];
+		}
+		/// wypisujemy ostatnią pozycję spisu
+		///  * zamyka wszystkie otwarte zagniezdzenia
+		///  * zaznaczona jako bierząca gdy zadna poprzednia nie zaznaczona
+		$end_counter=0;
+		while ($zagniezdzenie>0) {
+			$zagniezdzenie--;
+			$end_counter++;
+		}
+		xhtml_print_navigation_entry($url_full, $end_counter, $content_page_zagniezdzenie,
+			$content_page_url, $content_page_title, $last_parsed, $curret_was_showed == -1);
+	}
+	xhtml_print_navigation_foot($BOOK_INFO['v.title'], $url_book, $spis_tresci != NULL);
+	
+	
+	
+	/// TODO pobranie pełnego tekstu z tabeli fulltext w oparciu o $PAGE_INFO['page_id']
+	
+	
+	/// wyświetlanie stopki dokumentu
+	xhtml_print_footer();
+}
+
+?>

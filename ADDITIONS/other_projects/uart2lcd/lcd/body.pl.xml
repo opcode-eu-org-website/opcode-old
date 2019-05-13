@@ -1,0 +1,12 @@
+<article>
+<title>Sterowanie wyświetlaczem LCD</title>
+<p>Układ sterujący komunikacją z LCD ma zachowanie odpowiednich zależności czasowych w komunikacji na szynie LCD. Zrealizowany jest jako 5 stanowy automat o następujących stanach:</p>
+<ul>
+	<li>IDLE - oczekiwanie na sygnał ważności danych na szynie wejściowej</li>
+	<li>START - początek transmisji - ustawienie sygnału wybierającego pomiędzy trybem rozkazowym a danych</li>
+	<li>E_UP - wystawienie danych na szynę i podniesienie strobu</li>
+	<li>E_DOWN - opuszczenie strobu</li>
+	<li>WAIT_TIME - stan oczekiwania</li>
+</ul>
+<p>Stany przełączane są kolejno (IDLE - START - E_UP - E_DOWN - IDLE), z tym że przejścia (za wyjątkiem przejść do oraz z IDLE) odbywają się przez stan WAIT_TIME. Stan ten korzysta z dodatkowych informacji (ustawianych przed wejściem do tego stanu) - stanu do którego ma automat przejść po zakończeniu oczekiwania (<code>LCD_STATE_AFTER_WAIT</code>) oraz liczby cykli zegara przez które należy czekać (<code>LCD_CLK_DIV</code>).</p>
+</article>

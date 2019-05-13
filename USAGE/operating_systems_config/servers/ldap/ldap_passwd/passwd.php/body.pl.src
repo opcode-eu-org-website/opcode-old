@@ -1,0 +1,66 @@
+<?php // KONFIGURACJA:
+	$LDAP_SERVER = "ldap://adres.of.ldap.serwer";
+	$LDAP_PORT = "389";
+	$USERNAME_FIELD = "uid";
+	$USERNAME_SURFIIX = "ou=People,dc=opcode,dc=eu,dc=org";
+?>
+<html>
+	<head>
+		<title>Change LDAP password</title>
+	</head>
+	<body>
+	<h1 style="text-align:center">Change LDAP password</h1>
+<?php if ($_POST['action'] != "change_passwd") { ?>
+	<form method="post" action="<?php echo $_SERVER['SCRIPT_NAME'] ?>"><center><table>
+		<tr>
+			<td><label for="wpPassword">Username:</label></td>
+			<td><input type="text" name="username" /></td>
+		</tr>
+		<tr>
+			<td><label for="wpPassword">Password:</label></td>
+			<td><input type="password" name="password" /></td>
+		</tr>
+		<tr>
+			<td><label for="wpPassword">New password:</label></td>
+			<td><input type="password" name="new_password_1" /></td>
+		</tr>
+		<tr>
+			<td><label for="wpPassword">Retype new password:</label></td>
+			<td><input type="password" name="new_password_2" /></td>
+		</tr>
+		<tr><td colspan="2">
+			<input type="submit" value="OK" />
+			<input type="hidden" name="action" value="change_passwd" />
+		</td></tr>
+	</table></center></form>
+<? } else {
+	if ($_POST['new_password_1'] == "") {
+		echo "<p style=\"color: red\">Sorry, empty passwords do not allowed ... Password unchanged</p>";
+	} else if ($_POST['new_password_2'] != $_POST['new_password_1']) {
+		echo "<p style=\"color: red\">Sorry, passwords do not match ... Password unchanged</p>";
+	} else {
+		$conn = @ldap_connect ( $LDAP_SERVER, $LDAP_PORT );
+		if ($conn) {
+			ldap_set_option( $conn, LDAP_OPT_PROTOCOL_VERSION, 3 );
+			$user_rdn = "$USERNAME_FIELD=" . $_POST['username'] . ",$USERNAME_SURFIIX";
+			
+			$bind = @ldap_bind( $conn, $user_rdn, $_POST['password'] );
+			if ($bind) {
+				$password_hash = '{CRYPT}' . crypt($_POST['new_password_1'], '');
+				$attrs = array('userpassword' => $password_hash);
+				
+				if (ldap_mod_replace($conn, $user_rdn, $attrs)) {
+					echo "<p style=\"color: green\">Password changed !!!</p>";
+				} else {
+					echo "<p style=\"color: red\">Error changing passwords ... Password unchanged</p>";
+				}
+			} else {
+				echo "<p style=\"color: red\">Error login to LDAP server ... Please check username or password</p>";
+			}
+		} else {
+			echo "<p style=\"color: red\">Error connecting to LDAP server ... Please try again later</p>";
+		}
+	}
+} ?>
+	</body>
+</html>

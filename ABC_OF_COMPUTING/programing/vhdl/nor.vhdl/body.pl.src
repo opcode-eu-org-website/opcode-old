@@ -1,0 +1,70 @@
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity nor3 is
+	port (
+		wej: in std_logic_vector(0 to 2);
+		wyj: out std_logic
+	);
+end;
+
+
+architecture logic of nor3 is
+	begin
+		wyj <= not (wej(0) or wej(1) or wej(2));
+		-- ze wzgledu na to iz jej funkcjonalnosc opisuje sie w taki prosty sposob
+		-- w praktycznych zastosowanuiach raczej nie ma sensu robienia z niej osobnego komponentu ...
+end;
+
+
+architecture proces_while of nor3 is
+	begin
+		process
+			variable i: integer range -1 to 3;
+			variable x: std_logic;
+			begin
+				-- czekamy na zmiane ktoregos z sygnalow
+				wait on wej;
+				-- jest to podobne do listy podawanej po slowie proces ...
+				-- tyle ze wtedy oczekiwanie jest umieszczane na kocu ciala procesu ...
+				-- nalezy wspomniec ze jest tez wait until (czekanie na spelnienie warunku)
+				
+				x := '0';
+				i := -1;
+				
+				-- petla typu while
+				L0: while i<2 loop
+					i := i+1;
+					
+					-- instrukcja next powoduje przejscie do nastepnego kroku petli
+					next when wej(i) = '0';
+					-- pomiedzy next a when mozna podac etykiete petli ktorej iteracje chemy zakonczyc ...
+					
+					x := '1';
+				end loop;
+				
+				wyj <= not x;
+		end process;
+end;
+
+
+architecture proces_loop of nor3 is
+	begin
+		process (wej)
+			variable i: integer range -1 to 2;
+			variable x: std_logic;
+			begin
+				x := '0';
+				i := -1;
+				-- petla prosta
+				L0: loop
+					exit when i=2;
+					i := i+1;
+					next when wej(i) = '0';
+					x := '1';
+					exit;
+				end loop;
+				
+				wyj <= not x;
+		end process;
+end;

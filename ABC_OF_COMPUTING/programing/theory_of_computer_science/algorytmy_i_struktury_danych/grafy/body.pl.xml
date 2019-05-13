@@ -1,0 +1,25 @@
+<article>
+<title>Grafy</title>
+
+<p>Graf to zbiór wierzchołków V i krawędzi L.</p>
+<ul>
+	<li>spójny - istnieje połączenie między dwoma dowolnymi wierzchołkami</li>
+	<li>cykliczny - są drogi prowadzące od obecnego wierzchołka do niego bez powtórzeń krawędzi</li>
+	<li>skierowany - krawędzie mają kierunek</li>
+	<li>ważony - do krawędzi przypisane są wagi</li>
+	<li>planarny - może zostać narysowany na płaszczyźnie tak aby krawędzie się nie przecinały</li>
+	<li>droga w grafie - skończony ciąg węzłów i krawędzi, kończący i zaczynający węzłem bez powtórzeń krawędzi</li>
+	<li>droga zamknięta - gdy wierzchołek startowy jest końcowym</li>
+	<li>droga otwarta - gdy wierzchołek startowy nie jest końcowym</li>
+	<li>ścieżka - droga otwarta, gdzie każdy wierzchołek występuje raz</li>
+	<li>cykl (obwód) - droga zamknięta, gdzie każdy wierzchołek występuje raz</li>
+	<li>droga Eurela - droga zamknięta przechodząca przez każdy wierzchołek bez przecinania krawędzi i powtórzeń krawędzi i wierzchołków</li>
+	<li>obwód Hamiltona - obwód przechodzący przez każdy wierzchołek ale tylko raz</li>
+</ul>
+<ul>
+	<li>dendryt (drzewo rozpinające) - drzewo powstałe z danego grafu po usunięciu pewnej liczby krawędzi</li>
+	<li>MST - minimalne drzewo rozpinające - drzewo rozpinające o najmniejszej sumarycznej wadze krawędzi</li>
+	<li>drzewo Stainera - MST dla grafu wzbogaconego o dodatkowe węzły tak aby zmniejszyć sumaryczne wagi połączeń</li>
+	<li>minimalny przekrój - zbiór krawędzi o minimalnej sumarycznej wadzę po usunięciu których drzewo ulega podziałowi na dwa</li>
+</ul>
+</article>

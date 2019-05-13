@@ -1,0 +1,24 @@
+/*
+ *
+ * więcej informacj w dsp_gui_qt.c
+ *
+ */
+ 
+ #include <qvbox.h>
+
+/** deklarujemy klasę naszego okna, w oparciu o pudełko pionowe (ustawia obiekty wkładane do niego jeden pod drugim) **/
+class MyWindow : public QVBox
+{
+	Q_OBJECT
+	public:
+		MyWindow( QWidget *parent=0, const char *name=0 );
+		int copy_dsp_work;
+	public slots:
+		void button1_action();
+		void button2_action();
+		void button3_action();
+		void button4_action();
+	protected:
+		int pid;
+};
+ 

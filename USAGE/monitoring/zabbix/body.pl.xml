@@ -1,0 +1,19 @@
+<article>
+<title>Zabbix</title>
+
+<p><homepage url="http://www.zabbix.com/">Zabbix</homepage> jest rozbudowanym systemem do monitorowania hostów i stanu sieci, można powiedzieć że łączy funkcjonalność systemów takich jak <wiki pl="Nagios">Nagios</wiki> i <wiki en="Munin (software)">Munin</wiki>. Konfiguracja odbywa się przez interfejs WWW i trzymana jest (podobnie jak dane) w bazie SQL, może być jednak importowana i eksportowana do XMLa co umożliwia jej łatwa masową edycję. Poniżej zamieszczam kilka skryptów i projektów związanych z tym systemem:</p>
+
+<ul>
+	<li><id_link id="zabbix.c">zabbix.c</id_link> i <id_link id="zabbix.h">zabbix.h</id_link> - prosta implementacja sendera zabbixowego</li>
+	
+	<li><id_link id="get_http_code.sh">get_http_code.sh</id_link> - skrypt przeznaczony do umieszczenia w <kbd class="path">/etc/zabbix/externalscripts</kbd> i używania w testach na kod odpowiedzi HTTP</li>
+	<li><id_link id="zabbix_get_from_history.sh">zabbix_get_from_history.sh</id_link> - skrypt pobierający ostatnia wartość wskazanego itemu z bazy zabbix'a</li>
+	<li><id_link id="klimy.sh">klimy.sh</id_link> i <id_link id="klimy.xsl">klimy.xsl</id_link> - skrypt przeznaczony do odpalania z cron'a i wstawiania do zabbixa danych pobranych z klimatyzacji (dla Emerson Libert HPM)</li>
+	
+	<li><id_link id="utils4zabbix:zabbix_template:make.sh">make.sh</id_link>, <id_link id="utils4zabbix:zabbix_template:item.template.xml">body.template.xml</id_link>, <id_link id="utils4zabbix:zabbix_template:header.xml">header.xml</id_link>, <id_link id="utils4zabbix:zabbix_template:footer.xml">footer.xml</id_link> - system generujący szablon do zabbixa w oparciu o plik konfiguracji sql-owej <id_link id="modbus_rtu">Master modbus RTU</id_link></li>
+	
+	<li><id_link id="analizatory.php">analizatory.php</id_link> - skrypt php wyciągający z bazy zabbixowej ostatnie wartości dla wskazanego analizatora PM710 i prezentujący je na WWW</li>
+</ul>
+
+<p>Zobacz też: <wiki en="Comparison of network monitoring systems">Comparison of network monitoring systems</wiki>, <wiki en="Monit">Monit</wiki></p>
+</article>

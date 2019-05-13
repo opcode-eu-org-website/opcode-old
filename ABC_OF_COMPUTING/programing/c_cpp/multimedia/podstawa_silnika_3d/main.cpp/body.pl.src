@@ -1,0 +1,220 @@
+/**
+
+**/
+
+/// standardowe pliki nagłówkowe
+#include <stdio.h>
+#include <unistd.h> // sleep, usleep
+
+/// pliki nagłówkowe OpenGL i "dodatków"
+#include <GL/glew.h>
+#include <GL/glut.h>
+
+/// glowny plik nagłówkowy silnika
+/// wlacza inne naglowki oraz zawiera definicje zmiennych i funkcji globalnych
+#include "misc/global.h"
+
+/// funcja ustawiająca rozmiar sceny
+void resize_GL(int szerokosc, int wysokosc) {
+	// ustawiamy rozmiar widoku: lewy gorny róg = (0,0) oraz wysokość i szerokość
+	// w ogólności może on być mniejszy od rozmiaru okna
+	glViewport(0, 0, szerokosc, wysokosc);
+	
+	// ustawiamy położenie i inne parametry kamery
+	// (musimy przeliczyć bo zależą od rozmiaru view point'a)
+	camera->ratio = (float)szerokosc/wysokosc;
+	camera->set();
+}
+
+/// funkcja przygotowujaca scene
+void scene_init() {
+	// FIXME - przeglad i uporzadkowanie tego co robi ta funkcja
+	// czyszczenie tła kolorem RGBA
+	glClearColor(0.0f, 0.0f, 0.4f, 0.3f);
+	// czyszczenie bufora głębi zadaną wartością
+	glClearDepth(1.0);
+	
+	// włączamy porównywanie głębi
+	// funkcją tą możemy włączać wiele innych funcjonalności OpenGL (do wyłączania glDisable)
+	glEnable(GL_DEPTH_TEST);
+	// ustawienie funkcji porównującej głębie
+	glDepthFunc(GL_LESS);
+	
+	// ustawiamy tryb shadingu na "smooth color", czyli:
+	// kolor liczony dla każdego wierzchołka i interplolowany na resztę wielokąta
+	glShadeModel(GL_SMOOTH);
+	
+	// ustawienia blendingu, czyli mówimy jak chemy używac kanału alfa
+	//glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	//glEnable( GL_BLEND );
+	
+	// wyłączamy ukryweanie niewidocznych powierzchni
+	glEnable(GL_CULL_FACE);
+	// ukrywamy tył
+	glCullFace(GL_BACK);
+	// strona przednia to ta której wierzchołki rysowane są zgodnie z ruchem wskazówek zegara
+	glFrontFace(GL_CW);
+	
+	// włączamy efekty oświetlenia
+	//glEnable( GL_LIGHTING );
+	
+	// ustawiamy redenrowanie wypełniające dla obu stron wielokątów
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	
+	// ustawienia specyficzne dla implementacji
+	// konkretnie ustawiamy najbardziej poprawne korygowanie kolorów i tekstór przy liczeniu perspektywy
+	glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
+	
+	// wymuszamy wykonanie komend OpenGL w tym momencie
+	glFlush();
+}
+
+int last_time;
+void write_debug_info() {
+	if (!show_debug)
+		return;
+	
+	int time = glutGet(GLUT_ELAPSED_TIME);
+	int width = glutGet( GLUT_WINDOW_WIDTH );
+	int heith = glutGet( GLUT_WINDOW_HEIGHT );
+	
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	glOrtho(0.0, width, 0.0, heith, -1.0, 1.0);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	glDisable(GL_TEXTURE_2D);
+	glColor3f(1.0f, 0.0f, 0.0f);
+	
+	char txt_buf[100];
+	int i, dlugosc;
+	
+	
+	sprintf(txt_buf, "Last Frame Generation Time [ms]: %d", time-last_time);
+	glRasterPos2f(1.0, 3.0);
+	dlugosc = strlen(txt_buf);
+	for (i = 0; i < dlugosc; i++)
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, txt_buf[i]);
+	
+	sprintf(txt_buf, "Camera position [x, y, z]: %f %f %f", camera->x, camera->y, camera->z);
+	glRasterPos2f(1.0, 18.0);
+	dlugosc = strlen(txt_buf);
+	for (i = 0; i < dlugosc; i++)
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, txt_buf[i]);
+	
+	sprintf(txt_buf, "Camera rotation [xz, yz, xy]: %f %f %f", camera->rot_xz, camera->rot_yz, camera->rot_xy);
+	glRasterPos2f(1.0, 33.0);
+	dlugosc = strlen(txt_buf);
+	for (i = 0; i < dlugosc; i++)
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, txt_buf[i]);
+	
+	sprintf(txt_buf, "[heith, width, ratio, zoom]: %d %d %f %f", heith, width, camera->ratio, camera->zoom);
+	glRasterPos2f(1.0, 48.0);
+	dlugosc = strlen(txt_buf);
+	for (i = 0; i < dlugosc; i++)
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, txt_buf[i]);
+	
+	sprintf(txt_buf, "BR=(%f,%f) BL=(%f,%f)", camera->trapezium[3].x, camera->trapezium[3].z, camera->trapezium[2].x, camera->trapezium[2].z);
+	glRasterPos2f(1.0, 63.0);
+	dlugosc = strlen(txt_buf);
+	for (i = 0; i < dlugosc; i++)
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, txt_buf[i]);
+	
+	int z = (uint)-camera->z;
+	int x = (uint)-camera->x;
+	sprintf(txt_buf, "HEIGHT: %f %f %f %f",
+		objects_space->get_from_space(z, x)->height,
+		objects_space->get_from_space(z, x+1)->height,
+		objects_space->get_from_space(z+1, x)->height,
+		objects_space->get_from_space(z+1, x+1)->height);
+	glRasterPos2f(1.0, 78.0);
+	dlugosc = strlen(txt_buf);
+	for (i = 0; i < dlugosc; i++)
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, txt_buf[i]);
+	
+	glColor3f(1.0f, 1.0f, 1.0f);
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+	
+	usleep(30000);
+	last_time=glutGet(GLUT_ELAPSED_TIME);;
+}
+
+/// funkcja rysujaca scene - wywolywana dla kazdej klatki
+void scene_draw() {
+	// jeżeli nastąpiła zmiana ustawień kamery to ją wdrażamy
+	camera->set();
+	
+	// czyścimy ekran (ustawionym wcześniej) kolorem oraz czyścimy bufor głębokości
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glLoadIdentity();
+	
+	// FIXME wywalic to ... rendering tylko przez objects_space->render();
+	/*glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f); glVertex3f(1024.0f, 0.0f,    0.0f);
+		glTexCoord2f(1.0f, 1.0f); glVertex3f(1024.0f, 0.0f, 1024.0f);
+		glTexCoord2f(1.0f, 0.0f); glVertex3f(   0.0f, 0.0f, 1024.0f);
+		glTexCoord2f(0.0f, 0.0f); glVertex3f(   0.0f, 0.0f,    0.0f);
+	glEnd();*/
+	
+	objects_space->find(camera->trapezium, camera->point);
+	objects_space->render();
+	
+	write_debug_info();
+	glutSwapBuffers();
+}
+
+/// funkcja główna
+int main (int argc, char **argv) {
+	// ładowanie konfigu
+	config = new Config();
+	config->load();
+	
+	show_debug=true;
+	
+	// inicjalizacja GLUTa i przekazanie do niego argumentów wywołania
+	glutInit(&argc, argv);
+	// ustawienie trybu wyświetlania
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_ALPHA | GLUT_DEPTH);
+	// ustawienie początkowego rozmiaru okna GLUTowego
+	glutInitWindowSize(800, 600);
+	// ustawienie położenia okna GLUTowego (lewy górny róg)
+	glutInitWindowPosition(10, 20);
+	// utworzenie okna
+	okno = glutCreateWindow("GRA");
+	
+	// okręslenie funkcji wykonywane przy zmianie rozmiaru okna
+	glutReshapeFunc(&resize_GL);
+	
+	// przejście w tryb pełnoekranowy
+	if ( config->getb(Config::USE_FULLSCREEN) )
+		glutFullScreen();
+	
+	// obsługa wejścia
+	input = new Input();
+	input->init_glut();
+	
+	// inicjalizacja OpenGL i przygotowanie obiektów dla funkcji rysującej
+	scene_init();
+	
+	// obsługa menagera sceny
+	objects_space = new ObjectsSpace();
+	objects_space->create_space(1024);
+	
+	// przygotowanie kamery
+	camera = new Camera();
+	
+	// określenie funkcji odpowiedzialnej za rysowanie sceny
+	glutDisplayFunc(&scene_draw);
+	// określenie funkcji wykonywanej gdy nie ma zdarzeń do obsłużenia
+	glutIdleFunc(&scene_draw);
+	
+	// uruchomienie pętli przetwarzającej zdarzenia GLUT 
+	glutMainLoop();
+	
+	quit_game();
+}

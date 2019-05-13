@@ -1,0 +1,14 @@
+<!-- WYSZUKIWARKA -->
+<form method="get" action="http://www.google.pl/search" class="search">
+	<p>
+		<input type="hidden" name="num" value="30" /><input type="hidden" name="ie" value="utf-8" /><input type="hidden" name="oe" value="utf-8" />
+		<label for="q" id="searchTitle">Wyszukiwarka:</label><br />
+		<input type="text" name="q" id="q" maxlength="1024" /><br />
+		<input type="checkbox" name="lr" id="lr" value="lang_pl" /><label for="lr">tylko w języku polskim</label><br />
+		<input type="checkbox" name="as_q" id="as_q" value="site:opcode.eu.org" checked="checked" /><label for="as_q">tylko ten serwis WWW*</label><br />
+		<input type="submit" value="  Szukaj z Google  " />
+	</p>
+	<p id="searchInfo">*) to że czegoś nie można znaleźć nie oznacza że tego tu niema ... - niektóre strony z jakiś powodów mogą nie być (jeszcze) zindeksowane.</p>
+	<p><a href="http://www.google.pl/"><img src="[[!URLPREFIX!]]/powered_by_google.png" alt="Powered by Google" /></a></p>
+	<p><a href="[[!URLPREFIX!]]/site/map/[[!URLPOSTFIX!]]">Mapa serwisu</a></p>
+</form>

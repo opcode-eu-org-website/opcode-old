@@ -1,0 +1,15 @@
+#include "info_thread.h"
+
+void InfoThread::run() {
+	// UWAGA: wątki (poza głównym wątkiem GUI) nie mogą produkować okien itp
+	double rnd_val = 0;
+	while (1) {
+		// obliczamy nową wartość
+		rnd_val += 0.5;
+		// wysyłamy sygnał - obliczona nowa wartość
+		printf("InfoThread: %f\n", rnd_val);
+		emit putNewValue("Test Random Value", rnd_val);
+		// odpoczywamy sobie 10 sekund
+		QThread::sleep(10);
+	}
+}

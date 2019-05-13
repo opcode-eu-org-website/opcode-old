@@ -1,0 +1,38 @@
+<article>
+<title>XML, XSL itp</title>
+
+<p>W zasadzie <wiki pl="XML">XML</wiki> nie jest ani językiem programowania, ani nawet rzeczywistym formatem danych, jest to jedynie składnia służąca do tworzenia formatów danych. Jednak <wiki pl="Extensible Stylesheet Language">XSL</wiki> spełnia już wszystkie wymogi bycia językiem programowania. Na XSL składają się mechanizmy takie jak:</p>
+<ul>
+	<li><wiki pl="XSL Transformations">XSLT</wiki> (XSL Transformations) - opis przetwarzania dokumentu XMLowego</li>
+	<li><wiki pl="XPath">XPath</wiki> (XML Path Language) - sposób odwołań do elementów dokumentu XML</li>
+	<li><wiki pl="XQuery">XQuery</wiki> (XML Query Language) - język zapytań</li>
+</ul>
+
+<p>Prezentuje dwa dokumenty XSL wykorzystywane przez silnik tego serwisu - <id_link id="base.xsl">base.xsl</id_link>, <id_link id="softdb.xsl">softdb.xsl</id_link>. Pierwszy z nich odpowiedzialny jest za zamianę źródeł dokumentów w XHTML lub LaTeX (posiada dwa tryby, w trybie LaTeX musi być wykonywany przez parser XSL2.0 ze względu na użycie fn:replace). Drugi odpowiedzialny jest za generowanie XML'a używanego w źródłach strony z bazy oprogramowania/komend.</p>
+
+<p>Przy debugowaniu kodów XMLowych niekiedy przydaje się skrypt do odnajdywania miejsca otwarcia niezamkniętego znacznika (niekiedy - np. gdy dopuszczane jest zagnieżdżanie danego znacznika - parsery wskazują jako miejsce błędu koniec pliku). Prezentuje jedno-linijkowiec ułatwiający takie wyszukiwanie (przykład dla znacznika &lt;p&gt;)</p>
+<pre>tr '\n' ' ' &lt; body.xml | sed -e 's#&lt;/p&gt;#\n#g' | grep '.*&lt;p&gt;.*&lt;p&gt;'</pre>
+
+<p>Bardzo przydatnym narzędziem do przetwarzania plików xml jest <homepage url="http://xmlstar.sourceforge.net/">xmlstarlet</homepage> umożliwiający np. łatwe wydobycie wartości jakiegoś tagu lub jego atrybutu. Dla przykładu jeżeli chcemy pobrać wartość atrybutu deadline z wszystkich znaczników TASK możemy posłużyć się następującym plikiem xsl (i wywołać go komendą <code>xalan -xsl plik.xsl -in plik.xml</code>):</p>
+<pre>
+&lt;?xml version="1.0"?&gt;
+
+&lt;xsl:stylesheet version="2.0"
+        xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+&gt;
+        &lt;xsl:output method='text' encoding='utf-8' /&gt;
+
+        &lt;xsl:strip-space elements="*" /&gt;
+
+        &lt;xsl:template match="TASK"&gt;
+                &lt;xsl:value-of select="@deadline"/&gt;
+        &lt;/xsl:template&gt;
+
+        &lt;xsl:template match="*|@*|processing-instruction()"&gt;
+                &lt;xsl:apply-templates select="*|@*|processing-instruction()" /&gt;
+        &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;
+</pre>
+<p>Albo możemy po prostu użyć komendy <code>xmlstarlet sel -t -v '//*/TASK/@deadline' plik.xml</code></p>
+<p>Zobacz w Sieci: <doc url="http://stencel.mimuw.edu.pl/abwi/20011023/">XML &amp; XSL</doc>, <wiki en="b:XML - Managing Data Exchange">XML  - Managing Data Exchange</wiki></p>
+</article>

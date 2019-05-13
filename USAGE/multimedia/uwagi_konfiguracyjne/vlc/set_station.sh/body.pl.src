@@ -1,0 +1,178 @@
+#!/bin/bash
+
+
+#
+# DEFAULT SETTINGS AND HELP
+#
+
+MODE="tv"
+STATION_LIST=".set_station.cfg"
+DEF_DEV_TV="/dev/video0"
+DEF_DEV_RADIO="/dev/radio0"
+
+print_help() {
+	echo "USAGE:"
+	echo "   $0 [-s STATION] [-d DEVICE_PATH] [-c CONFIG_FILE] [-m tv|radio]"
+	echo "   $0 [--station STATION] [--device DEVICE_PATH] [--config CONFIG_FILE] [--mode tv|radio]"
+	echo "   $0 -h"
+	echo "   $0 --help"
+	echo " default is tv mode"
+	echo " deafult DEVICE_PATH is $DEF_DEV_TV for TV and $DEF_DEV_RADIO for radio"
+	echo ""
+	echo " if is set XAWTV_COMPATIBILITY enviroment variable script reading STATION names from:"
+	echo "   ~/.xawtv and ~/.radio config file"
+	echo " otherwise read config file from option or default ~/$STATION_LIST"
+	echo ""
+	echo "CONFIG FILE FORMAT IS:"
+	echo " MODE FRENQUENCY_IN_MHz STATION_NAME"
+	echo "   MODE = radio | tv"
+	echo ""
+	echo "Conversion to .xawtv format:"
+	echo " awk 'BEGIN {printf(\"[defaults]\nnorm = PAL\n\n\")} /^tv/ {printf(\"[%s]\nfreq = %s\n\n\", $3, $2)}'"
+	exit
+}
+
+STATION_LIST="$HOME/$STATION_LIST"
+
+
+#
+# PARSING SCRIPT OPTIONS
+#
+
+eval set -- "`getopt -o hs:d:c:m: -l help,station:,device:config:mode: -- "$@"`"
+while true; do
+	case $1 in
+		-h|--help)
+			print_help
+			;;
+		-s|--station)
+			STATION=$2
+			CURRENT=" --default-item \"$STATION\""
+			ADDIONAL="1 \"$STATION\""
+			shift
+			;;
+		-d|--device)
+			DEVICE=$2
+			shift
+			;;
+		-c|--config)
+			STATION_LIST=$2
+			shift
+			;;
+		-m|--mode)
+			MODE=$2
+			shift
+			;;
+		--)
+			shift; break
+			;;
+		*)
+			shift
+			;;
+	esac
+done
+
+MODE=${MODE:-"tv"}
+if [ "$MODE" == "radio" ]; then
+	DEVICE="${DEVICE:-$DEF_DEV_RADIO}"
+else
+	DEVICE="${DEVICE:-$DEF_DEV_TV}"
+fi
+
+
+#
+# GETTING CHANNEL LIST   AND   DEFINE CONTROLING V4L DEVICE FUNCTION
+#
+
+#
+if [ "${XAWTV_COMPATIBILITY-"no"}" == "no" ]; then
+	CHANNEL_LIST=$(
+		awk -v MODE=$MODE '$1==MODE {printf("\"%s\" \"%s\" ", $3, $2)}' < $STATION_LIST
+	)
+	function set_station() {
+		freq="$( awk -v MODE=$MODE -v STATION=$1 '$1==MODE && $3 == STATION {print $2}' $STATION_LIST )"
+		input=`expr $freq : 'input=\(.*\)'`
+		if [ "$input" != "" ]; then
+			v4l2-ctl -d $DEVICE --all --set-input=$input > /dev/null
+		else
+			v4l2-ctl -d $DEVICE --all --set-input=0 --set-freq=$freq > /dev/null
+		fi
+	}
+else
+	if [ "$MODE" == "radio" ]; then
+		TMP_FILE_RADIO=`mktemp /tmp/set_station_radio.XXXXX`
+		trap "rm $TMP_FILE_RADIO" 0
+		CHANNEL_LIST=$(
+			grep -v '^#' ~/.radio | awk '
+				BEGIN {RS="["; FS="]"}
+				$1=="Stations" {print $0}
+			' > $TMP_FILE_RADIO
+			awk '
+				BEGIN {FS="="}
+				$2=="" {next}
+				{printf("\"%s\" \"%.2f\" ",  $2,  $1/1000000)}
+			' $TMP_FILE_RADIO | sort -n
+		)
+		function set_station() {
+			radio -q -c $DEVICE -f $(
+				awk '
+					BEGIN {FS="="}
+					$2=="'$1'" {printf("%s",  $1/1000000)}
+				' $TMP_FILE_RADIO
+			)
+		}
+	else
+		CHANNEL_LIST=$(
+			grep -v '^#' ~/.xawtv | awk '
+				BEGIN {RS="["; FS="]"}
+				$1=="" || $1=="global" || $1=="defaults" {next}
+				{printf("\"%s\" \"%s\" ",  $1, $1)}
+			'
+		)
+		function set_station() {
+			v4lctl -c $DEVICE setstation "$1"
+		}
+	fi
+fi
+
+
+#
+#PRESET STATION
+#
+[ "$STATION" != "" ] && set_station "$STATION"
+
+
+#
+# RUN DIALOG
+#
+
+TMP_FILE=`mktemp /tmp/set_station.XXXXX`
+trap "rm $TMP_FILE" 0
+
+while true; do
+	eval dialog $CURRENT --menu CHANELL 0 0 0 $ADDIONAL $CHANNEL_LIST 2> $TMP_FILE || break;
+	
+	PREV_STATION_2=$PREV_STATION_1
+	PREV_STATION_1=$PREV_STATION_0
+	PREV_STATION_0=$STATION
+	
+	STATION=`cat $TMP_FILE`
+	
+	if [ "$PREV_STATION_0" != "" ]; then
+		if [ "$PREV_STATION_1" != "" ]; then
+			ADDIONAL="1 \"$PREV_STATION_0\" 2 \"$PREV_STATION_1\""
+		else
+			ADDIONAL="1 \"$PREV_STATION_0\""
+		fi
+	fi
+	
+	if [ "$STATION" = "1" ]; then
+		STATION=$PREV_STATION_1
+	elif [ "$STATION" = "2" ]; then
+		STATION=$PREV_STATION_2
+	fi
+	
+	CURRENT=" --default-item \"$STATION\""
+	
+	set_station "$STATION"
+done

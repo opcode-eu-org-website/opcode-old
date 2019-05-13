@@ -1,0 +1,43 @@
+/*
+ * plik ma na celu prezentację ciekawych zagadnień z programowania w języku C / C++
+ * prezentuje metode wylaczania przerwań - przydaje się to gdy na k ótko potrzebujemy
+ * działania w mocnym trybie czasu rzeczywistego (jest to rozwiązanie dużo mocniejsze
+ * niż priorytet -20, gdzie program nawet o dużo niższym (np. dodatnim) priorytecie
+ * ma prawo dorwać się do głosu, tu nie może tego zrobić nawet jądro
+ * - wszystkie przerwania poza niemaskowalnymi są zablokowane
+ *
+ */
+
+#include <sys/io.h> // w tym siedzi funkcja iopl();
+#include <stdio.h>
+
+int main (int argv, char *args[]) {
+
+	int a=999999999;
+
+	FILE *plik;
+	plik = fopen("tekst.txt","w");
+
+	iopl (3); // musimy przejac wladze nad portami ;-),
+	          // inaczej mamy blad ochrony pamieci i nasz wspanialy program z komenda "cli"
+	          // nie bedzie sie uruchamial, ale do tego to potrzeba nam root'a ...
+
+	asm("cli"); // - wylacza przerwania
+
+
+	while (1) {
+		// nistety jezeli chcielibysmy cos czytac lub pisac to przerwania beda wlaczone :(((
+		//scanf("%d",&a);
+		//printf("%d", a);
+		//fprintf(plik, "%d", a);
+
+		// a to taki bezpiecznik, ktory zapewni ze kom sie odiwesi ;-)
+		a--;
+		if (a == 0) break;
+	}
+	
+	asm("sti"); // - wlacza przerwania
+	
+	return 0;
+}
+

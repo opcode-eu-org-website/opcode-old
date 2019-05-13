@@ -1,0 +1,9 @@
+<article>
+<title>Układ ograniczający prąd rozruchowy</title>
+
+<p>Niektóre urządzenia charakteryzują się poborem znacznego prądu w momencie załączenia napięcia, dotyczy to w szczególności transformatorów dużej mocy. W obwodach zasilających takie urządzenia należy stosować odpowiednie zabezpieczenia zwłoczne. Jednak gdy instalacja posiada zbyt szybkie zabezpieczenia przydatny może być układ ograniczający prąd rozruchowy. Działanie takiego układu polega na rozruch poprzez szeregowo włączony z urządzeniem rezystor który jest następnie bocznikowany. Koncepcję takiego układu wykorzystującego jako rezystor żarówkę (usuwa to problem płonących rezystorów gdy mają za małą moc) przedstawiam poniżej.</p>
+
+<p><img_from_src name="ograniczenie_pradu_rozruchowego_trafo" type="sch" alt="Schemat ideowy układu ograniczenia prądu rozruchowego" /></p>
+
+<p>Zobacz także <photo_link tag="soft_start">zdjęcia wykonanego urządzenia</photo_link></p>
+</article>

@@ -1,0 +1,6 @@
+<article>
+<title>Konwersja do postaci analogowej</title>
+<p>Konwersja do postaci analogowej z wykorzystaniem karty dźwiękowej wykorzystuje (do wyboru) mechanizm pliku urządzenia <kbd class="path">/dev/dsp</kbd> lub bibliotekę ALSA. Realizacja przetwarzania polega na przekazaniu przygotowanej wcześniej tablicy próbek do podsystemu dźwiękowego celem odtworzenia na wyjściu karty dźwiękowej. Metoda ta wiąże się z ograniczeniem możliwych do zastosowania wartości częstotliwości próbkowania do wartości wspieranych przez karty dźwiękowe.</p>
+
+<p>Konwersja do postaci analogowej z wykorzystaniem przystawki mikrokontrolerowej odbywasię się poprzez przekazanie tablicy próbek do mikrokontrolera który odpowiedzialny jest za przekształcenie ich na postać analogową. Próbki przekazywane są z wykorzystaniem portu szeregowego. Ze względu na to iż okres rozsądnego sygnału składa się na ogół z niewięcej niż stu próbek (jest to wynik testów niniejszego programu na karcie dźwiękowej, przy złożonych lub mniej okresowych sygnałach liczba ta może być większe) wszystkie dane przekazywane są za jednym razem. W obecnej wersji przystawka mikrokontrolerowa nie została zrealizowana ze względu na brak w posiadanych zasobach mikrokontrolera z wbudowanym przetwornikiem cyfrowo-analogowym (ku mojemu zaskoczeniu taka funkcjonalność jest żadkością w serii AVR).</p>
+</article>

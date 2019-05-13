@@ -1,0 +1,35 @@
+*** ../psiaccount.cpp	2007-10-27 15:17:41.000000000 +0200
+--- src/psiaccount.cpp	2007-12-30 22:54:22.000000000 +0100
+***************
+*** 4263,4272 ****
+  				PGPUtil::instance().removePassphrase(ke.id());
+  		}
+  
+! 		QMessageBox::critical(0, tr("Error"), tr("There was an error trying to sign your status.\nReason: %1.").arg(PGPUtil::instance().messageErrorString(t->errorCode())));
+! 
+! 		logout();
+! 		return;
+  	}
+  	t->deleteLater();
+  }
+--- 4263,4282 ----
+  				PGPUtil::instance().removePassphrase(ke.id());
+  		}
+  
+! 		switch (QMessageBox::question (0,
+! 			tr("Error"),
+! 			tr("There was an error trying to sign your status.\nReason: %1.").arg(PGPUtil::instance().messageErrorString(t->errorCode())),
+! 			QMessageBox::Retry | QMessageBox::Ignore | QMessageBox::Abort, QMessageBox::Abort)) {
+! 			case QMessageBox::Retry:
+! 				trySignPresence();
+! 				return;
+! 			case QMessageBox::Ignore:
+! 				setStatusActual(d->loginStatus);
+! 				break;
+! 			default:
+! 				logout();
+! 				return;
+! 		}
+  	}
+  	t->deleteLater();
+  }

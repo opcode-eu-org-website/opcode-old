@@ -1,0 +1,41 @@
+[general]
+; automatyczna rejestracja i usuwanie ...
+;autoregister=yes
+;autoprune=yes
+
+; automatyczne akceptowanie subskrypcji
+auth_policy=accept
+
+
+; konto służące do powiadomień o przychodzących połączeniach
+[notify]
+type=client
+
+; konfiguracja dostępu do serwera XMPP
+serverhost=opcode.eu.org
+username=asterisk@opcode.eu.org/asterisk
+secret=XXXXXXX
+port=5222
+usetls=yes
+
+; status i opis
+status=available
+statusmessage="I am asterisk server"
+
+
+; konta służące użytkownikowi do komunikacji z voip'em jabberowym (jingle/gtalk)
+#include <jabber-users.conf>
+; typowe wpisy:
+; 	[rrp1]
+; 		type=client
+; 
+; 		; konfiguracja dostępu do serwera XMPP
+; 		serverhost=opcode.eu.org
+; 		username=rrp@voip.opcode.eu.org/asterisk
+; 		secret=XXXXXXXX
+; 		port=5222
+; 		usetls=yes
+; 
+; 		; status i opis
+; 		status=available
+; 		statusmessage="This is VoIP (jingle/gtalk) only account, real IM account is rrp@opcode.eu.org"

@@ -1,0 +1,81 @@
+<article>
+<title>DNS</title>
+
+<p>Najczęściej wykorzystywanym serwerem usługi <id_link id="ABC_OF_COMPUTING:networks:IP_network_services:dns">DNS</id_link> jest bind. Konfiguracja tego programu dzieli się na pliki opisujące opcja związane z działaniem samego serwera i wskazujące na obsługiwane strefy (<kbd class="path">/etc/bind/named.conf*</kbd>) oraz pliki opisujące poszczególne strefy ich położenie wskazywane jest w ogólnej konfiguracji binda poprzez wpisy typu:</p>
+<pre>zone  "moja.domena" {
+	type master;
+	file  "/etc/bind/zone/moja.domena.ZONE";
+	notify yes;
+	allow-update { none; };
+};</pre>
+
+<p>Natomisat same pliki stref są postaci:</p>
+<pre>$ORIGIN moja.domena.
+$TTL 86400 
+
+@                 IN      SOA     dns.moja.domena.  root.dns.moja.domena. (
+                                  2005122902 ;; numer seryjny
+                                  7200 ;; sprawdzanie czy zaszly zmiany
+                                  7200 ;; ponowna proba kontaktu
+                                  604800 ;; dane wygasna po
+                                  86400 ;; serwery po drodze beda pamietac przez
+                                  )
+
+@                 IN      NS      dns
+
+@                 IN      MX      15      mail
+
+;; GLOWNE
+@                 IN      A       XXX.XXX.XXX.XXX ;; UWAGA: dla @ nie można stosować CNAME gdyż mamy tam już zdefiniowane SOA, MX, NS
+                                                  ;;  a CNAME wymaga bycia jedynym rekordem dla danej subdomeny
+dns               IN      A       XXX.XXX.XXX.XXX ;; UWAGA: w myśl RFC 2181 tu nie może być CNAME bo na ten adres wskazuje NS
+mail              IN      A       XXX.XXX.XXX.XXX ;; UWAGA: w myśl RFC 2181 tu nie może być CNAME bo na ten adres wskazuje MX
+
+im                IN      CNAME   mail.moja.domena.
+www               IN      CNAME   dns.moja.domena.
+ipv6              IN      AAAA    YYY:YYYY:YYYY::YYYY
+
+;; wpisy SRV dla usług
+_xmpp-client._tcp    86400 IN SRV 0 0 5222 im
+_xmpp-server._tcp    86400 IN SRV 0 0 5269 im
+_sip._udp            86400 IN SRV 0 0 5060 im
+_iax._udp            86400 IN SRV 0 0 4569 im
+
+;; wpis dla www (niestety żadna przeglądarka tego nie obsługuje i trzeba dawać @ IN A :-(
+_www._tcp            86400 IN SRV 0 0 80   www
+
+;; wpis dla serwera pocztowego - obecnie w zasadzie nie potrzebny (jest MX) ale może kiedys
+_smtp._tcp           86400 IN SRV 0 0 80   mail
+
+;; wpisy SRV z "nioficjalnymi" nazwami potów, tak dla bezpieczeństwa (istotne mogą być tylko dla jabber)
+_http._tcp           86400 IN SRV 0 0 80   www
+_mail._tcp           86400 IN SRV 0 0 80   mail
+_jabber-client._tcp  86400 IN SRV 0 0 5222 im
+_jabber-server._tcp  86400 IN SRV 0 0 5269 im
+
+;; odwrotny DNS dla IP przekierowanych przez CNAME na 23-ip.moja.domena.
+;; w odpowiedniej strefie XX.YY.ZZ.in-addr.arpa (u naszego dostawcy) umieszczony musi być wpis
+;;   23 IN CNAME 23-ip.moja.domena.
+;; zamiast
+;;   23-ip IN PTR mail.moja.domena.
+23-ip             IN      PTR     mail
+</pre>
+
+<p>Wspomniane wpisy opcji serwera są następującej postaci:</p>
+<pre>options {
+	directory "/var/cache/bind";
+	
+	auth-nxdomain no;    # conform to RFC1035
+	listen-on-v6 { any; };
+	
+	listen-on { any; };
+	allow-transfer { any; };
+};</pre>
+
+
+<p>Warto zwrócić możliwość na wykorzystanie * oznaczającej dowolną nazwę hosta (np. *.moja.domena.pl oznacza wszystkie adresy postaci ciag_znakow_bez-kropki.moja.domena.pl), podobnie możemy uczynić z konfiguracją webserwera (serwer wirtualny z wpisem "ServerAlias *.moja.domena.pl" będzie obsługiwał wszystkie te odwołania (dalej możemy użyć mechanizmów różnicowania położenia katalogu głównego w zależności od tego co jest podane zamiast kropki).</p>
+
+<p>Kolejną rzeczą o której warto wspomnieć jest konfiguracja DNS w bind9 dla IPv6. W <code>/etc/bind/named.conf.options</code> dodać należy <code>listen-on-v6 { any; };</code> (wewnątrz <code>options { ... }</code>). Możemy także konfigurować domeny na adresach IPv6 poprzez dodanie w pliku naszej strefy wpisu z typem AAAA. Odwrotny DNS konfigurujemy podobnie jak dla IPv4 - poprzez utworzenie wpisu dla domeny <code>{nasz prefix pisany od tyłu po każdej cyfrze szesnastkowej stawiamy kropkę}.ip6.arpa</code>wraz z wpisami dla hostów - tutaj w rekordach PTR piszemy jako nazwę domeny część odpowiedzialną za adres hosta, również od tyłu i z kropką po każdej cyfrze szesnastkowej.</p>
+
+<p>Niekiedy mogą wystąpić problemy z zatrzymywaniem/restartowaniem binda, może to być spowodowane błędem w kluczy (lub haśle do niego) który autoryzuje komunikację binda i programu go nadzorującego. Należy wtedy przegenerować klucz (<code>rndc-confgen -r /dev/urandom &gt; /etc/bind/rndc.key</code>) i dokonać stosowanych zmian w konfiguracji binda (hasło do klucza, ew. jego położenie).</p>
+</article>

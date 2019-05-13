@@ -1,0 +1,16 @@
+<article>
+<title>Źródła</title>
+<p>Program napisany został w C i dystrybuowany jest w postaci źródłowej. Celem zbudowania programu należy wydać komendę <code>make</code> w katalogu z źródłami. W przypadku modyfikowania plików nagłówkowych konieczne jest wydanie polecenia <code>make clean &amp;&amp; make</code>.</p>
+
+<p>Program został podzielony na moduły:</p>
+<ul>
+	<li><id_link id="main.c">main.c</id_link> - główna funkcja programu</li>
+	<li><id_link id="config.c">config.c</id_link>, <id_link id="config.h">config.h</id_link> - obsługa konfiguracji (odczyt i przechowywanie) podawanej w linii poleceń i w pliku konfiguracyjnym</li>
+	<li><id_link id="help.c">help.c</id_link>, <id_link id="help.h">help.h</id_link> - komunikaty pomocy</li>
+	<li><id_link id="signal.c">signal.c</id_link>, <id_link id="signal.h">signal.h</id_link> - generacja sygnału PCM w oparciu o dane konfiguracyjne</li>
+	<li><id_link id="output_alsa.c">output_alsa.c</id_link>, <id_link id="output_alsa.h">output_alsa.h</id_link> - odtwarzanie sygnału z wykorzystaniem biblioteki ALSA</li>
+	<li><id_link id="output_dsp.c">output_dsp.c</id_link>, <id_link id="output_dsp.h">output_dsp.h</id_link> - odtwarzanie sygnału z wykorzystaniem /dev/dsp</li>
+	<li><id_link id="output_uC.c">output_uC.c</id_link>, <id_link id="output_uC.h">output_uC.h</id_link> - odtwarzanie sygnału z wykorzystaniem przystawki elektronicznej</li>
+</ul>
+<p class="download"><a class="int" href="./generator.tgz">Pobierz</a></p>
+</article>

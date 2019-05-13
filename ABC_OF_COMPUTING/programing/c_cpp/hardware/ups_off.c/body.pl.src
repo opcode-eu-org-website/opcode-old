@@ -1,0 +1,48 @@
+// program przeznaczony do wywolywaniqa z skryptu reboot (na runlevel 6) ...
+// program sprawdza stan zasilania ups'a Fideltronic Ares 1000
+// jezeli system dziala na zasilaniu z UPS (praca awaryjna)
+// nastapi wylaczenie ups'a oraz wykonanie polecenia halt,
+// w przeciwnym razie program zakonczy sie ... pozwalajac na dokonanie reboot'u
+
+// gdy program wywolany nie jest w runlevelu 6 poinformuje o stanie zasilania i zakonczy dzialanie
+
+#include <stdio.h>
+#include <sys/io.h>
+#include <unistd.h>
+
+#define RS_PORT 0x3f8
+int main(int argv, char *argc[]) {
+	iopl (3);
+	
+	// ustawiamy DTR na stan wysoki
+	outb(1, RS_PORT + 4);
+	
+	// odczytujemy CTS - informacja o stanie zasilania
+	if ( inb(RS_PORT + 6) & (1 <<4) ) {
+		puts("Normalny stan zasilania - nic nie robie");
+		return 0;
+	} else {
+		puts("Awaryjny stan zasilania - czekam");
+		// jezeli runlvel !=6 nie kontynuje ...
+		if ( 0 != system("test `runlevel | cut -f2 -d' '` = 6")) {
+			puts("Runlevel != 6 => koncze");
+			return -2;
+		} else {
+			sleep(5);
+			// ponownie sprawdzam stan zasilania
+			if ( ! ( inb(RS_PORT + 6) & (1 <<4) ) ) {
+				puts("Nadal awaryjny stan zasilania => wylaczam");
+		
+				// ustawiamy stan wysoki na RTS - wylaczenie UPS za 5s
+				outb(2, RS_PORT + 4);
+		
+				// wykonanie halt
+				system("halt -d -f -i");
+				return -3;
+			} else {
+				puts("Powrot do normalnego stanu zasilania ...");
+				return -1;
+			}
+		}
+	}
+}

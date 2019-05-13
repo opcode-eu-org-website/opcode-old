@@ -1,0 +1,5 @@
+PROJECTNAME=game
+PROJECTPATH=/path/to/project/
+LIBS=-lglut -lglpng -lstdc++
+GLOBAL_CFLAGS=-Wall -ggdb -I$(PROJECTPATH) -I$(PROJECTPATH)include
+#-DDEBUG

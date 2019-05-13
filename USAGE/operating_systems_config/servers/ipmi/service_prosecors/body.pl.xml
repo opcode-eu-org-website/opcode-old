@@ -1,0 +1,51 @@
+<article>
+<title>nie tylko IPMI</title>
+<p>IPMI nie jest jedynym interfejsem systememów zarządzania sprzętem. W sererach SUNowskich możemy spotakać także różne *LOMy, poniżej porównanie naistotniejszych funkcji poszczególnych systemów obsługi service procesora:</p>
+
+<table summary="prównanie różnych systemów komunikacji z SP na platformach SUN"><col latex="p{1.8cm}|" /><col latex="p{2.6cm}|" /><col latex="p{4.2cm}|" /><col latex="p{3.2cm}|" /><col latex="p{3.2cm}" />
+	<tr latex="\hline">
+		<th>działanie</th>
+		<th>IPMI v1.5 Service Processor</th>
+		<th>ELOM</th>
+		<th>ILOM</th>
+		<th>ALOM</th>
+	</tr>
+	<tr latex="\hline">
+		<td>uruchamianie konsoli</td>
+		<td><code>platform console</code></td>
+		<td><code>start /SP/AgentInfo/console</code></td>
+		<td><code>start /SP/console</code></td>
+		<td><code>console</code> oraz <code>consolehistory</code></td>
+	</tr>
+	<tr latex="\hline">
+		<td>wychodzenie z konsoli (rozłączanie)</td>
+		<td><code>Ctrl+E c .</code></td>
+		<td><code>Esc (</code></td>
+		<td><code>Esc (</code></td>
+		<td><code># .</code></td>
+	</tr>
+	<tr latex="\hline">
+		<td>zasilanie</td>
+		<td><code>platform set power state</code></td>
+		<td><code>set /SP/SystemInfo/CtrlInfo PowerCtrl=on | gracefulloff | forceoff | reset | BIOSSetup</code></td>
+		<td><code>stop -force /SYS</code></td>
+		<td><code>poweron | poweroff | reset</code></td>
+	</tr>
+	<tr latex="\hline">
+		<td>pomoc</td>
+		<td><code>help</code> oraz dodanie do komendy <code>-h</code> lub <code>--help</code></td>
+		<td><code>help [komenda]</code></td>
+		<td><code>help [komenda]</code></td>
+		<td><code>help [komenda]</code></td>
+	</tr>
+	<tr latex="\hline">
+		<td>uwagi</td>
+		<td></td>
+		<td>konsola często źle znosi reset systemu zlecony z SP (należy ją odpalić ponownie)</td>
+		<td></td>
+		<td></td>
+	</tr>
+</table>
+
+<p>W przypadku ILOM w wersji 1 i 2 możliwe jest zalogowanie się do bash'owej powłoki z użyciem <code>ssh sunservice@ilom.adres</code> oraz hasła użytkownika root. Umożliwia to m.in. zrestartowanie ILOMu gdy <code>restart /SP</code> odmawia współpracy.</p>
+</article>

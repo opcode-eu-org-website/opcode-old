@@ -1,0 +1,57 @@
+/*
+ * plik ma na celu prezentację ciekawych zagadnień z programowania w języku C / C++
+ * prezentuje metody wykonywania precyzyjnych przerw w programach
+ *
+ * uwaga: aby uzyskać naprawde dokładne przerwy należy prezentowane tu metody wyczekiwania
+ * łączyć z metodami powodującymi uprzywilejowanie naszego procesu w dostępie do procesora
+ * opisanymi w zawieszacz.c i priorytety.c
+ *
+ */
+
+#include <stdio.h>
+
+
+// funkcja zwracajaca wartosc rejestru zliczajacego takty procesora
+unsigned long long czas() {
+  asm( "rdtsc" );
+}
+
+struct timeval tv_1;
+unsigned long long czas2() {
+	gettimeofday ( &tv_1, NULL );
+	return (unsigned long long)( tv_1.tv_sec * 1000000 + tv_1.tv_usec );
+		// zmiesci sie to nam gdyz 10^6 * 2^32 < 2^64
+}
+
+
+int main (int argv, char *args[]) {
+
+	int ile = atoi(argv[1]); // czas czekania w us
+	
+	// czekanie aktywne w oparciu o licznik taktów i pomiar czasu czekania ...
+	// czekanie to moze dzialac nawet z precyzja kilku nanosekund
+	// - zalezy to od predkosci taktowania procesora ...
+	struct timeval tv_1, tv_2;
+	gettimeofday ( &tv_1, NULL );
+		tmp1 = czas() + 3000*ile;
+		while ( czas() < tmp1);
+	gettimeofday ( &tv_2, NULL );
+	printf("CZAS [us]: %li\n",
+		(tv_2.tv_sec * 1000000 + tv_2.tv_usec) - (tv_1.tv_sec * 1000000 + tv_1.tv_usec) );
+	
+	// jak widzimy pomiar ten jest dosc dokladny (jest sytematyczne zawyzenie
+	// ale wiaze sie ono z czasem wykonywania dodatkowych instrukcji ...
+	// dla czasów oczekiwań > 4us można zatem zrealizować z wykorzystaniem gettimeofday
+	// nalezy wtedy korzystac z czas2() oraz nie podawac mnoznika 3000
+	// ktory jest zwiazany z predkoscia procesora (w przykladzie 3GHz
+	// mnoznik ten mozna obliczas z wykorzystaniem polaczenia obu metod
+	
+	// wiecej na ten temat w zrodlach "Sterowanie magnetowidem"
+	
+	// na koniec trzeba tez wspomniec o nanosleep(), ktora zgodnie z dokumentacja man powinna
+	// dla czasow <2ms i polityce szeregowania czasu rzeczywistego uzywac aktywnego czekania
+	// jednak z przeprowadzonych testow wynika ze przynajmniej nie zawsze tak sie dzieje ...
+	
+	return 0;
+}
+

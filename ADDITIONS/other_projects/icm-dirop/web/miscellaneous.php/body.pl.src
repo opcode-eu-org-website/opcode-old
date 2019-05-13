@@ -1,0 +1,60 @@
+<?php
+/**
+	System prezentacji zasobów DIROP na WWW
+	
+	plik zawierający definicje stałych systemowych (nie konfiguracyjnych) oraz funkcje pomocnicze
+**/
+
+
+
+/// tryby wyświetlania wyników
+define('MODE_BOOK_LIST', 1); define('MODE_VOLUME_LIST', 2); define('MODE_SEARCH', 10); define('MODE_INFO', 20); define('MODE_PAGE', 21);
+
+/// tryby filtrowania
+define('FILTER_NOVELTY', 1); define('FILTER_CATEGORY', 2); define('FILTER_SEARCH', 3);
+
+/// wykaz pobieranych kolumn do BOOK_INFO i złączenie z którego pobierane
+define('BOOK_INFO_SELECT', 'b.book_id, b.single_vid, v.volume_id, b.title AS "b.title", b.url AS "b.url", v.title AS "v.title", v.url AS "v.url", dc_title, dc_creator, dc_subject_and_keywords, dc_description, dc_publisher, dc_contributor, dc_date, info_category, b.extra AS "b.extra"');
+define('BOOK_INFO_SELECT_FROM', 'book AS b JOIN volume AS v ON v.book_id=b.book_id');
+
+/// domyślna ilość ksiązek na stronie spisu pozycji
+define('BOOKS_ITEM_PER_PAGE', 25);
+
+/// domyślna ilośc pozycji w nowościach
+define('DEFAULT_MAX_NOVELTY', 15);
+
+/// ilość standardowo rozwiniętych poziomów spisu treści
+define('STANDAR_SHOW_CONTENT_LEVEL', 0);
+
+/// wyświetlanie strony błędu (z wysłaniem kodu odpowiedzi 500)
+function error($code = '', $info = '') {
+	global $debug;
+	
+	if (is_file(DIROP_INCLUDE_DIR_PATH . "sub_pages/error_{$code}.php") && ! $debug) {
+		include(DIROP_INCLUDE_DIR_PATH . "sub_pages/error_{$code}.php");
+	} else {
+		include(DIROP_INCLUDE_DIR_PATH . "sub_pages/500.php");
+	}
+	exit;
+}
+
+
+/// protrect for sql injection
+function protect_sql($sql) {
+	return strtr($sql, ";'\"()", "_____");
+}
+
+
+/// funkcja przygotowuje tablice z danymi o wyszukiwaniu specjalnym
+function special_search($extra) {
+	$index_search = ereg_replace('^(.*;)*' . "index_search" . '="([^;"]*)".*$', "\\2", $extra);
+	$special_search = array();
+	if ($index_search != '') {
+		$special_search[0]['label'] = "wg haseł";
+		$special_search[0]['name'] = "index_search";
+		$special_search[0]['table'] = $index_search;
+	}
+	return $special_search;
+}
+
+?>

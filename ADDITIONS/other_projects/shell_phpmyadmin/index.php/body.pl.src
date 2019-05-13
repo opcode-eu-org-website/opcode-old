@@ -1,0 +1,82 @@
+#!/usr/bin/php-cgi
+<?php header('Content-Type: text/html; charset=utf-8', 1);
+/** Skrypt umożliwia logowanie się do systemu phpmyadmin uzywając hasła i loginu konta shelowego
+ *  na którym umieszczony jest stosowny plik .my.cnf zawierający nazwę uzytkownika i hasło MySQL
+ *
+ * UWAGA 1:
+ *  wymagane ustawienia dla .my.cnf:
+ *  plik powinien należeć do grupy na której pracuje ten skrypt
+ *  (nie powinna być to grupa na której pracuje serwer WWW)
+ *  oraz grupa ta powinna mieć prawo odczytu tego pliku */
+ // chmod 440 /home/xxx/.my.cnf; chgrp www-data /home/xxx/.my.cnf;
+ 
+/** UWAGA 2:
+ *  użytkownik na prawch którego pracuje skrypt powinien mieć prawo czytania /etc/shadow */
+?>
+<html>
+	<head>
+		<title>phpMyAdmin - logowanie PAM</title>
+	</head>
+	<body>
+<?php
+	$SERWER_URL="/";
+	$username = $_POST['username'];
+	$password = $_POST['password'];
+
+	if ($username != "") {
+		if (! pam_auth($username, $password, &$error)) {
+			echo $error;
+			exit;
+		}
+		
+		//$db_user = shell_exec ("id -u $username");
+		$db_user = shell_exec ("awk 'BEGIN {FS=\"=\"} /^user=/ {printf \$2}' /home/$username/.my.cnf");
+		$db_pass = shell_exec ("awk 'BEGIN {FS=\"=\"} /^password=/ {printf \$2}' /home/$username/.my.cnf");
+		
+		echo "
+		<p>Witaj $username. Zostaniesz zalogowany do systemu zarządzania bazami danych MySQL,
+			na podstawie danych z pliku <code>~/.my.cnf</code> jako ${db_user}.</p>
+		
+		<p>Po zalogowaniu się możesz utworzyć bazę danych kilkając na link
+			<font color=\"blue\">Bazy danych</font>, następnie wpisując w pole \"Utwórz nową bazę danych\"
+			<b>${db_user}-XXX</b>, gdzie XXX jest twoją nazwą bazy danych i naciskając \"Utwórz\"</p>
+		
+		<form method=\"post\" action=\"${SERWER_URL}index.php\" name=\"login_form\" target=\"_top\">
+			<input type=\"hidden\" name=\"pma_username\" value=\"$db_user\" />
+			<input type=\"hidden\" name=\"pma_password\" value=\"$db_pass\" />
+			<input type=\"hidden\" name=\"server\" value=\"1\" />
+			<input type=\"hidden\" name=\"lang\" value=\"pl-utf-8\" />
+			<input type=\"hidden\" name=\"convcharset\" value=\"iso-8859-1\" />
+			<center><input type=\"submit\" value=\"Login\" id=\"buttonYes\" /></center>
+		</form>";
+	} else {
+		echo "
+		<p>W poniższe pola należy wpisać swój login i hasło do konta shelowego
+			- system pobierze odpowiednie informacje o koncie MySQL.</p>
+		<center>
+		<form method=\"post\" action=\"\" name=\"login\" target=\"_top\">
+		<table cellpadding=\"3\" cellspacing=\"0\">
+			<tr>
+				<td align=\"right\" bgcolor=\"#E5E5E5\"><b>Użytkownik:&nbsp;</b></td>
+				<td align=\"left\" bgcolor=\"#E5E5E5\">
+					<input type=\"text\" name=\"username\" size=\"24\" class=\"textfield\" />
+				</td>
+			</tr>
+			<tr>
+				<td align=\"right\" bgcolor=\"#E5E5E5\"><b>Hasło:&nbsp;</b></td>
+				<td align=\"left\" bgcolor=\"#E5E5E5\">
+					<input type=\"password\" name=\"password\" size=\"24\" class=\"textfield\" />
+				</td>
+			</tr>
+			<tr>
+				<td colspan=\"2\" align=\"center\">
+					<input type=\"submit\" value=\"Login\" id=\"buttonYes\" />
+				</td>
+			</tr>
+		</table></form></center>
+		<p>Aby zalogować się bezpośrednio jako użytkownik MySQL należy przejść do
+			<a href=\"${SERWER_URL}index.php\">tej</a> strony.</p>";
+	}
+?>
+	</body>
+</html>

@@ -1,0 +1,8 @@
+<article>
+<title>Zewnętrzna pętla opóźnienia</title>
+<p>Podobnie jak przerzutnik Shmitta działają np. bramki cyfrowe tego typu. Bramkę taką możemy wykorzystać jako przerzutnik astabilny:</p>
+
+<p class="center"><img_from_src name="zewnetrzna_petla" type="sch" alt="schemat ideowy prostego przerzutnika z zewnętrzną pętlą" /></p>
+
+<p>Korzystamy tutaj z histerezy tej bramki (napięcie na kondensatorze zmienia się pomiędzy tymi wartościami, a napięcie wyjściowe zgodnie z stanami logicznymi bramki. Długości półokresów wynoszą określa <eq_latex>t_x = \tau \ln({u(\infty) - u(0) \over u(\infty) - u(t_x)})</eq_latex>, gdzie <eq_latex>\tau = R_1 C_1</eq_latex>.</p>
+</article>

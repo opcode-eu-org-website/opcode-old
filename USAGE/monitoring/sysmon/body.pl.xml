@@ -1,0 +1,22 @@
+<article>
+<title>SysMon</title>
+
+<p>Jest to system skryptów służących do monitorowania pracy systemów. System wspiera:</p><ul>
+	<li>kontrolę dostępności hostów w oparciu o echo ICMP (ping)</li>
+	<li>kontrolę restartu hostów (w oparciu o badanie uptime)</li>
+	<li>kontrolę temperatury na hostach (w oparciu o ipmi)</li>
+	<li>kontrolę braku miejsca na dystkach twardych</li>
+	<li>kontrolę stanu dysków poprzez S.MA.R.T.</li>
+	<li>systemach z rodziny Linux i Solaris</li>
+	<li>powiadomienia poprzez pocztę elektroniczną oraz xmpp</li>
+	<li>automatyzację procesu instalacji i aktualizacji</li>
+	<li>raporty diagnostyczne systemu monitorującego</li>
+</ul>
+
+<p>Na system skaładą się następujące elementy</p><ul>
+	<li><id_link id="sysmon_server.sh">sysmon_server.sh</id_link> - skrypt wywoływany poprzez cron i odpowiedzialny za badanie stanu hostów</li>
+	<li><id_link id="sysmon_client.sh">sysmon_client.sh</id_link> - skrypt wywoływany zdalnie poprzez ssh na monitorowanych hostach</li>
+	<li><id_link id="sysmon_server.conf">sysmon_server.conf</id_link> - plik konfiguracyjny dla sysmon_server.sh (ustawienia wspólne dla całości systemu)</li>
+	<li>sysmon_client.conf - plik konfiguracyjny dla sysmon_client.sh (ustawienia zalezne od danego hosta)</li>
+</ul>
+</article>

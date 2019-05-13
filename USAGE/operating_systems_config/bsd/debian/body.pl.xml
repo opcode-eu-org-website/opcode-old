@@ -1,0 +1,18 @@
+<article>
+<title>Debian GNU/kfreebsd</title>
+
+<subtitle id="instalacja">Instalacja</subtitle>
+<p>Proces instalacji systemu z rootfs na zfs opisałem szczególowo na <a class ="ext" href="http://dug.net.pl/tekst/144/instalacja_debiana_gnu_kfreebsd_6_0_na_zfs/">protalu DUG</a>. Najważniejsze wydaje się zastosowanie tablicy partycji GPT i wgranie w nią GRUB2 o czym piszę także <id_link id="gpt">tutaj</id_link>.</p>
+
+<subtitle id="konsola">Konsola szeregowa</subtitle>
+<p>Aby wystawić konsolę Debian GNU/kfreebsd na pierwszy port szeregowy z prędkością 9600 należy:</p>
+<ul>
+	<li>wpisać konsole na <dfn>cuau0</dfn> do <kbd class="path">/etc/inittab</kbd> - <code>T0:23: respawn:/sbin/getty -L cuau0 9600 vt100</code></li>
+	<li>dodać ją do <kbd class="path">/etc/securetty</kbd></li>
+
+	<li>(aby ogladać komunikaty startowe) w <kbd class="path">/etc/grub.d/10_kfreebsd</kbd> w linii wypisujacej "kfreebsd" (<code>kfreebsd    ${rel_dirname}/${basename}</code>) dopisać na koncu <code>-D  -h</code></li>
+	<li>wydać polecenie <code>update-grub2</code></li>
+</ul>
+
+<p>Pełniejszy zestaw opcji w command line gruba po wpisaniu <code>kfreebsd --help</code></p>
+</article>

@@ -1,0 +1,5 @@
+<article>
+<title>Szyfrowanie</title>
+
+<p>Przesyłanie danych przez Internet pod względem ich bezpieczeństwa przypomina przesyłanie ich przy pomocy kartek pocztowych - każda osoba (serwer/router) pośrednicząca w przekazywaniu może podejrzeć zawartość, ale zrobić to może także osoba będąca dostatecznie blisko i posiadająca np. lornetkę. Dlatego przy poufnych danych stosuje się ich szyfrowanie. Kolejną kwestia jest łatwość zmiany danych będących w postaci cyfrowej tudzież wyparcia się ich autentyczności/autorstwa - stąd bardzo pokrewna szyfrowaniu technika <wiki pl="Podpis cyfrowy">podpisu cyfrowego</wiki>. Zobacz także skrypt eksportujący dane kryptograficzne (i nie tylko) - <id_link id="CommonsConfig-addionals.sh">CommonsConfig-addionals.sh</id_link></p>
+</article>

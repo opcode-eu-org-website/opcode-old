@@ -1,0 +1,21 @@
+<article>
+<title>Dia i różne schematy</title>
+
+<p>Jest to całkiem program do tworzenia diagramów i schematów. Umożliwia tworzenie m.in:</p>
+<ul>
+	<li>diagramów blokowych</li>
+	<li>diagramów logicznych (z użyciem symboli ALU, MUX, bramek, ...)</li>
+	<li>diagramów przepływu dla algorytmów (<wiki en="Flowchart">Flowchart</wiki>)</li>
+	<li>grafów stanu dla automatów (<wiki en="State diagram">State diagram</wiki>)</li>
+	<li>schematów <wiki pl="Unified Modeling Language">UML</wiki></li>
+	<li>schematów telekomunikacyjnych</li>
+	<li>schematów elektronicznych (jednak tutaj warto użyć dedykowanego oprogramowania takiego jak <code>kicad</code>, czy <code>gschem</code> - posiada ono na ogół znacznie więcej symboli oraz umożliwia tworzenie netlist i przejście do projektowania pcb)</li>
+	<li>schematów elektrycznych (tutaj także można użyć oprogramowania takiego jak <code>kicad</code>, czy <code>qcad</code>)</li>
+</ul>
+
+<p>Ponadto dzięki bliskości formatu dia do svg narzędzie to ładnie współpracuje z <code>inkscape</code> (możemy go użyć np. do przygotowywania elementów używanych w dia), a także umożliwia eksport do tego formatu. Główną niedogodnością w dia jest brak możliwości swobodnego obracania elementów.</p>
+
+<p>Możemy instalować także w <kbd class="path">~/.dia/</kbd> dodatkowe "shape" do tego programu, trochę gotowych znaleźć można na <homepage url="http://dia-installer.de/shapes.html">Dia Shape Repository</homepage>, <homepage url="http://www.hawlisch.de/devel/dia/index.html">Shapes for Dia</homepage> (te i nie tylko w formie <homepage url="http://code.google.com/p/jubarte/downloads/list">paczki deb</homepage>). Poprzez edycję pliku konfiguracyjnego <kbd class="path">~/.dia/sheets/Assorted.sheet</kbd> możemy ustalać zawartość grupy "Mieszane" (wyróżnia się tym iż zawsze jest na górze menu) - <a class="int" href="./Assorted.sheet">przykład</a>.</p>
+
+<p>Zamieszczm także skrypt do automatycznej konwersji schematów dia na pliki w formatach pdf i png - <id_link id="dia2pdf.sh">dia2pdf.sh</id_link></p>
+</article>

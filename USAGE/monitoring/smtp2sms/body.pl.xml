@@ -1,0 +1,37 @@
+<article>
+<title>System powiadomień SMS</title>
+
+<p>Projekt stanowi implementację systemu powiadomień SMS dla platformy <homepage url="http://www.a2s.pl/komputery-embedded-platforma-c-834_1933_107.html">NPE</homepage>. Jako że stanowi dość typowe linuxowe oprogramowanie stosunkowo łatwo może być przeniesiony na dowolna inna platformę zgodną z POSIX. </p>
+
+<p>Obsługa kolejki SMSów (realizowanej jako baza danych SQL)</p>
+<ul>
+	<li><id_link id="sms_queued.c">sms_queued.c</id_link> - program wysyłający SMSy w oparciu o wpisy z kolejki</li>
+	<li><id_link id="sms_queue_add.c">sms_queue_add.c</id_link> - program odpowiedzialny za wstawianie SMSów do kolejki</li>
+</ul>
+
+<p>System odbierający e-maile i tworzący w oparciu o nie wpisy w kolejce SMSów:</p>
+<ul>
+	<li><id_link id="smtp_listener.c">smtp_listener.c</id_link> - daemon nasłuchujący połączeń SMTP</li>
+	<li><id_link id="smtp_talk.c">smtp_talk.c</id_link> i <id_link id="smtp_talk.h">smtp_talk.h</id_link> - biblioteczka obsługująca dialog SMTP (wywołuje mail2sms.sh oraz wstawia maila do kolejki nullmailer'a)</li>
+	<li><id_link id="mail2sms.sh">mail2sms.sh</id_link> - skrypt parsujący e-mail'e i decydujący o dodaniu wiadomości do kolejki SMSów</li>
+</ul>
+
+<p>Pliki ogólne:</p>
+<ul>
+	<li><id_link id="error_reporting.h">error_reporting.h</id_link> - plik nagłówkowy definiujący makra odpowiedzialne za wyświetlanie bądź zapisywanie do logu systemowego informacji zgłaszanych przez program</li>
+	<li><a class="int" href="./install_and_run.sh">install_and_run.sh</a> - skrypt używany do zainstalowania i uruchomienia systemu na platformie NPE (podpinany do skryptu startowego systemu)</li>
+	
+	<li><a class="int" href="./Makefile">Makefile</a></li>
+	<li><a class="int" href="./nullmailer.build.sh">nullmailer.build.sh</a> - skrypt obudowujący kompilację <homepage url="http://untroubled.org/nullmailer/">nullmailer'a</homepage> dla NPE</li>
+</ul>
+
+<p class="download"><a class="int" href="./smtp2sms.tgz">Pobierz</a></p>
+
+<TODO title="Rozwój systemu powiadomień SMS" intro="Koncepcje dalszego rozwoju">
+	<li>Można rozważyć mechanizm limitowania ilości wysłanych SMSów na jeden numer danym czasie z uwględnieniem priorytetów poprzez procedurę:<ol>
+		<li><code>DELETE FROM log WHERE phone= AND TIME &lt; curr-0.5h</code></li>
+		<li><code>num = SELECT count(*) FROM log WHERE phone=</code></li>
+		<li><code>if (num>4 and priority > 30) drop  else if (num>8 and priority > 10) drop else send</code></li>
+	</ol></li>
+</TODO>
+</article>

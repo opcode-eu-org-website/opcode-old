@@ -1,0 +1,44 @@
+#ifndef SCENEOBJECT_H
+#define SCENEOBJECT_H
+
+using namespace std;
+#include <iostream>
+#include <string>
+#include <list>
+#include <map>
+
+#include "point.h"
+#include "ball.h"
+#include "scene_objects/geometryobject.h"
+#include "scene_objects/lightobject.h"
+#include "scene_objects/textureobject.h"
+
+enum SceneObjectFlags {NOT_LOAD=0, LOAD=1, USE=2, TO_LOAD=4, TO_UNLOAD=8};
+
+class SceneObject {
+	private:
+		string filename;
+		unsigned int flags;
+		float z, x, y;
+		float rot_xz, rot_yz, rot_xy;
+		
+		GeometryObject* geometry;
+		TextureObject* texture[8];
+		LightObject* light;
+		
+		static map<const int, GeometryObject*> geometry_id;
+		static map<const int, TextureObject*> texture_id;
+		static map<const int, LightObject*> light_id;
+	public:
+		list< Ball<float> > colision_balls;
+		static PointXZY<float> eye;
+		
+		SceneObject(float z, float x, float y, string filename);
+		
+		static void render(SceneObject *obj);
+		static bool check_collisions(SceneObject *obj, float x, float y, float z);
+		static void load(SceneObject *obj);
+		static float distans_to_eye(SceneObject *obj);
+		static bool compare(SceneObject *arg1, SceneObject *arg2);
+};
+#endif

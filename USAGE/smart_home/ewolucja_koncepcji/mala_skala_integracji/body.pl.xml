@@ -1,0 +1,5 @@
+<article>
+<title>Rozwiązania oparte na układach cyfrowych małej skali integracji</title>
+<p>Pierwszym z projektów automatyki domowej był impulsowy sterownik oświetlenia w oparciu o układy cyfrowe serii 74 (TTL) oraz przekaźniki bistabilne. Umożliwiał on także zastosowanie zwykłych przekaźników (po wyeliminowaniu części układu odpowiedzialnego za impulsowość sterowania. Głównym problemem takiej realizacji było to iż układ wymagałaby użycia wielu elementów (dla sterownika 6-cio kanałowego: 6x NE555, 3x 4747, 3x 4708 oraz wiele elementów biernych) a co za tym idzie rozbudowanego i zajmującego sporo miejsca PCB.  Zamieszczam tutaj powstały wtedy projekt takiego sterownika, jednak należy pamiętać że projekt nigdy nie doczekał się realizacji czy nawet testów, więc ma prawo nie działać.</p>
+<img_from_src name="sterownik_impulsowy" type="sch" />
+</article>

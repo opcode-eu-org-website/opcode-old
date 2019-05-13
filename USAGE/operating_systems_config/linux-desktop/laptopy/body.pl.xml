@@ -1,0 +1,5 @@
+<article>
+<title>Laptopy - pcmcia, itp</title> 
+
+<p>Aby możliwe było korzystanie z kart PCMCIA wymagany jest pakiet pcmciautils. Podobne do niego pakiety (pciutils i usbutils) są przydatne ale nie są niezbędne dla poprawnego działania odpowiednich podsystemów.</p>
+</article>

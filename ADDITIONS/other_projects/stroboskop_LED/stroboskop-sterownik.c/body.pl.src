@@ -1,0 +1,304 @@
+/*
+ * program sterownika stroboskopu i kluczy tranzystorowych
+ * z funkcją zdalnego sterowania poprzez port RS
+ * dla mikrokontrolera Atmega8
+ *
+ *
+ * kompilacja i wgranie przez ISP:
+ *  avr-gcc -mmcu=atmega8 -Os -o sterownik.o stroboskop.c
+ *  avr-objcopy -O ihex sterownik.o sterownik.hex
+ *  uisp -dprog=dapa -dlpt=0x378 --erase --upload --verify --segment=flash if=sterownik.hex
+ *  w razie problemow warto przeladowac modul odpowiedzialny za obsluge LPT
+ *    rmmod lp parport_pc parport ; modprobe parport_pc
+ *
+ * konfiguracja układu na zewnętrzny kwarc 8MHz (lub troche mniejszy)
+ *  uisp -dprog=dapa -dlpt=0x378 --wr_fuse_l=0xff
+ */
+
+/** MATRYCA LED 12x3:
+	R R R R Y W W Y B B B B
+	R R R R W Y Y W B B B B
+	R R R R Y W W Y B B B B
+	
+	LUB:
+	
+	R R R R Y W Y B B B B
+	R R R R W Y W B B B B
+	R R R R Y W Y B B B B
+	
+	R = dioda czerwona (PD.4)
+	B = dioda niebieska (PD.5)
+	Y = dioda zółta (PD.6)
+	W = dioda biała (PD.7)
+	
+	podane piny portu D służą do podłączania tranzystorów sterujących diodami
+ **/
+
+// biala, niebieska 0.5k jedna w szereg, dwie rownolegle
+// zolta, czerwona 0.33k dwie w szereg
+
+#include <inttypes.h>
+#include <stdio.h>
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
+#define STROBOSKOP
+
+/** nagłówki funkcji opóżniających **/
+#define F_CPU 3000000UL
+#include <util/delay.h>
+
+/** nagłówki mojego formatu transmisji przez RS485 **/
+#define DRIVER_CTRL_PORT PORTD
+#define DRIVER_CTRL_PIN PD2
+#define MY_ADDRES 22
+
+#include "my_rs485_ascii.c"
+
+
+/** struktura z polami bitowymi odpowiadajacymi kolorm ... **/
+volatile struct {
+	uint8_t r :1;
+	uint8_t b :1;
+	uint8_t y :1;
+	uint8_t w :1;
+} kolory;
+
+/// maski bitowe przechowujące informację o stanie linii
+#define STATUS_MAX 5
+volatile uint8_t status [STATUS_MAX];
+//  status[0] - PORTD
+//  status[1] - PORTC
+//  status[2] - rejestr U4 (aktywowanego PB4)
+//  status[3] - rejestr U5 (aktywowanego PB5)
+//  status[STATUS_MAX-1]
+//            - 4 młodsze bity - zabroń migania dla kolejnych kolorów
+//            - 4 starsze bity - zabroń stroboskopu dla kolejnych kolorów
+//              (ze względów technicznych powoduje to równierz wyłączenie miganie))
+//            bit 0 -> R, bit 3 -> W, bit 4 ->R , bit 7 -> W
+//            ustawienie na 0xff lub 0xf0 spowoduje stałe świecenie diód stroboskopu
+
+void make_strobe(uint8_t mask){
+	_delay_us(30.0);
+	PORTB |= mask;
+	_delay_us(60.0);
+	PORTB &= 0x0f;
+}
+
+/** obsluga portu szeregowego **/
+// subadres:
+//   0 -> IR_LIGHT:1
+//   1 -> STROB_R:1
+//   2 -> STROB_B:1
+//   3 -> STROB_Y:1
+//   4 -> STROB_W:1
+//
+//   5 -> LIGHT_R:1
+//   6 -> LIGHT_G:1
+//   7 -> LIGHT_B:1
+//   8 -> EMERGENCY_LIGHT_1:1
+//   9 -> EMERGENCY_LIGHT_2:1
+//
+//  14 -> SWITCH_Y:1
+//  15 -> SWITCH_R:1
+//  16 -> SWITCH_B:1
+//  17 -> SWITCH_G:1
+//
+//  10 -> SYGN_B:1
+//  11 -> SYGN_Y:1
+//  12 -> (REZERWA)
+//  13 -> (REZERWA)
+
+void execute_rs_cmd(uint8_t cmd, uint8_t addr, uint8_t param, uint8_t uart_decode_mode) {
+	uint8_t addr_ind;
+	if (addr > 17) {
+		addr_ind = 6;
+		addr = addr - 18;
+	} else if (addr > 13) {
+		addr_ind = 3;
+		addr = addr - 14;
+	} else if (addr > 9) {
+		addr_ind = 2;
+		addr = addr - 10;
+	} else if (addr > 4) {
+		addr_ind = 1;
+		addr = addr - 5;
+	} else {
+		addr_ind = 0;
+	}
+	switch (cmd) {
+		case 0x01: /// read
+			if ( (status[addr_ind] & (1 << addr)) != 0 )
+				rs_switch_and_send_char('1'); // ON
+			else
+				rs_switch_and_send_char('0'); // OFF
+			break;
+		case 0x02: /// on
+			status[addr_ind] = status[addr_ind] | (1 << addr);
+			break;
+		case 0x03: /// off
+			status[addr_ind] = status[addr_ind] & ~(1 << addr);
+			break;
+		case 0x04: /// switch
+			status[addr_ind] = status[addr_ind] ^ (1 << addr);
+			break;
+		case 0x05: /// get status
+			if (addr < STATUS_MAX) {
+				rs_switch_and_send_8bit_num( status[addr] );
+			}
+			break;
+		case 0x06: /// set status
+			if (addr < STATUS_MAX) {
+				status[addr] = param;
+				addr_ind = addr;
+			}
+			break;
+		case 0x07: /// odczytaj napięcie związane z fotorezystorem
+					//  odczytaną wartość należy pomnożyć przez 0.1V
+					//  maksymalny odczyt to 2.55V
+			// pomiar ADC
+			ADCSRA |= _BV(ADSC);
+			// oczekiwanie na zakończenie pomiaru
+			while(bit_is_set(ADCSRA,ADSC));
+			// wysłanie wyniku
+			rs_switch_and_send_8bit_num( ADCH );
+			break;
+	}
+	switch (addr_ind) {
+		case 3:
+			PORTB = status[3] & 0x0f;
+			make_strobe(0x20);
+			break;
+		case 2:
+			PORTB = status[2] & 0x0f;
+			make_strobe(0x10);
+			break;
+		case 1:
+			PORTC = status[1] << 1;
+			break;
+		case 0:
+			PORTD &= 0x07;
+			PORTD |= (status[0] << 3 )& 0xf8;
+			break;
+	}
+}
+
+
+
+#ifdef STROBOSKOP
+#define TCNT0_INIT_20ms 256 - (19 * F_CPU / 1000000UL)
+uint8_t licznik_timer_20ms = 0;
+SIGNAL (SIG_OVERFLOW0) {
+	// reinicjalizujemy timer
+	TCNT0 = TCNT0_INIT_20ms;
+	
+	licznik_timer_20ms++;
+	
+	if (licznik_timer_20ms%8 == 0) {
+		// włączamy kolory zółty i biały pod warunkiem że akurat świecą
+		PORTD |= kolory.y << 6 | kolory.w << 7;
+	} else if (licznik_timer_20ms%4 == 0) {
+		// wyłączamy kolory zółty i biały
+		PORTD &= (0x3f | status[STATUS_MAX-1]);
+	}
+	
+	if (licznik_timer_20ms%10 == 0) {
+		// włączamy kolory czerwony i niebieski pod warunkiem że jest zezwolenie w kolory
+		PORTD |= kolory.r << 4 | kolory.b << 5;
+	} else if (licznik_timer_20ms%5 == 0) {
+		// wyłączamy kolory czerwony i niebieski
+		PORTD &= 0xcf | status[STATUS_MAX-1];
+	}
+	
+	if (licznik_timer_20ms == 80)
+		licznik_timer_20ms = 0;
+}
+#endif
+
+
+main() {
+	DDRD = 0xfe;
+	status[0]=0x00; // 0x1e -> stroboskop wlaczony
+	PORTD = 0;
+	
+	DDRC = 0xfe;
+	status[1]=0x00;
+	PORTC = 0;
+	
+	DDRB = 0xff;
+	status[2]=0x00;
+	PORTB = 0;
+	make_strobe(0x10);
+	
+	status[3]=0x00;
+	PORTB = 0;
+	make_strobe(0x20);
+	
+	kolory.r=0;
+	kolory.b=1;
+	kolory.y=1;
+	kolory.w=0;
+	
+	/** inicjalizacja ADC **/
+	// wewnętrzne źródło odnienienia, interesuje nas 8 starszych bitów konwersja z ADC0 (PC0)
+	ADMUX |= _BV(REFS0) | _BV(REFS1) | _BV(ADLAR);
+	// aktywacja orazustawienie częstotliwości
+	ADCSRA |= _BV(ADEN) | _BV(ADPS0) | _BV(ADPS1);
+	
+	/** port szeregowy - inicjalizacja **/
+	rs_init();
+
+	
+#ifdef STROBOSKOP
+	// aktywujemy timer dizałający co 20ms
+	TIMSK = _BV(TOIE0); // timer generuje przerwania przy przepełnieniu
+	TCNT0 = TCNT0_INIT_20ms; // wartość początkowa timera
+	TCCR0 = _BV(CS00)|_BV(CS02); // dzielinik zegara systemowego 1024
+	sei(); // właczamy globalną obsługe przerwań
+#endif
+	
+	uint8_t licznik_timer_100ms = 0;
+	while(1) {
+		if (licznik_timer_100ms%19 == 0) {
+			// YELOW ON
+			kolory.y=(status[0] >> 3) & 0x01;
+		} else if ((licznik_timer_100ms-5)%19 == 0) {
+			// YELOW OFF
+			kolory.y=(status[STATUS_MAX-1] >> 2) & 0x01;
+		} else if ((licznik_timer_100ms-8)%19 == 0) {
+			// WHITE ON
+			kolory.w=(status[0] >> 4) & 0x01;
+		} else if ((licznik_timer_100ms-13)%19 == 0) {
+			// WHITE OFF
+			kolory.w=(status[STATUS_MAX-1] >> 3) & 0x01;
+		}
+		
+		if (licznik_timer_100ms%12 == 0) {
+			// RED OFF
+			kolory.r=(status[STATUS_MAX-1]) & 0x01;
+			// BLUE ON
+			kolory.b=(status[0] >> 2) & 0x01;
+		} else if (licznik_timer_100ms%6 == 0) {
+			// RED ON
+			kolory.r=(status[0] >> 1) & 0x01;
+			// BLUE OFF
+			kolory.b=(status[STATUS_MAX-1] >> 1) & 0x01;
+		}
+		
+		if (++licznik_timer_100ms == 180) {
+			licznik_timer_100ms = 0;
+		}
+		
+#ifndef STROBOSKOP
+#warning nie zdefiniowano STROBOSKOP - program tylko dla celow testowych - moze byc zaburzone sterowanie nadajnikiem RS485
+		// wyświetlenie wyjścia bez nałożenia efektu stoboskopowego
+		PORTD = kolory.r << 4 | kolory.b << 5 | kolory.y << 6 | kolory.w << 7;
+		// jeżeli zachowamy porządek bitów zgodny z kolory to kompilator
+		// to ładnie sobie zoptymalizuje
+#endif
+		
+		// czekamy około 100ms
+		uint8_t i=0;
+		for (i=0; i<5; i++) _delay_ms(20.0);
+	}
+}

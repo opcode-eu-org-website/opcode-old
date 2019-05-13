@@ -1,0 +1,93 @@
+#!/bin/bash
+
+# to jest komentarz
+
+ala="ma kota"
+wiek_kota=5
+# powyzej zdefiniowalismy dwie zmienne, wazne aby miedzy nazwa a = nie bylo spacji
+
+echo "Ala $ala, który ma $wiek_kota lat"
+# oraz podstawiliśmy je - służy do tego operator $
+
+# tutaj też uwaga odnośnie różnych cudzysłowów:
+# "" - zmienne są podstawiane itp, '' - tekst nie jest modyfikowany,
+# `` - służy do wykonania polecenia, którego stdout może być zapisany w zmiennej
+#      w Bashu takie samo działanie ma $() ta metoda może być zagnierzdzana
+# (jak w poniższym przykładzie):
+wynik=`ls $HOME`
+# tutaj widzimy też że w ten sam sposób możemy obsługiwać zmienne środowiskowe ...
+# warto także zaznaczyć że aby zmienić zmienne środowiskowe tak aby zmiany były
+# widoczne poza skryptem po  nadaniu nowej wartości zmiennej nalezy skorzystać z
+# komendy: export $ZMIENNA
+
+echo "${ala}makota"
+# klamerkami zaznaczyliśmy co jest nazwa zmiennej a co napisem ...
+
+
+echo ${nie_ma_takiego:-"Hello World"}
+# wypisze $nie_ma_takiego gdy ustawiony i niepusty albo (w przeciwnym razie) "Hello World"
+# gdy zamiast :- użyjemy := dodatkowo zmienna nie_ma_takiego zostanie ustawiona na "Hello World"
+
+# jest jeszcze pare ciekawych zastosowań ${} ...
+
+echo ${ala:+"Hello World"}
+# podobnie jak powyżej, ale wypisze "Hello World" gdy $ala jest zdefiniowana (nie pusta)
+# w przeciwnym razie użyje napisu pustego,
+
+# gdy w powyższych pominiemy : zdeklarowany napis pusty będzie rozróżniany od wartości niezdeklarowanej
+
+
+echo ${#ala}
+# wypisze długość napisu w zmiennej ala
+
+abc="abcdefgh"
+echo ${abc#"ab"} ${abc%"h"} ${abc:1} ${abc:2:2}
+# wypisze $abc:
+#	z odrzuconym początkowym ab
+#	końcowym h
+#	od pozycji 1 (pierwsza litera to pozycja 0)
+#	2 litery od pozycji 2
+
+${abc:0:$(( ${#abc} - 1 ))}
+# powyższa dziwna konstrukcja służy wypisaniu zawartości zmiennej bez ostatniego znaku
+
+abc="abcdeabcf"
+echo ${abc/ab/AB} ${abc//ab/AB}
+# wypisze $abc z zastąpionym pierwszym (a potem wszystkimi) wystąpieniami ab przez AB
+# jeżeli napis dopasowywany rozpoczniemy od # musi on być na początku zmiennej
+# jeżeli od % musi być na końcu
+
+# podobne rzeczy można robić korzystając z expr - w szczególności
+#	expr match $zmienna 'wyrazenieregularne1\(podwyrazenie\)wyrazenieregularne2'
+# zwróci część podanej zmiennej pasującej do podanego podwyrażenia ujętego w \( \)
+expr $abc : '.*\([^df]*\)'
+
+
+# możemy używać $ wewnątrz napisów - w tym celu zabezpieczmy go \ lub napis umieszczmyu w ''
+xx='${ala} ma $HOME'
+ala="ALA"
+export ala
+echo $xx
+# jak widać zmienne wtedy nie są podmieniane, ale jeżeli wyeksportujemy zmienną
+# i przekażemy taki napis do envsubst to zostaną podstawione
+echo $xx | envsubst
+# możemy nawet określić które mają być podstawiane ...
+echo $xx | envsubst '$ala'
+
+
+# ale to jeszcze nie wszystko bash umożliwia nam korzystanie z TABLIC:
+tablica[0]="to jest element 0"
+tablica[1]="to jest element 1"
+element=1
+echo ${tablica[1]} " --- " ${tablica[0]}
+
+# @ i * zachowują się tak jak w $@ i w $* ...
+echo ${tablica[@]}
+
+echo ${#tablica[@]}
+# zwróci ilość elementów w tablicy, ale
+echo ${#tablica[1]}
+# zwróci długość elementu o indeksie 1
+
+# pozostałe operacje napisowe gdy są stosowane do ${tablica[@]} stosują się do
+# całej zawartości tablicy a gdy ${tablica[$i]} do elementu określonego w $i ...

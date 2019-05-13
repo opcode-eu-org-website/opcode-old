@@ -1,0 +1,7 @@
+<article>
+<title>Linki i moje projekty</title>
+
+<p>Zachęcam także do zapoznania się z moimi projektami związanymi z językiem C/C++: <id_link id="sterowanie_magnetowidem">Sterowanie magnetowidem</id_link>, <id_link id="radiometeor.c">detekcja radiometeorów</id_link>, <id_link id="nutos_IM_notify">powiadamiacz o IM dla jabberd2</id_link> (<id_link id="jabber_info_server.c">serwer</id_link> - mysql, autoryzacja PAM, parsowanie napisów, <id_link id ="jabber_info.c">klient</id_link> - AVR NutOS), <id_link id="sterownik_ogrzewania">sterownik ogrzewania (AVR)</id_link>, <id_link id="sterownik_oswietlenia">sterownik oświetlenia (AVR)</id_link>.</p>
+
+<p>Zobacz w Sieci: <doc url="http://www.intercon.pl/~sektor/cbx/">C++ bez cholesterolu</doc>, <doc url="http://www.icm.edu.pl/kdm/Programowanie">KDMwiki - Programowanie</doc> (głównie o uruwnoleglaniu obliczeń), <doc url="http://www.icm.edu.pl/kdm/Numeryka">Serwis Numeryczny ICM</doc>, <doc url="http://pl.cpp.wikia.com/">Wiki o C/C++</doc>, <doc url="http://david.tribble.com/text/cdiffs.htm">niekompatybilności między C a C++</doc>, <homepage url="http://www.intra2net.com/en/developer/libftdi/">libftdi</homepage>, <homepage url="http://pes.free.fr/">libmodbus</homepage>, <wiki en="b:Optimizing C++">Optimizing C++</wiki>, <wiki en="b:C++ Programming As A Set Of Problems">C++ Programming As A Set Of Problems</wiki>.</p>
+</article>

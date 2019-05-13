@@ -1,0 +1,5 @@
+<article>
+<title>Działanie w tle</title>
+
+<p>Celem uruchomienia polecenia w tle podajemy na końcu linii poleceń znak &amp;. Listę tak uruchomionych zadań z aktualnego shela możemy wyświetlić poprzez polecenie <code>jobs</code> a następnie przenieść na pierwszy plan poleceniem <code>fg %n</code> lub zakończyć poprzez <code>kill %n</code> (gdzie n jest wyświetlonym przez jobs numerem zadania). Warto też wspomnieć o kombinacji [Ctrl]+[z] (wysyłającej sygnał SIGTSTP) zawieszającej wykonywanie aktualnego programu i powodującej ponowne przejście do shela, następnie można spowodować odwieszenie i przesunięcie w tło tak przerwanego procesu poprzez <code>bg [%n]</code>. Procesy uruchomione w tle możemy także odłączyć od powłoki z wykorzystaniem <code>disown</code>.</p>
+</article>

@@ -1,0 +1,35 @@
+/*
+ * program sprawdza po kazdym nacisnieciu klawisza ENTER
+ * stan pinu ACK i wypisuje informacje
+ *
+ */
+
+#include <stdio.h>
+#include <sys/io.h>
+
+#define PROCESOR 400000000.0
+#define LPT_PORT 0x378
+
+
+int main() {
+
+	iopl (3);
+
+	int wartosc;
+
+	while(1) {
+		printf("Aby kontynuowac nacisnij ENTER, aby zakonczyc Ctrl C\n");
+		while (getchar() != 10);
+
+		// zczytuje wartosc portu
+		wartosc = inb(LPT_PORT +1);
+
+		if ( !(wartosc & 64) ) {
+			printf("Stan NISKI !\n");
+		}
+
+		if ( (wartosc & 64) ) {
+			printf("Stan WYSOKI !\n");
+		}
+	}
+}

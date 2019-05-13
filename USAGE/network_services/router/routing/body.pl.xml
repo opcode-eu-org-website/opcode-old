@@ -1,0 +1,47 @@
+<article>
+<title>Routing</title>
+<p>Istotną funkcją w różnych systemach opartych o protokół IP jest routing. Często jest on realizowany przez wyspecjalizowane urządzania (routery sprzętowe), ale równie często jego realizację przeprowadza się software'owo. Zaczęcam do zapoznania się z <id_link id="USAGE:network_services:router:skrypty">zestawem skryptów do konfiguracji routingu i podziału pamsa</id_link> mojego autorstwa.</p>
+
+<p>W tym miejscu warto wspomnieć o dość interesującej alternatywie w stosunku co do IMQ jaką jest obecne standardowo w jądrze IFB. Inną alternatywą jest lokalne tunelowanie ruchu (tunel na interfejsie lo). Więcej na jego temat takich rozwiązań znaleźć można w: <doc url="http://forum.dug.net.pl/viewtopic.php?pid=112994#p112994">jak radzić sobie bez IMQ?</doc> i <doc url="http://groups.google.com/group/pl.comp.os.linux.sieci/browse_thread/thread/1188ed70f12a6546/fbd47e7fc3482ee4">IMQ bez IMQ HOWTO</doc>.</p>
+
+<p>Warto zaznaczyć iż do przekierowywania usług/portów mogą być realizowane z wykorzystaniem xinetd (<id_link id="redirect-xinetd">zobacz konfigurację</id_link>) a nie DNAT - co nie rodzi problemów z IPv6 oraz dwiema sieciami IP na jednym interfejsie Kolejnym popularnym zastosowaniem NATu jest chęć skierowania ruchu z jakiś adresów do danego hosta (wyświetlającego np. komunikat odnośnie przerwy w dostępie do Internetu). W przypadku IPv6, gdzie (na linuxie) nie mamy do dyspozycji NATu, możemy to zrobić modyfikując działanie DNS (odpalając sfałszowany DNS) tak aby na każde zapytanie odpowiadał adresem naszego hosta z komunikatem. Sam serwer DNS może identyfikować czy hosta należy przekierować czy nie lub możemy to oprzeć np. na różnych adresach DNS wysyłanych przez DHCP do wybranych grup hostów.</p>
+
+<p>Wspomniana technologia NAT (o której troszkę więcej w <id_link id="ABC_OF_COMPUTING:networks:IP:adresacja_i_routing:routing">artykule o sieciach IP</id_link>) korzysta z tablicy w której przechowuje śledzone połączenia (pamiętanie NATowanych połączeń jest konieczne aby wykonywać NAT). Aktualną ilość wpisów w tej tablicy można sprawdzić poprzez <code>wc -l &lt; /proc/net/ip_conntrack</code>. Gdy tablica ta się zapełni nie jest możliwe nawiązywanie nowych połączeń, gdy występuje taki problem możemy zmienić jej rozmiar lub zmniejszyć czas przechowywania połączeń poprzez ustawienie odpowiednich wartości odpowiednio w <kbd class="path">/proc/sys/net/ipv4/netfilter/ip_conntrack_max</kbd> <kbd class="path">/proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_established</kbd>. Interesujący wydaje się także <homepage url="http://meriste.net/code/patches/alter_nat/">patch</homepage> umożliwiający wybór typu NAT przy konfiguracji jądra.</p>
+
+<p>Częstym aspektem przy konfiguracji bramek (jednak tutaj praktycznie pominiętym) jest autoryzacja klientów uprawnionych do dostępu do sieci. Najpopularniejszym rozwiązaniem tego typu jest stosowanie <wiki pl="Point-to-Point Protocol over Ethernet">PPPoE</wiki>, spotkać się można także z wykorzystaniem autoryzacji <wiki pl="Serwer pośredniczący">proxy</wiki>, stosowania VPN w tym celu. W systemach BSD możliwe jest także dopuszczanie użytkowników którzy nawiążą z serwerem połączenie SSH - poprzez mechanizm Authpf.</p>
+
+<p>W IPv6 niezaniedbywalnym elementem routingu jest rozgłaszanie inforamacji routingowych poprzez mechanizm typu radv - może do tego posłużyć serwer "radvd", a jego przykładowa konfiguracja (<kbd class="path">/etc/radvd.conf</kbd>) może wyglądać np. następująco:</p>
+<pre>interface eth0
+{
+	# konfiguracja adresów stateful (TAK)
+	AdvManagedFlag on;
+	# konfiguracja innych parametrów stateful (NIE)
+	AdvOtherConfigFlag off;
+
+	# wysylamy MTU
+	AdvLinkMTU 1280;
+
+	# wysylamy okresowo
+	AdvSendAdvert on;
+
+	#AdvSourceLLAddress off
+	prefix 2001:db8:1000:3b::/64
+	{
+		# pytanie czy i jak da się skutecznie rozgłosić sieć z prefiksem np. /48 ?
+		# tak aby jej wybrany fragment stanowił sieć autokonfigurowaną ale maska dla global-scope była /38 ...
+		AdvOnLink on;
+		AdvAutonomous on;
+	};
+
+	#route 2001:db8:1000::1/48 {
+	#	AdvRoutePreference medium;
+	#};
+	route 0::/0 {
+		AdvRoutePreference medium;
+	};
+};</pre>
+
+<p>Kożystanie z  protokołów routingowych takich jak SPF, BGP, czy też korzystanie z routingu multicastowego wymaga stosowania deamonów zajmujących się obsługą tych protokołów i ustawiających w oparciu o nie odpowiednich jądrowych tablic routingu. Dla różnych systemów POSIXowych <homepage url="http://www.quagga.net/">Quagga</homepage> (<wiki pl="Quagga">Quagga</wiki> jest nieoficjalnym kontynuatorem projektu <wiki pl="GNU Zebra">GNU Zebra</wiki>), <homepage url="http://www.xorp.org/ ">xorp</homepage>, <homepage url="http://bird.network.cz/">bird</homepage>, dla OpenBSD (i z drobnymi łatami dla innych *BSD) jest to na przykład <homepage url="http://www.openbgpd.org/">OpenBGPD</homepage>. Dla protokołów multicastowych są to np. <homepage url="http://fivebits.net/proj/mrd6/">mrd6</homepage>, <homepage url="http://sourceforge.net/projects/mrt/">Multi-threaded Routing Toolkit</homepage>, <homepage url="http://freshmeat.net/projects/mrouted/">mrouted</homepage> i <homepage url="http://netweb.usc.edu/pim/pimd/">pimd</homepage>.</p>
+
+<p>Zobacz w Sieci: <doc url="http://lwn.net/Articles/324989/" mirror="oprogramowanie/Linux/nftables.html">Nftables: a new packet filtering engine</doc>, <doc url="http://xkr47.outerspace.dyndns.org/netfilter/packet_flow/packet_flow10.png">Jak podróżuje pakiet przez router linuxowy</doc>, <doc url="http://linuxreviews.org/howtos/networking/lartc/pl/c1330.html">HTB, filtry u32 i inne</doc>, <doc url="http://www.jukie.net/~bart/multicast/Linux-Mrouted-MiniHOWTO.html">Linux-Mrouted-MiniHOWTO</doc>.</p>
+</article>

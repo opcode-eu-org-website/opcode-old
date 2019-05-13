@@ -1,0 +1,21 @@
+<article>
+<title>Wzmacniacz małych sygnałów</title>
+
+<p>Typowym zastosowaniem tranzystora jest wzmacnianie sygnałów. Dalej będziemy przez jakiś czas przyjmować że mamy doczynienia z "małym sygnałem" czyli takim którego dołożenie powoduje niewielkie odchylenia od punktu pracy (takie że można zaniedbać krzywiznę charakterystyki). Wyróżnić można 3 podstawowe układy pracy tranzystora bipolarnego w wzmacniaczu sygnału (pokazane na przykładzie układu polaryzacji z opornikiem emiterowym):</p>
+
+<p class="center"><img_from_src name="uklady_pracy_npn" type="sch" alt="układy pracy tranzystora bipolarnego" /></p>
+
+<p>W przypadku pracy w układzie wspólnego emitera, generator sygnału dokładamy poprzez kondensator do spolaryzowanej w stanie aktywnym bazy. W efekcie tego na stały prąd wyjściowy nakłada się prąd związany z sygnałem wejściowym wynoszący <eq>I<sub>C</sub> |<sub>AC</sub> = g<sub>m</sub> U<sub>b'e</sub> |<sub>AC</sub></eq>, gdzie <eq_latex>g_m = {I_{CQ} \over \varphi_{_T}} \approx {1 \over r_{eb'}}</eq_latex> jest nachyleniem charakterystyki w punkcie pracy, a <eq>U<sub>b'e</sub> |<sub>AC</sub></eq> jest sygnałem dołożonym na złącze baza-emiter (w przybliżeniu równym sygnałowi wejściowemu).</p>
+
+<p>W prezentowanej sytuacji (układ z opornikiem emiterowym) przy rozważaniu mechanizmu tego procesu lepiej byłoby rozumować właśnie poprzez rezystancję dynamiczną emitera <eq>r<sub>eb'</sub></eq> (a nie <eq>g<sub>m</sub></eq>, które jest właściwe dla polaryzacji stałym prądem bazy), gdyż w układzie takim zmiana napięcia zasilającego przekłada się w niezmiennym stosunku (określonym głównie przez wartość oporu emiterowego) na prąd emitera, a ten jest w przybliżeniu równy prądowi kolektora. Zatem uzyskanie wzmocnienia innego niż 1 wymaga zwarcia emitera dla sygnałów zmiennych do masy (kondensator CE) i wtedy właśnie opór dynamiczny <eq>r<sub>eb'</sub></eq> powoduje że uzyskujemy skończone wzmocnienie.</p>
+
+<p>Każdy wzmacniacz charakteryzuje się następującymi parametrami (podane sposoby obliczania dla układu pracy wspólny emiter):</p>
+<ul>
+	<li>rezystancja wejściowa - utworzona przez rezystancję zastępczą oporników ustalających punkt pracy oraz oporu dynamicznego złącza PN pomiędzy bazą a emiterem wynoszącą: <eq_latex>r_{b'e}=\beta r_{eb'} = \beta \frac{\varphi_{_T}}{I_E} \approx \beta \frac{\varphi_{_T}}{I_C}</eq_latex></li>
+	<li>rezystancja wyjściowa - utworzona przez rezystor łączący kolektor z zasilaniem</li>
+	<li>wzmocnienie napięciowe zwykłe <eq>|k_u| = U<sub>wy</sub> / U<sub>we</sub> = g<sub>m</sub> R<sub>C</sub></eq> (niekiedy umawiamy się że obejmuje też rezystancję obciążenia a nie tylko <eq>R<sub>C</sub></eq>)</li>
+	<li>wzmocnienie napięciowe skuteczne (czyli uwzględniające rezystancję wewnętrzną źródła sygnału) <eq_latex>|k_{us}| = k_u \frac{R_{we}}{R_{we} + R_G}</eq_latex></li>
+</ul>
+
+<p>Zobacz także: <doc url="http://koral.ise.pw.edu.pl/~burd/hybr-p.pdf">Model Hybrid-Pi</doc></p>
+</article>

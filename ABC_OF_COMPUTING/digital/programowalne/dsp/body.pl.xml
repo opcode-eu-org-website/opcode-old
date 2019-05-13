@@ -1,0 +1,24 @@
+<article>
+<title>DSP - przetwarzanie sygnałów</title>
+
+<p><wiki pl="Procesor sygnałowy">Procesor DSP</wiki> są procesorami zoptymalizowanymi do przetwarzania ucyfrowionych sygnałów. Charakteryzują się możliwością równoczesnego wykonywania kilku operacji w ramach jednej instrukcji, sprzętowymi układami mnożącymi lub mnożąco-akumulującymi, rozdziałem (możliwością równoległych dostępów) pamięci próbek i współczynników. Do najistotniejszych cech charakteryzujących procesor sygnałowy od strony programistycznej (znaczną część tych cech można także rozpatrywać porównując architektury procesorów ogólnego przeznaczenia) należą:</p>
+<ul>
+	<li>bitowość i typ procesora - zmiennoprzecinkowy, stałoprzecinkowy (ułamkowy lub zwykły), mieszanych</li>
+	<li>długość bitowa instrukcji i wynikłe z niej ograniczenia (np. wielkość danych natychmiastowych, nieortogonalności w liście instrukcji, etc)</li>
+	<li>bogactwo listy rozkazowej, rozkazy predykatowe (wykonywane warunkowo)</li>
+	<li>ilość różnego typu rejestrów oraz poziom ich uniwersalności (które mogą być używane na wyjściu, które na wejściu, które do adresowania, etc - rejestry specjalizowane vs rejestry uniwersalne/ogólnego przeznaczenia)</li>
+	<li>dostępne tryby adresowania rejestrowego (przy pomocy dedykowanych rejestrów adresowych, mogących być modyfikowanymi - inkrementowanymi, zwiększanymi o stałą wartość lub wartość z podanego rejestru, etc - bez dodatkowych narzutów), zauważalny rozrost jednostek generacji adresów do (prawie) normalnych <wiki pl="Jednostka arytmetyczno-logiczna">ALU</wiki></li>
+	<li>rozdzielność / ilość przestrzeni adresowych (np. trzy - programu (<em>P:</em>), danych "x" (<em>X:</em>) i danych "y" (<em>Y:</em>))</li>
+	<li>zorientowaność rejestrowa (konieczność ładowania danych z pamięci do rejestrów przed ich wykorzystaniem) lub jej brak</li>
+	<li>przesłania pamięć-pamięć</li>
+	<li>rozdzielony lub zintegrowany układ mnożący i ALU</li>
+	<li>pętle sprzętowe vs. pętle programowe gdzie warunkowy skok zajmuje tylko ułamek częsci jednego słowa rozkazowego</li>
+	<li>konstrukcja potoku wewnętrznego, itp</li>
+	<li>system przerwań (wspieranie szybkiej, krótkiej obsługi przerwań, wielkość wektora przerwań, etc)</li>
+	<li>mechanizm DMA</li>
+	<li>...</li>
+</ul>
+
+<p>W wspomnianym przetwarzaniu sygnałów coraz istotniejszą rolę zaczynają odgrywać architektury wielordzeniowe, gdzie grupy rdzeni funkcjonują w trybie <wiki pl="SIMD">SIMD</wiki> lub <wiki en="SPMD">SPMD</wiki>. Do głównych przedstawicieli tego nurtu należą procesory <wiki pl="Cell (procesor)">CELL</wiki> i procesory graficzne <wiki pl="Procesor graficzny">GPU</wiki>. Tendencja ta wpływa także na wzrost znaczenia algorytmów umożliwiających prowadzenie obliczeń w sposób równoległy (np. algorytmów kratowych).</p>
+
+</article>

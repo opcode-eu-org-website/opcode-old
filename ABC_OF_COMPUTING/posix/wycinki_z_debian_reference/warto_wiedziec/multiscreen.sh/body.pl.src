@@ -1,0 +1,18 @@
+#!/bin/sh
+
+COMMAND="top"
+HOST_LIST="localhost"
+
+FILENAME="`echo $COMMAND | tr ' ' '_'`.screen.conf"
+echo "sessionname \"$COMMAND\"" > $FILENAME
+echo "caption always \"%{Yk}TOPs: %t   %{rk}Ctrl-a \\\" >> lista okien %{rk}Ctrl-a n >> nastepne okno\"" >> $FILENAME
+
+for h in $HOST_LIST; do
+	echo "screen -t $h ssh -t $h \"$COMMAND\"" >> $FILENAME
+	# warto także zwrócić uwagę na opcję -t w wywołaniu ssh
+	# wymusza ona utworzenie wirtualnego terminala
+done
+
+screen -c $FILENAME
+
+rm $FILENAME

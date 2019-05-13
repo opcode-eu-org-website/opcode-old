@@ -1,0 +1,27 @@
+<article>
+<title>Tablica partycji GPT</title>
+
+<p><wiki pl="GUID Partition Table" en="GUID Partition Table">GUID Partition Table</wiki> (niekiedy określany także jako tablica partycji EFI) jest jednym z kilku stosowanych typów tablic partycji (należy tutaj wspomnieć o tablicach typu <wiki en="BSD disklabel">disklabel</wiki> charakterystycznych dla rodziny <id_link id="operating_systems_config:bsd:dyski">BSD</id_link>, partycjach typu x86 (msdos, fdisk, <wiki en="Master boot record" pl="Master Boot Record">mbr</wiki>) charakterystycznych dla platformy PC, typu <wiki en="Apple Partition Map">APM</wiki> charakterystycznych dla Apple). W porównaniu do wymienionych konkurentów jest rozwiązaniem dość nowym i posiadającym zalety wobec nich (obsługa dużych partycji, bezpośrednia - bez zagnieżdżania bsd disklabel - obsługa systemów BSD, obsługa do 128 partycji, itd).</p>
+
+<p>Do tworzenia tego typu partycji pod linuxem możemy posłużyć się GNU parted (niestety fdisk ich nie wspiera):</p>
+
+<pre>
+# tworzymy tablicę partycji typu gpt
+parted $DEV "mklabel gpt"
+
+# tworzy partycję która posłuży do wgrania gruba
+# należy zaznaczyć iż nie jest to partycja /boot
+# jest to surowe (bez filesystemu) miejsce na dysku gdzie
+# zostanie wgrany fragment gruba normalnie wgrywany zaraz za MBR
+parted $DEV "mkpart grub 0 2MB";
+
+# ustawiamy dla tej partycji flagę "GRUB BIOS partition"
+parted $DEV "set 1 bios_grub on"
+
+# resztę dysku możemy podzielić wg uznania
+# w tym przykładzie robimy jedną dużą partycję o nazwie raid
+parted $DEV "mkpart raid 2MB 100%";  
+</pre>
+
+<p>Tak zainstalowany GRUB2 radzi sobie bez problemu z partycjami GPT, macierzami mdadm, wolumenami LVM itd.</p>
+</article>

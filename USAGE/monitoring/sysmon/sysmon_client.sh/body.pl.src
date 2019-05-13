@@ -1,0 +1,178 @@
+#!/bin/bash
+
+
+### KONFIGURACJA ###
+# sciezka do katalogu skryptu
+system_dir="/var/lib/sysmon"
+
+# lista numerów atrybutów monitorowanych przez S.M.A.R.T
+smart_attrib_list="5|10|196|197|198"
+
+# wlaczenie reszty konfiguracji zależnej od hosta
+# możliwe ustawienia:
+#   not_run_smart="true" # wyłączenie testowania S.M.A.R.T
+#   not_run_temp="true" # wyłączenie testowania temperatury
+# możliwe jest także nadpisanie ustawień podanych powyżej
+if [ -e $system_dir/sysmon_client.conf ]; then
+	source $system_dir/sysmon_client.conf
+fi
+
+raport() {
+	all_OK=true;
+	if [ "$not_run_temp" = "true" -o ! -x /usr/bin/ipmitool ]; then
+		echo " * Temperature monitoring is stopped"
+		all_OK=false;
+	fi
+	if [ "$not_run_smart" = "true" ] || [ $UNAME = "SunOS" -a ! -x /usr/bin/hd ] || [ $UNAME = "Linux" -a ! -x /usr/sbin/smartctl ]; then
+		echo " * S.M.A.R.T monitoring is stopped"
+		all_OK=false;
+	fi
+	if $all_OK; then
+		echo " * All tests is ON"
+	fi
+}
+
+uptime_sek() {
+	# zwracamy uptime w postaci liczby sekund
+	case $UNAME in
+		"SunOS")
+			LANG=C uptime | tr -d ',' | nawk '
+				t2s(t) {
+					split(t, tmp, ":");
+					if (2 in tmp) return tmp[1]*60*60+tmp[2]*60
+					return tmp[1]*6
+				}
+				$4~/day/ {
+					printf $3*60*60*24 + t2s($5);
+					next
+				}
+				{
+					printf t2s($3)
+				}
+			'
+		;;
+		"Linux")
+			cut -f1 -d' ' /proc/uptime
+		;;
+	esac
+}
+
+temp() {
+	if [ "$not_run_temp" = "true" -o ! -x /usr/bin/ipmitool ]; then
+		return
+	fi
+	sudo ipmitool -I open sdr | awk '
+		BEGIN {CPU=0; PLANAR=0; AMBIENT=0}
+		$1=="CPU" && $3=="Temp" && $5>CPU {CPU=$5}
+		$1~"cpu..dietemp" && $3>CPU {CPU=$3}
+		$1=="Planar" && $2=="Temp" && $5>PLANAR {PLANAR=$5}
+		$1=="Ambient" && $2~"Temp" && $4>AMBIENT {AMBIENT=$4}
+		$1=="ambienttemp" && $3>AMBIENT {AMBIENT=$3}
+		END {if (CPU>'${CPU_TEMP_ALERT-68}' || PLANAR>'${PLANAR_TEMP_ALERT-30}' || AMBIENT>'${AMBIENT_TEMP_ALERT-40}')
+			printf("High Temp Warning (cpu=%s planar=%s ambient=%s)\n", CPU, PLANAR, AMBIENT)}
+	'
+}
+
+freespace() {
+	if [ "$UNAME" = "Linux" ]; then
+		df_opt="-P"
+	fi
+
+	# procentowo
+	# msg=$(df -h $df_opt | nawk 'BEGIN{ret=0} NR>1 && $5+0>95 {print $0; ret=10} END{exit ret}')
+	
+	# bezwzglednie
+	msg=$(df -k $df_opt | nawk 'BEGIN{ret=0} $3+0>100000 && $4+0<100000 {print $0; ret=10} END{exit ret}')
+	
+	if [ $? = 10 ]; then echo "DISK FREE SPACE WARNING:"; echo "$msg"; fi
+}
+
+watch_dmesg() {
+	case $UNAME in
+		"SunOS")
+			msg=$(dmesg | egrep "`date | nawk '{printf("(%s %2d)|(%s %2d)", $2, $3, $2, $3-1) }'`" |
+				egrep '(file system full)|(WARN)|(ERR)|(CRIT)|(ALERT)|(warning)|(error)|(alert)|(critical)' |
+				cut -b 17- | sort | uniq
+			)
+		;;
+		"Linux")
+			msg=$(dmesg | tr -d '[]' |
+				awk -v time="$(( `cut -f1 -d'.' /proc/uptime` - 3600*48 ))" '$1>time{$1=""; print $0}' |
+				egrep '(WARN)|(ERR)|(CRIT)|(ALERT)|(warning)|(error)|(alert)|(critical)' | sort | uniq
+			)
+		;;
+	esac
+	
+	if [ "$msg" != "" ]; then
+		echo "DMESG WARNINGS:"
+		echo "$msg"
+	fi
+}
+
+smart() {
+	if [ "$not_run_smart" = "true" ]; then
+		return
+	fi
+	
+	case $UNAME in
+		"SunOS")
+			if [ ! -x /usr/bin/hd ]; then
+				return
+			fi
+			
+			sudo hd -r | awk '
+				/^[0-9]+ c[0-9]+t[0-9]+$/ {DYSK=$2; next}
+				/^ *('"$smart_attrib_list"') / {printf("%s : %s\n", DYSK, $0)}
+			' > $system_dir/smart.new
+		;;
+		"Linux")
+			if [ ! -x /usr/sbin/smartctl ]; then
+				return
+			fi
+			
+			for d in /dev/sd[a-d] /dev/hd[a-d]; do sudo smartctl -A $d | awk -v DYSK=`basename $d` '
+				/^ *('"$smart_attrib_list"') / {printf("%s : %s\n", DYSK, $0)}
+			'; done > $system_dir/smart.new
+		;;
+	esac
+	
+	touch $system_dir/smart.old
+	
+	if ! diff_out=`diff $system_dir/smart.old $system_dir/smart.new`; then
+		echo "S.M.A.R.T. ATTRIBUTES CHANGE TO:"
+		echo "$diff_out" | grep '^>' | cut -b2-
+		
+		bck_file=$system_dir/smart.`date "+%FT%T"`
+		mv $system_dir/smart.old $bck_file
+		mv $system_dir/smart.new $system_dir/smart.old
+		
+		echo "old attributes save to: $bck_file"
+		echo "more info about S.M.A.R.T. attributes - http://en.wikipedia.org/wiki/S.M.A.R.T."
+	fi
+}
+
+
+# ustalenie komendy
+cmd=$1
+if [ "$cmd" = "" ]; then
+	read cmd
+fi
+
+
+UNAME=`uname`
+export LANG=C
+
+case $cmd in
+	"uptime")
+		echo "`uptime_sek`"
+		temp
+	;;
+	"status")
+		freespace
+		watch_dmesg
+		smart
+	;;
+	"raport")
+		raport
+	;;
+esac

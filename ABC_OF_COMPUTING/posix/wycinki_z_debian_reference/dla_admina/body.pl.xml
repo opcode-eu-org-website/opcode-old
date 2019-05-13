@@ -1,0 +1,10 @@
+<article>
+<title>Dla admina:</title>
+<ul>
+	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tune.pl.html#s-loginctrl">Kontrola dostępu poprzez PAM oraz login</a></li>
+	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tune.pl.html#s-sudo">Bezpieczniejsza praca – sudo</a>. <code>sudo</code> jest programem umożliwiającym wykonywanie przez wybranych użytkowników wybranych komend uprzywilejowanych, np. wpis <code><var>user1</var> ALL=PASSWD: ALL, NOPASSWD:<var>/cmd/path</var></code> w konfiguracji sudo spowoduje że <code><var>user1</var></code> po podaniu (swojego hasła) będzie mógł wykonać dowolną komendę z prawami root'a, a do wykonania <code><var>/cmd/path</var></code> nie będzie musiał podawać hasła (przydatne w skryptach)</li>
+	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tune.pl.html#s-hdtune">Optymalizacja ustawień sprzętowych</a></li>
+	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tips.pl.html#s8.5.2">Alt-SysRq</a>, czyli co robić gdy nic już nie działa (zobacz też: <wiki en="Magic SysRq key">Magiczny Klawisz Linuksa SysRq</wiki>)</li>
+	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tips.pl.html#s8.6.8">Poziomy raportowania na konsolę</a></li>
+</ul>
+</article>

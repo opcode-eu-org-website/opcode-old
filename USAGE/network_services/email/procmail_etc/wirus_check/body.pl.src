@@ -1,0 +1,26 @@
+# czyscimy po obcych antywirusach
+:0 fhw
+| formail -I "X-AntiVirus:"
+
+# skanujemy wiadomosci (jezeli niezbyt duze)
+:0 hbw
+* < 200000
+AV_REPORT=|/path-to/wirus.sh
+#AV_REPORT=|clamscan --stdout -v --recursive --mbox -
+
+# oznaczamy wiadomosci w oparciu o wynik skanowania
+:0 fhw
+* < 200000
+| formail -I "X-AntiVirus:`echo "$AV_REPORT" | awk 'BEGIN { printf(" OK") } $NF=="OK" { printf(" OK") }  $NF=="FOUND" { printf(" %s", $(NF-1)) }'`"
+
+# zmiana tematu wiadomosci oznaczonych jako zawirusowane
+:0 fhw
+*^X-AntiVirus:
+*!^X-AntiVirus:.*Oversized
+*!^X-AntiVirus:( OK)+$
+{
+	:0 hw
+	subject=|formail -xSubject:
+	:0 fhw
+	| formail -I "Subject: !!! UWAGA WIRUS !!! - $subject"
+}

@@ -1,0 +1,10 @@
+<article>
+<title>Mealy'ego</title>
+<p><wiki pl="Automat Mealy'ego">Automat Mealy'ego</wiki> charakteryzuje się powiązaniem wyjść z stanem wewnętrznym automatu i jego wejściami. Automat możemy opisać przy pomocy <wiki pl="Graf (matematyka)">grafu</wiki>, gdzie wierzchołkami są stany, a krawędziami są przejścia pomiędzy stanami (wraz z powodującym je sygnałem i związanym z tym wyjściem automatu). Inną formą prezentacji jest tabela przejść/wyjść, gdzie dla każdego stanu podane są stany następne do których automat przechodzi pod wpływem danego wektora oraz wyjścia związane z aktualnym stanem i podanym wektorem wejściowym:</p>
+<table><col /><col /><col /><col />
+	<tr><td>stan obecny</td><td>wektor wejściowy 1</td><td>wektor wejściowy 2</td><td>...</td></tr>
+	<tr><td>A</td><td>B/10</td><td>A/11</td><td>...</td></tr>
+	<tr><td>B</td><td>C/01</td><td>D/11</td><td>...</td></tr>
+	<tr colspan="4"><td>...</td></tr>
+</table>
+</article>

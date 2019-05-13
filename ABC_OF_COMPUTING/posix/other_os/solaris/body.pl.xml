@@ -1,0 +1,5 @@
+<article>
+<title>(Open)Solaris</title>
+
+<p><wiki pl="Solaris (system operacyjny)">Solaris</wiki> jest unixowym systemem operacyjnym opracowanym przez Sun jest następcą SunOs'ów i niekiedy nazywany jest SunOS 5.x, gdzie x to numer wersji Solarisa (pierwotnie numery Solarisów poprzedzane były dodatkowo 2.). W wielu aspektach przypomina systemy *BSD, z którymi łączy go wspólny przodek. Elementem wyróżniającym go z pośród innych systemów operacyjnych jest zaawansowany system plików <wiki pl="ZFS">ZFS</wiki> (Zettabyte File System). System ten posiada wbudowane mechanizmy zarządzania dyskami będące odpowiednikiem programowego <wiki pl="RAID">RAID</wiki> oraz <wiki pl="LVM">LVM</wiki> (stanowiące dodatkową warstwę abstrakcji pomiędzy sprzętem a samym systemem plików). System obok oficjalnej Sun'owskiej gałęzi posiada także gałąź na wolnej licencji - <wiki pl="OpenSolaris">OpenSolaris</wiki>. Poniżej przedstawię kilka uwag konfiguracyjnych dotyczących tego systemu, a w szczególności OpenSolarisa.</p>
+</article>

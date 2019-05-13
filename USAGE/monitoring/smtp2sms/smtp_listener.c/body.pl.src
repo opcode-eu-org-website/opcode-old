@@ -1,0 +1,124 @@
+// port na którym słuchamy, UID z jakim pracujemy po jego otworzeniu oraz długość kolejki
+#define PORT 25
+#define WORK_AS_UID 8
+#define QUERY_SIZE 3
+
+#include <sys/socket.h>
+#include <netinet/ip.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+
+#include <signal.h>
+#include <sys/wait.h>
+
+#include "error_reporting.h"
+#include "smtp_talk.h"
+
+int sh;
+
+void end_of_main(int sig) {
+	close(sh);
+	closelog();
+	exit(0);
+}
+
+int main(int argv, char *args[]) {
+	openlog("smtp_listener", LOG_PID, LOG_DAEMON);
+	
+	// gniazdo ...
+#ifndef IPv4ONLY
+	sh = socket(PF_INET6, SOCK_STREAM, 0);
+#else
+	sh = socket(PF_INET, SOCK_STREAM, 0);
+#endif
+	if (sh<0) {
+		LOG_PRINT_CRIT("socket: %m");
+		exit(EXIT_FAILURE);
+	}
+	
+	// funkcja wykonywana po zakonczeniu potomka - unikamy zoombie
+	signal(SIGCHLD, SIG_IGN);
+
+	// funkcja wykonywana po Ctrl+C i kill ... unikamy blokowania portu
+	signal(SIGTERM, &end_of_main);
+	signal(SIGINT, &end_of_main);
+
+	// ustawiamy REUSEADDR na sockecie
+	int tmp = 1;
+	setsockopt(sh, SOL_SOCKET, SO_REUSEADDR, &tmp, sizeof(tmp));
+
+	// utworzenie struktury opisującej adres
+#ifndef IPv4ONLY
+	struct sockaddr_in6 serwer;
+	serwer.sin6_family=AF_INET6;
+	serwer.sin6_port=htons(PORT);
+	serwer.sin6_addr=in6addr_any;
+
+	if (bind(sh, (struct sockaddr *) &serwer, sizeof(struct sockaddr_in6)) < 0) {
+#else
+	struct sockaddr_in serwer;
+	serwer.sin_family=AF_INET;
+	serwer.sin_port=htons(PORT);
+		// host to network short (porzadek bajtow) ... sa tez dla long i odwrotne ...
+	serwer.sin_addr.s_addr=INADDR_ANY;
+		// INADDR_ANY oznacza że nasłuchujemy na każdym adresie IP danego hosta
+		// (zamiast tego można określić konkretny adres)
+
+	// przypisanie adresu ...
+	if (bind(sh, (struct sockaddr *) &serwer, sizeof(struct sockaddr_in)) < 0) {
+#endif
+		LOG_PRINT_CRIT("bind: %m");
+		exit(EXIT_FAILURE);
+	}
+
+	// zmiana UIDu
+#ifdef WORK_AS_UID
+	 if (setuid(WORK_AS_UID) < 0) {
+		LOG_PRINT_CRIT("Can't drop root privileges: %m");
+		close(sh);
+		exit(EXIT_FAILURE);
+	}
+#endif
+
+	// nazwa hosta sie nam przyda ...
+	char hostname[64];
+	gethostname(hostname, 64);
+	
+	while(1) {
+		// otwarcie portu do nasluchiwania
+		if (listen(sh, QUERY_SIZE) < 0) {
+			LOG_PRINT_CRIT("listen: %m");
+			exit(EXIT_FAILURE);
+		}
+		
+		// odebranie połączenia
+#ifndef IPv4ONLY
+		struct sockaddr_in6 from;
+		socklen_t fromlen=sizeof(struct sockaddr_in6);
+#else
+		struct sockaddr_in from;
+		socklen_t fromlen=sizeof(struct sockaddr_in);
+#endif
+		int sh2 = accept(sh, (struct sockaddr *) &from, &fromlen);
+		
+		switch (fork()) {
+			case -1: // funkcja zwróciła -1 co oznacza błąd
+				LOG_PRINT_ERROR("Error in fork");
+				break;
+			
+			case 0: // funkcja zwróciła zero co oznacza że jesteśmy w procesie potomnym
+				close(sh);
+				return smtp_talk(sh2, hostname, (struct sockaddr *) &from);
+				
+			default: // funkcja zwróciła coś innego od 0 i -1 oznacza to że jestesmy w pocesie macierzystym
+				close(sh2);
+		}
+	}
+
+	// zamkniecie gniazda
+	close(sh);
+	closelog();
+}

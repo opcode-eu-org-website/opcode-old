@@ -1,0 +1,6 @@
+<article>
+<title>Shmitta</title>
+<p class="center"><img_from_src name="przerzutnik_shmitta" type="sch" alt="schemat ideowy przerzutnika Shmitta" /></p>
+<p>Służy od do uzyskania histerezy - większe napięcie powoduje przejście w stan wysoki, a mniejsze od niego w stan niski. Pozwala to m.in. na odszumianie sygnałów. Idea działania polega na zmianie potencjału drugiego wejścia wzmacniacza różnicowego zależnie od jego stanu. Przesuwnik poziomów zrealizowany na D1 oraz R1 służy do dostosowania napięcia wyjściowego do zakresu histerezy (wynosi on <eq>U<sub>CC</sub>-U<sub>p</sub></eq> - wartość górna, <eq>U<sub>cc</sub> - I<sub>ee</sub> R<sub>C1</sub> - U<sub>p</sub></eq> - wartość dolna). Występujący efekt millerowski na T2 w tym przerzutniku można usuwać np. poprzez zrealizowanie przesuwnika poziomów na wtórniku emiterowym i diodzie Zenera.</p>
+
+</article>

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+while true; do
+	date >> /var/log/arp.log
+	cat /proc/net/arp >> /var/log/arp.log
+	echo "" >> /var/log/arp.log
+	sleep 150
+done

@@ -1,0 +1,54 @@
+div.tresc {
+	margin-left: 25px;
+}
+
+
+div.menu {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 20px;
+	height: 100%;
+	
+	overflow: hidden;
+	background: url("menu.png") repeat #000000;
+}
+div.menu * {
+	visibility: hidden;
+}
+div.menu p.menu_info {
+	color: white;
+	font-weight: bold;
+	display: block;
+	visibility: visible;
+	text-indent: 0;
+	text-align: center ;
+	background: #777777;
+}
+
+
+div.menu:hover {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 180pt;
+	padding: 5pt;
+	height: 100%;
+	
+	overflow: auto;
+	background: #f0f8ff;
+}
+div.menu:hover * {
+	visibility: visible;
+}
+div.menu:hover p.menu_info {
+	display: none;
+	visibility: hidden;
+}
+
+@media print {
+	div.menu {
+		display: none ;
+		visibility: hidden ;
+	}
+}

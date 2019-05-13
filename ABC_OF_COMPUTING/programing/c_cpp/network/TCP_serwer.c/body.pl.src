@@ -1,0 +1,75 @@
+/*
+ * plik ma na celu prezentację ciekawych zagadnień z programowania w języku C / C++
+ * prezentuje metody komunikacji sieciowej (TCP/IP) - prosty serwer TCP echo
+ *
+ * przykładowy klijent TCP zademonstrowany jest w jabber.cpp
+ *
+ */
+
+#include <sys/socket.h>
+#include <netinet/ip.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <inttypes.h>
+
+#define BUF_SIZE 255
+#define QUERY_SIZE 1
+#define PORT 4080
+
+
+char buf[BUF_SIZE];
+
+int main(int argv, char *args[]) {
+	int res;
+	
+	// gniazdo ...
+	int sh = socket(PF_INET, SOCK_STREAM, 0);
+	if (sh<0) {
+		fprintf(stderr, "%s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+	// utworzenie struktury opisującej adres
+	struct sockaddr_in serwer;
+	serwer.sin_family=AF_INET;
+	serwer.sin_port=htons(PORT);
+		// host to network short (porzadek bajtow) ... sa tez dla long i odwrotne ...
+	serwer.sin_addr.s_addr=INADDR_ANY;
+		// INADDR_ANY oznacza że nasłuchujemy na każdym adresie IP danego hosta
+		// (zamiast tego można określić konkretny adres)
+
+	// przypisanie adresu ...
+	if (bind(sh, (struct sockaddr *) &serwer, sizeof(struct sockaddr_in)) < 0) {
+		fprintf(stderr, "%s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+	while(1) {
+		// otwarcie portu do nasluchiwania
+		if (listen(sh, QUERY_SIZE) < 0) {
+			fprintf(stderr, "%s\n", strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+		
+		// odebranie połączenia
+		struct sockaddr_in from;
+		socklen_t fromlen=sizeof(struct sockaddr_in);
+		int sh2 = accept(sh, (struct sockaddr *) &from, &fromlen);
+		
+		// tutaj moglibysmy utworzyc potomka zajmujacego sie tym polaczeniem ...
+		// wtedy w macierzystym robimy close(sh2) a w potomnym close(sh)
+		
+		// tu mozna sprawdzic czy klijent uprawniony jak nie to close(sh2)
+		
+		FILE * net;
+		net=fdopen(sh2, "r+");
+		while(fgets(buf, BUF_SIZE, net))
+			fputs(buf, net);
+		fclose(net);
+	}
+
+	// zamkniecie gniazda
+	close(sh);
+}

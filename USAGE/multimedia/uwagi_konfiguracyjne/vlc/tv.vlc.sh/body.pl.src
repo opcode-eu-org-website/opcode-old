@@ -1,0 +1,95 @@
+# Program demonstruje wykorzystanie komunikacji poprzez DCOP w prostym skrypcie
+# shellowym uruchamiającym zestaw programów do słuchania radia / ogladania telewizji.
+# tryb pracy rozpoznawany jest automatycznie po nazwie wywoływanego programu
+# (np. uzytego dwoiązania symbolicznego)
+
+# DCOP jest protokołem komunikacji międzyprocesowej wykorzystywanym w KDE
+# umożliwia on sterowanie działającymi aplikacjami KDE (np. konsolą czy
+# konquerorem) z innej aplikacji, a w szczególności poprzez program dcop z
+# skryptów shellowych. Umożliwia nam to budowanie w oparciu o KDE własnych
+# "aplikacji".
+
+# Więcej o DCOP (a także wykorzystaniu dialogów KDE w skryptach bashowych -
+# kdialog) w pomocy KDE -  help:/khelpcenter/userguide/kde-diy.html#dcop
+
+# analiza nazwy z którą zaostał odpalony skrypt => wybór trybu radio/tv/...
+MODE=`basename "$0"`
+MODE=${MODE%.vlc.sh}
+case $MODE in
+	"tv"|"radio")
+		VIDEO_DEV="/dev/video0"
+		AUDIO_DEV="alsa://hw:0,0"
+		
+		# poczatkowe ustawienia glosnosci
+		amixer set 'Input Source',0 Line
+		amixer set 'Capture',0 30% on
+		amixer set 'Digital',0 30% on
+		# w powyzszym nie dziala on ale to `amixer cset numid=10 on` lub ponizsze (rownowazne) dziala:
+		amixer cset iface=MIXER,name='Capture Switch',index=0 on
+		
+		# ustawiamy sprzatanie po skrypcie - wyciszenie
+		trap "amixer set \"Capture\",0 0 off; amixer cset iface=MIXER,name=\"Capture Switch\",index=0 off;" 0
+		
+		if [ "$MODE" = "radio" ]; then
+			VLC_OPT="--qt-start-minimized --no-video"
+		else
+			VLC_OPT="--video-on-top --deinterlace 1"
+		fi
+		;;
+	"tv2")
+		VIDEO_DEV="/dev/video1"
+		AUDIO_DEV="alsa://hw:2,0"
+		
+		SET_STATION_OPT="-d /dev/video1"
+		VLC_OPT="--video-on-top --deinterlace 1"
+		MODE="tv"
+		;;
+	*)
+		echo "Unknown MODE"
+		exit
+		;;
+esac
+
+function start_vlc() {
+	vlc $VLC_OPT --no-fullscreen v4l2://$VIDEO_DEV :v4l2-norm=pal --v4l2-width=640 --v4l2-height=480 :v4l2-input=0 \
+		:input-slave=$AUDIO_DEV :audio=1 >/dev/null 2>/dev/null
+}
+
+if [ -e "/usr/share/services/konsole-script.desktop" -o -e "~/.kde/share/services/konsole-script.desktop" ]; then
+	konsole=$(dcopstart konsole-script)
+	
+	# pobieramy identyfikator i modyfikujemy nazwe bierzace sesji
+	session=$(dcop $konsole konsole currentSession)
+	dcop $konsole $session renameSession Głosność
+	# wylaczamy zapamietywanie histori basha
+	dcop $konsole $session sendSession 'HISTFILE=""; export HISTFILE;'
+	dcop $konsole $session sendSession 'alsamixer -V all'
+	dcop $konsole $session sendSession ''
+	
+	# uruchamiamy nowa sesje, pobierajac jej identyfikator, zmieniamy jej nazwe i odpalamy set_station.sh
+	session=$(dcop $konsole konsole newSession)
+	dcop $konsole $session renameSession SetStation
+	dcop $konsole $session sendSession 'HISTFILE=""; export HISTFILE;'
+	dcop $konsole $session sendSession "set_station.sh -m $MODE $SET_STATION_OPT $@"
+	dcop $konsole $session sendSession ''
+	
+	# przenosimy okienko na 3 pulpit wirtualny
+	wmctrl -i -r `dcop $konsole konsole-mainwindow#1 getWinID` -t 3
+	# i przelaczamy się na niego
+	wmctrl -s 3
+	
+	# start VLC
+	start_vlc
+	
+	# zamknięcie konsoli po zakończeniu VLC
+	dcop $konsole MainApplication-Interface quit
+elif [ -x "`which xfce4-terminal`" ]; then
+	xfce4-terminal --disable-server --title "volume"  -e "alsamixer -V all" \
+	                         --tab  --title "station" -e "set_station.sh -m $MODE $SET_STATION_OPT $@" &
+	start_vlc
+	kill `jobs -p`
+else
+	echo "Couldn't find supported terminal emulator"
+	start_vlc
+fi
+

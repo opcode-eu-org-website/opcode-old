@@ -1,0 +1,274 @@
+/*
+ * program sterownika oświetlenia z funkcją zdalnego sterowania poprzez port RS
+ * dla mikrokontrolera Atmega8
+ *
+ *
+ * kompilacja i wgranie przez ISP:
+ *  avr-gcc -mmcu=atmega8 -Os -o sterownik.o sterownik_oswietlenia.c
+ *  avr-objcopy -O ihex sterownik.o sterownik.hex
+ *  uisp -dprog=dapa -dlpt=0x378 --erase --upload --verify --segment=flash if=sterownik.hex
+ *
+ *  w razie problemow warto przeladowac modul odpowiedzialny za obsluge LPT
+ *    rmmod lp parport_pc parport ; modprobe parport_pc
+ *
+ * konfiguracja układu na zewnętrzny kwarc 8MHz (lub troche mniejszy)
+ *  uisp -dprog=dapa -dlpt=0x378 --wr_fuse_l=0xff
+ */
+
+#include <inttypes.h>
+#include <stdio.h>
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
+/** nagłówki funkcji opóżniających **/
+#define F_CPU 8000000UL
+#include <util/delay.h>
+
+/** nagłówki mojego formatu transmisji przez RS485 **/
+#define DRIVER_CTRL_PORT PORTD
+#define DRIVER_CTRL_PIN PD4
+#define MY_ADDRES 11
+
+#include "my_rs485_ascii.c"
+
+
+/** ustawienia sciemniacza **/
+/// ilość linii obsługujących ściemnianie
+///
+/// wymagamy aby linie z regulacją PWM (ściemniaczem) stanowiły ciągły zakres od początku
+/// przyjętej kolejności pinów (0...14): PD5,...,PD7,PB0,...,PB5,PC0,...,PC5
+/// do linii ściemniających powinien być podłączony MOC3023 a nie MOC3043
+///
+/// wartość zerowa REG_NUMB powoduje przełączanie wyjścia bezpośrednio w obsłudze wykonywania komendy RS
+/// procedura obsługi przerwania związanego z detekcją zera nie jest instalowana
+/// umożliwia to pominięcie w takim wypadku układu detekcji zera
+#define REG_NUMB 15
+
+/// maksymalna ilość poziomów regulacji ściemnienia
+#define COUNT_MAX 0xdf
+
+/// opóżnienienie obiegu pętli w us
+///
+/// wartość należy dobrać tak aby czas wykonywania procedury obsługi przerwania był około 75% okresu pomiędzy przerwaniami
+/// częstotliwosc_przerwań = 2 * czastotliwosc_sieci (sygnał związany z przejściami przez zero)
+/// UWAGA: na czas wykonywania procedury obsługi przwerwania wpływa także: F_CPU, REG_NUMB, COUNT_MAX
+#define COUNT_OFFSET 0.2
+
+/// opóźnienie rozpoczęcia pętli sterowania ścienieniem
+/// związane z wywoływaniem na zboczu narastającym
+/// wartość należy zmierzyć eksperymentalnie
+#define START_OFFSET 0.17
+
+/// konfiguracja wyjsc - makro odpwiedzialne za przepisywanie ports na piny uC
+///
+/// jeżeli pod którejś z pinów podłączone są rejestry sterujące przekażnikami
+/// lub optotriakami z detekcją zera wyjścia te należy wyłączyć z obsługi ports,
+/// podobnie należy uczynić z pinami wykorzystywanymi jako dane dla tych zatrzasków
+///
+/// piny te powinny być obsługiwane bezpośrednio w "switch (cmd)" w USART_RXC_vect
+/// [adres rejestru ustalacj jako (addr-LICZBA_STEROWANYCH_BEZPOSREDNIO)%LICZBA_BITOW_REJESTROW]
+/// jako iż wprowadzenie takiego trybu wiązałoby się z możliwością przepełnienia zmiennej status
+/// należy rozważyć użycie kilku zmiennych o takim przeznaczeniu (np. tablicy uint8_t indeksowanej numerem rejestru)
+/// lub rezygnacje z funkcji pamięciowych (read/switch)
+#define SET_OUTPUT(val) PORTD=(val & 0xf) << 5; PORTB=(val >> 3) & 0x3f; PORTC=(val >> 9) & 0x3f;
+
+/** tryb debugowania (nie używać w sieci RS) **/
+//#define DEBUG
+//#define DEBUG_TIME
+
+#ifdef DEBUG
+# warning "Enable DEBUG MODE - don't use in RS network"
+#endif
+
+#ifdef DEBUG_TIME
+volatile double zero_offset = START_OFFSET;
+#endif
+
+
+/** konfiguracja "czasu pracy" **/
+// wykorzystywane w poniższych deklaracjach volatile pozwala na
+// korzystanie z tej samej zmiennej w przerwaniach i w main()
+// umożliwia uniknięcie stosowania sztuczek wskaznikowych typu:
+//  double * opoznienie_wsk = &opoznienie;
+//  opoznienie = *opoznienie_wsk;
+
+// maska bitowa przechowująca informację o stanie linii
+volatile uint16_t status;
+
+// opoznienie sciemnienia
+volatile uint8_t opoznienie[REG_NUMB];
+
+
+/** obsluga portu szeregowego **/
+void execute_rs_cmd(uint8_t cmd, uint8_t addr, uint8_t param, uint8_t uart_decode_mode) {
+	addr--; // chcemy aby linie były numerowa zgodnie z elementami na PCB czyli od 1
+	switch (cmd) {
+		case 0x01: /// read
+			if ( (status & (1 << addr)) != 0 )
+				rs_switch_and_send_char('1'); // ON
+			else
+				rs_switch_and_send_char('0'); // OFF
+			break;
+		case 0x02: /// on
+			status = status | (1 << addr);
+#if REG_NUMB == 0
+			SET_OUTPUT(status);
+#endif
+			break;
+		case 0x03: /// off
+			status = status & ~(1 << addr);
+#if REG_NUMB == 0
+			SET_OUTPUT(status);
+#endif
+			break;
+		case 0x04: /// switch
+			status = status ^ (1 << addr);
+#if REG_NUMB == 0
+			SET_OUTPUT(status);
+#endif
+			break;
+		
+		case 0x05: /// odczyt wartosci sciemnienia lub ststusu
+			if ( addr < REG_NUMB) { // sciemnienie zadanej linii
+				cmd = opoznienie[addr];
+			} else if (addr == REG_NUMB) { // młodszy bajt statusu
+				cmd = status;
+			} else if (addr == REG_NUMB+1) { // starszy bajt statusu
+				cmd = status >> 8;
+			} else {
+				break;
+			}
+			rs_switch_and_send_8bit_num( opoznienie[addr] );
+			break;
+		case 0x06: /// ustawienie wartosci sciemnienia lub ststusu
+			if ( addr < REG_NUMB) { // sciemnienie zadanej linii
+				opoznienie[addr] = param;
+			} else if (addr == REG_NUMB) { // młodszy bajt statusu
+				status = (status & 0xff00) | param;
+			} else if (addr == REG_NUMB+1) { // starszy bajt statusu
+				status = (status & 0x00ff) | param;
+			}
+			break;
+#ifdef DEBUG_TIME
+		case 10:
+			zero_offset=addr/100.0;
+			break;
+		case 12:
+			MCUCR = (1 << ISC00) | (1 << ISC01); // narastajace
+			break;
+		case 13:
+			MCUCR = 0; // niski
+			break;
+		case 14:
+			MCUCR = (1 << ISC00); // zmiana stanu
+			break;
+		case 15:
+			MCUCR = (1 << ISC01); // opadajace
+			break;
+#endif
+	}
+}
+
+
+#if REG_NUMB != 0
+/** obsluga przerwania powodowanego przejsciem przez zero fazowe **/
+// w razie problemów z działaniem przerwania zegarowego mozna sprobowac
+// to wrzucic do petli glownej obarczajac stosownym if'em na zmiane stanu PD2:
+// new=PIND & (1 << PD2); if (new != last) {last=new; ...}
+uint8_t i, j;
+uint16_t ports;
+ISR(INT0_vect) {
+	cli();
+	
+	ports = (0xffff << REG_NUMB) & status;
+	// jako wstępną wartość przyjmujemy stan linii nie będących ściamniaczami zgodny z statusem
+	
+#ifdef DEBUG_TIME
+	_delay_ms(zero_offset);
+#else
+	_delay_ms(START_OFFSET);
+#endif
+	
+	/// aktywujemy linie ściemniacza z stosownymi opóżnieniami
+	for (i=0; i<COUNT_MAX; i++) {
+		for (j=0; j<REG_NUMB; j++) {
+			if (opoznienie[j] == i) {
+				// włączamy triak odpowiedzialny za linię j
+				// pod warunkiem że linia aktywna
+				ports = ports | (status & (1 << j));
+			}
+		}
+		
+		SET_OUTPUT(ports);
+		// powyzsze instrukcje moglyby być w wewnetrznym if:
+		// wtedy wykonywaly by sie duzo rzadziej,
+		// ale moglyby zaburzac rownomiernosc opoznienia
+		
+		_delay_us(COUNT_OFFSET);
+	}
+	
+	/// wyłączenie linii dla których ściemnienie !=0
+	for (j=0; j<REG_NUMB; j++) {
+		if (opoznienie[j] != 0) {
+			// wyłczamy triak odpowiedzialny za linię j
+			// pod warunkiem że linia ma niepełną jasność
+			ports = ports & (~(1 << j));
+		}
+	}
+	SET_OUTPUT(ports);
+	
+	sei();
+}
+#endif
+
+
+main() {
+	/** konfiguracja portów IO mikrokontrolera **/
+	// port B - wyjściowy
+	DDRB = 0xff;
+	PORTB = 0;
+	
+	// port C - wyjściowy
+	DDRC = 0xff;
+	PORTC = 0;
+	
+	// port D - wyjściowo/ wejściowy:
+	//  PD2 wejsciowy bez podciagajacego
+	//  PD4-PD7 wyjściowe
+	DDRD = (1 << PD4) | (1 << PD5) | (1 << PD6) | (1 << PD7);
+	PORTD = 0x00;
+	
+	/** port szeregowy - inicjalizacja **/
+	rs_init();
+	
+#ifdef DEBUG
+	UDR = 'S'; _delay_ms(1000);
+	UDR = 'O'; _delay_ms(1000);
+	UDR = ' '; _delay_ms(1000);
+	UDR = 'v'; _delay_ms(1000);
+	UDR = '2'; _delay_ms(1000);
+	UDR = '.'; _delay_ms(1000);
+	UDR = '9'; _delay_ms(1000);
+	UDR = '.'; _delay_ms(1000);
+	UDR = '1'; _delay_ms(1000);
+#endif
+	
+#if REG_NUMB != 0
+	/** przerwania z int0 **/
+	GIMSK = (1 << INT0);
+	MCUCR = (1 << ISC00) | (1 << ISC01);
+	// reagujemy na zbocze narastajace, a nie opadajace (1 << ISC01) i czekamy chwile w procedurze obslugi przerwania
+	// podyktowane jest to minimalizacją czasu potrzebnego na włączenie gdy ściemnienie = 0
+#endif
+	/** wartość początkowe zmiennych **/
+	status = 0x0000;
+	for (j=0; j<REG_NUMB; j++)
+		opoznienie[j] = 0;
+	
+	/** włączenie przerwań **/
+	sei();
+	
+	/** petla glowna **/
+	while (1) {
+	}
+}

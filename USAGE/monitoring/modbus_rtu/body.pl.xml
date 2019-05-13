@@ -1,0 +1,44 @@
+<article>
+<title>Master modbus RTU</title>
+
+<p>Projekt stanowi implementację mastera modbus RTU dla platformy <homepage url="http://www.a2s.pl/komputery-embedded-platforma-c-834_1933_107.html">NPE</homepage>. Jako że stanowi dość typowe linuxowe oprogramowanie stosunkowo łatwo może być przeniesiony na dowolna inna platformę zgodną z POSIX. System umożliwia zapis danych do lokalnej bazy danych opartej na <homepage url="http://www.sqlite.org/">sqlite3</homepage> (przy dużej liczbie obsługiwanych rejestrów UPDATE na takiej bazie na platformie NPE jest zbyt mało wydajny) a także zdalny zapis do systemu <id_link id="zabbix">zabbix</id_link> (własna implementacja sendera).</p>
+
+<p>pliki źródłowe daemona odpytującego urządzenia poprzez modbus:</p>
+<ul>
+	<li><id_link id="modbus_reader.c">modbus_reader.c</id_link> - implementacja głównej pętli odpytywania oraz funkcji wywoływanej na odebranej odpowiedzi</li>
+	
+	<li><id_link id="modbus_rtu.c">modbus_rtu.c</id_link> i <id_link id="modbus_rtu.h">modbus_rtu.h</id_link> - implementacja funkcji związanych z obsługą protokołu modbus RTU</li>
+	<li><a class="int" href="./crc.c">crc.c</a> i <a class="int" href="./crc.h">crc.h</a> - implementacja obliczania CRC pochodzi z <doc url="http://www.netrino.com/Embedded-Systems/How-To/CRC-Calculation-C-Code">CRC Implementation Code in C by Michael Barr</doc> (<homepage url="http://www.netrino.com/code/crc.zip" mirror="soft/CRC">kod źródłowy</homepage> dystrybuowany na zasadach public domain) i została jedynie okrojona z niewykorzystywanych w tym projekcie funkcji.</li>
+	
+	<li><id_link id="zabbix.c">zabbix.c</id_link> i <id_link id="zabbix.h">zabbix.h</id_link> - implementacja sendera zabbixowego</li>
+	<li><id_link id="error_reporting.h">error_reporting.h</id_link> - plik nagłówkowy definiujący makra odpowiedzialne za wyświetlanie bądź zapisywanie do logu systemowego informacji zgłaszanych przez program</li>
+	
+	<li><a class="int" href="./Makefile">Makefile</a></li>
+</ul>
+
+<p>programy pomocnicze:</p>
+<ul>
+	<li><a class="int" href="./install_and_run.sh">install_and_run.sh</a> - skrypt używany do zainstalowania i uruchomienia systemu na platformie NPE (podpinany do skryptu startowego systemu)</li>
+	
+	<li><id_link id="modbus_reader.sql">modbus_reader.sql</id_link> - konfiguracja SQL-owa programu określająca jakie rejestry, jakich urządzeń i jak często mają być czytane. Przykładowa konfiguracja obsługuje odczyt prawie wszystkich rejestrów analizatorów PM710 z rozróżnieniem czasowym (rejestry związane z aktualną wartością prądu czytane co 15 sekund, a najbardziej wolno zmienne co 5 minut).</li>
+	
+	<li><id_link id="utils4zabbix:zabbix_template:make.sh">make.sh</id_link>, <id_link id="utils4zabbix:zabbix_template:item.template.xml">body.template.xml</id_link>, <id_link id="utils4zabbix:zabbix_template:header.xml">header.xml</id_link>, <id_link id="utils4zabbix:zabbix_template:footer.xml">footer.xml</id_link> - system generujący szablon do zabbixa w oparciu o plik konfiguracji sql-owej systemu</li>
+	
+	<li><id_link id="analizatory.php">analizatory.php</id_link> - skrypt php wyciągający z bazy zabbixowej ostatnie wartości dla wskazanego analizatora PM710 i prezentujący je na WWW</li>
+	
+	<li><id_link id="monitor_modbus.sh">monitor_modbus.sh</id_link> - skrypt monitorujący wartość graniczne wybranych parametrów w oparciu o lokalna bazę sqlite</li>
+	
+	<li><id_link id="modbus_listener.c">modbus_listener.c</id_link> - pomocnicze narzędzie umożliwiające podsłuch linii modbusowej</li>
+	<li><id_link id="modbus_read_write.c">modbus_read_write.c</id_link> - prosty program odczytujący podany rejestr modbusowy, bądź zapisujący do niego podaną wartość</li>
+</ul>
+
+<p class="download"><a class="int" href="./modbus_rtu.tgz">Pobierz</a></p>
+
+<TODO title="Rozwój systemu odczytu danych modbusowych" intro="Koncepcje dalszego rozwoju">
+	<li>zastosowanie std:map z C++ do przechowywania ostatnich wartości + dostęp do nich z cmdline + analiza progów alarmowych - szczegóły w modbus_reader.c</li>
+</TODO>
+
+
+<p>Zobacz też: <doc url="http://www.modbus.org/docs/Modbus_Application_Protocol_V1_1b.pdf">Specyfikacja Modbus Application Protocol</doc>, <homepage url="http://libmodbus.org/">libmodbus</homepage></p>
+
+</article>

@@ -1,0 +1,10 @@
+#ifndef LIGHTOBJECT_H
+#define LIGHTOBJECT_H
+
+class LightObject {
+	private:
+	public:
+		LightObject(float parametry[16]) {}
+		//~LightObject();
+};
+#endif

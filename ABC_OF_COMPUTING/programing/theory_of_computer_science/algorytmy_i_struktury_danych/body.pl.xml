@@ -1,0 +1,54 @@
+<article>
+<title>Algorytmy i struktury danych</title>
+
+<ul>
+	<li>typ danych to zbiór pewnych wartości i zbiór czynności na nich wykonywanych, jest on implementowany z wykorzystaniem jakiejś struktur danych (tworząc klasę w C++ wymyślamy typ danych)</li>
+	<li>struktura danych - tablicowa i listowa oraz ich warianty</li>
+	<li>problem algorytmiczny - zbiór danych, rozwiązań i relacja przekształcająca dane w rozwiązania (rozwiązania w tym zbiorze to zarówno rozwiązania dobre jak i złe)</li>
+</ul>
+
+<ul>
+	<li>asymptotyczna mniejszość - <eq>f(n)</eq>  co najwyżej rzędu <eq>g(n)</eq>  - dla każdego <eq>n &gt; m</eq> zachodzi <eq>f(n) &lt; c g(n)</eq> - <eq_latex>f(n) = O(g(n)) \Leftrightarrow \lim_{n \rightarrow \inf} {f(n) \over g(n)} = 0</eq_latex></li>
+	<li>asymptotyczna większość - <eq>f(n)</eq>  co najwyżej rzędu <eq>g(n)</eq>  - dla każdego <eq>n &gt; m</eq> zachodzi <eq>f(n) &gt; c g(n)</eq> - <eq_latex>f(n) = O(g(n)) \Leftrightarrow \lim_{n \rightarrow \inf} {f(n) \over g(n)} = \inf</eq_latex></li>
+	<li>asymptotyczna dokładność - <eq>f(n)</eq>  co najwyżej rzędu <eq>g(n)</eq>  - dla każdego <eq>n &gt; m</eq> zachodzi <eq>c<sub>1</sub> g(n) &lt; f(n) &lt; c<sub>2</sub> g(n)</eq> - <eq_latex>f(n) = O(g(n)) \Leftrightarrow \lim_{n \rightarrow \inf} {f(n) \over g(n)} = G > 0</eq_latex></li>
+</ul>
+
+<p>Klasy złożoności:</p>
+<ul>
+	<li>stała (<eq>1</eq>)</li>
+	<li>logarytmiczna (<eq>log n</eq>)</li>
+	<li>liniowa (<eq>n</eq>)</li>
+	<li>liniowo logarytmiczna (<eq>n log n</eq>)</li>
+	<li>wielomianowa (<eq>n<sup>k</sup>, k=2,3,4,...</eq>)</li>
+	<li>pod-wykładnicza (<eq>n<sup>log n</sup></eq>)</li>
+	<li>wykładnicza (<eq>k<sup>n</sup></eq>)</li>
+	<li>silniowa (<eq>n!</eq>)</li>
+	<li>nad-wykładanicza (<eq>n<sup>n</sup></eq>)</li>
+	<li>nieskończona</li>
+</ul>
+<p>Zauważalny jest ogromny wzrost czasu dla algorytmów o złożoności gorszej niż wielomianowa wraz z wzrostem wielkości problemu</p>
+
+<ul>
+	<li>problem klasy P - są deterministyczne algorytmy rozwiązujące go w czasie wielomianowym</li>
+	<li>problem klasy NP - są nie deterministyczne algorytmy rozwiązujące go w czasie wielomianowym</li>
+	<li>problem NP-zupełny - grupa problemów NP przekształcalnych jeden w drugi algorytmem wielomianowym</li>
+	<li>problem silnie NP-zupełny - poszukiwanie lokalnego minimum jest problemem NP zupełnym</li>
+	<li>problem NP-trudny - niedeterministyczne algorytmy rozwiązują go w czasie wykładniczym</li>
+</ul>
+
+<p>metody:</p>
+<ul>
+	<li>probabilistyczne - losowe wybieranie rozwiązania</li>
+	<li>prób i błędów - losowanie (próba) i sprawdzanie wyniku (powtórzenie losowania x-razy)</li>
+	<li>konstrukcyjne - budowanie rozwiązania w oparciu o jakieś przesłaniki</li>
+	<li>optymalizacyjne - utworzenie rozwiązania i poprawianie go</li>
+	<li>znalezienie wszystkich rozwiązań (przegląd bezpośredni) i znalezienie optymalnego (np. poprzez budowę drzewa)</li>
+	<li>programowanie dynamiczne - jak poprzednio, ale z zauważeniem że do niektórych rozwiązań nie trzeba wielokrotnie dochodzić</li>
+	<li>algorytmy genetyczne - naśladowanie ewolucji</li>
+	<li>stymulowane odprężanie - naśladowanie krystalizacji (forma optymalizacji gdzie zgadzamy się na chwilowe pogarszanie rozwiązania z jakimś prawdopodobieństwem na skutek "drgań termicznych")</li>
+	<li>systemy ekspercie - szczególny przypadek konstrukcyjnych</li>
+</ul>
+
+
+<p>Algorytm wyszukiwania przez podział polega na dzieleniu posortowanej tablicy na części i próbie oszacowania w którym rejonie jest interesujący element</p>
+</article>

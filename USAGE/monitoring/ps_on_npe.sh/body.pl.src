@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# skrypt służy kontrolowaniu działania procesów (związanych z prezentowanymi na strone systemami
+# odczytu modbus'a, wysyłania smsm-ów oraz monitoringu DI) na komputerze przemysłowym NPE 
+
+run_remote_cmd_via_telnet() {
+	HOST="$1"
+	USER="$2"
+	PASSWORD="$3"
+	CMD="$4"
+
+expect -f - << EOF
+set timeout $timeout
+spawn telnet $HOST
+expect {
+        "Unknown host" exit
+        "login: "
+}
+send "$USER\r"
+expect "assword: "
+send "$PASSWORD\r"
+expect "$ "
+send "$CMD\r"
+expect "$ "
+send "exit\r"
+expect "closed by foreign host.\r"
+EOF
+}
+
+check_process() {
+	echo -n "$1 ... "
+	if echo "$PROCESS_LIST" | grep "$2" > /dev/null 2> /dev/null; then
+		echo "RUNNING"
+	else
+		echo "FAILED"
+	fi
+}
+
+PROCESS_LIST=`run_remote_cmd_via_telnet 192.168.119.200 user user ps`
+
+check_process "modbus_reader" "/opt/modbus/modbus_reader"
+check_process "modbus monitor" "/opt/modbus/monitor_modbus.sh"
+check_process "di monitor" "/opt/di/monitor_di.sh"
+
+check_process "smtp_listener" "mail[\t ]*/opt/smtp2sms/smtp_listener"
+check_process "nullmailer" "mail[\t ]*/opt/smtp2sms/nullmailer/bin/nullmailer-send"
+check_process "sms_queued" "/opt/smtp2sms/sms_queued"
+
+#check_process "sms_queue_add" "/opt/smtp2sms/sms_queue_add"
+

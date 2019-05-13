@@ -1,0 +1,89 @@
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity UART_RXD is
+	generic (
+		RX_CLK_DIV: natural := 104166
+	);
+	port (
+		rxd: in std_logic;
+		clk, reset: in std_logic;
+		data_out: out std_logic_vector (7 downto 0);
+		data_ready: out std_logic
+	);
+end;
+
+architecture logic of UART_RXD is
+	signal RX_CLK_CNT : integer;
+	signal RX_CLK_EN : std_logic;
+	signal RX_BUFF : std_logic_vector (7 downto 0);
+	signal RS_STATE, RS_STATE_NEXT : integer range 0 to 10;
+begin
+	process (reset, clk)
+	begin
+		-- obsluga resetu
+		if (reset = '1') then
+			RS_STATE <= 0;
+			RX_CLK_EN <= '0';
+		elsif ( rising_edge(clk) ) then
+			-- obsluga poczatku bitu startu (start licznika)
+			if (RS_STATE = 0) then
+				if (rxd = '0') then
+					-- rozpoczynamy odliczanie wewnetrznego zegara
+					RX_CLK_CNT <= 0;
+					-- przechodzimy do stanu start (potwierdzanie odebrania bitu startu)
+					RS_STATE <= 1;
+				end if;
+			-- obsluga licznika
+			else
+				if (RX_CLK_CNT = RX_CLK_DIV - 1) then
+					-- doliczenie do wartosci dzielnika zegara powoduje:
+					--  wyzerowanie licznika
+					RX_CLK_CNT <= 0;
+					--  przejscie do nowego stanu
+					RS_STATE <= RS_STATE_NEXT;
+				else
+					RX_CLK_CNT <= RX_CLK_CNT + 1;
+				end if;
+				
+				if (RX_CLK_CNT = (RX_CLK_DIV - 1)/2) then
+					-- doliczenie do polowy wartosci dzielnika zegara powoduje:
+					--  wystawienie przez jeden takt zegara sygnalu RX_CLK_EN
+					RX_CLK_EN <= '1';
+				else
+					RX_CLK_EN <= '0';
+				end if;
+			end if;
+		end if;
+	end process;
+	
+	process (clk)
+	begin
+		if ( falling_edge(clk) ) then
+			if( RX_CLK_EN = '1' ) then
+				case RS_STATE is
+					when 1 => -- bit startu
+						if (rxd = '0') then
+							data_ready <= '0';
+							RS_STATE_NEXT <= 2;
+						else
+							-- blad (nie ma bitu startu) - wracamy do IDLE
+							RS_STATE_NEXT <= 0;
+						end if;
+					when 10 => -- bit stopu
+						RS_STATE_NEXT <= 0;
+						if (rxd = '1') then
+							-- skompletowalismy bajt
+							data_out <= RX_BUFF;
+							data_ready <= '1';
+						end if;
+					when 0 =>
+						RS_STATE_NEXT <= 0;
+					when others =>
+						RX_BUFF(RS_STATE-2) <= rxd;
+						RS_STATE_NEXT <= RS_STATE_NEXT + 1;
+				end case;
+			end if;
+		end if;
+	end process;
+end;

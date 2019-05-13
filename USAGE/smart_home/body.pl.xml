@@ -1,0 +1,34 @@
+<article>
+<title>Inteligentny Dom</title>
+
+<p>Dział ten gromadzi projekty elektroniczno-programistyczne związane z automatyką domową - systemami sterowania urządzeniami elektrycznymi, kontroli dostępu, detekcji pożaru i włamania. Ewolucja stosowanych tutaj rozwiązań projektowych i komunikacyjnych (sieć RS485) opisana jest w <id_link id="smart_home:ewolucja_koncepcji">ewolucja koncepcji projektów inteligentnego domu</id_link>. Projekty czysto programistyczne związane z monitoringiem pracy różnych systemów (zarówno informatycznych jak i infrastrukturalnych) przedstawione są w dziale <id_link id="USAGE:monitoring">monitoring</id_link>.</p>
+
+<p>Głównymi elementami prezentowanego systemu są: <id_link id="niestabilizowany_zasilacz_buforowy">centralny system zasilania DC</id_link> i główny układ programowalnego kontrolera. Wyposażony jest on w kilka magistral <wiki pl="EIA-485">RS485</wiki>/<wiki pl="Modbus">ModbusRTU</wiki> (do podłączania zdalnych modułów), <wiki pl="I²C">I2C</wiki> (do bezpośredniej realizacji wejść i wyjść) oraz port <id_link id="ABC_OF_COMPUTING:networks:ethernet">Ethernetu</id_link> zapewniający komunikację <id_link id="ABC_OF_COMPUTING:networks:IP">TCP/IP</id_link>. Oparty jest na mikrokontrolerze <wiki pl="Architektura ARM">ARM</wiki> z systemem Linux i bardziej szczegółowo opisany w <id_link id="centralka_nie_tylko_alarmowa">centralka (nie tylko) alarmowa</id_link>.</p>
+
+<p>Moduły wchodzące w skład poszczególnych projektów były tak tworzone aby dało się je łatwo wykorzystać w innych projektach, jako swego rodzaju klocki realizujące typowe funkcje związane z systemami sterowania obiektem:</p><ul>
+	<li>moduły kontrolne:<ul>
+		<li>master systemu oparty na mikrokontrolerze ARM z systemem Linux, komunikatcją TCP/IP over Ethernet, i2c, rs485 - wykorzystane standardowe płytki tego typu, więcej szczegółów w <id_link id="centralka_nie_tylko_alarmowa">centralka (nie tylko) alarmowa</id_link></li>
+	</ul></li>
+	<li>moduły z komunikacją Modbus/RS485:<ul>
+		<li>sterownik oparty na mikrokontrolerze Atmega8 z komunikacją poprzez interfejs RS485 - <id_link id="toolbox4electronic:libs4avr">biblioteczka dla uC</id_link>, wykorzystywany m.in. w:<ul>
+			<li><id_link id="manipulator_alarmowy">manipulator do systemu alarmowego</id_link> - wyświetlacz LCD i klawiatura z komunikacją MODBUS</li>
+			<li><id_link id="sterownik_oswietlenia">sterownik oświetlenia</id_link> - sterownik 4 linii PWM z niezależna detekcją zera dla każdej linii oraz 4 linii ON/OFF</li>
+			<li>rozproszone DI na magistrali Modbus/RS485 - może być bezproblemowo zrealizowane w oparciu o dev-board modułu podstawowego</li>
+		</ul></li>
+	</ul></li>
+	<li>moduły wejśc/wyjść z komunikacją I2C:<ul>
+		<li>moduły sterujące liniami DC:<ul>
+			<li>moduły tranzystorowe do magistrali I2C - <id_link id="sterownik_LED_RGB">sterownik LED RGB / sterownik linii DC</id_link></li>
+		</ul></li>
+		<li>moduł obsługi magistrali 1wire - <id_link id="centralka_nie_tylko_alarmowa">centralka (nie tylko) alarmowa</id_link></li>
+		<li>moduł obsługi wejść z linii 3 stanowych, analogowych, cyfrowych z detekcją zmiany, ... - <id_link id="centralka_nie_tylko_alarmowa">centralka (nie tylko) alarmowa</id_link></li>
+	</ul></li>
+	<li>moduły wykonawcze sterowane sygnałem cyfrowym:<ul>
+		<li>moduły sterujące liniami AC - <id_link id="sterownik_oswietlenia">triakowy sterownik obwodów 230V AC</id_link>:<ul>
+			<li>moduł triakowy ON/OFF</li>
+			<li>moduł triakowy z regulacją mocy PWM</li>
+		</ul></li>
+	</ul></li>
+	<li><id_link id="niestabilizowany_zasilacz_buforowy">system zasilania DC</id_link></li>
+</ul>
+</article>

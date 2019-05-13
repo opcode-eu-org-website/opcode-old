@@ -1,0 +1,200 @@
+options {
+	# nie wpisujemy nazwy hosta do logów
+	chain_hostnames(0);
+	
+	time_reopen(10);
+	time_reap(360);
+	log_fifo_size(2048);
+	
+	# może tworzyć katalogi
+	create_dirs(yes);
+	
+	# prawa do plików logów
+	owner(root);
+	group(adm);
+	perm(0640);
+	dir_perm(0755);
+	
+	# nie używamy DNS
+	use_dns(no);
+};
+
+source all_src {
+	internal();
+	unix-stream("/dev/log");
+	file("/proc/kmsg" log_prefix("kernel: "));
+};
+
+
+#######################
+#                     #
+#   DEFINICJE LOGOW   #
+#                     #
+#######################
+
+
+#
+# EMERGENCY
+#
+
+destination std_console	{ file("/dev/ttyS0"); file("/dev/tty1"); };
+destination all_console	{ usertty("*"); };
+destination emergency_fd	{ file("/var/log/emergency.log"); };
+
+filter emergency { level(crit,alert,emerg); };
+
+log {
+	source(all_src);
+	filter(emergency);
+	destination(std_console);
+	destination(all_console);
+	destination(emergency_fd);
+};
+
+
+#
+# poczta - exim, dovecot
+#
+
+destination exim_fd	{ file("/var/log/exim.log"); };
+destination dovecot_fd	{ file("/var/log/dovecot.log"); };
+destination mail_fd	{ file("/var/log/mail-else.log"); };
+
+filter exim { facility(mail) and program("exim"); };
+filter dovecot { facility(mail) and program("dovecot"); };
+filter mail { facility(mail); };
+
+log {
+	source(all_src);
+	filter(exim);
+	destination(exim_fd);
+	flags(final);
+};
+log {
+	source(all_src);
+	filter(dovecot);
+	destination(dovecot_fd);
+	flags(final);
+};
+log {
+	source(all_src);
+	filter(mail);
+	destination(mail_fd);
+	flags(final);
+};
+
+
+#
+# www - apache
+#
+
+destination apache_fd	{ file("/var/log/apache.log"); };
+destination www_fd	{ file("/var/log/www.log"); };
+
+filter apache { facility(daemon) and program("apache"); };
+filter www { facility(local0) and program("www"); };
+
+log {
+	source(all_src);
+	filter(apache);
+	destination(apache_fd);
+	flags(final);
+};
+log {
+	source(all_src);
+	filter(www);
+	destination(www_fd);
+	flags(final);
+};
+
+
+#
+# systemowe - cron, jądro
+#
+
+destination cron_fd	{ file("/var/log/cron.log"); };
+destination kernel_fd	{ file("/var/log/kernel.log"); };
+destination kernel_debug_fd	{ file("/var/log/kernel-debug.log"); };
+
+filter kern { facility(kern); };
+filter kernel_debug { facility(kern) and level(debug); };
+filter cron { facility(cron) or facility(auth) and program("cron"); };
+
+log {
+	source(all_src);
+	filter(cron);
+	destination(cron_fd);
+	flags(final);
+};
+log {
+	source(all_src);
+	filter(kernel_debug);
+	destination(kernel_debug_fd);
+	flags(final);
+};
+log {
+	source(all_src);
+	filter(kern);
+	destination(kernel_fd);
+	flags(final);
+};
+
+
+#
+# autoryzacja
+#
+
+destination auth_fd	{ file("/var/log/auth.log"); };
+destination auth-err_fd	{ file("/var/log/auth.err.log"); };
+
+filter auth { facility(auth); };
+filter auth-err { facility(auth) and level(warning,err,crit,alert,emerg); };
+
+log {
+	source(all_src);
+	filter(auth-err);
+	destination(auth-err_fd);
+	flags(final);
+};
+log {
+	source(all_src);
+	filter(auth);
+	destination(auth_fd);
+	flags(final);
+};
+
+
+#
+# bazy danych - mysql, postgres
+#
+destination mysql_fd	{ file("/var/log/mysql.log"); };
+destination postgres_fd	{ file("/var/log/postgres.log"); };
+
+filter mysql { program(".*mysql.*"); };
+filter postgres { program("postgres"); };
+
+log {
+	source(all_src);
+	filter(mysql);
+	destination(mysql_fd);
+	flags(final);
+};
+log {
+	source(all_src);
+	filter(postgres);
+	destination(postgres_fd);
+	flags(final);
+};
+
+
+#
+# wszystko inne (co sięnie załapało wcześniej)
+#
+
+destination elselog_fd	{ file("/var/log/elselog.log"); };
+
+log {
+	source(all_src);
+	destination(elselog_fd);
+	flags(final);
+};

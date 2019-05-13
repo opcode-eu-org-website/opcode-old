@@ -1,0 +1,11 @@
+<article>
+<title>Impedancja</title>
+<p><wiki pl="Impedancja">Impedancja</wiki> jest to "uogólnienie" pojęcia oporu dla obwodów prądu zmiennego. Obowiązują dla niej takie same zasady przy łączeniu elementów obwodu - gdy szeregowo to dodajemy impedancje gdy równolegle to odwrotność impedancji wypadkowej jest sumą odwrotności impedancji składowych. Przy skorzystaniu z tej wartości prawdziwe jest dla nich prawo Ohma: <eq>u(t) = i(t) Z</eq>. Część rzeczywistą impedancji nazywamy rezystancją, a część zespoloną reaktancją. Stosunek reaktancji do rezystancji jest równy tangensowi kąta przesunięcia fazowego.</p>
+
+<p>opór: <eq>Z = R</eq><br />
+pojemność: <eq_latex>Z=\frac{1}{j \omega C}</eq_latex> (dla prądu stałego jest to przerwa w obwodzie: <eq_latex>Z = \infty</eq_latex>)<br />
+indukcyjność: <eq_latex>Z=j \omega L</eq_latex> (dla pradu stałego jest to zwarcie: <eq>Z = 0</eq>)<br />
+gdzie: <eq_latex>j=\sqrt{-1}</eq_latex>, a <eq_latex>\omega = 2 \pi f</eq_latex> to częstotliwość kołowa (pulsacja)</p>
+
+<p>Należy pamiętać iż rzeczywiste elementy posiadają wielkości pasożytnicze (a więc są impedancjami złożonymi), które w pewnych okolicznościach mogą mieć znaczenie.</p>
+</article>

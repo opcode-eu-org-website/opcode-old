@@ -1,0 +1,16 @@
+#ifndef INPUT_H
+#define INPUT_H
+class Input {
+	private:
+		static int last_x;
+		static int last_y;
+		
+	public:
+		static void init_glut();
+		
+		static void mouse_click_event(int przycisk, int stan, int x, int y);
+		static void mouse_move1_event(int x,int y);
+		static void mouse_move2_event(int x,int y);
+		static void keyboard_event(unsigned char klawisz, int x, int y);
+};
+#endif

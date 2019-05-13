@@ -1,0 +1,50 @@
+#ifndef _CONFIG_H
+#define _CONFIG_H
+
+//#define DEBUG() printf("%s:%d\n", __FILE__, __LINE__);
+#define DEBUG()
+
+#include <stdio.h>
+
+typedef enum {
+	OUTPUT_DSP = 1,
+	OUTPUT_ALSA,
+	OUTPUT_UC
+} OUTPUT_MODES;
+
+typedef enum {
+	SQUARE = 1,
+	SIN,
+	SAW_R,
+	SAW_L,
+	TRIANGLE,
+	FUNCTION,
+	PCM
+} MACROS;
+
+typedef struct config_t {
+	OUTPUT_MODES output_mode;
+	char *output_device_name;
+	int rate;
+	FILE *config_file;
+	FILE *display_file;
+	
+	double one_period_time;
+	int num_of_periods;
+	
+	MACROS macro;
+	double macro_args[2];
+	
+	char *function;
+	int function_len;
+} config_t;
+
+void clean_line(FILE *file);
+void clean_white_space(FILE *file);
+
+config_t* config_init(void);
+void config_read_cmdline(config_t *config, int argc, char *argv[]);
+void config_parse_file(config_t *config);
+void config_free(config_t *config);
+
+#endif

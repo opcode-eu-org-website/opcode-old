@@ -1,0 +1,173 @@
+<?xml version="1.0"?>
+<xsl:stylesheet version="2.0"
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+	xmlns:fn="http://www.w3.org/2005/xpath-functions"
+	exclude-result-prefixes="fn"
+>
+	<xsl:output method='xml' encoding='utf-8' />
+	<!-- zaleznie od trybu -> ustawiane przez opcje parsera	<xsl:strip-space elements="*" /> -->
+	
+	<!-- parametry globalne arkusza: -->
+	<xsl:param name="cat_name" />
+	
+	
+	
+	<!-- element główny -->
+	<xsl:template match="soft_db">
+		<!-- dla każdej kategori której nazwa zgadza się z podaną w parametrze -->
+		<!-- ta petla ma zazwyczaj JEDEN obieg,
+		     ale jej zastosowanie jest wygodna metoda sprawdzania warunku na nazwe kategorii -->
+		<xsl:for-each select="soft_cat[@name=$cat_name]">
+			<!-- stosujemy odpowiedni szablon -->
+			<xsl:apply-templates select="." />
+		</xsl:for-each>
+	</xsl:template>
+	
+	<!-- przetwarzamy wszystkie elementy w kategorii, w tym podkategorie
+	     poprzez odwolania do odpowiednich szablonow -->
+	<xsl:template match="soft_cat">
+		<!-- umieszczamy opis kategorii ... -->
+		<xsl:apply-templates select="desc" />
+		<ul>
+			<!-- ... i dla każdego elementu w kategori ... -->
+			<xsl:for-each select="soft_cat|app_link|app">
+				<!-- ... posortowanego w kolejniości alfabetycznej ... -->
+				<!--xsl:sort select="@name" /-->
+				<!-- ... stosuj odpowiedni szablon,
+				     umieszczając jego wynik w elemencie listy -->
+				<li><xsl:apply-templates select="." /></li>
+			</xsl:for-each>
+		</ul>
+	</xsl:template>
+	
+	<!-- dla elementów app_link wyszukujemy w całej bazie elementu app o takiej samej nazwie -->
+	<xsl:template match="app_link">
+		<!-- pewnie dałoby sie zapisać warunek for-each bez tworzenia tej zmiennej,
+		     ale tak jest chyba czytelniej itd ... -->
+		<xsl:variable name="name">
+			<xsl:value-of select="@name"/>
+		</xsl:variable>
+		<!-- ta petla ma zazwyczaj JEDEN obieg,
+		     ale jej zastosowanie jest wygodna metoda znalezienia odpowiedniego tagu -->
+		<xsl:for-each select="//app[@name=$name]">
+			<xsl:apply-templates select="." />
+		</xsl:for-each>
+	</xsl:template>
+	
+	<!-- dotarliśmy do elementu opisującego dany program, w tym miejscu generujemy
+	     zawartość <li/> opisującego dany program w oparciu o informacje z bazy ... -->
+	<xsl:template match="app">
+		<xsl:variable name="prio"><xsl:choose>
+			<xsl:when test="@priority">
+				<xsl:value-of select="@priority"/>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:text>normal</xsl:text>
+			</xsl:otherwise>
+		</xsl:choose></xsl:variable>
+		<xsl:choose>
+			<xsl:when test="@type='cmd'">
+				<code class="{$prio}-app">
+					<xsl:value-of select="@name" />
+					<xsl:if test="@attr">
+						<xsl:text> </xsl:text>
+						<var>
+							<xsl:value-of select="@attr" />
+						</var>
+					</xsl:if>
+				</code>
+			</xsl:when>
+			<xsl:when test="homepage">
+				<a class="ext_homepage {$prio}-app" href="{homepage/text()}">
+					<xsl:value-of select="@name" />
+				</a>
+			</xsl:when>
+			<xsl:otherwise>
+				<span class="{$prio}-app">
+					<xsl:value-of select="@name" />
+				</span>
+			</xsl:otherwise>
+		</xsl:choose>
+		
+		<!-- podajemy w nawiasie dodatkow nazwy komend i programu -->
+		<xsl:if test="alt_name|cmd_name">
+			<xsl:text> (</xsl:text>
+				<xsl:for-each select="cmd_name|alt_name">
+					<xsl:choose>
+						<xsl:when test="name() = 'cmd_name'">
+							<code><xsl:apply-templates select="." /></code>
+						</xsl:when>
+						<xsl:otherwise>
+							<xsl:apply-templates select="." />
+						</xsl:otherwise>
+					</xsl:choose>
+					<xsl:if test="position() != last()">
+						<xsl:text>, </xsl:text>
+					</xsl:if>
+				</xsl:for-each>
+			<xsl:text>)</xsl:text>
+		</xsl:if>
+		
+		<!-- opis -->
+		<xsl:text> - </xsl:text><xsl:apply-templates select="desc" />
+		
+		<!-- id_link'i -->
+		<xsl:if test="id_link">
+			<br /><xsl:text>Dodatkowe informacje: </xsl:text>
+			<xsl:apply-templates select="id_link" mode="full_rewrite" />
+		</xsl:if>
+
+		<!-- dodatkowe strony domowe -->
+		<xsl:if test="alt_homepage or (homepage and @type='cmd')">
+			<br /><xsl:text>Homepage: </xsl:text>
+			<xsl:if test="@type='cmd'">
+				<xsl:for-each select="homepage">
+					<a class="ext_homepage" href="{text()}">
+						<xsl:value-of select="text()" />
+					</a>
+				</xsl:for-each>
+			</xsl:if>
+			<xsl:for-each select="alt_homepage">
+				<a class="ext_homepage" href="{text()}">
+					<xsl:value-of select="text()" />
+				</a>
+			</xsl:for-each>
+		</xsl:if>
+		
+		<!-- linki do paczek Debiana -->
+		<xsl:if test="deb">
+			<br /><xsl:text>Debian: </xsl:text>
+			<xsl:for-each select="deb">
+				<xsl:choose>
+					<xsl:when test="@repo">
+						<xsl:value-of select="text()" />
+						<xsl:text>@</xsl:text>
+						<xsl:value-of select="@repo" />
+					</xsl:when>
+					<xsl:otherwise>
+						<a class="ext_homepage" href="http://packages.debian.org/{text()}">
+							<xsl:value-of select="text()" />
+						</a>
+					</xsl:otherwise>
+				</xsl:choose>
+				<xsl:text> </xsl:text>
+			</xsl:for-each>
+		</xsl:if>
+		
+		<xsl:apply-templates select="id_link" mode="full_rewrite" />
+	</xsl:template>
+	
+	
+	
+	<!-- tryb pełnego przepisywania
+	     na potrzeby wstawiania fragmentów XML z bazy danych do pliku wynikowego -->
+	<xsl:template match="*|@*|processing-instruction()|text()" mode="full_rewrite">
+		<xsl:copy>
+			<xsl:apply-templates mode="full_rewrite" select="*|@*|processing-instruction()|text()" />
+		</xsl:copy>
+	</xsl:template>
+	<!-- szablon dla tagów których zawartość ma być przepisywana bez zmian -->
+	<xsl:template match="desc">
+		<xsl:apply-templates select="*|text()" mode="full_rewrite" />
+	</xsl:template>
+</xsl:stylesheet>

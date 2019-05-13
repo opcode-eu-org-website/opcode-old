@@ -1,0 +1,13 @@
+<article>
+<title>Sieć</title>
+<p>Konfiguracja sieci odbywa się w kilku plikach konfiguracyjnych - są to:</p>
+<ul>
+	<li><kbd class="path">/etc/hostname.<var>INTERFACE</var></kbd> - określenie nazwy hosta dla zadanego przez <var>INTERFACE</var> interfejsu sieciowego, kilka nazw na interfejsie uzyskuje się poprzez stosowanie aliasów <var>INTERFACE:X</var>, gdzie <var>X</var> jest kolejnym numerem</li>
+	<li><kbd class="path">/etc/hosts</kbd> - skojarzenie nazw hostów z numerami IP (w szczególności nazw przypisanych do interfejsów z numerami IP które będą do nich przypisane)</li>
+	<li><kbd class="path">/etc/netmasks</kbd> - przypisania masek do adresów sieci IP</li>
+	<li><kbd class="path">/etc/defaultrouter</kbd> - domyślna trasa routingu (brama)</li>
+	<li><kbd class="path">/etc/nodename</kbd> - nazwa hosta</li>
+	<li>DNS konfigurujemy poprzez wpisy w dwóch plikach - <code>"hosts:  files dns"</code> w <kbd class="path">/etc/nsswitch.conf</kbd> i typowy konfig w <kbd class="path">/etc/resolv.conf</kbd></li>
+</ul>
+<p>Sieć opartą na takiej konfiguracji uruchamiamy <code>svcadm enable svc:/network/physical:default</code> (przed tym należy wyłączyć inne sposoby konfiguracji sieci - w szczególności <code>svcadm disable svc:/network/physical:nwam</code>).</p>
+</article>

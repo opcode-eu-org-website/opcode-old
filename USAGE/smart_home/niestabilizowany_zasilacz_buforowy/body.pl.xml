@@ -1,0 +1,35 @@
+<article>
+<title>Niestabilizowany zasilacz buforowy</title>
+
+<p>Przedstawiam projekt niestabilizowanego zasilacza buforowego. Układ pomyślany został to pracy jako zasilacz centralny zasilacz systemów "elektronicznego domu" (systemy sterowania, system alarmowy, systemy komunikacyjne - router wifi z switchem, telefoniczne - telefony SIP, komputerowe - laptop, diodowe oświetlenie awaryjne).</p>
+
+<p>W urządzeniach elektronicznych możemy wyróżnić następujące popularne standardy zasilania DC:</p><ul>
+	<li>napięcia precyzyjne (mogą trafiać bezpośrednio do układów scalonych, itd):<ul>
+		<li>3.3V</li>
+		<li>5V</li>
+		<li>9V (nie wiem czy używane bezpośrednio czy tylko do wytworzenia innych napięć)</li>
+		<li>12V (dyski, wentylatory, ale często tylko do wytworzenia innych napięć)</li>
+	</ul></li>
+	<li>napięcia "brudne" (z sporą tolerancją - nie używane bezpośrednio, a jedynie do wytworzenia innych napięć):<ul>
+		<li>18V (19V)</li>
+		<li>24V (16V-30V), w logice 24V napięcie >= 15V przyjmuje się za jedynkę</li>
+		<li>48V (36V-72V)</li>
+	</ul></li>
+</ul>
+
+<p>Akumulatory w zależności od stopnia naładowania oferują nam napięcia z przedziału: 11V - 13.8V (12V), 16.5V - 20.7V (18V), 22V - 27.6V (24V).</p>
+
+<p>W projekcie zdecydowałem się na realizację zasilacza na 18V (czyli zasadniczo 16-21V). Napięcie 18V zostało podyktowane łatwością uzyskania wszystkich standardowych napięć poprzez przetwornice DC/DC - w przypadku 12 lub 24V ciężko byłoby uzyskać te napięcia (wymagane przetwornice up-down). Można rozważyć modyfikację tego projektu aby uzyskiwać z niego 12V (dokładniej to coś z przedziału 10.5-14.5). Wtedy (przynajmniej dla napięcia 12V) należałoby korzystać z przetwornic izolowanych.</p>
+
+<p>Projekt zakłada:</p><ul>
+	<li>centralny zasilacz (pseudo-)buforowy z akumulatorami 18V</li>
+	<li>ładowanie akumulatorów niezależne od zasilania odbiorników (jeden mostek + zestaw kondensatorów zasila szynę DC, drugi mostek zasila układ ładowania akumulatorów, oba układy mają wspólną masę)</li>
+	<li>przy pracy sieciowej napięcie 22V, po przejściu na akumulatory 18V spadek do 20.7V, co jest to jednocześnie sygnalizacja (dla urządzeń odbiorczych) trybu pracy akumulatorowej</li>
+	<li>napięcia precyzyjne uzyskiwane przez lokalne zasilacze dc-dc step-down</li>
+</ul>
+
+<p><b>UWAGA: </b>Projekt został zarzucony na etapie koncepcyjnym na rzecz zastosowania gotowego impulsowego zasilacza buforowego 12V wyposażonego w wymagane zabezpieczenia zwarciowe, przeciążeniowe i przeciw głębokiemu rozładowaniu. Nie zostały wykonane testy prezentowanych rozwiązań. Zaletą prezentowanego tutaj rozwiązania powinny być mniejsze straty (brak stabilizacji), ale czy tak byłoby rzeczywiście ciężko ocenić (straty na trafo, brak możliwości bezpośredniego wykorzystania nietypowego niestabilizowanego napięcia 18 V vs zasilacz impulsowy i 12V napięcie które możemy podłączyć bezpośrednio - bez kolejnej przetwornicy DC/DC do części urządzeń).
+</p>
+
+<p>Zamieszczam schemat <sch_link name="./niestabilizowany_zasilacz_buforowy">ideowy zasilacza</sch_link>, a także kilka <sch_link name="elementy_podzasilaczy">propozycji</sch_link> "podzasilaczy" i płytki <sch_link name="./podlaczenie_zasilania">dystrybucji napięć wyjściowych</sch_link>.</p>
+</article>

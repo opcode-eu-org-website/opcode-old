@@ -1,0 +1,20 @@
+<article>
+<title>Kilka słów o znakach z poza ASCII w adresach URI</title>
+
+<p>Zagadnie skład się z dwóch pod-zagadnień:</p>
+<ul>
+	<li>kodowania znaków non-ASCII w nazwach domenowych</li>
+	<li>kodowania znaków non-ASCII w części określającej ścieżkę, itp</li>
+</ul>
+
+<p>Znaki z poza ASCII w nazwach domenowych są wynalazkiem stosunkowo nowym - przez to nie obciążonym mnogością kodowań narodowych. Zgodnie z dokumentami RFC specyfikującymi to rozwiązanie - Internationalizing Domain Names (RFC3490, RFC3491, RFC3492) człony (od kropki do kropki) takich domen w całości zapisywane są z wykorzystaniem <wiki pl="Unicode">Unicode</wiki> kodowanego do postaci zbioru znaków ASCII reprezentowanego w nazwach domenowych z wykorzystaniem <wiki pl="Punycode">punycode</wiki>. Standard wspierany jest przez m.in. przez przeglądarkę Firefox 3, ale np. Konqueror 3.5.9 (pomimo oficjalnej zgodności) ma problemy z obsługą tego standardu. W przypadku narzędzi nie potrafiących dekodować IDN wprowadzanego w formie czytelnej dla człowieka (Unicode) konieczne jest zastosowanie programu konwertującego nazwę domeny na punycode - np. <code>w3m `idn --quiet http://www.żółw.pl/`</code>.</p>
+
+<p>W przypadku znaków z poza ASCII w pozostałych częściach URL sprawa jest bardziej skomplikowana gdyż:</p>
+<ul>
+	<li>standard <wiki pl="Uniform Resource Locator">URL</wiki> (RFC1738), a później jego uogólnienie <wiki pl="Uniform Resource Identifier">URI</wiki> (RFC3986) dopuszczają umieszczanie znaków z poza ASCII w adresach URL pod warunkiem zakodowania ich w postaci hexalnej poprzedzonej znakiem % (tzw kodowanie URL)</li>
+	<li>jednak żaden z tych standardów ani standard HTTP nie określa kodowania jakie ma być użyte do przypisania wartości numerycznej do znaku - można by zakładać że jest to kodowanie strony na której występuje link (ale takie rozwiązanie rodzi problem z linkami między stronami używającymi różnych kodowań oraz problem ustalenia kodowania przy ręcznym wpisywaniu adresu)</li>
+	<li>dopiero standard <wiki pl="Internationalized Resource Identifier">IRI</wiki> (RFC3987) stwierdza jednoznacznie iż takie znaki w URL przed potraktowaniem kodowaniem URL mają zostać zapisane w UTF8. Niestety nadal część aplikacji używa swojego aktualnego kodowania do kodowania znaków nie ASCII w URL zamiast stosować RFC3987.</li>
+</ul>
+
+<p>Dla ścisłości należy zaznaczyć że nie wszystkie znaki ASCII są obsługiwane bezpośrednio (w sposób niekodowany) w URL'ach - niektóre z nich mają znaczenie specjalne w ramach URL, a inne nie są znakami alfanumerycznymi.</p>
+</article>

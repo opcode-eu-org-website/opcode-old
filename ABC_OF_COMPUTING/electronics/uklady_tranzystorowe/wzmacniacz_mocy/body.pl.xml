@@ -1,0 +1,11 @@
+<article>
+<title>Wzmacniacz mocy</title>
+
+<p>Trudnościami w realizacji liniowych wzmacniaczy mocy jest konieczność operowania na dużych wartościach napięcia i prądu, minimalizacji wydzielania mocy (<eq>P=UI=I<sup>2</sup>R=U<sup>2</sup>/r</eq>), przy jednoczesnym zachowaniu możliwie niezniekształconego sygnału oraz sporego wzmocnienia i rezystancji wejściowej. Podstawowym układem na którym można oprzeć tego typu rozwiązania jest wtórnik komplementarny (dwa wtórniki emiterowe połączone emiterami) - w odróżnieniu od zwykłego wtórnika emiterowego pozwala uniknąć problematycznego w tych zagadnieniach opornika emiterowego. Niestety układ ten cechuje się strefą martwą przy przełączaniu co powoduje konieczność zastosowania rozsównika poziomów. Na poniższym schemacie przedstawiono dwa warianty (prosty - bez dbania o drop-out oraz bardziej rozbudowany) takiego wzmacniacza.</p>
+
+<p class="center"><img_from_src name="wzmacniacz_mocy" type="sch" alt="schemat ideowy prostego wzmacniacza mocy" /></p>
+
+<p>Należy zapewnić diodom lub tranzystorowi robiącego za rozsównik napięć taką samą temperaturę jak tranzystorom mocy Q1 i Q2. Cp wspomaga rozsównik przy skokach. Rb i Rbr zapewniają poprawną pracę T3. Rbo robi za "górne" źródło prądowe na zasadzie bootstrapu.</p>
+
+<p>Najczęściej spotykanymi w dzisiejszych czasach wzmacniaczami mocy są wzmacniacze impulsowe, których działanie z grubsza polega na załączaniu w stan nasycenia tranzystorów odpowiedzialnych za dostarczenie kolejnej porcji prądu.</p>
+</article>

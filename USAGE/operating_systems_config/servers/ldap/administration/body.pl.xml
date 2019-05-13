@@ -1,0 +1,57 @@
+<article>
+<title>Administracja kontami LDAPowymi</title>
+
+<pre>URL="<var>ldap://adres.of.ldap.serwer/</var>"
+BASEDN="<var>dc=opcode,dc=eu,dc=org</var>"
+BINDDN="uid=MYADMINLOGIN,ou=People,$BASEDN"
+
+# dodanie usera:
+	ldapadd -xW -H "$URL" -D "$BINDDN" -x -W -f dodawanie.ldif
+
+# dodanie do grupy lub inne modyfikacje:
+	ldapadd -xW -H "$URL" -D "$BINDDN" -f modyfikacja.ldif
+
+# zmiana hasla:
+	ldappasswd -xW -H "$URL" -D "$BINDDN" -S "uid=LOGIN,ou=People,$BASEDN"
+
+# sprawdzenie dzialania hasla:
+	ldapsearch -xW -H "$URL" -b "$BASEDN" -D "uid=LOGIN,ou=People,$BASEDN"
+
+# wyszukiwanie:
+	ldapsearch -H "$URL" -b "$BASEDN" -x
+</pre>
+
+<p>Przyklad pliku ldif do zakladania uzytkownika:</p>
+<pre>
+dn: uid=LOGIN,ou=People,dc=vls,dc=icm,dc=edu,dc=pl
+objectClass: ldapPublicKey
+objectClass: shadowAccount
+objectClass: posixAccount
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+shadowWarning: 10
+shadowInactive: 10
+shadowMin: 1
+shadowMax: 365
+shadowLastChange: 14673
+homeDirectory: /home/LOGIN
+loginShell: /bin/false
+uid: LOGIN
+cn: IMIE NAZWISKO
+uidNumber: 30001
+sn: NAZWISKO
+givenName: IMIE
+mail: ADRES@MAILOWY
+gidNumber: 3003
+userPassword: {MD5}da4427d9e3dbb96a7fe4053a4bfb21dd
+</pre>
+
+<p>Przyklad pliku ldif do dodania uzytkownika do grupy:</p>
+<pre>
+dn: cn=NAZWAGRUPY,ou=Group,dc=vls,dc=icm,dc=edu,dc=pl
+changetype: modify
+add: memberUid
+memberUid: LOGIN
+</pre>
+</article>

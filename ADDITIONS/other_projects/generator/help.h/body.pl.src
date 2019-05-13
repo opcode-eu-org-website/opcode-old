@@ -1,0 +1,9 @@
+#ifndef _HELP_H
+#define _HELP_H
+
+#include <stdio.h>
+
+void print_help(FILE *output, char *name, int code);
+void print_parse_error(int line, const char *info);
+
+#endif

@@ -1,0 +1,62 @@
+#!/usr/bin/perl -w
+
+# uwaga dane wejściowe do programu pochodzące z maila (wydobyte np. przy pomocy formail)
+# warto przepuścić przez mail2text.sh celem dokonania konwersji 7 lub 8 bitowego kodowania
+# znaków narodowych do utf-8
+
+use open ":encoding(utf8)";
+use open ":std";
+
+# konfiguracja
+$SERVER = "jabber.moja.domena";
+$PORT = 5222;
+$TLS = 1;
+$USER = "mail-system";
+$PASS = "secret";
+
+require "/etc/xmmp-mail-system-conf.pl";
+
+my $RES = "New Mail Notify";
+my $SUBJECT = "";
+my $TYPE = "headline"; # "headline", "chat" or ""
+
+# XEP-0160: Best Practices for Handling Offline Messages:
+# "Messages with a 'type' attribute whose value is "headline" SHOULD NOT be stored offline,
+#  since such messages are usually time-sensitive."
+
+
+# deklaracje wstępne
+my $message="";
+use Getopt::Long;
+GetOptions ("to=s" => \$to_jid, "message=s" => \$message, "type=s"  => \$TYPE, "subject=s" => \$SUBJECT);
+
+if ($message eq "") {
+	while(<STDIN>) {
+		$message .= $_;
+	}
+}
+
+use Net::XMPP;
+my $cli = new Net::XMPP::Client();
+
+# łączenie
+my $con = $cli->Connect(hostname=>$SERVER, port=>$PORT, tls=>$TLS);
+if (!(defined($con))) {
+	print "Nie można połączyć się z serwerem\n";
+	exit(-1);
+}
+
+# logowanie
+my @aut = $cli->AuthSend(username=>$USER, password=>$PASS, resource=>$RES);
+if ($aut[0] ne "ok") {
+	print "Błąd autoryzacji";
+	exit(-2);
+}
+
+# wysylanie
+$cli->MessageSend(to=>$to_jid, subject=>$SUBJECT, body=>$message, type=>$TYPE, from=>$USER . "@" . $SERVER);
+
+# zamkniecie polaczenia i zakonczenie
+$cli->Disconnect;
+exit(0);
+

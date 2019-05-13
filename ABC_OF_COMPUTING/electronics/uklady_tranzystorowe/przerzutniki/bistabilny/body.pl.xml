@@ -1,0 +1,5 @@
+<article>
+<title>Bistabilny</title>
+<p class="center"><img_from_src name="przerzutnik_bistabilny" type="sch" alt="schemat ideowy prostego przerzutnika bistabilnego" /></p>
+<p>Układ ten służy do zapamiętania stanu binarnego. Może być przełączony poprzez podanie krótkiego sygnału na którejś z wejść lub zwarcie któregoś wyjścia do masy. powoduje to rozpoczęcie przewodzenia przez wybrany z tranzystorów, co prowadzi do spadku napięcia na bazie drugiego tranzystora, prowadząc do jego zatkania i trwałego ustalenia stanu wysokiego na bazie wybranego tranzystora.</p>
+</article>

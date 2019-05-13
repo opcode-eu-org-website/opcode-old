@@ -1,0 +1,85 @@
+#!/bin/sh
+
+# rozdzielana przecinkami lista odbiorców mailowych
+MAIL_TO="alarmy@example.org"
+
+# adres nadawcy
+MAIL_FROM="alarmy@example.org"
+
+# serwer pocztowy
+MAIL_VIA="192.168.119.13"
+
+# send_alert priority message_short message_full
+send_alert() {
+	echo "$2"
+	
+	# wysyłanie maila
+	echo "$3" | email -n "monitor_di.sh" -f $MAIL_FROM -r $MAIL_VIA -s "$2" $MAIL_TO
+	
+	# wysyłanie SMSa poprzez centralny skrypt z systemu smtp2sms
+	echo -e "Subject: Alarm z BMS\n\nSite number: NPE Priority $1\nAlarm block description: $2" |
+		/opt/smtp2sms/mail2sms.sh
+}
+
+# liczba monitorowanych pozycji
+NUM=7
+
+# ustawienie wstepne stanow na OK
+for i in `seq 1 $NUM`; do
+	eval STANY_$i=OK
+	eval INFO_$i=\"RINF$i - za duzy prad\"
+	eval PRIO_$i=50
+	eval MAX_$i=75
+	eval MIN_$i=0
+done
+
+# prady na RINF
+ADRESY_1="17, 18"
+ADRESY_2="19, 20"
+ADRESY_3="21, 22"
+ADRESY_4="23, 24"
+ADRESY_5="25, 26"
+ADRESY_6="27, 28"
+
+# prad na A14
+ADRESY_7="14"
+INFO_7="A14 - za duzy prad"
+MAX_7=99
+
+
+while true; do
+	for i in `seq 1 $NUM`; do
+		tmp="ADRESY_$i"
+		tmp=$(C='eval "echo \$$tmp"'; eval $C)
+		val=`sqlite3 /tmp/modbus.db 'SELECT MAX(val) FROM data WHERE address in ('"$tmp"') AND register in (1042,1044,1046)' |
+			cut -f1 -d.`
+		
+		tmp="STANY_$i"
+		tmp=$(C='eval "echo \$$tmp"'; eval $C)
+		tmp2="MAX_$i"
+		tmp2=$(C='eval "echo \$$tmp2"'; eval $C)
+		tmp3="MIN_$i"
+		tmp3=$(C='eval "echo \$$tmp3"'; eval $C)
+		if [ "$val" -gt "$tmp2" -o "$val" -lt "$tmp3" ]; then
+			if [ "$tmp" != "ALARM" ]; then
+				eval STANY_$i=ALARM
+				tmp="INFO_$i"
+				tmp=$(C='eval "echo \$$tmp"'; eval $C)
+				tmp2="PRIO_$i"
+				tmp2=$(C='eval "echo \$$tmp2"'; eval $C)
+				send_alert $tmp2 "$tmp, Active"
+			fi
+		else
+			if [ "$tmp" != "OK" ]; then
+				eval STANY_$i=OK
+				tmp="INFO_$i"
+				tmp=$(C='eval "echo \$$tmp"'; eval $C)
+				tmp2="PRIO_$i"
+				tmp2=$(C='eval "echo \$$tmp2"'; eval $C)
+				send_alert $tmp2 "$tmp, Not Active"
+			fi
+		fi
+	done;
+	
+	sleep 300
+done 2>&1 | logger -p daemon.info -t monitor_modbus.sh

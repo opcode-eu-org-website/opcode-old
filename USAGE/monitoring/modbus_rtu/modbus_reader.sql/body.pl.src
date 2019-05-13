@@ -1,0 +1,191 @@
+CREATE TABLE devices (address INT, dev_group INT, frenq_offset INT, name TEXT);
+CREATE TABLE device_groups (dev_group INT, reg_list_id INT, frenq INT, frenq_offset INT, device_offset_multip INT, name TEXT, PRIMARY KEY (dev_group, reg_list_id));
+
+CREATE TABLE reg_list (reg_list_id INT PRIMARY KEY, base_register INT, offset INT, function INT, value_type INT, desc TEXT);
+CREATE TABLE reg_desc (reg_list_id INT, register INT, desc TEXT, units TEXT, PRIMARY KEY (reg_list_id, register));
+
+CREATE TABLE data (address INT, register INT, val REAL, time_s INT);
+
+
+
+INSERT INTO reg_list VALUES (1, 1000, 34, 3, 1, "PM710 Total - Average and Demand");
+INSERT INTO reg_desc VALUES (1, 1000, "Real Energy Consumption", "kWh");
+INSERT INTO reg_desc VALUES (1, 1002, "Apparent Energy Consumption", "kVAh");
+INSERT INTO reg_desc VALUES (1, 1004, "Reactive Energy Consumption", "kVARh");
+INSERT INTO reg_desc VALUES (1, 1006, "Real Power - Total", "kW");
+INSERT INTO reg_desc VALUES (1, 1008, "Apparent Power - Total", "kVA");
+INSERT INTO reg_desc VALUES (1, 1010, "Reactive Power - Total", "kVAR");
+INSERT INTO reg_desc VALUES (1, 1012, "Power Factor - Total", "");
+INSERT INTO reg_desc VALUES (1, 1014, "Voltage L-L - 3P Average", "V");
+INSERT INTO reg_desc VALUES (1, 1016, "Voltage L-N - 3P Average", "V");
+INSERT INTO reg_desc VALUES (1, 1018, "Current - 3P Average", "A");
+INSERT INTO reg_desc VALUES (1, 1020, "Frequency", "Hz");
+INSERT INTO reg_desc VALUES (1, 1022, "Real Power - Total Demand Present", "kW");
+INSERT INTO reg_desc VALUES (1, 1024, "Apparent Power - Total Demand Present", "kVA");
+INSERT INTO reg_desc VALUES (1, 1026, "Reactive Power - Total Demand Present", "kVAR");
+INSERT INTO reg_desc VALUES (1, 1028, "Real Power - Total Demand Peak", "kW");
+INSERT INTO reg_desc VALUES (1, 1030, "Apparent Power - Total Demand Peak", "kVA");
+INSERT INTO reg_desc VALUES (1, 1032, "Reactive Power - Total Demand Peak", "kVAR");
+
+INSERT INTO reg_list VALUES (10, 1034, 8, 3, 1, "PM710 Current");
+INSERT INTO reg_desc VALUES (10, 1034, "Current A", "A");
+INSERT INTO reg_desc VALUES (10, 1036, "Current B", "A");
+INSERT INTO reg_desc VALUES (10, 1038, "Current C", "A");
+INSERT INTO reg_desc VALUES (10, 1040, "Current N", "A");
+
+INSERT INTO reg_list VALUES (2, 1042, 12, 3, 1, "PM710 Demand Current");
+INSERT INTO reg_desc VALUES (2, 1042, "Current A - Demand Present", "A");
+INSERT INTO reg_desc VALUES (2, 1044, "Current B - Demand Present", "A");
+INSERT INTO reg_desc VALUES (2, 1046, "Current C - Demand Present", "A");
+INSERT INTO reg_desc VALUES (2, 1048, "Current A - Demand Peak", "A");
+INSERT INTO reg_desc VALUES (2, 1050, "Current B - Demand Peak", "A");
+INSERT INTO reg_desc VALUES (2, 1052, "Current C - Demand Peak", "A");
+
+INSERT INTO reg_list VALUES (9, 1054, 12, 3, 1, "PM710 Voltage");
+INSERT INTO reg_desc VALUES (9, 1054, "Voltage A-B", "V");
+INSERT INTO reg_desc VALUES (9, 1056, "Voltage B-C", "V");
+INSERT INTO reg_desc VALUES (9, 1058, "Voltage C-A", "V");
+INSERT INTO reg_desc VALUES (9, 1060, "Voltage A-N", "V");
+INSERT INTO reg_desc VALUES (9, 1062, "Voltage B-N", "V");
+INSERT INTO reg_desc VALUES (9, 1064, "Voltage C-N", "V");
+
+INSERT INTO reg_list VALUES (3, 1066, 18, 3, 1, "PM710 Power");
+INSERT INTO reg_desc VALUES (3, 1066, "Real Power A", "kW");
+INSERT INTO reg_desc VALUES (3, 1068, "Real Power B", "kW");
+INSERT INTO reg_desc VALUES (3, 1070, "Real Power C", "kW");
+INSERT INTO reg_desc VALUES (3, 1072, "Apparent Power A", "kVA");
+INSERT INTO reg_desc VALUES (3, 1074, "Apparent Power B", "kVA");
+INSERT INTO reg_desc VALUES (3, 1076, "Apparent Power C", "kVA");
+INSERT INTO reg_desc VALUES (3, 1078, "Reactive Power A", "kVAR");
+INSERT INTO reg_desc VALUES (3, 1080, "Reactive Power B", "kVAR");
+INSERT INTO reg_desc VALUES (3, 1082, "Reactive Power C", "kVAR");
+
+INSERT INTO reg_list VALUES (4, 1084, 20, 3, 1, "PM710 THD");
+INSERT INTO reg_desc VALUES (4, 1084, "THD @ Current A", "%");
+INSERT INTO reg_desc VALUES (4, 1086, "THD @ Current B", "%");
+INSERT INTO reg_desc VALUES (4, 1088, "THD @ Current C", "%");
+INSERT INTO reg_desc VALUES (4, 1092, "THD @ Voltage A-N", "%");
+INSERT INTO reg_desc VALUES (4, 1094, "THD @ Voltage B-N", "%");
+INSERT INTO reg_desc VALUES (4, 1096, "THD @ Voltage C-N", "%");
+INSERT INTO reg_desc VALUES (4, 1098, "THD @ Voltage A-B", "%");
+INSERT INTO reg_desc VALUES (4, 1100, "THD @ Voltage B-C", "%");
+INSERT INTO reg_desc VALUES (4, 1102, "THD @ Voltage C-A", "%");
+
+INSERT INTO reg_list VALUES (5, 1104, 30, 3, 1, "PM710 minimum");
+INSERT INTO reg_desc VALUES (5, 1104, "Minimum Real Power - Total", "kW");
+INSERT INTO reg_desc VALUES (5, 1106, "Minimum Apparent Power - Total", "kVA");
+INSERT INTO reg_desc VALUES (5, 1108, "Minimum Reactive Power - Total", "kVAR");
+INSERT INTO reg_desc VALUES (5, 1110, "Minimum Power Factor - Total", "");
+INSERT INTO reg_desc VALUES (5, 1112, "Minimum Frequency", "Hz");
+INSERT INTO reg_desc VALUES (5, 1114, "Minimum Current A", "A");
+INSERT INTO reg_desc VALUES (5, 1116, "Minimum Current B", "A");
+INSERT INTO reg_desc VALUES (5, 1118, "Minimum Current C", "A");
+INSERT INTO reg_desc VALUES (5, 1120, "Minimum Current N", "A");
+INSERT INTO reg_desc VALUES (5, 1122, "Minimum Voltage A-N", "V");
+INSERT INTO reg_desc VALUES (5, 1124, "Minimum Voltage B-N", "V");
+INSERT INTO reg_desc VALUES (5, 1126, "Minimum Voltage C-N", "V");
+INSERT INTO reg_desc VALUES (5, 1128, "Minimum Voltage A-B", "V");
+INSERT INTO reg_desc VALUES (5, 1130, "Minimum Voltage B-C", "V");
+INSERT INTO reg_desc VALUES (5, 1132, "Minimum Voltage C-A", "V");
+
+INSERT INTO reg_list VALUES (6, 1134, 20, 3, 1, "PM710 minimum THD");
+INSERT INTO reg_desc VALUES (6, 1134, "Minimum THD @ Current A", "%");
+INSERT INTO reg_desc VALUES (6, 1136, "Minimum THD @ Current B", "%");
+INSERT INTO reg_desc VALUES (6, 1138, "Minimum THD @ Current C", "%");
+INSERT INTO reg_desc VALUES (6, 1142, "Minimum THD @ Voltage A-N", "%");
+INSERT INTO reg_desc VALUES (6, 1144, "Minimum THD @ Voltage B-N", "%");
+INSERT INTO reg_desc VALUES (6, 1146, "Minimum THD @ Voltage C-N", "%");
+INSERT INTO reg_desc VALUES (6, 1148, "Minimum THD @ Voltage A-B", "%");
+INSERT INTO reg_desc VALUES (6, 1150, "Minimum THD @ Voltage B-C", "%");
+INSERT INTO reg_desc VALUES (6, 1152, "Minimum THD @ Voltage C-A", "%");
+
+INSERT INTO reg_list VALUES (7, 1154, 30, 3, 1, "PM710 maximum");
+INSERT INTO reg_desc VALUES (7, 1154, "Maximum Real Power - Total", "kW");
+INSERT INTO reg_desc VALUES (7, 1156, "Maximum Apparent Power - Total", "kVA");
+INSERT INTO reg_desc VALUES (7, 1158, "Maximum Reactive Power - Total", "kVAR");
+INSERT INTO reg_desc VALUES (7, 1160, "Maximum Power Factor - Total", "");
+INSERT INTO reg_desc VALUES (7, 1162, "Maximum Frequency", "Hz");
+INSERT INTO reg_desc VALUES (7, 1164, "Maximum Current A", "A");
+INSERT INTO reg_desc VALUES (7, 1166, "Maximum Current B", "A");
+INSERT INTO reg_desc VALUES (7, 1168, "Maximum Current C", "A");
+INSERT INTO reg_desc VALUES (7, 1170, "Maximum Current N", "A");
+INSERT INTO reg_desc VALUES (7, 1172, "Maximum Voltage A-N", "V");
+INSERT INTO reg_desc VALUES (7, 1174, "Maximum Voltage B-N", "V");
+INSERT INTO reg_desc VALUES (7, 1176, "Maximum Voltage C-N", "V");
+INSERT INTO reg_desc VALUES (7, 1178, "Maximum Voltage A-B", "V");
+INSERT INTO reg_desc VALUES (7, 1180, "Maximum Voltage B-C", "V");
+INSERT INTO reg_desc VALUES (7, 1182, "Maximum Voltage C-A", "V");
+
+INSERT INTO reg_list VALUES (8, 1184, 20, 3, 1, "PM710 maximum THD");
+INSERT INTO reg_desc VALUES (8, 1184, "Maximum THD @ Current A", "%");
+INSERT INTO reg_desc VALUES (8, 1186, "Maximum THD @ Current B", "%");
+INSERT INTO reg_desc VALUES (8, 1188, "Maximum THD @ Current C", "%");
+INSERT INTO reg_desc VALUES (8, 1192, "Maximum THD @ Voltage A-N", "%");
+INSERT INTO reg_desc VALUES (8, 1194, "Maximum THD @ Voltage B-N", "%");
+INSERT INTO reg_desc VALUES (8, 1196, "Maximum THD @ Voltage C-N", "%");
+INSERT INTO reg_desc VALUES (8, 1198, "Maximum THD @ Voltage A-B", "%");
+INSERT INTO reg_desc VALUES (8, 1200, "Maximum THD @ Voltage B-C", "%");
+INSERT INTO reg_desc VALUES (8, 1202, "Maximum THD @ Voltage C-A", "%");
+
+
+
+
+
+-- zakladamy:
+-- * obieg petli: 0.5s
+-- * ilosc tranzakcji modbus w obiegu petli: 3 ==> 3 sloty: A, B, C)
+-- * ilosc urzadzen: 30 ==> dzielnik modulo jest wielokrotnoscia 30, ofsety sa odlegle o 30
+
+-- 15s ( cnt % 30) ==> slot A
+INSERT INTO device_groups VALUES (710, 10,  30,   0, 1, "");
+
+-- 30s (cnt % 60) ==> slot B
+INSERT INTO device_groups VALUES (710,  9,  60,   0, 1, "");
+INSERT INTO device_groups VALUES (710,  3,  60,  30, 1, "");
+
+-- 60s (cnt % 120) ==> 1/2 slotu C
+INSERT INTO device_groups VALUES (710,  1, 120,   0, 1, "");
+INSERT INTO device_groups VALUES (710,  4, 120,  30, 1, "");
+
+-- 5min. (low priority) ==> 1/4 slotu C
+-- for (i=0;i<50;i++) if (i*30 % 120 == 60 || i*30 % 120 == 90) printf("%d\t%d\t%d\t%d\t%d\n", i*30, i*30 % 30, i*30 % 60, i*30 % 120, i*30 % 1200)
+INSERT INTO device_groups VALUES (710,  2, 600,  60, 1, "");
+INSERT INTO device_groups VALUES (710,  5, 600, 180, 1, "");
+INSERT INTO device_groups VALUES (710,  6, 600, 300, 1, "");
+INSERT INTO device_groups VALUES (710,  7, 600, 420, 1, "");
+INSERT INTO device_groups VALUES (710,  8, 600, 540, 1, "");
+
+
+
+
+INSERT INTO devices VALUES ( 5, 710,  0, "RG_1A");
+INSERT INTO devices VALUES (13, 710,  1, "RG_2A");
+
+INSERT INTO devices VALUES (17, 710,  2, "RINF_1A");
+INSERT INTO devices VALUES (18, 710,  3, "RINF_1B");
+INSERT INTO devices VALUES (19, 710,  4, "RINF_2A");
+INSERT INTO devices VALUES (20, 710,  5, "RINF_2B");
+INSERT INTO devices VALUES (21, 710,  6, "RINF_3A");
+INSERT INTO devices VALUES (22, 710,  7, "RINF_3B");
+
+INSERT INTO devices VALUES (14, 710,  8, "RG_A14");
+
+INSERT INTO devices VALUES ( 6, 710,  9, "RG_A1");
+INSERT INTO devices VALUES ( 7, 710, 10, "RG_A2");
+INSERT INTO devices VALUES ( 8, 710, 11, "RG_A3");
+INSERT INTO devices VALUES ( 9, 710, 12, "RG_A4");
+INSERT INTO devices VALUES (10, 710, 13, "RG_A5");
+INSERT INTO devices VALUES (11, 710, 14, "RG_A6");
+
+INSERT INTO devices VALUES (15, 710, 15, "RG_A15");
+
+INSERT INTO devices VALUES (23, 710, 16, "RINF_4A");
+INSERT INTO devices VALUES (24, 710, 17, "RINF_4B");
+INSERT INTO devices VALUES (25, 710, 18, "RINF_5A");
+INSERT INTO devices VALUES (26, 710, 19, "RINF_5B");
+INSERT INTO devices VALUES (27, 710, 20, "RINF_6A");
+INSERT INTO devices VALUES (28, 710, 21, "RINF_6B");
+
+--INSERT INTO devices VALUES (12, 710, 22, "RG_A7");
+INSERT INTO devices VALUES (13, 710, 25, "RG_2A");
+

@@ -1,0 +1,106 @@
+#!/bin/bash
+
+# set of command for Bosh Dinion IP CCTV cameras
+
+# conversion date (or unix timestamp) to camera time stamp: 946684800 is 2000-01-01 00:00:00
+# USAGE: cctv_convertDate "YYYY-mm-dd HH:MM:SS"
+# USAGE: cctv_convertDate "@UNIXTIME"
+cctv_convertDate() {
+	printf %x $(( `date -d "$@" +%s` - 946684800 ))
+}
+
+# return session id for rtsp stream
+cctv_getSession() {
+	rtsp_sess=`wget -O - "http://$HOST:$PORT/rcp.xml?command=0x0ae8&type=T_DWORD&direction=READ&protocol=TCP&num=$RAND" | xmlstarlet sel -t -v '//rcp/result/hex'`
+	if [ `printf %d $rtsp_sess` -ne 0 ]; then
+		echo $rtsp_sess
+	else
+		wget -O - "http://$HOST:$PORT/rcp.xml?command=0xFF0C&type=P_OCTET&direction=WRITE&num=1&idstring=connect&payload=0x0001001000000000001327100000000001010000000000004040FFFF00000000" |
+			xmlstarlet sel -t -v '//rcp/sessionid'
+	fi
+}
+
+# execute commande (read or write) on camera
+# USAGE: cctv_cmd command mode args_string
+cctv_cmd() {
+	wget -O - "http://$HOST:$PORT/rcp.xml?command=$1&sessionid=`cctv_getSession`&direction=$2&$3"
+	# get SESSION_ID before any set/get operation because session_id can be changed on reset video in client
+}
+
+# command write to camera
+# USAGE: cctv_set command args_string
+cctv_set() {
+	cctv_cmd "$1" WRITE "$2"
+}
+
+# command read from camera
+# USAGE: cctv_get command args_string
+cctv_get() {
+	cctv_cmd "$1" READ "$2"
+}
+
+# start RTSP replay session with vlc as client
+# USAGE: cctv_start host port "YYYY-mm-dd HH:MM:SS"
+cctv_start() {
+	HOST="$1"
+	PORT="$2"
+	RAND=$RANDOM
+	vlc --rtsp-tcp --rtsp-http --rtsp-http-port $PORT "rtsp://$HOST:$PORT/rtsp_tunnel?&inst=1&rec=1?enableaudio=1&audio_mode=0&rnd=$RAND&seek=0x`cctv_convertDate "$3"`" &
+}
+
+
+# seek replay to time position
+# USAGE: cctv_goToDate "YYYY-mm-dd HH:MM:SS"
+# vlc can stop play after this call (when go backward?)
+cctv_goToDate() {
+	cctv_set  0x0905 "type=P_OCTET&payload=0x`cctv_convertDate "$1"`"
+	
+}
+
+# seek replay to current position (live stream)
+cctv_goToLive() {
+	cctv_set 0x0963 "type=T_DWORD&payload=1"
+}
+
+# set play speed, 100 = normal
+cctv_setSpeed() {
+	cctv_set  0x0902 "type=T_INT&num=1&payload=$1"
+}
+
+# read time info from camera
+cctv_getDate() {
+	cctv_get  0x0905 "type=P_OCTET"
+	
+}
+
+
+# get raw record info from cammera
+# USAGE: cctv_getRecordInfoRaw [start_time end_time]
+# optional times in "YYYY-mm-dd HH:MM:SS" format
+cctv_getRecordInfoRaw() {
+	if [ $# -lt 2 ]; then
+		cctv_get 0x0901 "type=P_OCTET&payload=0xffffffff00000000000007ff00000000"
+	else
+		cctv_get 0x0901 "type=P_OCTET&payload=0x`cctv_convertDate "$1"``cctv_convertDate "$2"`000007ff00000000"
+	fi
+}
+
+# get formatted record info from cammera
+# USAGE: cctv_getRecordInfo [start_time end_time]
+# optional times in "YYYY-mm-dd HH:MM:SS" format
+cctv_getRecordInfo() {
+	cctv_getRecordInfoRaw "$@" | xmlstarlet sel -t -v '//rcp/result/str' |
+	awk -F '  ' '{print $1, $2; print $3, $4}' |
+	awk --non-decimal-data '
+		BEGIN {
+			printf("   date and time   \ttime id \tlen [s]\t  flags  \t file id\n")
+		}
+		$1 != "" {
+			start  = ("0x"$1$2$3$4)
+			len    = ("0x"$5$6$7$8) - ("0x"$1$2$3$4)
+			flags  = ("0x"$9$10$11$12)
+			fileid = ("0x"$13$14$15$16)
+			printf("%s\t%x\t%6d\t%s\t%s\n", strftime("%Y-%m-%d %H:%M:%S", start + 946684800), start, len, flags, fileid)
+		}
+	'
+}

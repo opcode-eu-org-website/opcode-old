@@ -1,0 +1,60 @@
+-- dynamiczne tworzenie konferencji wieloosobowej
+-- konferencja zostanie zakończona po wyjściu ostatniego uzytkownika
+-- dostęp do menu konfiguracyjnego poprzez #
+function conference_create(context, exten)
+	for confno=10,99,1 do
+		state = channel["DEVICE_STATE(confbridge:".. confno ..")"]:get()
+		if state ~= "INUSE" then
+			app.Verbose(verb, "Using conference number: ".. confno
+				.." (in state: ".. state ..")")
+			app.Answer()
+			-- odczytanie numeru konferencji
+			app.Playback("conf-enteringno")
+			app.SayDigits(confno)
+			-- zapytanie o PIN
+			app.Read("CONFPIN","conf-getpin",nil,nil,3,10)
+			-- zapamietanie PINu
+			pin = channel["CONFPIN"]:get()
+			app.Verbose(verb, "Setting PIN=".. pin)
+			channel["DB(conf/".. confno .."/pin)"] = pin
+			-- wejscie do konferencji
+			app.Playback("conf-placeintoconf")
+			app.ConfBridge(confno,"sa")
+			break
+		end
+	end
+end;
+
+-- przyłączenie się do podanbej konferencji
+-- funkcja przeznaczona do wywoływania w numerach budowanych na zasadzie
+--  prefix . numer_konferencji
+function conference_enter(confno)
+	state = channel["DEVICE_STATE(confbridge:".. confno ..")"]:get()
+	app.Verbose(verb, "Using conference number: ".. confno
+		.." (in state: ".. state ..")")
+	if state == "INUSE" then
+		pin_db   = channel["DB(conf/".. confno .."/pin)"]:get()
+		app.Answer()
+		if pin_db == 0 then
+			app.Playback("conf-placeintoconf")
+			app.ConfBridge(confno,"s")
+		else
+			-- zapytanie o PIN
+			app.Read("CONFPIN","conf-getpin",nil,nil,3,10)
+			-- weryfikacja PINu
+			pin_read = channel["CONFPIN"]:get()
+			app.Verbose(verb, "Using PIN=".. pin_read
+				.." (conference pin is: "..pin_db ..")")
+			if pin_db == pin_read then
+				app.Playback("conf-placeintoconf")
+				app.ConfBridge(confno,"s")
+			else
+				app.Playback("conf-invalidpin")
+				app.Hangup(21)
+			end
+		end
+	else
+		app.Hangup(1)
+	end
+end;
+

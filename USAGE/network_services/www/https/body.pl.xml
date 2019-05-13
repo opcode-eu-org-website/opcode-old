@@ -1,0 +1,21 @@
+<article>
+<title>HTTPS i Apache</title>
+<p>Aby uruchomić szyfrowany dostęp do stron WWW (poprzez Apache2) wystarczy uaktywnić moduł SSL, ustawić nasłuch na porcie 443 (standardowy port dla https) oraz skonfigurować vhosta na tym porcie z włączonym szyfrowaniem poprzez umieszczenie w jego konfiguracji:</p>
+<pre>
+SSLEngine on
+SSLCertificateFile /etc/ssl/server.crt
+SSLCertificateKeyFile /etc/ssl/server.key
+</pre>
+
+<p>Następnie musimy również przygotować odpowiednie certyfikaty - więcej na ten temat w części poświęconej szyfrowaniu z wykorzystaniem <id_link id="cryptography:x509">certyfikatów x509</id_link></p>
+
+<p>Jeżeli wygenerowaliśmy niezależnie certyfikat CA warto w konfiguracji Apache także określić jego położenie:</p>
+<pre>
+SSLCACertificatePath /etc/ssl/ca/
+SSLCACertificateFile /etc/ssl/ca/ca.crt
+</pre>
+
+<p>Należy zaznaczyć iż dawniej aby vhosty miały różne certyfikaty SSL należy je uruchamiać na rożnych portach lub adresach IP (jest to ograniczenie wynikłe z samego mechanizmu SSL). Posłużyć się należy dyrektywami: <code>VirtualHost <samp>ip.ip.ip.ip</samp>:<samp>port</samp></code> oraz <code>Listen <samp>port</samp></code> i opcjonalnie - gdy na danym ip i porcie ma być kilka vhostow rozróżnianych nazwami (ale z wspólnym certyfikatem !) <code>NameVirtualHost <samp>ip.ip.ip.ip</samp>:<samp>port</samp></code>). Należy też zaznaczyć iż porty możemy użyć w redirectach z http:// (ale z https:// już trudniej - zmiana certyfikatu), najwygodniejsze są adresy IP.</p>
+
+<p>Współczenie rozwiązaniem tego problemu jest wykorzystanie mechanizmu <wiki en="Server Name Indication">SNI</wiki>, który pozwala na używanie różnych certyfikatów dla różnych vhostów. Jest on obsługiwany przez wszystkie najpopularniejsze przeglądarki w współczesnych wersjach idomyślnie włączony w Apache.</p>
+</article>

@@ -1,0 +1,44 @@
+/*
+ * program wykorzystujacy mikrokontroler jako swoiste echo
+ * uklad powtarza na PD1 stan z PD0
+ * wymaga ustawienia zworek: TX ->CYFRA4 i ACK-> RX
+ * przydatny jest do sprawdzenia poprawnosci nadajnika podczerwieni
+ *
+ * czesto warto zastosowac dodatkowy odlegly nadajnik ~umiszczony blisko odbiornika
+ * (uzyskamy wtedy przedluzacz pilota), wykonac go mozna poprzez podlaczenie diody podczerwonej
+ * (np. uzytej przeze mnie L-53F3BT) z odpowiednim rezystorem (okolo 1k)
+ * pomiedzy zworki ZW5 i masą (ZW6) na plytce doswiadczalnej (nie mikrokontrolera)
+ *
+ * 2003.12.27
+ *
+ */
+
+
+#include <io.h>
+#include <interrupt.h>
+#include <sig-avr.h>
+
+int main()
+{
+	// sbi(PORT, BIT) - ustawia bit BIT na porcie PORT
+	// DDRX - ustalenie kierunku dla portu X: ustawiony - wyjście, skasowany - wejście
+	sbi (DDRD, PD1);
+
+	// zapisujemy na port bez ustawionego kierunku (bedziemy mogli tez z niego czytac)
+	// ustawienia stanu wysokiego na tym porcie (tak jak ma komputer w pinach LPT nie będących masą)
+	// wymagaja ULN2003AN z naszej plytki aby poprawnie dzialac
+	// - zastepowac go niskim gdy na swoim wejsciu maja wysoki (w przeciwnym razie nie zmieniac go ...)
+	sbi (PORTD, PD0);
+
+	// ten mało estetyczny programistycznie element jakim jest pętla nieskończona jest tutaj wręcz nieodzowny
+	while ( 1 ) {
+	// bit_is_set(PORT, BIT) - zwraca 1 gdy bit BIT jest ustawiony na porcie PORT, w przeciwnym razie 0
+	// PINX - czytanie z portu X
+	if ( bit_is_set (PIND, PD0) )
+		// PORTX - zapis na port X
+		sbi (PORTD, PD1);
+	else
+		// cbi(PORT, BIT) - kasuje bit BIT na porcie PORT
+		cbi (PORTD, PD1);
+	}
+}

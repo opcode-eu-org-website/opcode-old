@@ -1,0 +1,18 @@
+<article>
+<title>Opcje linii poleceń</title>
+<p>Program obsługuje typowe opcje w stylu unixowym:</p>
+<ul>
+	<li><code>-o</code> tryb wyjściowy, możliwe wartości:<ul>
+		<li>dsp - wyjście realizowane z użyciem karty dźwiękowej poprzez plik wskazany /dev/dsp</li>
+		<li>alsa - wyjście realizowane z użyciem karty dźwiękowej poprzez wskazane urządzenie systemu ALSA</li>
+		<li>uC - wyjście realizowane z użyciem modułu elektronicznego (mikrokontrolera) poprzez port szeregowy</li>
+	</ul></li>
+	<li><code>-O</code> urządzenie wyjściowe (np. "default" dla ALSA, "/dev/dsp" dla dsp, "/dev/ttyS0" dla uC)</li>
+	<li><code>-r</code> częstotliwość próbkowania na urządzeniu wyjściowym w Hz (uwaga wartości nie typowe dla kart audio mogą być re-samplowane programowo przez sterownik)</li>
+	<li><code>-d</code> plik (lub "-" dla standardowego wyjścia) w którym ma być zapisany pojedynczy okres wygenerowanego sygnału, może służyć do zobrazowania sygnału z użyciem gnuplota poprzez <code>echo 'plot "/wskazany/plik"' | gnuplot -persist</code></li>
+	<li><code>-h</code> wyświetlenie treści pomocy</li>
+</ul>
+
+<p>Wszystkie opcje poza <code>-d</code> i <code>-h</code> są obowiązkowe. Po opcjach należy wskazać używany plik konfiguracyjny opisujący sygnał. Przykład wywołania:</p>
+<pre>./generator -d /tmp/log -o dsp -r 48000 -O /dev/dsp0 config.txt</pre>
+</article>

@@ -1,0 +1,44 @@
+<article>
+<title>Monit</title>
+
+<p>Istonym zaganieniem jest kontrola działania usług i podejmowanie akcji gdy coś nie działa. Pomocnym w tym może być monit. Umożliwia on wysyłanie powiadomien, wykonanie restartu niedziałającej usługi, itd.</p>
+
+<p>Dobrym pomysłem wydaje się pozostawienie <kbd class="path">/etc/monit/monitrc</kbd> bez zmian i umieszczenie całości konfiguracji w <kbd class="path">/etc/monit/conf.d/</kbd>. Pliki są includowane wg kolejności nazw zatem np. w <kbd class="path">/etc/monit/conf.d/000_global.conf</kbd> należy umieścić konfigurację podstawową:</p>
+<pre>
+set daemon 120 with start delay 60
+set eventqueue basedir /var/monit slots 100
+set logfile syslog facility log_daemon
+
+set mailserver primary.mailserwer, secondary.mailserwer, localhost
+set alert adres@mailowy.uzywany.do.powiadomien
+set mail-format {
+  from: monit@nazwa.monitorowanego.hsta
+  subject: [$HOST] monit alert -- $EVENT $SERVICE
+}
+
+set httpd port 2812 use address localhost allow localhost
+</pre>
+
+<p>W kolejnych plikach mozemy umieścić monitorowanie stanu systemu:</p>
+<pre>
+check system nazwa.monitorowanego.hsta
+  group system
+  if loadavg (1min) > 6 then alert
+  if loadavg (5min) > 4 then alert
+  if memory usage > 95% then alert
+  if cpu usage (user)   > 90% then alert
+  if cpu usage (system) > 50% then alert
+  if cpu usage (wait)   > 35% then alert
+</pre>
+
+<p> oraz monitorowanie poszczególnych usług - np.:</p>
+<pre>
+check process cron with pidfile /var/run/crond.pid
+  group system
+  start program = "/etc/init.d/cron start"
+  stop  program = "/etc/init.d/cron stop"
+  if 5 restarts within 5 cycles then timeout
+</pre>
+
+<p>Dane o stanie usług prezentowane są na www (w powyższym przykłądzie port 2812). Przy pomocy prostego skryptu można je zebrać w jedn spójny system</p>
+</article>

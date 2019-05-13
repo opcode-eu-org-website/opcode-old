@@ -1,0 +1,361 @@
+/*
+ * System kontroli dostępu w oparciu o kartę zbliżeniową i PIN
+ * z wykorzystaniem kontrolera NPE, czytnika z komunikacją szeregową
+ * (RS232) i protokołem EPSO firmy Roger (np. PRT12EM)
+ */
+#include <inttypes.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
+#include <termios.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <syslog.h>
+#include <sqlite3.h>
+
+#define DATABESE_FILE "/tmp/access.db"
+
+/*
+rm /tmp/access.db
+sqlite3 /tmp/access.db 'CREATE TABLE access (card INT, pin INT, mode INT, name TEXT);'
+sqlite3 /tmp/access.db 'INSERT INTO access VALUES (123456679012, 123456, 1, "t1");'
+sqlite3 /tmp/access.db 'INSERT INTO access VALUES (563399023445, 3456, 1, "t2");'
+sqlite3 /tmp/access.db 'INSERT INTO access VALUES (646685564478, 3456, 1, "t3");'
+*/
+
+#define NO_USE_SYSLOG
+#include "error_reporting.h"
+
+#define TTY_READ_TIMEOUT_1 2000000
+#define TTY_READ_TIMEOUT_2   40000
+
+int init_tty(const char *tty_device, int tty_baud_flag) {
+	struct termios term;
+	int tty_fd;
+	
+	tty_fd = open(tty_device, O_RDWR | O_NOCTTY | O_SYNC);
+	if (tty_fd < 0) {
+		LOG_PRINT_ERROR("Opening serial port: %m");
+		return tty_fd;
+	} else {
+		tcflush(tty_fd, TCIFLUSH);
+		//fcntl(tty_fd, F_SETFL, FASYNC);
+		
+		memset(&term, 0, sizeof(term));
+		
+		term.c_iflag = IGNBRK | IGNPAR /* bez parzystości */;
+		term.c_oflag = term.c_lflag = term.c_line = 0;
+		term.c_cflag = CREAD |  CLOCAL | tty_baud_flag | \
+			CS8 /* 8 bitow */;
+		term.c_cc[VMIN]=1;
+		term.c_cc[VTIME]=0;
+		tcsetattr (tty_fd, TCSAFLUSH, &term);
+		
+		tcflush(tty_fd, TCIOFLUSH);
+	}
+	
+	return tty_fd;
+}
+
+int init_net(const char* host, short port) {
+	struct sockaddr_in netTerm;
+	netTerm.sin_family=AF_INET;
+	netTerm.sin_port=htons(port);
+	netTerm.sin_addr.s_addr=inet_addr(host);
+
+	int fd = socket(PF_INET, SOCK_STREAM, 0);
+	connect(fd, (struct sockaddr*) &netTerm, sizeof(struct sockaddr_in));
+	return fd;
+}
+
+#define SOH 0x01
+#define STX 0x02
+#define ETX 0x03
+
+uint8_t epso_checksum(uint8_t *buf, uint8_t len) {
+	uint8_t i, sum = 0;
+	for (i=0; i<len; i++) {
+		sum ^= buf[i];
+	}
+	return sum | 0x20;
+}
+
+int epso_write(int tty_fd, uint8_t addr, uint8_t func, uint8_t data) {
+	uint8_t buf[16], pos;
+	int ret;
+	
+	if (func == 0xFF) {
+		pos = snprintf(buf, 15, "_S%02d%02X_X_", addr, func);
+		buf[pos-2] = data;
+	} else {
+		pos = snprintf(buf, 15, "_S%02d%02X_%d_", addr, func, data);
+	}
+	buf[0] = SOH;
+	buf[6] = STX;
+	buf[pos-1] = ETX;
+	buf[pos] = epso_checksum(buf, pos);
+	
+	#ifdef DEBUG_OUT
+	uint8_t i;
+	for (i=0; i < pos+1; i++)
+		printf("  >>> %02d: 0x%02x (%c)\n", i, buf[i], buf[i]);
+	#endif
+	
+	ret = write(tty_fd, buf, pos+1);
+	if (ret != pos+1) {
+		LOG_PRINT_WARN("Error write data from device: %m");
+		return -11;
+	}
+	return 0;
+}
+
+int epso_write_read(int tty_fd, uint8_t addr, uint8_t func, uint8_t data, char *buf_out, uint8_t buf_len) {
+	uint8_t buft[260];
+	uint8_t* buf = buft;
+	uint8_t check_sum, i, j;
+	int buf_pos, ret;
+	struct timeval timeout;
+	fd_set tty_fd_set;
+	
+	/// sending epso request
+	ret = epso_write(tty_fd, addr, func, data);
+	
+	/// receive epso response
+	FD_ZERO(&tty_fd_set);
+	FD_SET(tty_fd, &tty_fd_set);
+	timeout.tv_sec = 0;
+	timeout.tv_usec = TTY_READ_TIMEOUT_1;
+	ret = select(tty_fd+1, &tty_fd_set, NULL, NULL, &timeout);
+	if (ret > 0) {
+		buf_pos = read(tty_fd, buf, 260);
+		if (buf_pos < 0) {
+			LOG_PRINT_WARN("Error read data from device - read: %m");
+			return -21;
+		}
+		// doczytaie reszty pakietu
+		do {
+			FD_ZERO(&tty_fd_set);
+			FD_SET(tty_fd, &tty_fd_set);
+			timeout.tv_sec = 0;
+			timeout.tv_usec = TTY_READ_TIMEOUT_2;
+			ret = select(tty_fd+1, &tty_fd_set, NULL, NULL, &timeout);
+			if (ret>0) {
+				buf_pos += read(tty_fd, buf+buf_pos, 260-buf_pos);
+				if (buf_pos < 0) {
+					LOG_PRINT_WARN("Error read data from device - read (2): %m");
+					return -22;
+				}
+			}
+		} while (ret>0);
+	} else if (ret == 0) {
+		LOG_PRINT_WARN("Timeout on read from device: %d, func: 0x%02x", addr, func);
+		return -20;
+	} else {
+		LOG_PRINT_WARN("Error read data from device - select: %m");
+		return -23;
+	}
+	
+	while (buf[0] == 0) {
+		buf++;
+		buf_pos--;
+	}
+	
+	/// checking epso response
+	if (buf_pos < 3) {
+		LOG_PRINT_WARN("Too short response from device: %d, func: 0x%02x", addr, func);
+		return -24;
+	}
+	check_sum = epso_checksum(buf, buf_pos-1);
+	
+	#ifdef DEBUG_IN
+	for (i=0; i < buf_pos; i++)
+		printf("  <<< %02d: 0x%02x (%c)\n", i, buf[i], buf[i]);
+	#endif
+	
+	if ( buf[buf_pos-1] != check_sum) {
+		LOG_PRINT_WARN("Error read data (func=0x%02x) from device %d - check_sum (0x%x != 0x%x)", func, addr, buf[buf_pos-1], check_sum);
+		return -30;
+	}
+	
+	j = -40;
+	for (i=7; i < buf_pos-2; i++) {
+		j = i - 7;
+		if (j == buf_len) {
+			LOG_PRINT_WARN("Output Buffer Overflow");
+			return -32;
+		} else {
+			buf_out[j] = buf[i];
+		}
+	}
+	
+	return j+1;
+}
+
+#define RED    0x4
+#define GREEN  0xa
+#define ORANGE 0x1
+
+#define BUF_SIZE 255
+char buf[ BUF_SIZE ];
+
+int main(int argc, char **argv) {
+	// open syslog
+	openlog("modbus_reader", LOG_PID, LOG_DAEMON);
+	
+	#ifdef USE_TCP
+		// initialize serial port via TCP (e.g. Moxa serial port server)
+		int serial = init_net("192.168.127.254", 4001);
+		if ( serial < 0 ) {
+			LOG_PRINT_CRIT("Open TCP ERROR\n");
+			exit(-1);
+		}
+	#else
+		// initialize RS232
+		int serial = init_tty("/dev/ttyS2", B9600);
+		if ( serial < 0 ) {
+			LOG_PRINT_CRIT("Open TTY ERROR\n");
+			exit(-1);
+		}
+	#endif
+	
+	#ifndef TEST_ONLY
+		// open database
+		sqlite3 *db;
+		if ( sqlite3_open(DATABESE_FILE, &db) ) {
+			syslog(LOG_CRIT, "Can't open database: %s\n", sqlite3_errmsg(db));
+			sqlite3_close(db);
+			exit(-1);
+		}
+	#endif
+	
+	char last_card[17], last_pin[7], *bufp, *pe, isNewData;
+	last_card[0] = '\0';
+	last_pin[0] = '\0';
+	
+	uint64_t lastCard, dbCard;
+	uint32_t lastPin, dbPin;
+	int len, access, waitCounter = 0;
+	const char *userName = NULL;
+	lastCard = 0xffffffffffffffffULL;
+	lastPin  = 0xffffffff;
+	
+	len = epso_write_read(serial, 0x00, 0xB1, 62, buf, BUF_SIZE);
+	len = epso_write_read(serial, 0x00, 0xe8, ORANGE, buf, BUF_SIZE);
+	len = epso_write_read(serial, 0x00, 0xB0, 62, buf, BUF_SIZE);
+	
+	while(1) {
+		len = epso_write_read(serial, 0x00, 0xA5, 62, buf, BUF_SIZE);
+		buf[len]='\0';
+		
+		// printf("input status: %s\n", buf+len-2);
+		
+		if (len > 4) {
+			if (buf[0] == 'R') {
+				bufp = buf+1;
+				bufp[16] = '\0';
+				// now in bufp we have HEX coded card ID
+				lastCard = strtoull(bufp, NULL, 16);
+				
+				bufp = buf+18;
+				isNewData = 1;
+			} else {
+				bufp = buf+1;
+				isNewData = 0;
+			}
+			
+			
+			if (bufp[0] != ':') {
+				pe = index(bufp, ':');
+				*pe = '\0';
+				// now in bufp we have DEC coded pin
+				lastPin = strtoul(bufp, NULL, 10);
+				
+				isNewData = 1;
+			}
+		} else {
+			isNewData = 0;
+		}
+
+		#ifndef TEST_ONLY
+			access = -2;
+			if (isNewData) { // is new data
+				access = 3;
+				snprintf(buf, 255, "SELECT card, pin, mode, name FROM access WHERE card = '%llu' OR pin = '%u'", lastCard, lastPin);
+				int ret;
+				sqlite3_stmt *stmt;
+				ret = sqlite3_prepare_v2( db,
+					buf,
+					-1, &stmt, NULL
+				);
+				
+				while ( ( ret = sqlite3_step(stmt) ) == SQLITE_ROW ) {
+					dbCard = sqlite3_column_int64(stmt, 0);
+					dbPin  = sqlite3_column_int(stmt, 1);
+					int mode = sqlite3_column_int(stmt, 2);
+					userName = (const char*) sqlite3_column_text(stmt, 3);
+					
+					// printf("FIND IN DB: %s (0x%llx, %d) by (0x%llx, %d) with mode %d\n", userName, dbCard, dbPin, lastCard, lastPin, mode);
+					
+					if (mode==1) {                                                        // if check pin AND card
+						if (lastCard == 0xffffffffffffffffULL || lastPin == 0xffffffff) { //   if don't have both => still waitng
+							access = -1;
+							waitCounter++;
+						} else {                                                          //   if have both
+							waitCounter = 0;
+							if (dbCard==lastCard && dbPin==lastPin) {                     //     if consistent    => access granted
+								access = 11;
+								break;
+							} else {                                                      //     otherwise        => access denaid
+								access = 0;
+							}
+						}
+					} else {                                                              // if check pin OR card => access granted (because find in db)
+						access = 10;
+						break;
+					}
+				}
+			} else if (waitCounter > 0) { // is waiting for new data
+				if (waitCounter++ > 25) { //   is waiting timeout
+					access = 5;
+					waitCounter = 0;
+				} else {
+					access = -1;
+				}
+			}
+			
+			if (access >=0) {
+				if (access >= 10) {
+					printf("ACCESS GRANTED FOR: %s (0x%llx, %d), code=%d\n", userName, lastCard, lastPin, access);
+					
+					system ("npe +PO1");
+					epso_write_read(serial, 0x00, 0xe8, GREEN, buf, BUF_SIZE);
+					sleep(3);
+					epso_write_read(serial, 0x00, 0xe8, ORANGE, buf, BUF_SIZE);
+					system ("npe -PO1");
+				} else {
+					printf("ACCESS DENIED card=0x%llx / pin=%d, code=%d\n", lastCard, lastPin, access);
+					
+					epso_write_read(serial, 0x00, 0xe8, RED, buf, BUF_SIZE);
+					epso_write_read(serial, 0x00, 0xB1, 62, buf, BUF_SIZE);
+					sleep(1);
+					epso_write_read(serial, 0x00, 0xB0, 62, buf, BUF_SIZE);
+					epso_write_read(serial, 0x00, 0xe8, ORANGE, buf, BUF_SIZE);
+				}
+				lastCard = 0xffffffffffffffffULL;
+				lastPin  = 0xffffffff;
+			}
+		#else
+			if (lastCard != 0xffffffffffffffffULL || lastPin != 0xffffffff)
+				printf("ACCESS DENAID card=0x%llx / pin=%d\n", lastCard, lastPin);
+			
+			lastCard = 0xffffffffffffffffULL;
+			lastPin  = 0xffffffff;
+		#endif
+		
+		usleep(100000);
+	}
+	
+	return 0;
+}

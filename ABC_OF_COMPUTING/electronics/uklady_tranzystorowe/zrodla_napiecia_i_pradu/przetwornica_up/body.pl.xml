@@ -1,0 +1,7 @@
+<article>
+<title>Przetwornica step-up</title>
+
+<p class="center"><img_from_src name="step_up" type="sch" alt="schemat ideowy przetwornicy podwyższającej" /></p>
+
+<p>Działanie przedstawionej przetwornicy podwyższającej oparte jest na ładowaniu prądem cewki L1 (w czasie gdy Q1 w stanie nasycenia) oraz wyciąganiu z niej tego prądu celem ładowania C2 (w czasie gdy Q1 w stanie zatkania). W sytuacji gdyby nie było obciążenia oraz D2 napięcie na kondensatorze chciałoby wzrosnąć do nieskończoności, prowadząc do jego przebicia, lub przebicia Q1. Dlatego stosujemy D2 jako zabezpieczenie przed brakiem obciążenia. C1 przyspiesza przechodzenie Q1 w stan nasycenia/zatkania. <eq_latex>{U_{WY} \over U_{WE}} = {t_1 \over t_2} \qquad I_{WY_{sr}} = {\Delta I \over 2} \cdot (1 - {t_1 \over t_1 + t_2})</eq_latex>, gdzie <eq_latex>\Delta I</eq_latex> - prąd do którego ładujemy cewkę, <eq>t<sub>1</sub></eq> - czas ładowania, <eq>t<sub>2</sub></eq> - czas rozładowywania. Ze względu na wielkość cewki chcielibyśmy jak największą częstotliwość pracy. Jednak jej ograniczeniem jest prędkość tranzystora, który ponadto musi wytrzymać <eq>U<sub>wy</sub></eq> i <eq_latex>\Delta I</eq_latex>. Warto jednak zadbać aby układ pracował z częstotliwością nad akustyczną (inaczej będzie buczeć).</p>
+</article>

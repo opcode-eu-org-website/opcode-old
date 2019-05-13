@@ -1,0 +1,49 @@
+#!/bin/sh
+
+exec 1>/var/log/smtp2sms.log
+exec 2>&1
+
+BASEDIR='/mnt/nand'
+
+#
+# prepare system
+#
+chmod a+x /usr/bin/gawk
+
+if ! grep "^mail:x:8" /etc/passwd > /dev/null; then
+	echo "mail:x:8:99:Mail2SMS system:/tmp:/bin/sh" >> /etc/passwd
+fi
+
+ln -s $BASEDIR/smtp2sms /opt/
+
+#
+# run nullmailer
+#
+mkdir -p '/usr/lib/nullmailer/'
+ln -s /opt/smtp2sms/nullmailer/lib/* '/usr/lib/nullmailer/'
+ln -s /opt/smtp2sms/nullmailer/bin/* '/usr/bin/'
+ln -s '/opt/smtp2sms/nullmailer/lib/libstdc++.so.6.0.8'  '/usr/lib/libstdc++.so.6'
+mkdir /etc/nullmailer
+echo "192.168.119.13" > /etc/nullmailer/remotes
+
+mkdir -p /var/spool/nullmailer/queue
+mkfifo /var/spool/nullmailer/trigger
+
+chown -R mail /var/spool/nullmailer
+
+su mail -c "exec /opt/smtp2sms/nullmailer/bin/nullmailer-send" 2>&1 | logger -t nullmailer &
+
+#
+# run smtp_listener
+#
+touch /var/log/mail2sms.log
+chown mail /var/log/mail2sms.log
+/opt/smtp2sms/smtp_listener &
+
+#
+# run SMS QUEUE
+#
+chown mail /dev/ttyS1
+chmod a+w /tmp/
+#su mail -c "exec /opt/smtp2sms/sms_queued 8459" &
+su mail -c "exec /opt/smtp2sms/sms_queued" &

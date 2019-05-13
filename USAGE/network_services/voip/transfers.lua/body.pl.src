@@ -1,0 +1,96 @@
+-- pomocnicza funkcja wydobywająca rekurencyjnie DIALEDPEERNUMBER
+-- z kanłu który realizuje "attended transfer"
+function get_dialedpeernumber(transfer_channel)
+	local tmp_channel
+	local transfer_real_from
+
+	-- pobieramy z DIALEDPEERNUMBER w wskazanym kanale
+	transfer_real_from = channel["IMPORT("
+		.. transfer_channel ..",DIALEDPEERNUMBER)"]:get()
+	
+	if transfer_real_from ~= nil and transfer_real_from ~= "" then
+		-- jeżeli się udało to kończymy
+		return transfer_real_from
+	else
+		-- w przeciwnym razie sprawdzamy czy w kanale tym:
+		--     jest BRIDGEPEER ?
+		tmp_channel = channel["IMPORT("
+			.. transfer_channel ..",BRIDGEPEER)"]:get()
+		if tmp_channel ~= nil and tmp_channel ~= "" then
+			-- gdy jest to wykonujemy się rekurencyjnie na znalezionym kanale
+			return get_dialedpeernumber(tmp_channel)
+		end
+
+		--     jest TRANSFERNAME ?
+		local tmp_channel = channel["IMPORT("
+			.. transfer_channel ..",TRANSFERNAME)"]:get()
+		if tmp_channel ~= nil and tmp_channel ~= "" then
+			-- gdy jest to wykonujemy się rekurencyjnie na znalezionym kanale
+			return get_dialedpeernumber(tmp_channel)
+		end
+	end
+end
+
+extensions.input_from_transfers = {
+	[any_ext] = function(context, exten)
+		local current_channel    = channel["CHANNEL"]:get()
+		local dial_from_channel  = channel["CALLING_CHANNEL"]:get()
+		local transfer_channel   = channel["TRANSFERERNAME"]:get()
+		local from               = channel["CALL_FROM_USER"]:get()
+		local to                 = channel["CALL_TO_USER"]:get()
+		local transfer_real_from = ""
+
+		if from ~= nil and dial_from_channel ~= current_channel then
+			-- dzwonicy   robi transfer <=> dial_from_channel!=current_channel
+			-- dzwonicy   jest klientem <=> from!=nil
+			app.Verbose(verb, "Transfer from=" .. from)
+			transfer_real_from = from
+		elseif to ~= nil and dial_from_channel == current_channel then
+			-- odbierajcy robi transfer <=> dial_from_channel==current_channel
+			-- odbierajcy jest klientem <=> to!=nil
+			app.Verbose(verb, "Transfer to=" .. to)
+			-- niestety w zmiennej to mamy adres
+			-- a nie nazwę klienta (peer'a) robiącego transfer
+			-- zatem musimy ją wyciągnąc z zmiennych kanału
+			-- najlepsza do tego celu wydaje się DIALEDPEERNUMBER
+			-- która zdaje się że powinna zawierać nazwę peer'a który odebrał
+			-- Dial() wykonywany w wyniku połączenia z adresem
+			transfer_real_from = channel["DIALEDPEERNUMBER"]:get()
+		elseif transfer_channel ~= nil then
+			-- transfer wywołany z kanału ${TRANSFERERNAME}
+			-- jeżeli wywołujący jest naszym klientem
+			-- będzie miał ustawione ${CHANNEL(peername)}
+			-- i peer ten będzie miał powiązany ze sobą kontekst
+			app.Verbose(verb, "Attended transfer init from channel: "
+				.. transfer_channel)
+
+			-- z kanału tego (lub dolinkowanych do niego kanałów) wydobywamy
+			-- wartość zmiennej DIALEDPEERNUMBER
+			transfer_real_from = get_dialedpeernumber(transfer_channel)
+		end
+
+		-- jeżeli mamy nazwę peer'a (zautoryzwoanego klienta)
+		-- który wywołał transfer
+		if transfer_real_from ~= nil and transfer_real_from ~= "" then
+			app.Verbose(verb, "transfer_real_from=" .. transfer_real_from)
+
+			-- znajdujemy jego kontekst wychodzący
+			local transfer_context =
+				channel["SIPPEER("..transfer_real_from..",context)"]:get()
+
+			if transfer_context ~= nil and transfer_context ~= "" then
+				app.Verbose(verb, "transfer_context=" .. transfer_context)
+
+				-- i idziemy do stosownego exten w tym kontekscie
+				app.GoTo(transfer_context, exten, "1")
+			else
+				app.Verbose(verb, "Can't find transfer_context :-(")
+				app.Hangup()
+			end
+		else
+			app.Verbose(verb, "Can't find transfer_real_from :-(")
+			app.Hangup()
+		end
+	end;
+};
+

@@ -1,0 +1,10 @@
+<article>
+<title>Moje projekty</title>
+
+<p>Zobacz także:</p>
+<ul>
+	<li><a href="[[!URLPREFIX!]]/more_advanced/programing/c_cpp/ftdi_ds18b20.tar.gz">ftdi_ds18b20.tar.gz</a> - zestaw modułów dla Linuxa składających się na sterownik do obsługi termometru ds18b20 opartego na interfejsie OneWire z wykorzystaniem układu FTDI FT245BM do emulacji portu OneWire (rozpowszechniane na zasadach GNU GPL)</li>
+	<li><homepage url="http://www.mediawiki.org/wiki/Extension:StringLoop">Extension for MediaWiki - StringLoop</homepage></li>
+	<li><homepage url="http://www.mediawiki.org/wiki/Extension:CategoryIndex">Extension for MediaWiki - CategoryIndex</homepage></li>
+</ul>
+</article>

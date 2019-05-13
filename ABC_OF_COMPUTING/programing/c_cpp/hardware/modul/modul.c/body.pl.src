@@ -1,0 +1,186 @@
+/*
+ * plik ma na celu prezentację podstawowych zagadnień z programowania modułów jądra systemu Linux (w C)
+ * prezentuje wypisywanie komunikatów dmesg (printk), umieszczenie informacji o module
+ *  (pokazywanych przez modinfo), obsługę urządzeń znakowych, wykorzystywanie portów oraz przerwań
+ *
+ * urządzenie znakowe wykorzystywane przez ten moduł nalezy utworzyć poleceniem 'mknod plik c _DEV_ID_ 0'
+ * (_DEV_ID_ zastępujemy oczywiście odpowiednim numerem)
+ *
+ * problemy z zaladownaiem - moze jakis modul (np. parport) uzywa tego portu ...
+ * uwaga: wazne jest aby moduly parport nie byly ladowane wcale
+ * (po ich usunieciu nie dzialaja instrukcje pisania do portu LPT)
+ *
+ * aby załadować moduł wydajemy jako root polecenie insmod sciezka/do/naszego/modulu
+ * uwaga: nalezy liczyć się z ryzykiem że załadowanie błędnego modułu może wywalić cały system
+ *
+ *
+ * więcej o tworzeniu modułów: http://www.faqs.org/docs/kernel/ http://lwn.net/Kernel/LDD3/
+ *
+ * program zainspirowany zajęciami z Programowania 2 ( 2003/2004) na Wydziale Fizyki UW:
+ * http://www.fuw.edu.pl/~pablo/s/
+ * pomyślany o współpracy z płytką wykorzystywaną na tych zajęciach (umożliwia m.in. zmianę stanu ACK)
+ *
+ */
+
+
+// mknod plik c _DEV_ID_
+// mknod urzadzenie c 242 0
+// echo -e "Ala ma kota\000" > urzadzenie
+
+// problemy z zaladownaiem - moze jakis modul (np. parport) uzywa tego portu ...
+// uwaga: wazne jest aby moduly parport nie byly ladowane wcale
+// (po ich usunieciu nie dzialaja instrukcje pisania do portu LPT)
+// dlatego nalezy dodac je do blacklisty w /etc/modprobe.d/blacklist:
+//  blacklist parport
+//  blacklist parport_pc
+
+// przerwanie wywoływane jest poprzez zbocze narastajace na ACK (pin 10) - rozwarcie ACK od masy
+
+#include <linux/module.h>
+#include <linux/fs.h>
+#include <linux/ioport.h>
+#include <asm/io.h>
+#include <asm/irq.h> 
+#include <linux/signal.h> 
+#include <linux/sched.h> 
+#include <linux/interrupt.h>
+#include <asm/uaccess.h>
+
+// informacje o naszym module
+MODULE_LICENSE("BSD");
+MODULE_DESCRIPTION("Modul demonstracyjny ...");
+MODULE_AUTHOR("Robert Paciorek");
+
+// informacje konfiguracyjne
+#define _MOD_NAME_ "wyswietlacz"
+#define _DEV_ID_ 242
+#define _LPT_BASE_ 0x378
+// standardowy port to 0x378, ale modol paraport_pc przesuwa obsluge portu LPT0 na 0x778 (tryb ECR portu typu ECP)
+#define _LPT_LEN_ 3
+#define _LPT_IRQ_ 7
+
+
+// zmienna zawierająca informacje o tym jak daleko zaszło uruchamianie modułu (przydatne przy jego usuwaniu);
+static int poziom_uruchomienia = 0;
+static char sa_dane = 0;
+
+// funkcja wykonywana przy usuwaniu modułu - uswuwanie modułu (definicja ciała - patrz niżej)
+void cleanup_module( void );
+
+ // funkcja której użyjemy do obsługi przerwania (definicja ciała - patrz niżej)
+static irqreturn_t obsluz_przerwanie( int irq_no, void* dev_id, struct pt_regs* regs );
+
+// funkcja wywoływana gdy następuje zapis do urządzenia znakowego  (definicja ciała - patrz niżej)
+static ssize_t char_dev_write( struct file *file, const char __user *buf, size_t count, loff_t *ppos );
+
+// funkcja wywoływana gdy następuje odczyt z urządzenia znakowego  (definicja ciała - patrz niżej)
+static ssize_t char_dev_read( struct file *file, char __user *buf, size_t count, loff_t *ppos );
+
+// funkcja wywoływana gdy następuje otwarcie urządzenia znakowego  (definicja ciała - patrz niżej)
+static int char_dev_open (struct inode *inode, struct file *file);
+
+// struktura ustawien pliku urzadzenia znakowego
+static struct file_operations char_dev_conf = {
+	.owner	 = THIS_MODULE,
+	.read	 = char_dev_read, // tutaj określamy funkcję wywoływaną przy czytaniu
+	.write	 = char_dev_write, // tutaj określamy funkcję wywoływaną przy zapisie
+	.open	 = char_dev_open, // ... przy otwarciu
+	// lseek read  write readdir poll ioctl mmap open flush release fsync
+};
+
+// funkcja wykonywana przy ładowaniu modułu - inicjalizacja modułu
+int init_module( void ) {
+	printk(KERN_INFO "Ladowanie modulu rozpoczete\n");
+	// zmienna przechowująca kody powrotu funkcji ...
+	int kontrolna;
+	
+	// sprawdzamy dostępność i dokonujemy zarezerwowania interesującego nas zakresu portów
+	kontrolna = request_region( _LPT_BASE_, _LPT_LEN_, _MOD_NAME_ );
+	if ( !kontrolna ) {
+		// był niedostępny ... kończymy
+		printk(KERN_ALERT "Niemogę zarezerwować zakresu portów\n");
+		cleanup_module();
+		return -ENODEV;
+	}
+	poziom_uruchomienia++; // 1 zapamiętujemy postępy ...
+	
+	// sprawdzamy dostępność przerwania, jeżeli dostępne to dokonujemy rezerwacji i wyznaczmy funkcję obsługi
+	kontrolna = request_irq( _LPT_IRQ_, obsluz_przerwanie, 0, _MOD_NAME_, 0 );
+	if ( kontrolna ) {
+		// było niedostępne ... kończymy
+		printk(KERN_ALERT "Niemogę zarezerwować przerwania\n");
+		cleanup_module();
+		return kontrolna;
+	}
+	poziom_uruchomienia++; // 2 zapamiętujemy postępy ...
+	
+	// chcemy aby LPT (linia ACK) generowało przerwania
+	outb( 0x0f, _LPT_BASE_ );
+	outb( 0x1b, _LPT_BASE_ + 2 );
+	
+	// sprawdzamy dostępność numeru urządzenia znakowego, jeżeli dostępne to dokonujemy rezerwacji
+	kontrolna = register_chrdev( _DEV_ID_, _MOD_NAME_, &char_dev_conf );
+	if ( kontrolna < 0 ) {
+		// był niedostępny ... kończymy
+		printk(KERN_ALERT "Niemogę zarezerwować urządzenia znakowego\n");
+		cleanup_module();
+		return kontrolna;
+	}
+	poziom_uruchomienia++; // 3 zapamiętujemy postępy ...
+	
+	// konczymy inicjalizację modułu
+	struct timespec now;
+	getnstimeofday(&now);
+
+	printk(KERN_INFO "Ladowanie modulu zakonczone %d %d\n", now.tv_sec, now.tv_nsec);
+	return 0;
+}
+
+
+static irqreturn_t obsluz_przerwanie( int irq_no, void* dev_id, struct pt_regs* regs ) {
+	struct timespec now;
+	getnstimeofday(&now);
+
+	printk(KERN_INFO "Otrzymałem przerwanie z LPT %d %d\n", now.tv_sec, now.tv_nsec);
+	
+	return IRQ_HANDLED;
+}
+
+static ssize_t char_dev_write( struct file *file, const char __user *buf, size_t count, loff_t *ppos ) {
+	printk(KERN_INFO "wczytano: %s\n", buf);
+	outb( buf[1], _LPT_BASE_ );
+	return count;
+}
+
+static ssize_t char_dev_read( struct file *file, char __user  *buf, size_t count, loff_t *ppos ) {
+	if(sa_dane==1) {
+		copy_to_user(buf, "Helo World\n", 11);
+		// należy zauważyć że niemy bezpośredniego dostępu do danych w przestrzeni użytkownika,
+		// ponadto ta funkcja kopiująca nie może być wykonywana w obsłudze przerwania
+		// jest to spowodowane tym że dane z przestrzeni użytkownika mogą być np. wyswapowane
+		sa_dane=0;
+		return 11;
+	} else {
+		return 0;
+	}
+}
+
+static int char_dev_open (struct inode *inode, struct file *file) {
+	sa_dane = 1; // zaznaczamy ze mamy cos wypisac ...
+	// gdyby nie to zabezpieczenie po zrobieniu cat nasze_urzadzenie pisaloby sie w nieskonczonosc
+	return 0;
+}
+
+void cleanup_module( void ) {
+	printk(KERN_INFO "Usuwanie modulu rozpoczete\n");
+	switch (poziom_uruchomienia) {
+		case 3:
+			unregister_chrdev( _DEV_ID_, _MOD_NAME_ );
+		case 2:
+			outb( 0xb, _LPT_BASE_ + 2 ); // wyłącz generację przerwań z LPT
+			free_irq( _LPT_IRQ_, 0 ); // zwolnij numer przerwania
+		case 1:
+			release_region( _LPT_BASE_, _LPT_LEN_ ); // zwolnij zakres portów
+	}
+	printk(KERN_INFO "Usuwanie modulu zakonczone\n");
+}

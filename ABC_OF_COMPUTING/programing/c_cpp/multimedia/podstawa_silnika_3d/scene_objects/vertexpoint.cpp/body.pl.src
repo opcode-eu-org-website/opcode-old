@@ -1,0 +1,10 @@
+#include "vertexpoint.h"
+
+/// struktura opisująca punkt naszego vertexu (zgodny z GL_T2F_V3F)
+VertexPoint::VertexPoint(float x, float y, float z, float s, float r) {
+	punkt[0] = x;
+	punkt[1] = y;
+	punkt[2] = z;
+	tekstura1[0] = s;
+	tekstura1[1] = r;
+}

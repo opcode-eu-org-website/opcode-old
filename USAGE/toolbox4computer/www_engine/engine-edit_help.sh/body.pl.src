@@ -1,0 +1,470 @@
+###################################
+#     FUNKCJE - POMOC W EDYCJI    #
+###################################
+
+FUNCTIONS_HELP="$FUNCTIONS_HELP
+  find_in_body() - wyszukiwanie w treści dokumentów składających się na stronę
+
+  find_body_not_in_menu() - wyszukanie dokumentów nie przekształcanych na stronę (brak wpisu w menu.xml)
+                            gdy jako arugument podano \"tar\" nie pokazuje plików które są umieszczne tylko w archiwach tar
+  find_noexist_body_in_menu() - wyszukuje wpisy w menu dla których nie istnieją odpowiednie pliki body.xml
+  find_tar_not_in_body() - wyszukanie archiwów nie podlinkowanych na żadnej stronie
+  find_notar_not_in_body() - wyszukanie rozpakowanych archiwów nie podlinkowanych na żadnej stronie
+
+  create_dev_dir() - tworzy normalna strukturę źródeł programu z struktury katalogowej źródeł strony
+
+  make_dir_from_source() - tworzenie struktury katalog/body.pl.src z zestawu plików
+  make_menu_file_entry() - generowanie wpisów <file> pliku menu w oparciu o bieżący katalog
+  make_menu_dir_entry() -  generowanie wpisów <dir> pliku menu w oparciu o bieżący katalog
+  make_commons_link_entry() - generowanie linków do commomns w oparciu o listę katalogów z plikami multimedialnymi
+                              (nazwy zgodne z oryginałami na commons)
+
+  create_photo_tags() - tworzy pliki opisowe z tagami podanymi w pierwszym argumencie dla plików zdjęć podanych
+                        jako kolejne argumenty np. create_photo_tags \"technical ups\" *.jpg
+
+  find_too_long_lines() - wyszukuje za długie linie w plikach źródłowych
+                          gdy jako arugument podano \"all\" wypisuje wszystkie zbyt długie linie z pliku,
+                          w przeciwnym razie tylko długośc najdłuższej
+
+  find_wiki() - wyszukanie linków do Wikipedii
+  find_doc()  - wyszukanie linków \"doc\" np.:
+                wyszukanie linków bez mirrorów w dziale ABC_OF_COMPUTING:
+                    find_doc \"ABC_OF_COMPUTING\" | sort | grep ' >  > '
+                wyszukanie linków z mirrorami w działach ABC_OF_COMPUTING i USAGE:
+                    find_doc \"ABC_OF_COMPUTING USAGE\" | sort | grep -v ' >  > '
+  
+  fixWiki() - aktualizacja / edycja linków wiki (USAGE: fixWiki pl|en oldLink newLink)
+  get_all_source_from_debian_repo() - pobieranie wszystkich źródeł z wskazanego repozytorium
+                                      (pierwszy argument, np. ftp://www.debian-multimedia.org/)
+                                      w gałęzi (drugi argument - domyślnie \"sid/main\") do bierzącego katalogu"
+
+# wyszukiwanie w body.xml
+find_in_body() {
+	cd "$SRC_DIR"
+	egrep --color -r --include="body*.xml" --include="body*.src" --include="software.db.xml" "$1" .
+	return $?
+}
+
+# funkcja wyszukuje pliki body.xml nie występujące w zadanym pliku menu.xml
+#  gdy nie okreslono pliku menu uzywa standardowego
+find_body_not_in_menu() {
+	cd "$SRC_DIR"
+	if [ "$2" = "" ]; then
+		menu="$MENU_FILE"
+	else
+		menu="$2"
+	fi
+	find * -name "body.*" | grep -v '.svn' | grep -v 'ARCHIVE' | while read f ; do
+		# dla każdego znależnionego pliku body.* szukamy linii w menu.xml
+		# zawierającej ściezkę katalogu w którym jest ten plik
+		d=`dirname "$f"`
+		if ! grep "$d" "$menu" > /dev/null ; then
+			dd=$d
+			#while [ "$dd" != "." -a "$dd" != ""  ]; do
+				dd=`dirname $dd`
+				[ "$1" = "tar" -a "$dd" != "." ] && grep "$dd/[*]" "$menu" > /dev/null && dd=""
+			#done;
+			if [ "$dd" != "" ]; then
+				echo $d;
+			fi
+		fi
+	done
+}
+
+# funkcja wyszukuje wpisy w menu.xml dla których nie istnieją odpowiednie pliki body.xml
+find_noexist_body_in_menu() {
+	{ grep -v 'text>' OpCode_menu.xml | xmlstarlet sel -t -v '//*/dir/@path';
+	  grep -v 'text>' OpCode_menu.xml | xmlstarlet sel -t -v '//*/file/@path'; } | while read d; do
+		if ! ls >/dev/null 2>&1 "$d"/body.*; then
+			echo "$d"
+		fi
+	done
+}
+
+# funkcja wyszukuje katalogi .notar nie występujące w zadanym pliku body.xml
+# na podstawie wykazu z menu.xml, gdy nie okreslono pliku menu uzywa standardowego
+find_tar_not_in_body() {
+	cd "$SRC_DIR"
+	if [ "$1" = "" ]; then
+		menu="$MENU_FILE"
+	else
+		menu="$1"
+	fi
+	awk '
+	BEGIN {
+		RS="<"
+		FS="[=\" \t]+"
+	}
+	$1=="tar" {
+		for (f=1; f<NF; f++) if($f=="name") {
+			print $(f+1); next
+		}
+	}' $menu | while read f; do
+		if ! find_in_body "$f.tgz" > /dev/null; then
+			echo "$f -> `find_in_body "$f" | cut -f1 -d:`"
+		fi
+	done
+}
+
+# funkcja wyszukuje katalogi .notar nie występujące w zadanym pliku body.xml
+# na podstawie wykazu z menu.xml, gdy nie okreslono pliku menu uzywa standardowego
+find_notar_not_in_body() {
+	cd "$SRC_DIR"
+	if [ "$1" = "" ]; then
+		menu="$MENU_FILE"
+	else
+		menu="$1"
+	fi
+	awk '
+	BEGIN {
+		RS="<"
+		FS="[=\" \t]+"
+	}
+	$1=="tar" && $0 ~ /show_dir[ \t]*=["'"'"']+1/ {
+		for (f=1; f<NF; f++) if($f=="name") {
+			print $(f+1); next
+		}
+	}' $menu | while read f; do
+		if ! find_in_body "$f.notar" > /dev/null; then
+			echo "$f -> `find_in_body "$f" | cut -f1 -d:`"
+		fi
+	done
+}
+
+# utworzenie katalogu zrodlowego programu z struktury katalogowej
+function create_dev_dir() {
+	if [ "$1" != "" ]; then
+		cd "$1"
+	fi
+	
+	if [ -d "tmp_dev_dir" ]; then
+		out_name=tmp_dev_dir.`date +%s`
+		echo "Moving existing tmp_dev_dir to $out_name" >&2
+		mv tmp_dev_dir $out_name
+	fi
+	
+	if [ -e "tmp_dev_dir" ]; then
+		echo "tmp_dev_dir exist and is not a directory ... exiting" >&2
+		return 1;
+	fi
+	
+	mkdir tmp_dev_dir
+	
+	function parsedir() {
+		for f in $1/*; do
+			basename=`basename "$f"`
+			if [ "`echo $basename | cut -f1 -d.`" = "tmp_dev_dir" ]; then
+				continue
+			fi
+			
+			dst="tmp_dev_dir/$f"
+			
+			if [ -d "$f" -a ! -f "$f"/body.*.src ]; then
+				echo "Create directory: $dst"
+				mkdir "$dst"
+				
+				parsedir $f
+				continue
+			fi
+			
+			if [ -d "$f" ]; then 
+				src=`realpath "$f"/body.pl.src` # FIXME obsługa takich nie .pl.
+				
+				echo "Create link: $src -> $dst"
+				ln -s "$src" "$dst"
+			else
+				src=`realpath "$f"`
+				
+				echo "Create link: $src -> $dst"
+				ln -s "$src" "$dst"
+			fi
+		done
+	}
+	
+	parsedir .
+}
+
+# konwersja programu wieloplikowego do dir
+make_dir_from_source() {
+	if [ "$1" = "" ]; then
+		file_list="*.h *.c *.cpp *.sh *.vhdl *.conf"
+	else
+		file_list="$@"
+	fi
+	for f in $file_list; do
+		if [ -f $f ]; then
+ 			mv $f body.pl.src
+			mkdir $f
+			mv body.pl.src $f
+		fi
+	done
+}
+
+# funkcja generuje wpis menu.xml z pozycjami file z bierzacego katalogu
+make_menu_file_entry() {
+	echo "<file level=\"\" path=\"$PWD\" />";
+	ls -1Rtr -I body*.xml | grep '^[.]' | sed -e 's#^[.]/*##g' -e 's#:$##g' | while read f ; do
+		echo "<file level=\"\" path=\"$PWD/$f\" />";
+	done
+}
+
+# funkcja generuje wpis menu.xml z pozycjami dir -> file z bierzacego katalogu
+make_menu_dir_entry() {
+	echo "<file level=\"\" path=\"$PWD\" />";
+	ls -1rt -I body*.xml | while read f ; do
+		echo -e "<dir pdf_base_level=\"\" name=\"$f\">\n<file path=\"$PWD/$f\" />\n</dir>";
+	done
+}
+
+# funcja generująca akapit z numerowanymi linkami do obrazków na commons na podstawie katalogu z tymi obrazkami
+# $1, $2, ... obrabiane podkatalogi
+make_commons_link_entry() {
+	echo "i=0" > /tmp/${PPID}_i
+	echo '<p>'
+	while [ -d "$1" ]; do
+		. /tmp/${PPID}_i
+		find ! -name '*.war' |
+			grep '^./'`if [ $1 != "." ]; then echo $1; fi` |
+			cut -f `if [ $1 != "." ]; then echo 3; else echo 2; fi`- -d'/' |
+			while read f; do
+				if [ -f "$1/$f" ]; then
+					i=$(( $i+1 ))
+					echo "	<a class=\"ext\" href=\"http://commons.wikimedia.org/wiki/Image:$f\">[$i]</a>"
+					echo "i=$i" > /tmp/${PPID}_i
+				fi
+			done
+		shift
+	done
+	echo '</p>'
+}
+
+# tworzenie plików opisowych do zdjęć
+create_photo_tags() {
+	tagi=$1
+	shift
+	for f in $@; do echo -e "tags=\"$tagi\"\ndesc=\"\"" >$f.txt; done
+}
+
+find_too_long_lines() {
+	linie() {
+		sed -e 's#\t#____#g' -e 's#^ #_#g' -e 's#\\#\\\\#g' $1 | while read l; do
+			s=`echo -n "$l" | wc -m`
+			if [ $s -gt 127 ]; then
+				echo -en "$s\t$1\t\t"
+				echo "$l"
+			fi
+		done
+	}
+	linie_max() {
+		s=`sed -e 's#\t#____#g' -e 's#^ #_#g' $1 | wc -L`
+		if [ $s -gt 127 ]; then
+			echo -e "$s\t$1"
+		fi
+	}
+	
+	cd "$SRC_DIR"
+	
+	if [ "$1" == "all" ]; then
+		find -type f -name 'body.pl.src'| grep -v ARCHIVE | while read f; do linie     $f; done | sort -n
+	else
+		find -type f -name 'body.pl.src'| grep -v ARCHIVE | while read f; do linie_max $f; done | sort -n
+	fi
+}
+
+############################################################
+#     FUNKCJE - PRZETWARZANIE ŚCIEŻEK i INNE POMOCNICZE    #
+############################################################
+
+# konwersja identyfikatora na sciezkę do katalogu
+# katalog=`echo $identyfikator_zasobu | tr ':' '/'`
+make_dir() {
+	echo $1 | tr ':' '/'
+}
+
+# konwersja sciezki do katalogu na identyfikator
+# identyfikator_zasobu=`echo $katalog | tr '/' ':'`
+make_id() {
+	echo $1 | tr '/' ':'
+}
+
+# wykrywanie błędnych nazw katalogów
+#	ze wzgledu na konstrukcje identyfikatorow zasobow i jednoznaczosc
+#	tego przeksztalcenia niedozwolone sa katalogi z : w nazwie
+check_dir_names() {
+	if [ `find "$SRC_DIR"/[^_]* -type d | grep ':' | wc -l` != 0 ]; then
+		echo -e "\\033[1;31mERROR: not allowed directory names:\\033[0m" >&2
+		echo "" >&2
+		find "$SRC_DIR" -type d | grep ':' >&2
+		echo "" >&2
+		echo -e "\\033[32mINFORMACJA: nazwy katalogów nie moga zawierać dwukropka \":\"\\033[0m" >&2
+		return 1;
+	fi
+	return 0;
+}
+
+# wykrywanie powtorzonych nazw plikow $1 parametr -type komendy find
+check_file_names() {
+	if [ "$1" = "" ]; then
+		type="f"
+	else
+		type="$1"
+	fi
+	find "$SRC_DIR"/[^_]*/ -type $type -exec basename \{\} \; | egrep -v '^(body.*xml)|(body.*src)|(body.info)$' |
+		sort | uniq -d > "$TMP_DIR/lista_plikow"
+	if [ `cat "$TMP_DIR/lista_plikow" | wc -l` != "0" ] ; then
+		echo -e "\\033[1;31mERROR: duplicated file names:\\033[0m" >&2
+		cat "$TMP_DIR/lista_plikow" | while read nazwa_pliku ; do
+			echo -e "\\033[1m$nazwa_pliku :\\033[0m" >&2
+			find "$SRC_DIR"/[^_]*/ -name "$nazwa_pliku" >&2
+			echo "" >&2
+		done
+		echo -e "\\033[32mWSKAZÓWKA: Można używać ID lub skruconego ID wraz z separatorem \":\"" >&2
+		echo -e "           do rozróżnienia plików z różnych katalogów\\033[0m" >&2
+		return 1;
+	fi
+	return 0;
+}
+
+# wykrywanie niedozwolonych nazw plików
+check_file_names2() {
+	if [ "$1" = "" ]; then
+		type="f"
+	else
+		type="$1"
+	fi
+	find "$SRC_DIR"/*/ -o -name page*.xhtml -o -name README*.html> "$TMP_DIR/lista_plikow"
+	if [ `cat "$TMP_DIR/lista_plikow" | wc -l` != "0" ] ; then
+		echo -e "\\033[1;31mERROR: not allowed file names:\\033[0m" >&2
+		cat "$TMP_DIR/lista_plikow"
+		return 1;
+	fi
+	return 0;
+}
+
+# wykrywanie powtorzonych nazw sekcji <title> <head> <superhead> <minhead>
+check_section_names() {
+	egrep -r '(head>)|(title>)' "$SRC_DIR"/* > "$TMP_DIR/lista_plikow"
+	cat "$TMP_DIR/lista_plikow" | cut -d'>' -f2 | cut -d'<' -f1 | grep '[a-zA-Z0-9]' | sort |
+		uniq -d > "$TMP_DIR/lista_plikow2"
+	if [ `cat "$TMP_DIR/lista_plikow2" | wc -l` != "0" ] ; then
+		echo -e "\\033[1;31mERROR: duplicated section names:\\033[0m" >&2
+		cat "$TMP_DIR/lista_plikow2" | while read nazwa_pliku ; do
+			echo -e "\\033[1m$nazwa_pliku :\\033[0m" >&2
+			grep "$nazwa_pliku" "$TMP_DIR/lista_plikow" | cut -f1 -d: >&2
+			echo "" >&2
+		done
+		return 1;
+	fi
+	return 0;
+}
+
+# wykrywanie braku wymaganego oprogramowania
+check_program() {
+	if ! which $1 > /dev/null ; then
+		echo -e "\\033[1;31mERROR: command \`$1\` $3 not found\\033[0m" >&2
+		echo -e "\\033[32mWSKAZÓWKA: program można zainstalować poprzez:" >&2
+		echo -e "           \`aptitude install ${2-1}\`\\033[0m" >&2
+		return 1
+	else
+		return 0
+	fi
+}
+
+check_programs() {
+	return_code=0
+	
+	check_program  gawk                                                       || return_code=1
+	check_program  xsltproc                                                   || return_code=1
+	check_program  xmlstarlet                                                 || return_code=1
+	check_program  saxonb-xslt  libsaxonb-java                                || return_code=1
+	check_program  highlight                                                  || return_code=1
+	check_program  convert                                                    || return_code=1
+	check_program  rsvg-convert                                               || return_code=1
+	check_program  revpath      xutils-dev                                    || return_code=1
+	check_program  konwert                                                    || return_code=1
+	check_program  blahtexml                                                  || return_code=1
+	check_program  dvipng       dvipng              "required by blahtexml"   || return_code=1
+	check_program  latex        texlive-latex-base  "required by blahtexml"   || return_code=1
+	check_program  gschem       geda-gschem         "required by gsch2pdf.sh" || return_code=1
+	check_program  pcb          pcb                 "required by pcb2pdf.sh"  || return_code=1
+	check_program  dia          dia                 "required by dia2pdf.sh"  || return_code=1
+	check_program  ps2eps       ps2eps              "required by *2pdf.sh"    || return_code=1
+	check_program  pstops       psutils             "required by *2pdf.sh"    || return_code=1
+	check_program  epstopdf     texlive-font-utils  "required by *2pdf.sh"    || return_code=1
+	check_program  pdftoppm     poppler-utils       "required by *2pdf.sh"    || return_code=1
+	check_program  pnmtopng     netpbm              "required by *2pdf.sh"    || return_code=1
+	check_program  symlinks                                                   || return_code=1
+	check_program  debchange    devscripts                                    || return_code=1
+	
+	return $return_code;
+}
+
+# wyszukiwanie linkowanych artykułów Wikipedii
+find_wiki() {
+	cd "$SRC_DIR"
+	grep -r --include=body*.xml --include=software.db.xml '<wiki' ${1:-ABC_OF_COMPUTING USAGE} |
+		sed -e 's#<wiki \([^>]*\)>#\n<wiki \1\n#g' | grep '^<wiki ' | cut -f2- -d' ' |
+		sed -e 's#\([a-z]*\)="\([^"]*\)"#\n\1:\2\n#g' | grep -v '^ *$' | sort | uniq
+}
+
+# aktualizacja / edycja linków wiki (USAGE: fixWiki pl|en oldLink newLink)
+fixWiki() {
+	cd "$SRC_DIR"
+	grep -r --include=body*.xml --include=software.db.xml '<wiki.*="'"$2"'"' | cut -f1 -d: | while read f; do
+		sed -e 's|<wiki '"$1"'="'"$2"'"|<wiki '"$1"'="'"$3"'"|g' -i $f;
+	done;
+}
+
+# wyszukiwanie linkowanych materiałów typu DOC
+find_doc() {
+	cd "$SRC_DIR"
+	grep -r --include=body*.xml --include=software.db.xml '<doc' ${1:-*} | awk 'BEGIN { RS="<doc"; FS="</doc>" } {print $1}' |
+	sed -e 's#># name="#g' | awk '
+		function get_tag_arg(arg, txt) {
+			wynik=gensub(".*"arg"[\t ]*=[\"]([^\"]*).*", "\\1", "g", txt);
+			if (wynik!=txt) return wynik
+		}
+		{
+			printf("%s > %s > %s\n", get_tag_arg("url", $0), get_tag_arg("mirror", $0), get_tag_arg("name", $0))
+		}
+	'
+}
+
+# pobieranie wszystkich źródeł z wskazanego przez $1 repozytorium w gałęzi zadanej przez $2
+get_all_source_from_debian_repo() {
+	repo="${2-sid/main}"
+#	wget -q $1/dists/${repo}/source/Sources.gz
+#	gzip -d -f Sources.gz
+	repo=${repo//\//_}_`date +%Y%m%d`
+#	mv Sources Sources.$repo
+
+#	sed -e 's#^ #CNT: #' < Sources.$repo | gawk '
+#		BEGIN {FS="[: ]*"}
+#
+#		$1=="Package"          { printf("%s  %s ", PKG, VER); for (ii in FILES) printf(" %s/%s", DIR, FILES[ii]); printf("\n"); delete FILES; }
+#
+#		$1=="CNT" && USECNT==1 {FILES[i++]=$4; next}
+#		$1=="Files"       {USECNT=1;  next}
+#		                  {USECNT=0;      }
+#		$1=="Directory"   {DIR=$2;    next}
+#		$1=="Package"     {PKG=$2;    next}
+#		$1=="Version"     {VER=$2;    next}
+#
+#	' | sort -r > Sources.$repo.table
+	
+#	awk '$1 != lpkg { lpgk=$1; for(i=3; i<=NF; i++) print $i; }' < Sources.$repo.table > Sources.$repo.paths
+	
+	lines=`wc -l Sources.$repo.paths | cut -f1 -d' '`
+	line=0
+	while read path; do
+		file=`basename $path`
+		let line++
+		if [ ! -e $file ]; then
+			if wget -q $1/$path; then
+				echo "$file [$line / $lines] OK"
+			else
+				echo "$file [$line / $lines] ERROR"
+			fi
+		fi
+	done < Sources.$repo.paths
+}

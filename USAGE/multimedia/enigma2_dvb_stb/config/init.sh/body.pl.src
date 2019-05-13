@@ -1,0 +1,16 @@
+#!/bin/sh
+
+REAL_INIT=/sbin/init.sysvinit
+
+
+print() { echo -e "\e[1;36m$1\e[0m"; }
+
+if [ -x /sbin/runlevel -a "`/sbin/runlevel`" != "unknown" ]; then
+	print "Not unknown runlevel => Exec real init ..."
+	exec $REAL_INIT $@
+fi
+
+/etc/init.d/rcS.sh
+
+print "End of init script => Exec real init ..."
+exec $REAL_INIT $@

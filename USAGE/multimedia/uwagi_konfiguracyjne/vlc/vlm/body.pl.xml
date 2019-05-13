@@ -1,0 +1,23 @@
+<article>
+<title>VLM</title>
+
+<p>VLM jest metodą konfigurowania VLC do bardziej zaawansowanego streamingu czy też odtwarzania. Umożliwia także realizację usług typu wideo na życzenie. Uruchamianie VLC z taką konfiguracją odbywa się z użyciem opcji <code>--vlm-conf</code>. Aby uniknąć dziwnych błędów niekiedy lepiej (bezpieczniej) jest robić to w taki sposób: <code>LANG=C cvlc --vlm-conf plik.conf</code></p>
+
+<p>VLM można użyć także do streamingu video z kilkoma ścieżkami dźwiękowymi poprzez następujący konfig:</p>
+<pre>
+	new source1 broadcast enabled
+	setup source1 input "file:///sciezka/do/pliku.wideo"
+	setup source1 output #transcode{vcodec=mp2v,vb=10000,acodec=mpga}:bridge-in{id-offset=100}:std{access=udp{ttl=1},mux=ts,dst=226.1.226.1:1234}
+	
+	new source2 broadcast enabled
+	setup source2 input "file:///sciezka/do/pliku.dodatkowego.audio"
+	setup source2 output #duplicate{dst=bridge-out{id=2},select=audio}
+	
+	control source1 play
+	control source2 play
+</pre>
+
+<p>Konfig VLM można także obudować tak aby stanowił plik wykonywalny uruchamiający VLC z odpowiednią konfiguracją (poprzez dodanie jako pierwszej linii <code>#!/usr/bin/cvlc --vlm-conf</code> oraz nadanie prawa wykonywalności). Przykład takiej konfiguracji zamieszczam w plikach <a class="int" href="./streaming.sh">streaming.sh</a> i <a class="int" href="./mosaic.sh">mosaic.sh</a> (<a class="int" href="./mosaic2.sh">wersja dostosowana do VLC2</a>).</p>
+
+<p>W pewnych przypadkach warto zainteresować się strumieniowaniem z użyciem <homepage url="http://www.rtmpd.com/">C++ RTMP Server</homepage>.</p>
+</article>

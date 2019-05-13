@@ -1,0 +1,267 @@
+<?php
+
+//  KONFIGURACJA HTTPD na potrzeby użytkowania tego skryptu
+// 	umieszczonego pod nazwą system.system
+// 	
+// 	# konfiguracja vhosta
+// 	<VirtualHost *:80>
+// 		DirectoryIndex page.xhtml
+// 		
+// 		RewriteEngine On
+// 		
+// 		# obsługa skróconej nazwy dla system.system
+// 		RewriteRule ^/sys[?] /system.system [L]
+// 		RewriteRule ^/sys$ /system.system [L]
+// 		
+// 		# XHTML tylko dla Mozilla - rozwiązanie problemu z GoogleBot oraz IE
+// 		AddType text/html;charset=utf-8 .xhtml
+// 		BrowserMatch "Mozilla/5" xhtml_head=yes
+// 		BrowserMatch "Mozilla/6" xhtml_head=yes
+// 		RewriteCond %{ENV:xhtml_head} =yes
+// 		
+// 		# nazwa domeny z www.
+// 		RewriteCond %{HTTP_HOST} !=www.opcode.eu.org
+// 		RewriteRule ^/(.*)$ http://www.opcode.eu.org/$1 [R=301,L]
+// 		
+// 		# zabezpieczenie przed wywołaniem pliku page.xhtml lub README.html
+// 		RewriteRule ^([^~]*)/page.xhtml$ $1 [R=301,L]
+// 		RewriteRule ^([^~]*)/README.xhtml$ $1 [R=301,L]
+// 	</VirtualHost>
+// 	
+// 	# konfiguracja dla katalogu na którym operuje vhost oraz odwołania poza-vhostowe
+// 	<Directory ~ /home/rrp/public_html[^_].*>
+// 		RewriteEngine On
+// 		# gdy nie jest to moj vhost oraz istnieje plik page.xhtml w wskazywanym katalogu
+// 		# to korzystamy z system.system
+// 		RewriteCond %{DOCUMENT_ROOT} !/home/rrp/public_html
+// 		RewriteCond "%{REQUEST_FILENAME}/page.xhtml" -f
+// 		RewriteRule ^[^~]*/$ /~rrp/system.system [L]
+// 		# uwaga: warunek ^[^~]*/$ implikuje że jest to plik domyślny katalogu
+// 		#        wygenerowany przez mój silnik, a więc xhtml ...
+// 	
+// 		# obsługa skróconej nazwy dla system.system
+// 		RewriteRule ^/~rrp/sys /~rrp/system.system [L]
+// 	
+// 		# automatyczne indeksy
+// 		IndexOptions XHTML HTMLTable Charset=utf-8
+// 		ReadmeName README.xhtml
+// 		IndexIgnore README.xhtml
+// 		
+// 		# .php traktujemy jako zwykly tekst a .system jako php
+// 		AddType text/plain .php
+// 		AddType application/x-httpd-php .system
+// 	</Directory>
+
+
+/// obsługa (dynamiczne generowanie) pliku robots.txt
+if ( $_GET["robots"] == "old_site" ) {
+	header("Content-Type: text/plain", 1);
+	echo "User-agent: ia_archiver\nDisallow:\n\n";
+	echo "User-agent: Googlebot\nDisallow: /\n\n";
+	echo "User-agent: *\nDisallow: /archiwum/\n\n";
+	exit;
+}
+
+
+
+/*******************************
+ * PRZETWARZANIE ŚCIEŻEK i URL *
+ *******************************/
+
+/// wyrzucamy pytajniki
+$tmp = explode("?", urldecode($_SERVER['REQUEST_URI']));
+$REQUEST_URL = $tmp[0];
+
+
+/// wybieramy wariant serwera - vhost lub ~user
+if ($REQUEST_URL[1] != "~") {
+	$BASE_PATH = $_SERVER['DOCUMENT_ROOT'];
+	$BASE_URL = "";
+	
+	/// wycinamy rozpoczynający system.system lub sys (jeżeli był)
+	if ( substr($REQUEST_URL, 0, 14) == "/system.system") {
+		$url_args = "system.system";
+		$REQUEST_URL = substr($REQUEST_URL, 14);
+	} else if ( substr($REQUEST_URL, 0, 4) == "/sys") {
+		$url_args = "sys";
+		$REQUEST_URL = substr($REQUEST_URL, 4);
+	}
+} else {
+	$BASE_PATH = "/home/rrp/public_html";
+	$BASE_URL = "/~rrp";
+	$url_args = "";
+	
+	/// wycinamy rozpoczynające ~rrp
+	$tmp = explode("~rrp", $REQUEST_URL);
+	$REQUEST_URL=$tmp[1];
+}
+
+/// ustalenie $URL_POSFTIX w oparciu o argumenty rządania (id i page - obsługiwane poniżej)
+$URL_POSFTIX = "?";
+foreach(array("no_pl", "no_redirect", "static_menu") as $arg) {
+	if (isset($_GET[$arg]))
+		$URL_POSFTIX .= $arg . "&amp;";
+}
+
+/// obsługujemy id_link (id) i page
+if (isset($_GET["id"])) {
+	$request_id=$_GET["id"];
+	$tmp[0]="";
+	for ($i=0; $i<9; $i++) {
+		# komenda okresolna przez cmd wyszukuje w bazie indeksów pasujący
+		$cmd=sprintf("grep \"^%s%s:*\t\" id_index", $tmp[0], $request_id);
+		
+		exec ($cmd, $tmp2);
+		
+		if (count($tmp2) < 1 ) {
+			$tmp[0]=sprintf("[^:]*:%s", $tmp[0]);
+			continue;
+		} else if (count($tmp2) > 1 ) {
+			$REQUEST_URL="not_found";
+			break;
+		} else {
+			$tmp=explode("\t", $tmp2[0]);
+			$tmp=explode("#", $tmp[1]);
+			$REQUEST_URL=$tmp[0];
+			break;
+		}
+	}
+	if ( ! isset($_GET["no_redirect"]) && ! isset($_GET["no_pl"]) && ! isset($_GET["static_menu"]) ) {
+		# gdy nie zakazano redirectu to go robimy
+		$REQUEST_URL = $_SERVER['HTTP_HOST'] . $BASE_URL . $REQUEST_URL . "#" . $request_id;
+		header("Location: http://" . ereg_replace("//+", "/", $REQUEST_URL), 1);
+		exit;
+	}
+	
+	/// FIXME to powinno być tak: $URL_POSFTIX .= "id=";
+	$URL_POSFTIX = ""; $url_args = "";
+} else if ($url_args != "") {
+// domyslne dla linkowania gdy wywolano z vhosta bez id
+//  takze gdy wywolano jawnie z page -> if (isset($_GET["page"]))
+	$tmp=explode("#", $_GET["page"]);
+	$REQUEST_URL=$tmp[0];
+	
+	$URL_POSFTIX .= "page=";
+}
+
+/// korekcja $BASE_URL i $URL_POSFTIX w oparciu o $url_args
+if ($url_args != "") {
+	// było jawne wywołanie system.system o postaci podanej w $URL_ARGS
+	// zatem argumenty URL dodajemy do URL_BASE zamiast korzystać z URL_POSTFIX
+	$BASE_URL = $url_args . $URL_POSFTIX;
+	$URL_POSFTIX = "";
+}
+
+/** w tym miejscu mamy ustawione poprawne:
+    $REQUEST_URL - wskazuje na ścieżkę rządanego zasobu na serwerze względem $BASE_PATH
+    $BASE_URL - uzupełnienie url z lewej strony
+    $URL_POSFTIX - uzupełnienie url z prawej strony
+    $BASE_PATH - uzupełnienie ścieżki do pliku na serwerze **/
+
+
+
+/**********************************************
+ * PRZETWARZANIE I WYSYŁANIE TREŚCI DOKUMENTU *
+ **********************************************/
+
+/// obsługujemy usuwanie PL znaczków i zmianę nagłóka na ASCII
+if (isset($_GET["no_pl"])) {
+	/* $WITHOUT_PL = ' | awk \'
+	BEGIN {
+		LENG=split("ą ę ś ć ż ó ź ń Ą Ę Ś Ć Ż Ó Ź Ń ł Ł", IN, " ");
+		split("a e s c z o z n A E S C Z O Z N l L", OUT, " ");
+	}
+	{
+		for (i=1; i<=LENG; i++) {
+			gsub(IN[i], OUT[i]); 
+		};
+		print $0;
+	}\''; */
+	$WITHOUT_PL = ' | konwert UTF8-ascii';
+	$CONTENT_TYPE="Content-Type: text/html; charset=ASCII";
+} else {
+	$WITHOUT_PL = '';
+	$CONTENT_TYPE="Content-Type: text/html; charset=UTF-8";
+}
+
+/// tworzymy pelną scieżkę do pliku ($FILE_PATH) w oparciu o $BASE_PATH i $REQUEST_URL
+/// w tym gdy nie zawiera określenia dokumentu to je dodajemy
+/// chyba że jest istniejącym plikiem (obrazek, etc) - wtedy wysyłamy
+$FILE_PATH = $BASE_PATH . $REQUEST_URL;
+$tmp = explode("/", urldecode($_SERVER['REQUEST_URI']));
+if ( $tmp[count($tmp)-1] != "page.xml" ) {
+	if ( is_file("$FILE_PATH") && strstr(realpath("$FILE_PATH"), $BASE_PATH) != "" ) {
+		$cmd = popen("/usr/bin/file -bi '$FILE_PATH'", 'r');
+		$CONTENT_TYPE = "Content-Type: ";
+		$CONTENT_TYPE .= fread($cmd, 2096);
+		pclose($cmd);
+		header($CONTENT_TYPE, 1);
+		system("cat '$FILE_PATH'");
+		exit;
+	} else if ( is_file("$FILE_PATH/page.xhtml") ) {
+		$FILE_PATH .= "/page.xhtml";
+	} else if (is_dir("$FILE_PATH")) {
+		// dla indeksowanych automatycznie katalogów
+		// w trybie v-hostowym wypisujemy katalog i kończymy
+		// w trybie nie v-hostowym nie powinien być wywoływany
+		$listing=file_get_contents("http://" . $_SERVER['SERVER_NAME'] . $REQUEST_URL);
+		echo str_replace("href=\"", "href=\"" . $BASE_URL . $REQUEST_URL, $listing);
+		exit;
+	}
+}
+
+// finalna korekcja zmiennych $BASE_URL, $URL_POSFTIX, $REQUEST_URL
+// tak aby zabezpieczyć je przed sed'em
+$BASE_URL    = str_replace('&', '\&', $BASE_URL);
+$URL_POSFTIX = str_replace('&', '\&', $URL_POSFTIX);
+$REQUEST_URL = str_replace('&', '\&', $REQUEST_URL);
+
+/// obsługujemy alternatywne arkusze CSS
+if (isset($_GET["static_menu"])) {
+	$MOD_CSS = ' -e \'s#<link[^>]*layout_dynamic.css[^>]*>#<link rel="stylesheet" href="' .
+		$BASE_URL . '/layout_static.css" type="text/css" />#g\'';
+} else {
+	$MOD_CSS = '';
+}
+
+/// gdy istnieje wypisujemy stosowny dokument wraz z modyfikacjami:
+/// * linki globalne poprzedzone $BASE_URL
+/// * meta name="robots"
+/// * PL znaczki
+header($CONTENT_TYPE, 1);
+if ( is_file("$FILE_PATH") && strstr(realpath("$FILE_PATH"), $BASE_PATH) != "" ) {
+	system ('sed ' .
+		// brak indeksowania przez roboty (indeksujemy tylko normalną stronę)
+		' -e \'s#<title>#<meta name="robots" content="noindex, nofollow" /><title>#g\'' .
+		$MOD_CSS .
+		// linki globalne "/COS" (dwa warianty - gdy mamy # i gdy go nie ma)
+		' -e \'s%<\([^<]*\)"/\([^>"]*\)#\([^>"]*\)"%<\1"' . $BASE_URL . '/\2' . $URL_POSFTIX . '#\3"%g\' ' .
+		' -e \'s%<\([^<]*\)"/\([^>#"]*\)"%<\1"' . $BASE_URL . '/\2' . $URL_POSFTIX . '"%g\' ' .
+		// linki lokalne "./COS"
+		' -e \'s#<\([^<]*\)"./\([^>"]*\)"#<\1"' . $BASE_URL . $REQUEST_URL . '/\2"#g\' ' .
+		// brak PL znaczków (jeżeli był żądanay)
+		$FILE_PATH .
+		$WITHOUT_PL);
+	exit;
+}
+
+
+/// gdy nie istnieje wypisujemy stronę błędu 404
+header("Content-Type: application/xhtml+xml; charset=utf-8", 1);
+header("HTTP/1.0 404 Not Found", 1);
+header("Status: 404 Not Found", 1);
+echo "<?xml version=\"1.0\" encoding=\"utf-8\" ?>";
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl">
+<head>
+	<title>HTTP 404 error (www.opcode.eu.org)</title>
+	<link rel="home" title="Strona główna" href="http://www.opcode.eu.org/" />
+</head><body>
+
+<h1>HTTP 404 error (Not Found)</h1>
+
+<p>Strona o podanym adresie URL nie istnieje</p>
+<p>Zapraszamy na <a href="http://www.opcode.eu.org/">stronę główną</a>.</p>
+
+</body></html>

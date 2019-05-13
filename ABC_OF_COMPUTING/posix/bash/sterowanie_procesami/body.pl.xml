@@ -1,0 +1,5 @@
+<article>
+<title>Sterowanie procesami</title>
+
+<p>W systemach unixowatych z uruchomionymi procesami możemy komunikować się m.in. przy pomocy sygnałów. Do ich wysyłania służy program <code>kill</code>. Warto jednak wspomnieć także o kombinacji klawiszy [Ctrl]+[c] wysyłającej sygnał SIGINT (nr. 2, przerwanie) oraz [Ctrl]+[/] wysyłającej sygnał SIGQUIT (nr. 3, zakończenie programu). Jeżeli jest już mowa o kombinacjach specjalnych kończących działanie programu to trzeba wspomnieć też o [Ctrl]+[d] wysyłającej znak <wiki pl="ASCII">ASCII</wiki> o numerze 4 czyli EOT (koniec transferu) czyli informację o końcu wprowadzania danych tekstowych (nie jest to EOF ani ETX mające podobne znaczenie). Kombinacja ta wprowadzana np. w bashu kończy jego działanie.</p>
+</article>

@@ -1,0 +1,29 @@
+#!/bin/sh
+
+. /etc/init.d/init.common
+
+sleep 1
+
+print "Sending all processes the TERM signal..."
+killall5 -15
+sleep 5
+print "Sending all processes the KILL signal..."
+killall5 -9
+
+
+print "Umount all filesystems (or remount to read-only)  ..."
+umount -a -f -r
+mount -o remount,ro / >&/dev/null
+
+
+if [ $RUNLEVEL -eq 6 ]; then
+	print "Reboot system ..."
+	reboot -d -f -i
+else
+	print "Stop SCSI devices ..."
+	sdparm --command=stop /dev/sd?
+	sleep 5
+	print "Halt system ..."
+	halt -d -f -i -p -h
+fi
+

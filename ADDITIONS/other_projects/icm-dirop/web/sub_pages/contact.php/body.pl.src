@@ -1,0 +1,31 @@
+<?php
+xhtml_print_file_head("DIR - Kontakt");
+xhtml_print_header("DIR - Kontakt");
+
+echo '<div class="content">';
+
+if ($_POST['text'] == "") {
+?>
+<form method="post" class="contact" action="<?php echo DIROP_SCRIPT_PATH; ?>?contact">
+<fieldset>
+	<label for="name">Imię i nazwisko</label> <input name="name" id="name" type="text" size="40" value=""/>
+	<label for="email">E-mail</label> <input name="email" id="email" type="text" size="40" value="" />
+	<label for="text">Komentarz (pole wymagane)</label> <textarea name="text" id="text" cols="56" rows="10"></textarea>
+	<input name="send" id="send" type="image" src="<?php echo DIROP_LINK_DIR_PATH; ?>/img_css_and_js/send.png" />
+</fieldset>
+</form>
+
+<?php
+} else {
+
+	$mailheaders = 'From: "'. $_POST['name'] .'" <'. $_POST['email'] .">\n";
+	if (mail(DIROP_CONTACT_EMAIL, "Wiadomosc z formularza kontaktowego", $_POST['text'], $mailheaders)) {
+		echo "<p>Twoja wiadomość została wysłana.  Dziękujemy.</p>";
+	} else {
+		echo '<p>Wystąpił problem z wysłaniem wiadomości. Proszę spróbować kontaktu w inny sposób (np. wysyłając e-mail na adres: <a href="mailto:'. DIROP_ERROR_EMAIL .'">'. DIROP_ERROR_EMAIL .'<a> i powiadomić administratora o zaistniałej sytuacji.</p>';
+	}
+}
+?>
+</div>
+
+<?php xhtml_print_footer(); ?>

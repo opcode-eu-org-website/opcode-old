@@ -1,0 +1,497 @@
+# funkcja zwracajaca sciezke do pliku (czesc nazwy przed ostatnim /)
+function dirname(path_in) {
+	# aby nie wyjść za wysoko
+	if (path_in=="/" || path_in=="")
+		return "/"
+	
+	# rozkladamy sciezke
+	tmp = split(path_in, tmp2, "/");
+	
+	# pomijamy koncowe puste pola
+	while (tmp2[tmp] == "" && tmp > 0) tmp--;
+	
+	# generujemy nowa sciezke
+	path_in="";
+	for (i=1; i<tmp; i++)
+		if (path_in == "" || path_in == "/")
+			path_in=sprintf("/%s", tmp2[i]);
+		else
+			path_in=sprintf("%s/%s", path_in, tmp2[i]);
+	
+	return path_in
+}
+
+# funkcja zwracjajaca rozszerzenie (czesc nazwy po ostatniej kropce)
+function ext(path_in) {
+	# rozkladamy sciezke
+	tmp = split(path_in, tmp2, ".");
+	
+	# pomijamy koncowe puste pola
+	while (tmp2[tmp] == "" && tmp > 0) tmp--;
+	
+	# zwracamy wynik gdy nie bylo kropki ciag pusty
+	if (tmp <= 1)
+		return ""
+	else
+		return tmp2[tmp]
+}
+
+# funkcja zwracajaca nazwe pliku (czesc nazwy po ostatnim /)
+function basename(path_in) {
+	# rozkladamy sciezke
+	tmp = split(path_in, tmp2, "/");
+	
+	# pomijamy koncowe puste pola
+	while (tmp2[tmp] == "" && tmp > 0) tmp--;
+	
+	return tmp2[tmp]
+}
+
+function is_file(path_in) {
+	return system( "ls >/dev/null 2>&1 " path_in ) == 0
+}
+
+BEGIN {
+	RS="<"
+	# zamyknięcia znaczników i to co po nich wyrzucamy jako nieinteresujące nas atrybuty a nie przez:
+	# RS="(>?[^><]*<)|(>)"
+	FS="[ \n\t]+"
+	
+	# ustawienie wartosci poczatkowych zmiennych,
+	# w tym zmiennych odpowiadających wybranym zmiennym środowiskowym
+	is_comments=0; is_text=0; is_menutext=0; cur_dir="";
+	SRC_DIR=ENVIRON["SRC_DIR"];
+	PAGE_DIR=ENVIRON["PAGE_DIR"];
+	SITE_MAP_FILE=PAGE_DIR "/" ENVIRON["SITE_MAP_DIR"] "/body.xml";
+	TMP_DIR=ENVIRON["TMP_DIR"];
+	SCRIPT=ENVIRON["SCRIPT"];
+	OUT_MODE=ENVIRON["OUT_MODE"];
+	
+	# zmienna zawierjaca komende ustawiajaca srodowisko w niektorych wywolaniach system():
+	set_env=sprintf("SRC_DIR=\"%s\"; PAGE_DIR=\"%s\"; TMP_DIR=\"%s\"; SCRIPT=\"%s\"; ", SRC_DIR, PAGE_DIR, TMP_DIR, SCRIPT);
+	
+	pdf_level_index=0
+	pdf_level[0]=0
+}
+
+END {
+	close(PAGE_DIR "/id_index")
+	close(SITE_MAP_FILE)
+}
+
+$0=="" || $0=="\n" {
+	next
+}
+
+
+#############################
+###  ZNACZNIKI "BLOKOWE"  ###
+#############################
+
+# komentarze
+$1=="!--" {
+	is_comments = 1
+}
+is_comments==1 {
+	for (i=1; i<NF; i++) {
+		if ($i=="--" && $(++i)==">") {
+			is_comments = 0
+			break;
+		}
+	}
+	next; # zapobiega realizacji kolejnych instrukcji gdy trwa komentarz
+}
+
+# teskt
+$1=="text" {
+	is_text = 1
+	next;
+}
+$1=="/text" {
+	printf("\n") >> PAGE_DIR "/" cur_files_dir "/body.xml"
+	close(PAGE_DIR "/" cur_files_dir "/body.xml")
+	is_text = 0
+	next;
+}
+is_text==1 {
+	gsub(" *\"", "\"")
+	gsub(" *=\" *", "=\"")
+	gsub(" >", ">")
+	printf("<%s", $0) >> PAGE_DIR "/" cur_files_dir "/body.xml"
+	next; # zapobiega realizacji kolejnych instrukcji gdy trwa text
+}
+
+$1=="/menutext" {
+	close(menutext_file)
+	is_menutext = 0
+	next;
+}
+is_menutext==1 && OUT_MODE !~ "^latex" {
+	gsub(" *\"", "\"")
+	gsub(" *=\" *", "=\"")
+	gsub(" >", ">")
+	printf("<%s", $0) >> menutext_file
+	next; # zapobiega realizacji kolejnych instrukcji gdy trwa text
+}
+
+
+
+#############################
+###       ATRYBUTY        ###
+#############################
+
+# atrybuty znaczników które takowe posiadają
+$1=="menutext" || $1=="cmd" || $1=="dir" || $1=="file" || $1=="tar" || $1=="addtar" || $1=="gallery" || $1=="soft_db" {
+	delete ATTR; ATTR["art_menu"] = 1;
+	for (i=1; i<NF; i++) {
+		if ($i == "=\"") {
+			# nazwa atrybutu
+			tmp = $(i-1)
+			
+			# wartosc atrybutu
+			attrib = ""
+			for (i++; i<=NF; i++) {
+				if ($i == "\"")
+					break
+				if (attrib == "")
+					attrib = sprintf("%s", $i);
+				else
+					attrib = sprintf("%s %s", attrib, $i);
+			}
+			
+			# zapamietanie wartosci atrybutu
+			ATTR[tmp] = attrib
+		}
+	}
+}
+
+
+
+#############################
+###  ZNACZNIKI SPECJALNE  ###
+#############################
+
+# menu teskt
+$1=="menutext" {
+	is_menutext = 1
+	
+	if ("inmenu" in ATTR && ATTR["inmenu"] != 0)
+		menutext_file = PAGE_DIR "/" cur_dir "/" ATTR["inmenu"] "/menu.xhtml"
+	else
+		menutext_file = PAGE_DIR "/" cur_dir "/menu.xhtml"
+	
+	next;
+}
+
+# komenda
+$1=="cmd" {
+	name = ATTR["name"]
+	gsub("&gt;", ">", name)
+	gsub("&lt;", "<", name)
+	gsub("&amp;", "&", name)
+	gsub("&quot;", "\"", name)
+	printf("\033[34mExec command: %s \033[0m\n", name)
+	system(set_env "cd \"" PAGE_DIR "/" cur_files_dir "\"; " name);
+	
+	next
+}
+
+
+#############################
+###       KATALOGI        ###
+#############################
+
+# katalog
+$1=="dir" {
+	# name na podstawie ostatniego członu path
+	if (! ("name" in ATTR)){
+		ATTR["name"] = basename(ATTR["path"])
+	}
+	
+	# aktaulizacja zmiennej zawierającej aktualne położenie
+	if (cur_dir == "" || cur_dir == "/")
+		cur_dir=sprintf("/%s", ATTR["name"]);
+	else
+		cur_dir=sprintf("%s/%s", cur_dir, ATTR["name"]);
+	
+	# TODO FIXME kontrola zgodności cur_dir i/lub znacznika path
+	
+	if (OUT_MODE !~ "^latex") {
+		cur_files_dir = cur_dir
+		INFO_FILE = PAGE_DIR "/" cur_files_dir "/body.info"
+		
+		# utworzenie katalogu
+		printf("\033[32mCreate: %s\033[0m\n", cur_dir)
+		system( "mkdir -p \"" PAGE_DIR "/" cur_dir "\"" )
+		
+		# obsługa informacji dodatkowych (title i menu) dla parsera katalogowego XHTML
+		if ("title" in ATTR)
+			printf("title=\"%s\"\n", ATTR["title"]) >> INFO_FILE
+		if ("menu" in ATTR) 
+			if (ATTR["menu"] == "no" || ATTR["menu"] == "0")
+				printf("use_menu=\"NO\"\n") >> INFO_FILE
+			else if (ATTR["menu"] == "never")
+				printf("use_menu=\"NEVER\"\n") >> INFO_FILE
+			else if (ATTR["menu"] == "static")
+				printf("use_menu=\"STATIC\"\n") >> INFO_FILE
+			else if (ATTR["menu"] == "dynamic")
+				printf("use_menu=\"DYNAMIC\"\n") >> INFO_FILE
+			else if (ATTR["menu"] != 0)
+				printf("use_menu=\"SPECIAL\"\nuse_menu_spec=\"%s\"\n", ATTR["menu"]) >> INFO_FILE
+		if ("art_menu" in ATTR)
+			printf("art_menu=\"%d\"\n", ATTR["art_menu"]) >> INFO_FILE
+	} else {
+		cur_files_dir = ""
+		
+		# wartosc domyslna dla pdf_base_level
+		if (! pdf_base_level in ATTR || ATTR["pdf_base_level"] == "")
+			ATTR["pdf_base_level"] = "+1"
+	
+		# obsługa stosu przechowującego aktualną wartość pdf_base_level
+		pdf_level_index++
+		if (substr(ATTR["pdf_base_level"], 1, 1) == "+") {
+			pdf_level[pdf_level_index] = pdf_level[pdf_level_index-1] + ATTR["pdf_base_level"]
+		} else {
+			pdf_level[pdf_level_index] = ATTR["pdf_base_level"]
+		}
+	}
+
+	# obsługa dir z atrybutem path
+	if ("path" in ATTR) {
+		ATTR["level"] = 0
+		$1 = "filedir"
+	}
+	
+	close(INFO_FILE)
+}
+$1=="/dir" {
+	# aktaulizacja zmiennej zawierającej aktualne położenie
+	cur_dir = dirname(cur_dir);
+	
+	if (OUT_MODE !~ "^latex") {
+		cur_files_dir = cur_dir
+	} else {
+		# obsługa stosu przechowującego aktualną wartość pdf_base_level
+		delete pdf_level [pdf_level_index]
+		pdf_level_index--
+	}
+}
+    
+   
+##################################
+###  TRESC DOKUMENTU GLOWNEGO  ###
+##################################
+
+function make_id(id, level) {
+	if (substr(cur_files_dir, length(cur_files_dir), 1) != "/") {
+		sep = "/"
+	} else {
+		sep = ""
+	}
+	printf("%s\t%s%s\n", id, cur_files_dir, sep) >> PAGE_DIR "/id_index"
+		
+	if (OUT_MODE !~ "^latex" && level != 0) {
+		# obsługa znaczników id i menu artykułu
+		if ("title" in ATTR) {
+			printf("<a class=\"art_menu%d\" href=\"#%s\">%s</a> ", level, id, ATTR["title"]) \
+				>> PAGE_DIR "/" cur_dir "/art_menu.xhtml"
+			close(PAGE_DIR "/" cur_dir "/art_menu.xhtml")
+		}
+	}
+}
+
+# obsługa poziomu menu - na razie z atrybutu, w przyszłości być może ze struktury XMLa
+function get_level() {
+	if ("level" in ATTR)
+		return ATTR["level"] + pdf_level[pdf_level_index]
+	else
+		return pdf_level[pdf_level_index]
+}
+
+# obsługa zmiennych środowiskowych wramach atrybutu path
+function get_path(  path, envvar) {
+	path = ATTR["path"]
+	if ( substr(path, 1, 1) == "$" ) {
+		envvar = gensub("[^_A-Za-z0-9].*$", "", "g", substr(path, 2));
+		path = sprintf("%s%s", ENVIRON[envvar], gensub("[$][_A-Za-z0-9]*", "", "g", path))
+	}
+	return path
+}
+
+# wstawki dokumentu głównego katalogu oraz zawartość katalogu
+$1=="file" || $1=="filedir" {
+	printf("\033[34mParse: %s -> %s\033[0m\n", ATTR["path"], cur_dir)
+	INFO_FILE = PAGE_DIR "/" cur_files_dir "/body.info"
+	
+	head_level = get_level()
+	path = get_path()
+
+	# obsługa tytułu
+	if ($1=="filedir" && !("title" in ATTR)) {
+		if ( is_file( "\"" SRC_DIR "/" path "/body\"*.xml" ) ) {
+			cmd = SCRIPT " -f gettitle " path
+			cmd | getline ATTR["title"]
+		} else if ( is_file( "\"" SRC_DIR "/" path "/body\"*.src" ) ) {
+			ATTR["title"] = ATTR["name"]
+		}
+		printf("title=\"%s\"\n", ATTR["title"]) >> INFO_FILE
+	}
+	
+	# obsługa indeksu
+	if ("name" in ATTR && $1=="file") {
+		id = ATTR["name"]
+	} else {
+		id = ATTR["path"]
+		gsub("/", ":", id)
+		gsub("^[.:]*", "", id)
+	}
+	make_id(id, head_level)
+	
+	# obsługa plików
+	if ( is_file( "\"" SRC_DIR "/" path "/body\"*.xml" ) ) {
+		system( SCRIPT " -f incxml2xml \"" path "\" \"" cur_dir "\" " head_level " \"" id "\"")
+	} else if ( is_file( "\"" SRC_DIR "/" path "/body\"*.src" ) ) {
+		system( SCRIPT " -f source2xml \"" path "\" \"" cur_dir "\" " head_level " \"" id "\" - " ext(path) " " ATTR["download"] )
+	} else {
+		printf("\033[33mWARNING: no find body file in %s !!!\033[0m\n", path) > "/dev/stderr"
+	}
+	
+	# obsługa daty modyfikacji artykułu
+	system( "env TZ=UTC ls -ld --time-style=+\"|time='%Y-%m-%d %H:%M:%S (%Z)'|\" \"" SRC_DIR "/" path "/body\".* \
+		2> /dev/null | cut -f2 -d\"|\" >> \"" INFO_FILE "\"")
+	
+	# obsługa informacji dodatkowych (inhead)
+	if ( system( "test -f \"" SRC_DIR "/" path "/body.info\"" ) == 0 ) {
+		system( "cat \"" SRC_DIR "/" path "/body.info\" >> \"" INFO_FILE "\"" )
+		printf("\n") >> INFO_FILE
+	}
+	
+	# linkowanie pozostałych plików z wskazanego katalogu
+	system( "find \"" SRC_DIR "/" path "\" -maxdepth 1 -type f ! -name body*.xml ! -name body*.src \
+		! -name TODO.tmp.txt ! -name intro*.src ! -name body.info ! -name *.xhtml ! -name body.translate.sed \
+		| while read f ; do ln -srf \"$f\" \"" PAGE_DIR "/" cur_files_dir "\" ; done" )
+	
+	# linkowanie targetów linków znajdujących się w wskazanym katalogu
+	system( "find \"" SRC_DIR "/" path "\" -maxdepth 1 -type l ! -name body*.xml ! -name body*.src \
+		! -name TODO.tmp.txt ! -name intro*.src ! -name body.info ! -name *.xhtml ! -name body.translate.sed \
+		| while read l; do f=`readlink $l`; ln -srf \"" SRC_DIR "/" path "/$f\" \"" PAGE_DIR "/" cur_files_dir "\" ; done" )
+	
+	close(INFO_FILE)
+}
+
+# spisy oprogramowania
+$1=="soft_db" {
+	printf("\033[34mParse soft list %s -> %s\033[0m\n", ATTR["name"], cur_dir)
+	
+	id = "softdb:" ATTR["name"]
+	head_level = get_level()
+	make_id(id, head_level)
+	
+	system( SCRIPT " -f softdb2xml \"" ATTR["name"] "\" \"" cur_dir "\" \"" head_level "\" \"" id "\"" )
+	
+	next
+}
+
+# galerie obrazków
+$1=="gallery" {
+	printf("\033[34mParse: %s -> %s\033[0m\n", ATTR["path"], cur_dir)
+	
+	system( SCRIPT " -f make_gallery \"" get_path() "\" \"" cur_dir "\"")
+	next
+}
+
+
+
+############################################
+###  OPERACJE DODATKOWE TYLKO DLA XHTML  ###
+############################################
+OUT_MODE ~ "^latex" {
+	next
+}
+
+##################################
+###    ARCHIWA, PACZKI ITP     ###
+##################################
+
+# generowane archiwa *.tar.gz 
+function make_tar(name, show_dir, tar_path, add_path) {
+	system( SCRIPT " -f make_tar \"" name "\" \"" show_dir "\" \"" tar_path "\" \"" add_path "\"" )
+}
+$1=="tar" {
+	printf("\033[34mParse TAR: %s -> %s\033[0m\n", ATTR["path"], ATTR["name"])
+	if ("show_dir" in ATTR && ATTR["show_dir"] == 1)
+		show_dir = sprintf("%s/%s.notar", cur_dir, ATTR["name"])
+	else
+		show_dir = "-"
+	make_tar(ATTR["name"], show_dir, cur_dir "/" ATTR["name"] ".tgz",  ATTR["path"])
+	next
+}
+$1=="addtar" {
+	printf("\033[34mParse TAR: %s -> %s\033[0m\n", ATTR["path"], ATTR["name"])
+	make_tar(ATTR["name"], "-", "-",  ATTR["path"])
+	next
+}
+
+##################################
+###    MENU I MAPA SERWISU     ###
+##################################
+
+# obsługa dodawania dir i notar do menu i mapy
+$1=="dir" || $1=="filedir" || ($1=="tar" && "show_dir" in ATTR && ATTR["show_dir"] == 1) {
+	if ($1=="tar") {
+		ATTR["name"]=sprintf("%s.notar", ATTR["name"]);
+		cur_dir=sprintf("%s/%s", cur_dir, ATTR["name"]);
+	}
+	
+	# obsługa menu
+	if (!("inmenu" in ATTR) || ATTR["inmenu"] != 0) {
+		if (! "title" in ATTR || ATTR["title"] == "") {
+			#printf("\033[33mWARNING: menu entry (%s) use name instead title !!!\033[0m\n", cur_dir) > "/dev/stderr"
+			ATTR["title"] = ATTR["name"]
+		}
+		if (("inmenu" in ATTR) && ATTR["inmenu"] ~ /[./]*/) {
+			upper = ATTR["inmenu"]
+			if (ATTR["inmenu"] ~ /[.]*[/][.]*/)
+				li_class = "subsub"
+			else
+				li_class = "sub"
+		} else {
+			upper = ""
+			li_class = ""
+		}
+		printf("<li%s><a class=\"int\" href=\"[[!URL""PREFIX!]]%s/[[!URL""POSTFIX!]]\">%s</a></li%s>",
+			li_class, cur_dir, ATTR["title"], li_class) >> PAGE_DIR "/" cur_dir "/" upper "/../menu.xhtml"
+		close(PAGE_DIR "/" cur_dir "/" upper "/../menu.xhtml")
+	}
+	
+	# obsługa mapy serwisu
+	if (!("inmap" in ATTR) || ATTR["inmap"] != 0) {
+		if (! "title" in ATTR || ATTR["title"] == "") {
+			#printf("\033[33mWARNING: map entry (%s) use name instead title !!!\033[0m\n", cur_dir) > "/dev/stderr"
+			ATTR["title"] = ATTR["name"]
+		}
+		printf("\n<li><a class=\"int\" href=\"[[!URL""PREFIX!]]%s/[[!URL""POSTFIX!]]\">%s</a>",
+			cur_dir, ATTR["title"]) >> SITE_MAP_FILE
+	}
+	
+	# dalszy ciąg obsługi mapy - specyficzny dla dir / tar
+	if ($1=="tar") {
+		if (!("inmap" in ATTR) || ATTR["inmap"] != 0) {
+			printf("</li>") >> SITE_MAP_FILE
+		}
+		cur_dir = dirname(cur_dir);
+	} else if ($1=="dir" || $1=="filedir") {
+		if (!("inmap" in ATTR) || ATTR["inmap"] != 0) {
+			printf("<ul>") >> SITE_MAP_FILE
+		} else {
+			printf("<li><ul>") >> SITE_MAP_FILE
+		}
+	}
+	
+	next
+}
+# zamykanie <dir /> w mapie serwisu
+$1=="/dir" {
+	printf("</ul></li>") >> SITE_MAP_FILE
+	next
+}

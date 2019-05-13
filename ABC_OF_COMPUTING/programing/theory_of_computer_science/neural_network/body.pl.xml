@@ -1,0 +1,36 @@
+<article>
+<title>Wprowadzenie do sieci neuronowych</title>
+
+<p><wiki pl="Sieć neuronowa">Sieci neuronowe</wiki> są systemami zdolnymi do przetwarzania danych w problemach trudno algorytmizowalnych. Cechują się odpornością na zniekształcenia danych, zdolnością do uczenia w oparciu o przykłady, zdolnością generalizacji (uogólniania). Dane przetwarzane są w sposób równoległy. Zobacz też: <wiki pl="Sztuczna inteligencja">Sztuczna inteligencja</wiki>.</p>
+
+<p>Budowa sieci wielowarstwowych nie ma sensu w przypadku sieci liniowych, czyli takich w których wektor odpowiedzi <eq>y</eq> jest liniowo zależy od wektora wejściowego <eq>x</eq>. Dla pojedynczego neuronu wygląda to w sposób następujący - wyjście jest sumą iloczynu wartości wejścia i wagi odpowiedniego wejścia:<br /><eq_latex>y^{(m)} = W^{(m)} \ast x = \sum_{i=1}^n w_i^{(m)} x_i</eq_latex></p>
+
+<p>Dzieje się tak dlatego że każde odwzorowanie liniowe możemy zapisać jako macierz, a wynikiem mnożenia dwóch macierzy przez siebie (co odpowiada kolejnemu wykonaniu pierwszej i drugiej warstwy) jest macierz (czyli pojedyncza warstwa). Uczenie neuronu polega na modyfikacji macierzy wag <i>W</i> tak aby uzyskiwać lepszą odpowiedź. W przypadku uczenia z nauczycielem w oparciu o regułę delta chcemy minimalizować funkcję błędu w sensie najmniejszych kwadratów). Musimy zatem zmieniać wagi w kierunku przeciwnym do gradientu funkcji błędu:
+	<br /><eq_latex>W' = W + \eta \delta X \qquad  \delta = z -y</eq_latex>
+	<br /><eq_latex>\frac{\partial Q}{\partial y} = -(z-y) = - \delta \qquad \frac{\partial y}{\partial W} = x \qquad \frac{\partial Q}{\partial W} = \frac{\partial Q}{\partial y} \frac{\partial y}{\partial W} = - \delta x_i</eq_latex>
+</p>
+
+<p>Możliwe jest także uczenie bez nauczyciela (bez wiedzy o tym jaki powinien być wynik), w metodzie tej wzmocnieniu ulegają wagi dla których odpowiedź jest duża gdy sygnał pobudzający jest duży.</p>
+
+<p>Celem możliwości tworzenia bardziej zaawansowanych odwzorowań wprowadza się elementy nieliniowe, w których wyjście jest funkcją ważonej sumy elementów wejściowych). Najprostszą realizacją nieliniowości jest <eq>y = {1, 0}</eq> w zależności od znaku pobudzenia.Uczenie odbywa się na podobnej zasadzie jak w przypadku sieci liniowej. Jednowarstwowa sieć nie jest na przykład w stanie realizować odwzorowania XOR, jednak trój-warstwowa sieć (a kolejne warstwy mają sens tylko dla sieci nieliniowych) jest w stanie reprezentować dowolny podział płaszczyzny, zatem także funkcję XOR. Uczenie sieci wielowarstwowych odbywa się poprzez rzutowanie błędu na wszystkie neurony stanowiące wejście mnożąc go przez wagę danego wejścia. Należy zaznaczyć iż więcej neuronów w warstwach ukrytych daje więcej płaszczyzn decyzyjnych, jednak nie zawsze przyczynia się to do lepszego wyniku. W uczeniu sieci nieliniowych spotkać się możemy także z problemem lokalnych minimów do których będą zbiegały wektory wag (pomimo iż nie jest to właściwe rozwiązanie).</p>
+
+<p>Celem usprawnienia procesu uczenia stosuje się różne metody dodatkowe takie jak:</p>
+<ul>
+	<li>zanikanie wag - w każdym kolejnym kroku od wag odejmowany jest pewien czynnik</li>
+	<li>bezwładność - wartość zmiany z poprzednich iluś kroków wpływa na wartość obecnej zmiany</li>
+	<li>kontrola czy zmiana faktycznie przyczyniła się do zmniejszenia funkcji błędu jak nie to cofamy</li>
+	<li>drgania termiczne - dodawanie losowej zmiany (zapobiega to wpadaniu w minima lokalne)</li>
+	<li>stosowanie wstępnej obróbki danych</li>
+	<li>stosowanie innych procedur minimalizacji</li>
+</ul>
+
+<p>Szczególnym rodzajem są sieci przesyłające żetony (CP) - jest to dwuwarstwowa sieć, w której pierwsza warstwa klasyfikuje otrzymany wektor (z pierwszej warstwy wybieramy tylko wynik z jednego neuronu - największy), każdy neuron drugiej warstwy na swoim wejściu dostaje tylko jedyną liczbę i produkuje w oparciu o nią wektor skojarzony. Sieć taka działa jak tablica przeglądowa. Sieci tego typu stosowane są np. do kompresji danych, analizy statystycznej, rozpoznawania mowy, itp.</p>
+
+<p>Kolejnym typem sieci są sieci RBF. Sieci te posiadają pola receptorowe, trafienie w które powoduje aktywacje danej jednostki wejściowej, oczywiście pola te mogą na siebie nachodzić wtedy pobudzeniu ulega kilka jednostek. Warstwa wejściowa dokonuje klasyfikacji bodźców, a wyjściowa wykonuje operację liniową. Sieci te charakteryzują się dobrą <wiki pl="Interpolacja (matematyka)">interpolacją</wiki> lecz kiepską <wiki pl="Ekstrapolacja (matematyka)">ekstrapolacją</wiki>.</p>
+
+<p>Ostatnim omówionym tutaj rodzajem sieci są sieci Hopfielda. Są to sieci o połączeniach każdy z każdym (wektor wyjść podawany na wejścia). Sieci te mogą służyć do realizacji pamięci adresowanej treścią, do realizacji takiej koncepcji korzystamy z symetrycznych wag, wyjść mających wartości 1 i -1 i danych zależnością:<br /><eq_latex>S_i' = \textrm{sgn} \left( \sum_j w_{ij} s_j \right)</eq_latex></p>
+
+<p>Aktualizacja stanów jest asynchroniczna i realizowana poprzez aktualizację (losowo wybrana jednostka dokonuje aktualizacji). Sieci te korzystają z funkcji energetycznej danej zależnością:<br /><eq_latex>H=- {1 \over 2} \sum_{ij} w_{ij} s_i s_j</eq_latex></p>
+
+<p>Zobacz też: <wiki pl="Logika rozmyta">Logika rozmyta</wiki>, <wiki en="b:Artificial Neural Networks">Artificial Neural Networks</wiki>.</p>
+</article>

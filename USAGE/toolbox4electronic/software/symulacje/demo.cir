@@ -1,0 +1,42 @@
+DEMONSTARACJA DZIALANIA NgSPICE / GnuCAP
+**
+** WYWOŁANIE:
+**  ngspice -b demo.cir | awk '$2~/^[0-9.]+e/{for (i=2; i<=NF; i++) printf("%s ", $i); printf("\n")}' > wykres.ng.dat
+**  gnucap -b demo.cir
+**
+** RYSOWANIE WYKRESU:
+**  echo 'plot "wykres.ng.dat" using 1:2 title "ngspice", "wykres.gnu.dat" using 1:2 title "gnucap"; pause 10' | gnuplot
+**
+
+**
+** LISTA WEZLOW
+**
+V1 1 0 sin 0 1m 1K
+
+**
+** definujemy jakie węzły będą wypisywane w analizie TRAN
+** jeżeli przy napięciu podamy tylko jeden węzeł będzie ono odniesione do węzła 0
+**
+.PRINT TRAN V(1)
+
+**
+** ta funkcja powoduje wykonanie i wypisanie analizy prądów i napięć od czasu
+** zastosowane przekierowanie do pliku działa tylko dla gnucap'a
+** argumenty: krok stop start
+**
+.TRAN 10u 2000u 0 > wykres.gnu.dat
+
+.END
+
+* INTERAKTYWNE KOZYSTANIE Z GNUCAP:
+* $ gnetlist -g spice-sdb test2.sch && gnucap output.net
+*
+* 	gnucap> list
+* 	gnucap> print tran v(nodes) i(r1)
+* 	gnucap> tran 0 30u 10u
+* 	gnucap> modify r1=1meg
+* 
+* 	gnucap> ! gnetlist -g spice-sdb sample.sch
+* 	gnucap> GET output.net
+
+* pelniejsze przyklady symulacji http://www.opcode.eu.org/archiwum/studia_elka/use/projekt2/

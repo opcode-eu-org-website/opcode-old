@@ -1,0 +1,48 @@
+// kompilacja: g++ -shared -fPIC -lpython2.7 -lboost_python -I/usr/include/python2.7/  mojmodul.cpp -o mojmodul.so
+
+#include <iostream>
+#include <string>
+
+/// przykłądowe funkcje i klasa, które będa udostępnione jako moduł pythonowy
+std::string funkcja1() {
+	std::cout << "Ala ma kota\n";
+	return "Kot ma Alę";
+}
+
+int funkcja2(int a) {
+	return a + 10;
+}
+
+class Klasa {
+	public:
+		Klasa(const std::string& val) {
+			this->val = val;
+		}
+		std::string show() const {
+			return "Val is: " + val;
+		}
+	private:
+		std::string val;
+};
+
+std::string funkcja3(const Klasa& w) {
+	return w.show() + " call from funkcja3";
+}
+
+
+/// definicja modułu pythonowego
+
+#include <boost/python.hpp>
+using namespace boost::python;
+
+BOOST_PYTHON_MODULE(mojmodul) {
+	def("funkcja1", funkcja1);
+	def("f2", funkcja2);
+
+	class_<Klasa>("Klasa", init<std::string>())
+		.def("show", &Klasa::show)
+		.def("f3", funkcja3)
+	;
+
+	def("funkcja3", funkcja3);
+}

@@ -1,0 +1,9 @@
+# wyslanie powiadomienia na JABBER
+:0 hw
+subject=|mail2text header "`formail -xSubject:`"
+:0 hw
+from=|mail2text header "`formail -xFrom:`"
+:0 h
+*!From:.*xmpp-system@n17.waw.pl
+jabber=|echo "Nowy e-mail: $subject (od: $from)." | smtp2xmpp --to "$LOGNAME@"`hostname -d`
+# aby powiadomienia były wysyłane jako wiadomości a nie nagłówki nalezy do smtp2xmpp dodać opcję --type ""

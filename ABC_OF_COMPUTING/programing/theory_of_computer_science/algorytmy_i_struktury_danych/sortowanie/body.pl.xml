@@ -1,0 +1,18 @@
+<article>
+<title>Algorytmy sortowania</title>
+
+<p>Algorytm sortowania nazywamy <strong>stabilnym</strong> gdy dane o jednakowym kluczu sortowania nie zamieniają się miejscami.</p>
+
+<ul>
+	<li>przez selekcję - wybieramy maksymalny, potem ze zbioru pomniejszonego o niego znowu (można zrobić w miejscu przenosząc na początek tablicy a znajdujący się tam na miejsce znalezionego)</li>
+	<li>przez wstawianie - zbiór podzielony na część posortowaną i nie, pierwszy z nieposortowanej porównywany z ostatnim z posortowanej jeżeli mniejszy to zamieniany potem z następnym z posortowanej i tak do póki będzie nie mniejszy, część posortowana powiększana o jeden element i zajmujemy się kolejnym z nieposortowanej (można znaleźć pierwszy element posortowanej np. przez selekcję, ale aby zachować stabilność trzeba to zrobić sprytnie - zamiast zamiany przesunięcie)</li>
+	<li>sortowanie Shella - ciąg kolejnych sortowań z malejącym krokiem (sortowanie z krokiem k - sortujemy dane tak aby pod-tablice utworzone przez wybór co co k-tej komórki były posortowane)</li>
+	<li>sortowanie bombelkowe, zaczynamy od ostatniego, porównujemy z poprzednim i opcjonalnie zamieniamy (gdy nie zamieniamy przechodzimy do następnego elementu)</li>
+	<li>quick-sort - metoda typu "dziel i rządź", dzielimy tablicę na dwie części (tak aby w jednej były tylko elementy mniejsze niż w drugiej) i każdą część sortujemy niezależnie, podziału dokonujemy przeglądając z obu stron i w zależności od wyniku porównania zamieniając elementy</li>
+	<li>sortowanie o złożoności liniowej - dobre dla elementów o kluczu całkowitym i ograniczonej maksymalnej wartości klucza - tworzymy tabele krotności wystąpień kluczy (gdzie klucz jest indeksem), następnie w oparciu o te informacje budujemy tabelę danych posortowanych</li>
+	<li>przez scalanie - łączenie dwóch posortowanych ciągów w ciąg posortowany</li>
+	<li>sortowanie turniejowe (w tablicy) - porównujemy pierwszy z ostatnim, drugi z przedostatnim itd, potem powtarzamy na pierwszej części tablicy aż na początku znajdzie się największy (odpowiednio porównując w drugiej na końcu możemy umieścić najmniejszy)</li>
+	<li>szybkie sortowanie binarne - złożoność nk dla k-bitowej liczby - sortujemy wg. najstarszej cyfry, wstępnie podzielone zbiory wg. olejnej itd</li>
+	<li>sortowanie pozycyjne - gdy porównujemy nie liczby binarne a coś o większej podstawie</li>
+</ul>
+</article>

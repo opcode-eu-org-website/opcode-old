@@ -1,0 +1,71 @@
+<article>
+<title>Instalacja oprogramowania</title>
+<p>Polecam zakończenie działania programu dokonującego podstawowej konfiguracji systemu (automatycznie uruchamianego przy pierwszym starcie po ewentualnym wybraniu dodatkowych źródeł apta - w przypadku dobrego łącza do Internetu warto wybrać źródła HTTP lub FTP). System ten posiada na tyle wygodny system zarządzania pakietami (chyba najlepszy z jakim się spotkałem), że późniejsze dodanie potrzebnego oprogramowania nie będzie problemem. Poniżej omówię kilka poleceń i programów związanych z zarządzaniem pakietami w Debianie.</p>
+<p><strong>aptitude</strong> - najbardziej wysokopoziomowy i "user-friendly" (z standardowych) program do zarządzania pakietami, mogący pracującować w tzw. "trybie pełnoekranowym". Do najważniejszych jego poleceń zaliczyć należy {podane w postaci: "znak wywołujący akcje w trybie pełnoekranowym" - "opis" ("komenda trybu linii poleceń")}:<br />
++ - instaluje wybrany pakiet (install)<br />
+- - odinstalowywuje wybrany pakiet (remove)<br />
+_ - wykasowywuje (w raz z plikami konfiguracyjnymi) wybrany pakiet (purge)<br />
+L - reinstaluje wybrany pakiet<br />
+R - rekonfiguruje wybrany pakiet {odpowiada wywołaniu: dpkg-reconfigure nazwa_pakietu}<br />
+= - wstrzymuje aktualizację wybranego pakietu (hold)<br />
+I - instaluje "pojedyńczo" (bez spełniania zależności) wybrany pakiet<br />
+M - dodaje znacznik automatycznej instalacji (markauto)<br />
+m - usuwa znacznik automatycznej instalacji (unmarkauto)<br />
+/ - wyszukiwanie pakietu (standardowo według nazwy, aby szukać w opisie <code>~d</code> szukany_tekst, aby znaleźć niedokasowane <code>~c</code> lub nieoficjalne <code>!~Odebian</code>, aby szukać tylko w zainstalowanych <code>~i</code>)<br />
+\ - wyszukiwanie wstecz<br />
+n - następny wyszukany pakiet<br />
+N - poprzedni wyszukany pakiet<br />
+l - filtr pakietów (np. <code>?any-version(~i !~Astable !~Atesting)</code> zawęzi listę wyświetlanych pakietów tylko do tych których zainstalowana wersja jest różna od wersji z stable i testing)<br />
+d - wyświetla zależności danego pakietu<br />
+r - wyświetla zależności od pakietu<br />
+i - wyświetla informacje o pakiecie<br />
+g - wykonuje zaplanowane akcje<br />
+q - wychodzi z aktualnego okna bądź z programu<br />
+? - pomoc<br />
+jednym z mniej znanych, a bardzo przydatnych wywołań jest <code>aptitude -F '%c%a%M %p %V' search '~Rdepends:<var>nazwa_pakietu</var>'</code> wypisujące pakietów wymaganych itp dla danego<br />
+więcej: menu Pomoc w programie i <man section="8">aptitude</man></p>
+
+<p>Warto także zwrócić uwage na plik konfiguracyjny aptitude (i apt'a) - <kbd class="path">/etc/apt/apt.conf</kbd> (lub jego odpowiedniki w katalogu domowym) - umożliwia on m.in. wyłączenie instalowania pakietów polecanych:</p>
+<pre>
+# nie trzyma polecanych i sugerowanych jak zalezności
+APT::AutoRemove::RecommendsImportant "false";
+APT::AutoRemove::SuggestsImportant "false";
+
+# nie instaluje automatycznie olecanych i sugerowanych
+APT::Install-Recommends "false";
+APT::Install-Suggests "false";
+
+# wyłączenie wyszukiwania przyrostowego w aptitude
+aptitude::UI::Incremental-Search "false";
+
+# wyłączenie pobierania aktualizacji listy pakietów jako pdiff
+# (polecam jeżeli stosunkowo rzadko aktualizujemy listy pakietów np. na testingu)
+Acquire::PDiffs "false";
+</pre>
+
+<p><strong>apt-get</strong> - program do pobierania i instalowania pakietów ...</p>
+
+<p><strong>apt-file</strong> - program umożliwiający wyszukiwanie pakietu zawierającego plik o podanej nazwie lub ścieżce (w odróżnieniu od <code>dpkg -S</code> nie ogranicza się tylko do zainstalowanych pakietów) - <code>apt-file update</code> - aktualizacja informacji o pakietach, <code>apt-file search <var>test</var></code> - wyszukanie pakietów zawierających plik test</p>
+
+<p><strong>apt-build</strong> - program ułatwiający kompilowanie Debiana ze źródeł, celem optymalizacji</p>
+
+<p><strong>dpkg</strong> - potężne niskopoziomowe narządzie do zarządzania pakietami. Do najważniejszych opcji zaliczyć należy:<br />
+-i nazwa_pakietu [...] - instaluje pakiet(y)<br />
+-l wzorzec_nazwy_pakietu [...] - wypisuje informacje o stanie pakietów (w szczególności czy jest zainstalowany)<br />
+-L nazwa_pakietu [...] - lista plików zawartych w pakietach<br />
+-S sciezka_do_pliku - lista pakietów zawierających plik<br />
+--get-selections - lista zainstalowanych pakietów wraz z statusem - aktualnie zainstalowany (install) lub usunięty (deinstall)<br />
+warto zwrócić uwagę na możliwość zapisania listy zainstalowanych pakietów do pliku  - <code>dpkg --get-selections &gt; pakiety.txt</code> oraz zaznaczenia do instalacji pakietów zapisanych w tak wygenerowanej liście - <code>dpkg --set-selections &lt; pakiety.txt</code><br />
+<br />
+więcej - tradycyjnie: <man section="8">dpkg</man>, <kbd class="cmd_help">dpkg --help | less</kbd></p>
+
+<p>Zachęcam do zapoznania się także z pozostałymi programami z rodziny apt-* (niektóre z nich to osobne paczki, wymagające doinstalowania) - umożliwiają one m.in. budowę systemu Debian ze źródeł (jak Gentoo ...) oraz programem aptsh (shell do zarządzania pakietami, podobnie jak jest w PLD).</p> 
+
+<p>Niekiedy przydatna może być sztuczka z fałszywym zainstalowaniem paczki. Operacja taka sprowadza się do:</p><ul>
+	<li>dodaniu do <kbd class="path">/var/lib/dpkg/status</kbd>:<pre>
+Package: <samp>NAZWA_PACZKI</samp>
+Status: install ok installed
+Version: 999.999.999</pre></li>
+	<li>utworzeniu pliku do <kbd class="path">/lib/dpkg/info/<samp>NAZWA_PACZKI</samp>.list</kbd></li>
+</ul>
+</article>

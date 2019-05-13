@@ -1,0 +1,840 @@
+<?xml version="1.0"?>
+<xsl:stylesheet version="1.0"
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+	xmlns:fn="http://www.w3.org/2005/xpath-functions"
+	exclude-result-prefixes="fn"
+> <!-- tak naprawdę 2.0 (gdy używany tryb latex), ale xsltproc (używany dla trybu xhtml) nie che przetwarzać 2.0 -->
+	
+	<xsl:output method='xml' encoding='utf-8' />
+	<!-- zaleznie od trybu -> ustawiane przez opcje parsera	<xsl:strip-space elements="*" /> -->
+	
+	<!-- parametry globalne arkusza: -->
+	<xsl:param name="tryb" /> <!-- tryb przetwarzania latex lub xhtml -->
+	<xsl:param name="page_url" /> <!-- bazowy adres strony dla trybu latex -->
+	<xsl:param name="photo_dir" /> <!-- adres katalogu z zdjęciami i galeriami względem katalogu głównego strony (zaczynający się i kończący /) -->
+	
+	<!-- definijemy zmienne które bedziemy używać jako nową linię i podwójną nową linię -->
+	<xsl:variable name="LF"><xsl:text>
+</xsl:text></xsl:variable>
+	<xsl:variable name="LF_2">
+		<xsl:value-of select="$LF"/>
+		<xsl:value-of select="$LF"/>
+	</xsl:variable>
+	
+	<!-- TYTUŁY / NAGŁÓWKI:
+		<title> konwertowane na stosowny <headX>
+	-->
+	<xsl:template match="head0" mode="xhtml">
+		<h1>
+			<xsl:attribute name="class">center <xsl:copy-of select="@class" /></xsl:attribute>
+			<xsl:copy-of select="attribute::node()" />
+			<xsl:apply-templates mode="xhtml" select="node()"/>
+		</h1>
+	</xsl:template>
+	<xsl:template match="head0" mode="latex">
+		<xsl:text>\newpage\hypertarget{</xsl:text>
+			<xsl:value-of select="@id" />
+		<xsl:text>}{\part{</xsl:text>
+			<xsl:apply-templates mode="latex" select="node()"/>
+		<xsl:text>}}</xsl:text>
+		<xsl:value-of select="$LF_2"/>
+	</xsl:template>
+	
+	
+	<xsl:template match="head1" mode="xhtml">
+		<h2>
+			<xsl:copy-of select="attribute::node()" />
+			<xsl:apply-templates mode="xhtml" select="node()"/>
+		</h2>
+	</xsl:template>
+	<xsl:template match="head1" mode="latex">
+		<xsl:text>\hypertarget{</xsl:text>
+			<xsl:value-of select="@id"/>
+		<xsl:text>}{\chapter{</xsl:text>
+			<xsl:apply-templates mode="latex" select="node()"/>
+		<xsl:text>}}</xsl:text>
+		<xsl:value-of select="$LF_2"/>
+	</xsl:template>
+	
+	<xsl:template match="head2" mode="xhtml">
+		<h3>
+			<xsl:attribute name="class">center <xsl:copy-of select="@class" /></xsl:attribute>
+			<xsl:copy-of select="attribute::node()" />
+			<xsl:apply-templates mode="xhtml" select="node()"/>
+		</h3>
+	</xsl:template>
+	<xsl:template match="head2" mode="latex">
+		<xsl:text>\hypertarget{</xsl:text>
+			<xsl:value-of select="@id"/>
+		<xsl:text>}{\section{</xsl:text>
+			<xsl:apply-templates mode="latex" select="node()"/>
+		<xsl:text>}}</xsl:text>
+		<xsl:value-of select="$LF_2"/>
+	</xsl:template>
+	
+	<xsl:template match="head3" mode="xhtml">
+		<h4>
+			<xsl:copy-of select="attribute::node()" />
+			<xsl:apply-templates mode="xhtml" select="node()"/>
+		</h4>
+	</xsl:template>
+	<xsl:template match="head3" mode="latex">
+		<xsl:text>\hypertarget{</xsl:text>
+			<xsl:value-of select="@id"/>
+		<xsl:text>}{\subsection{</xsl:text>
+			<xsl:apply-templates mode="latex" select="node()"/>
+		<xsl:text>}}</xsl:text>
+		<xsl:value-of select="$LF_2"/>
+	</xsl:template>
+	
+	<xsl:template match="head4" mode="xhtml">
+		<h5>
+			<xsl:copy-of select="attribute::node()" />
+			<xsl:apply-templates mode="xhtml" select="node()"/>
+		</h5>
+	</xsl:template>
+	<xsl:template match="head4" mode="latex">
+		<xsl:text>\hypertarget{</xsl:text>
+			<xsl:value-of select="@id"/>
+		<xsl:text>}{\subsubsection{</xsl:text>
+			<xsl:apply-templates mode="latex" select="node()"/>
+		<xsl:text>}}</xsl:text>
+		<xsl:value-of select="$LF_2"/>
+	</xsl:template>
+	
+	<xsl:template match="head5" mode="xhtml">
+		<h6>
+			<xsl:copy-of select="attribute::node()" />
+			<xsl:apply-templates mode="xhtml" select="node()"/>
+		</h6>
+	</xsl:template>
+	<xsl:template match="head5" mode="latex">
+		<xsl:text>\hypertarget{</xsl:text>
+			<xsl:value-of select="@id"/>
+		<xsl:text>}{\paragraph{</xsl:text>
+			<xsl:apply-templates mode="latex" select="node()"/>
+		<xsl:text>}}</xsl:text>
+		<xsl:value-of select="$LF_2"/>
+	</xsl:template>
+	
+	<xsl:template match="head6" mode="latex">
+		<xsl:text>\hypertarget{</xsl:text>
+			<xsl:value-of select="@id"/>
+		<xsl:text>}{\subparagraph{</xsl:text>
+			<xsl:apply-templates mode="latex" select="node()"/>
+		<xsl:text>}}</xsl:text>
+		<xsl:value-of select="$LF_2"/>
+	</xsl:template>
+	
+	<xsl:template match="div[@id]" mode="latex">
+		<xsl:text>\hypertarget{</xsl:text>
+			<xsl:value-of select="@id"/>
+		<xsl:text>}{</xsl:text>
+			<xsl:apply-templates mode="latex" select="node()"/>
+		<xsl:text>}</xsl:text>
+	</xsl:template>
+	
+	<xsl:template match="article" mode="xhtml">
+		<xsl:apply-templates mode="xhtml" select="node()"/>
+	</xsl:template>
+	<xsl:template match="article" mode="latex">
+		<xsl:apply-templates mode="latex" select="node()"/>
+	</xsl:template>
+	
+	<!-- ODNOSNIKI:
+		<wiki pl="link" en="link">text</wiki> - linki do Wikipedii
+		<doc url="" mirror="">text</doc> - linki do materiałów archiwizowanych
+		<datasheet id=""> - linki do dokumentacji układów elektronicznych (wyszukiwanie na EleNota po zawartości atrybutu id)
+		<homepage> - linki do stron domowych projektów, oprogramowania itp postaci:
+			<homepage url="adres" mirror="">opis</homepage> lub <homepage mirror="">adres</homepage>
+		<id_link id="identyfikator:wewnetrzny"> - obsługiwany w skrypcie AWK
+		<photo_link tag="tag">opis</photo_link> - link do galerii zdjęć związanych z danym tagiem
+		<photo_link path="sciezka_wzgledem katalogu z zdjęciami">opis</photo_link> - link do zdjęcia
+		<sch_link name="nazwa_bez_rozszerzenia">opis</sch_link> - link do pliku .sch z dodaniem linków do wersji PDF i PNG
+			na potrzeby generacji latex do tagu jest także automatycznie wstawiany dir=""
+		<pcb_link name="nazwa_bez_rozszerzenia">opis</pcb_link> - link do pliku .pcb z dodaniem linków do wersji PDF
+			na potrzeby generacji latex do tagu jest także automatycznie wstawiany dir=""
+		<a> - standardowe linki HTML
+	-->
+	<xsl:template match="wiki" mode="xhtml">
+		<xsl:variable name="base_lang"><xsl:choose>
+			<xsl:when test="@pl">pl</xsl:when>
+			<xsl:when test="@en">en</xsl:when>
+		</xsl:choose></xsl:variable>
+		<a class="Wikipedia" href="http://{$base_lang}.wikipedia.org/wiki/{@*[local-name()=$base_lang]}">
+			<xsl:apply-templates mode="xhtml" select="node()"/>
+		</a>
+	</xsl:template>
+	<xsl:template match="wiki" mode="latex">
+		<xsl:variable name="base_lang"><xsl:choose>
+			<xsl:when test="@pl">pl</xsl:when>
+			<xsl:when test="@en">en</xsl:when>
+		</xsl:choose></xsl:variable>
+		<xsl:call-template name="latex_link">
+			<xsl:with-param name="url">
+				<xsl:text>http://</xsl:text>
+				<xsl:value-of select="$base_lang"/>
+				<xsl:text>.wikipedia.org/wiki/</xsl:text>
+				<xsl:value-of select="@*[local-name()=$base_lang]"/>
+			</xsl:with-param>
+			<xsl:with-param name="txt" select="node()"/>
+		</xsl:call-template>
+	</xsl:template>
+	
+	<!--
+	<xsl:template match="doc[@mirror]|homepage[@mirror]" mode="xhtml">
+		<span class="linkWithMirror">
+			<xsl:apply-templates mode="xhtml-reallinks" select="."/>
+			<a class="mirror" href="[[!URLPREFIX!]]/MIRRORS/{@mirror}">kopia lokalna</a>
+		</span>
+	</xsl:template>
+	<xsl:template match="doc[not(@mirror)]|homepage[not(@mirror)]" mode="xhtml">
+		<xsl:apply-templates mode="xhtml-reallinks" select="."/>
+	</xsl:template>
+	-->
+	<xsl:template match="doc|homepage" mode="xhtml">
+		<xsl:apply-templates mode="xhtml-reallinks" select="."/>
+	</xsl:template>
+
+	<xsl:template match="doc" mode="xhtml-reallinks">
+		<a href="{@url}" class="ext_doc">
+			<xsl:apply-templates mode="xhtml" select="node()"/>
+		</a>
+	</xsl:template>
+	<xsl:template match="doc" mode="latex">
+		<xsl:call-template name="latex_link">
+			<xsl:with-param name="url" select="@url"/>
+			<xsl:with-param name="txt" select="node()"/>
+		</xsl:call-template>
+	</xsl:template>
+	
+	<xsl:template match="homepage" mode="xhtml-reallinks">
+		<a class="ext_homepage">
+			<xsl:attribute name="href"><xsl:choose>
+				<xsl:when test="@url">
+					<xsl:value-of select="@url"/>
+				</xsl:when><xsl:otherwise>
+					<xsl:value-of select="node()"/>
+				</xsl:otherwise>
+			</xsl:choose></xsl:attribute>
+			<xsl:apply-templates mode="xhtml" select="node()"/>
+		</a>
+	</xsl:template>
+	<xsl:template match="homepage" mode="latex">
+		<xsl:call-template name="latex_link">
+			<xsl:with-param name="url"><xsl:choose>
+				<xsl:when test="@url">
+					<xsl:value-of select="@url"/>
+				</xsl:when><xsl:otherwise>
+					<xsl:value-of select="node()"/>
+				</xsl:otherwise>
+			</xsl:choose></xsl:with-param>
+			<xsl:with-param name="txt" select="node()"/>
+		</xsl:call-template>
+	</xsl:template>
+	
+	<xsl:template match="datasheet" mode="xhtml">
+		<a class="ext_doc" href="http://www.elenota.pl/search.php?man=--wszyscy--&amp;ile=50&amp;start=0&amp;szuk={@id}">
+			<xsl:apply-templates mode="xhtml" select="node()"/>
+		</a>
+	</xsl:template>
+	<xsl:template match="datasheet" mode="latex">
+		<xsl:call-template name="latex_link">
+			<xsl:with-param name="url">
+				<xsl:text>http://www.elenota.pl/search.php?man=--wszyscy--\&amp;ile=50\&amp;start=0\&amp;szuk=</xsl:text>
+				<xsl:value-of select="@id"/>
+			</xsl:with-param>
+			<xsl:with-param name="txt" select="node()"/>
+		</xsl:call-template>
+	</xsl:template>
+	
+	<xsl:template match="photo_link[@path]" mode="xhtml">
+		<a class="int" href="[[!URLPREFIX!]]/{$photo_dir}{@path}">
+			<xsl:apply-templates mode="xhtml" select="node()"/>
+		</a>
+	</xsl:template>
+	<xsl:template match="photo_link[@path]" mode="latex">
+		<xsl:call-template name="latex_link">
+			<xsl:with-param name="url">
+				<xsl:value-of select="$page_url" />
+				<xsl:value-of select="$photo_dir" />
+				<xsl:value-of select="@path" />
+			</xsl:with-param>
+			<xsl:with-param name="txt" select="node()"/>
+		</xsl:call-template>
+	</xsl:template>
+	
+	<xsl:template match="photo_link[@tag]" mode="xhtml">
+		<a class="int" href="[[!URLPREFIX!]]/{$photo_dir}/{@tag}.0.[[!URLPOSTFIX!]]">
+			<xsl:apply-templates mode="xhtml" select="node()"/>
+		</a>
+	</xsl:template>
+	<xsl:template match="photo_link[@tag]" mode="latex">
+		<xsl:call-template name="latex_link">
+			<xsl:with-param name="url">
+				<xsl:value-of select="$page_url" />
+				<xsl:value-of select="$photo_dir" />
+				<xsl:value-of select="@tag" />
+				<xsl:text>.0.[[!URLPOSTFIX!]]</xsl:text>
+			</xsl:with-param>
+			<xsl:with-param name="txt" select="node()"/>
+		</xsl:call-template>
+	</xsl:template>
+	
+	<xsl:template match="sch_link" mode="xhtml">
+		<a class="int" href="./{@name}.sch">
+			<xsl:apply-templates mode="xhtml" select="node()"/>
+		</a> (<a class="int" href="./{@name}.pdf">PDF</a>, <a class="int" href="./{@name}.png">PNG</a>)
+	</xsl:template>
+	<xsl:template match="sch_link" mode="latex">
+		<xsl:call-template name="latex_link">
+			<xsl:with-param name="url">
+				<xsl:value-of select="$page_url" />
+				<xsl:value-of select="@dir" />
+				<xsl:value-of select="@name" />
+				<xsl:text>.sch</xsl:text>
+			</xsl:with-param>
+			<xsl:with-param name="txt" select="node()"/>
+		</xsl:call-template>
+		<xsl:text>(PDF: \url{</xsl:text>
+			<xsl:value-of select="$page_url" />
+			<xsl:value-of select="@dir" />
+			<xsl:value-of select="@name" />
+		<xsl:text>.pdf})</xsl:text>
+	</xsl:template>
+	
+	<xsl:template match="pcb_link" mode="xhtml">
+		<a class="int" href="./{@name}.pcb">
+			<xsl:apply-templates mode="xhtml" select="node()"/>
+		</a> (<a class="int" href="./{@name}.pcb.pdf">PDF</a>)
+	</xsl:template>
+	<xsl:template match="pcb_link" mode="latex">
+		<xsl:call-template name="latex_link">
+			<xsl:with-param name="url">
+				<xsl:value-of select="$page_url" />
+				<xsl:value-of select="@dir" />
+				<xsl:value-of select="@name" />
+				<xsl:text>.pcb</xsl:text>
+			</xsl:with-param>
+			<xsl:with-param name="txt" select="node()"/>
+		</xsl:call-template>
+		<xsl:text>(PDF: \url{</xsl:text>
+			<xsl:value-of select="$page_url" />
+			<xsl:value-of select="@dir" />
+			<xsl:value-of select="@name" />
+		<xsl:text>.pcb.pdf})</xsl:text>
+	</xsl:template>
+	
+	<xsl:template match="a[@href]" mode="latex">
+		<xsl:variable name="adres"><xsl:choose>
+			<!-- delokalizowanie linków (usunięcie poczatkowego ./ -->
+			<xsl:when test="starts-with(@href,'./')">
+				<xsl:value-of select="substring-after(@href,'./')"/>
+			</xsl:when>
+			<xsl:when test="starts-with(@href,'[[!URLPREFIX!]]/[[!URLPOSTFIX!]]')">
+				<xsl:value-of select="substring-after(@href,'[[!URLPREFIX!]]/[[!URLPOSTFIX!]]')"/>
+			</xsl:when>
+			<!-- dodanie $PAGE_URL w linkach globalnych -->
+			<xsl:when test="starts-with(@href,'/')">
+				<xsl:value-of select="concat($page_url, @href)"/>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="@href"/>
+			</xsl:otherwise>
+		</xsl:choose></xsl:variable>
+		
+		<xsl:choose>
+			<!-- gdy href jest lokalny to używamy \hyperlink -->
+			<xsl:when test="starts-with($adres,'#')">
+				<xsl:text>\hyperlink{</xsl:text> <!-- zamiast \ref bądź \autoref -->
+					<xsl:value-of select="substring-after(@href,'#')"/>
+				<xsl:text>}{</xsl:text>
+					<xsl:apply-templates mode="latex" select="node()"/>
+				<xsl:text>}</xsl:text>
+			</xsl:when>
+			
+			<!-- gdy href taki sam jak opis to używamy \url{} -->
+			<xsl:when test="$adres = .">
+				<xsl:text>\url{</xsl:text>
+					<xsl:value-of select="$adres"/>
+				<xsl:text>}</xsl:text>
+			</xsl:when>
+			
+			<!-- w pozostałych wypadkach używamy \href
+				a adres linku podajemy w przypisach  -->
+			<xsl:otherwise>
+				<xsl:call-template name="latex_link">
+					<xsl:with-param name="url" select="$adres"/>
+					<xsl:with-param name="txt" select="node()"/>
+				</xsl:call-template>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+	
+	
+	
+	<!-- OBRAZKI:
+		<img_from_src name="nazwa_bez.rozszerzenia" type="rozszerzenie_pliku_zrodlowego" alt="opis obrazka" /> - obrazki generowane dynamicznie ze źródeł
+			na potrzeby generacji latex do tagu jest także automatycznie wstawiany dir=""
+		<sch_show name="" /> - pokazanie pliku sch (tylko tryb latex)
+		<img> - standardowe obrazki HTML
+	-->
+	<xsl:template match="img_from_src" mode="xhtml">
+		<span class="autosize" id="{generate-id()}"><span><a href="#{generate-id()}">POWIĘKSZ</a></span><a class="int" href="./{@name}.{@type}"><img src="./{@name}.png" alt="{@alt}" style="max-width:100%" /></a></span>
+	</xsl:template>
+	<xsl:template match="img_from_src" mode="latex">
+		<xsl:text>\href{</xsl:text>
+			<xsl:value-of select="$page_url"/>
+			<xsl:value-of select="@dir"/>
+			<xsl:value-of select="@name"/>
+			<xsl:text>.</xsl:text>
+			<xsl:value-of select="@type"/>
+		<xsl:text>}{\adjincludegraphics[max size={\linewidth}{0.9\textheight}]{</xsl:text>
+			<xsl:value-of select="@name"/>
+		<xsl:text>}}</xsl:text>
+	</xsl:template>
+	<xsl:template match="img" mode="latex">
+		<xsl:text>\adjincludegraphics[max size={\linewidth}{0.9\textheight}]{</xsl:text>
+			<xsl:value-of select="fn:replace(@src, '[.][^.]*$', '')"/>
+		<xsl:text>}</xsl:text>
+	</xsl:template>
+	
+	<xsl:template match="sch_show" mode="xhtml">
+	</xsl:template>
+	<xsl:template match="sch_show" mode="latex">
+		<xsl:text>\textbf{\texttt{</xsl:text>
+			<xsl:call-template name="latex_escape"><xsl:with-param name="txt" select="@name"/></xsl:call-template>
+		<xsl:text>.sch}:\\}</xsl:text>
+		<xsl:text>\adjincludegraphics[max size={\linewidth}{0.9\textheight}]{</xsl:text>
+			<xsl:value-of select="@name"/>
+		<xsl:text>}</xsl:text>
+		<xsl:value-of select="$LF_2"/>
+	</xsl:template>
+	
+	<xsl:template match="span[@latex_img_width]" mode="xhtml">
+		<xsl:apply-templates mode="xhtml" select="node()" />
+	</xsl:template>
+	<xsl:template match="span[@latex_img_width]" mode="latex">
+		<xsl:if test="@class='left'">
+			<xsl:text>\begin{wrapfigure}{l}{</xsl:text>
+		</xsl:if>
+		<xsl:if test="@class='right'">
+			<xsl:text>\begin{wrapfigure}{r}{</xsl:text>
+		</xsl:if>
+		<xsl:value-of select="2.6 * @latex_img_width div 150"/>
+		<xsl:text>cm}</xsl:text>
+		
+		<xsl:apply-templates mode="latex" select="node()" />
+		
+		<xsl:text>\end{wrapfigure}</xsl:text>
+	</xsl:template>
+	
+	
+	<!-- FORMATOWANIA SPECJALNE (1):
+		<man> - strony manuali, opcjonalnie może mieć atrybut section wskazujący rozdział manuala
+		<kbd class="path"> - ścieżki
+		<kbd class="cmd_help"> - komendy zawierające dodatkowe info - źródła informacji typu info, czy -help
+		<kbd class="path_help"> - ścieżki do dokumentacji
+		
+		<code> <pre> - kody skryptów, wpisy konfiguracyjne, komendy, ...
+		<var> <samp> - zmienne i przykłady w ramach powyższych
+	-->
+	<xsl:template match="man" mode="xhtml">
+		<kbd class="cmd_help">
+			<xsl:text>man </xsl:text>
+			<xsl:value-of select="@section"/>
+			<xsl:text> </xsl:text>
+			<xsl:apply-templates mode="xhtml" select="node()"/>
+		</kbd>
+	</xsl:template>
+	<xsl:template match="man" mode="latex">
+		<xsl:text>\mintinline{sh}{man </xsl:text>
+			<xsl:value-of select="@section"/>
+			<xsl:text> </xsl:text>
+			<xsl:apply-templates mode="latex-special" select="text()|var|samp|span"/>
+		<xsl:text>}</xsl:text>
+	</xsl:template>
+	<xsl:template match="kbd|code" mode="latex">
+		<xsl:text>\mintinline{txt}{</xsl:text>
+			<xsl:apply-templates mode="latex-special" select="text()|var|samp|span"/>
+		<xsl:text>}</xsl:text>
+	</xsl:template>
+	<xsl:template match="pre" mode="latex">
+		<xsl:text>\begin{minted}{txt}</xsl:text>
+			<xsl:if test="not(starts-with(text()[1],$LF))">
+				<xsl:value-of select="$LF"/>
+			</xsl:if>
+			<xsl:apply-templates mode="latex-special" select="text()|var|samp|span"/>
+			<xsl:if test="not(ends-with(text()[1],$LF))">
+				<xsl:value-of select="$LF"/>
+			</xsl:if>
+		<xsl:text>\end{minted}</xsl:text>
+		<xsl:value-of select="$LF_2"/>
+	</xsl:template>
+	
+	<xsl:template match="var|samp" mode="latex">
+		<xsl:text>\textit{</xsl:text>
+			<xsl:apply-templates mode="latex" select="node()"/>
+		<xsl:text>}</xsl:text>
+	</xsl:template>
+	<!-- konieczne inne traktowanie dla span i text()
+	     gdyż w minted i mintinline wyłączona interpretacja specjalnych -->
+	<xsl:template match="text()|var|samp|span" mode="latex-special">
+		<xsl:value-of select="."/>
+	</xsl:template>
+
+	
+	
+	<!-- RÓWNANIA:
+		<eq> - proste równania matematyczne - xhtml (<sub> i <sup>)
+		<eq_latex> - złożone równania matematyczne - latex
+		             (dla wyjścia xhtml przetwarzany przez parse_eq_latexuation)
+	-->
+	<xsl:template match="eq" mode="xhtml">
+		<i>
+			<xsl:attribute name="class">equation <xsl:copy-of select="@class" /></xsl:attribute>
+			<xsl:copy-of select="attribute::node()" />
+			<xsl:apply-templates mode="xhtml" select="node()"/>
+		</i>
+	</xsl:template>
+	<xsl:template match="eq" mode="latex">
+		<xsl:text>$</xsl:text>
+			<xsl:apply-templates mode="latex" select="node()"/>
+		<xsl:text>$</xsl:text>
+	</xsl:template>
+	<xsl:template match="eq//sub" mode="latex">
+		<xsl:text>_{</xsl:text>
+			<xsl:apply-templates mode="latex" select="node()"/>
+		<xsl:text>}</xsl:text>
+	</xsl:template>
+	<xsl:template match="eq//sup" mode="latex">
+		<xsl:text>^{</xsl:text>
+			<xsl:apply-templates mode="latex" select="node()"/>
+		<xsl:text>}</xsl:text>
+	</xsl:template>
+	<xsl:template match="eq_latex" mode="latex">
+		<xsl:text>$</xsl:text>
+			<xsl:value-of select="."/>
+		<xsl:text>$</xsl:text>
+	</xsl:template>
+	
+	<!-- FORMATOWANIA SPECJALNE (2):
+		<dfn> - nazwy
+		<cite> - elementy cytowane
+		
+		<strong> - wyroznione
+		<em> - lekkie wyroznienie
+		
+		<TODO> - plany rozwojowe itp
+		<tmp> - informacje tymczasowe
+	-->
+	<xsl:template match="TODO" mode="xhtml">
+		<xsl:choose>
+			<xsl:when test="@intro">
+				<p id="todo" class="center"><strong>
+					<xsl:value-of select="@intro"/>
+				</strong></p>
+				<ul>
+					<xsl:apply-templates mode="xhtml" select="node()"/>
+				</ul>
+			</xsl:when>
+			<xsl:otherwise>
+				<p id="todo">
+					<xsl:apply-templates mode="xhtml" select="node()"/>
+				</p>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+	<xsl:template match="TODO" mode="latex">
+		<xsl:value-of select="$LF_2"/>
+		<xsl:choose>
+			<xsl:when test="@intro">
+				<xsl:value-of select="@intro"/>
+				<xsl:text>\begin{itemize}</xsl:text>
+					<xsl:apply-templates mode="latex" select="node()"/>
+				<xsl:text>\end{itemize}</xsl:text>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:text>\textit{</xsl:text>
+					<xsl:apply-templates mode="latex" select="node()"/>
+				<xsl:text>}</xsl:text>
+			</xsl:otherwise>
+		</xsl:choose>
+		<xsl:value-of select="$LF_2"/>
+	</xsl:template>
+
+	<xsl:template match="tmp" mode="xhtml">
+		<i>
+			<xsl:attribute name="class">tmp <xsl:copy-of select="@class" /></xsl:attribute>
+			<xsl:copy-of select="attribute::node()" />
+			<xsl:apply-templates mode="xhtml" select="node()"/>
+		</i>
+	</xsl:template>
+	<xsl:template match="dfn|cite|em|tmp" mode="latex">
+		<xsl:text>\textit{</xsl:text>
+			<xsl:apply-templates mode="latex" select="node()"/>
+		<xsl:text>}</xsl:text>
+	</xsl:template>
+	<xsl:template match="strong" mode="latex">
+		<xsl:text>\textbf{</xsl:text>
+			<xsl:apply-templates mode="latex" select="node()"/>
+		<xsl:text>}</xsl:text>
+	</xsl:template>
+	
+	
+	
+	<!-- ZNACZNIKI BLOKOWE ITP
+		<p> <br> <ul> <ol> <li> - standardowe znaczniki HTML dla akapitów, łamań linii, list numerowanych i wypunktowywanych
+	-->
+	<xsl:template match="p" mode="latex">
+		<xsl:apply-templates mode="latex" select="node()"/>
+		<xsl:value-of select="$LF_2"/>
+	</xsl:template>
+	<xsl:template match="br" mode="latex">
+		<xsl:text>\\</xsl:text>
+		<xsl:value-of select="$LF"/>
+	</xsl:template>
+	
+	<xsl:template match="ul" mode="latex">
+		<xsl:text>\begin{itemize}</xsl:text>
+		<xsl:apply-templates mode="latex" select="node()"/>
+		<xsl:text>\end{itemize}</xsl:text>
+		<xsl:value-of select="$LF_2"/>
+	</xsl:template>
+	<xsl:template match="ol" mode="latex">
+		<xsl:text>\begin{enumerate}</xsl:text>
+		<xsl:apply-templates mode="latex" select="node()"/>
+		<xsl:text>\end{enumerate}</xsl:text>
+		<xsl:value-of select="$LF_2"/>
+	</xsl:template>
+	<xsl:template match="li" mode="latex">
+		<xsl:text>\item </xsl:text>
+		<xsl:apply-templates mode="latex" select="node()"/>
+		<xsl:value-of select="$LF"/>
+	</xsl:template>
+	
+	
+	
+	<!-- TABELE:
+		<table> - standardowy znacznik HTML do tabel
+		<col> - znacznik z informacją o kolumnach, używany tylko dla potrzeb generacji tabel latex'owych
+		<tr> - standardowy znacznik HTML do wierszy, usunięcie atrybutów (zwłaszcza latex="")
+		<td> - standardowy znacznik HTML do komórek, usunięcie znaczników z atrybutem skip (pochłoniętych przez rowspan) w trybie HTML (używane dla LateX)
+	-->
+	<xsl:template match="col" mode="xhtml">
+	</xsl:template>
+	<xsl:template match="td[@skip]" mode="xhtml">
+	</xsl:template>
+	<xsl:template match="tr" mode="xhtml">
+		<tr>
+			<xsl:apply-templates mode="xhtml" select="node()"/>
+		</tr>
+	</xsl:template>
+	<xsl:template match="skiptd" mode="xhtml">
+	</xsl:template>
+	
+	<xsl:template match="table" mode="latex">
+		<xsl:text>\begin{adjustbox}{max size={\linewidth}{0.9\textheight}}\begin{tabu}</xsl:text>
+		<xsl:choose>
+			<xsl:when test="@latex">
+				<xsl:value-of select="@latex"/>
+			</xsl:when>
+			<xsl:when test="@latexscale">
+				<xsl:text> to </xsl:text>
+				<xsl:value-of select="@latexscale"/>
+				<xsl:text>\linewidth </xsl:text>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:text> spread 2pt </xsl:text>
+			</xsl:otherwise>
+		</xsl:choose>
+		<xsl:text>{</xsl:text>
+		<xsl:apply-templates mode="latex-columninfo" select="col"/>
+		<xsl:text>}</xsl:text>
+		<xsl:apply-templates mode="latex" select="tr"/>
+		<xsl:text>\taburulecolor{white}</xsl:text>
+		<xsl:apply-templates mode="latex-specialrow" select="col"/>
+		<xsl:text>\end{tabu}\end{adjustbox}</xsl:text>
+		<xsl:value-of select="$LF_2"/>
+	</xsl:template>
+	<xsl:template match="col" mode="latex-columninfo">
+		<xsl:choose>
+			<xsl:when test="@latex">
+				<xsl:value-of select="@latex"/>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:choose>
+					<xsl:when test="../@latexborder='1'">
+						<xsl:text>|X[c,p]</xsl:text>
+						<xsl:if test="position() = last()">
+							<xsl:text>|</xsl:text>
+						</xsl:if>
+					</xsl:when><xsl:otherwise>
+						<xsl:text>X[c,p]</xsl:text>
+					</xsl:otherwise>
+				</xsl:choose>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+	<xsl:template match="col" mode="latex-specialrow">
+		<xsl:if test="position() != last()">
+			<xsl:text>&amp;</xsl:text>
+		</xsl:if>
+	</xsl:template>
+	
+	<xsl:template match="tr" mode="latex">
+		<xsl:apply-templates mode="latex" select="td"/>
+		<xsl:text> \\</xsl:text>
+		<xsl:if test="@latex">
+			<xsl:value-of select="@latex"/>
+		</xsl:if>
+		<xsl:value-of select="$LF"/>
+	</xsl:template>
+	<xsl:template match="tr/td" mode="latex">
+		<xsl:if test="@colspan">
+			<xsl:text>\multicolumn{</xsl:text>
+			<xsl:value-of select="@colspan"/>
+			<xsl:text>}{c</xsl:text>
+			<xsl:if test="../../@latexborder='1'">
+				<xsl:text>|</xsl:text>
+			</xsl:if>
+			<xsl:text>}{</xsl:text>
+		</xsl:if>
+		<xsl:if test="@rowspan">
+			<xsl:text>\multirow{</xsl:text>
+			<xsl:value-of select="@rowspan"/>
+			<xsl:text>}{</xsl:text>
+			<xsl:value-of select="@colspan"/>
+			<xsl:text>\tabucolX}{\centering{}</xsl:text>
+		</xsl:if>
+		<xsl:if test="not(@skip)">
+			<xsl:apply-templates mode="latex" select="node()"/>
+		</xsl:if>
+		<xsl:if test="@rowspan">
+			<xsl:text>}</xsl:text>
+		</xsl:if>
+		<xsl:if test="@colspan">
+			<xsl:text>}</xsl:text>
+		</xsl:if>
+		<!-- gdy jest to nie ostatni <td> w danym <tr> to wypisujemy & -->
+		<xsl:if test="position() != last()">
+			<xsl:text>&amp;</xsl:text>
+		</xsl:if>
+	</xsl:template>
+	
+	
+	
+	<!-- TAGI BLOKUJACE W WYBRANYCH TRYBACH:
+		<only_pdf> - zawartość wstawiana tylko przy generowaniu pdf
+		<only_xhtml>  - zawartość wstawiana tylko przy generowaniu html
+	-->
+	<xsl:template match="only_pdf" mode="xhtml">
+	</xsl:template>
+	<xsl:template match="only_pdf" mode="latex">
+		<xsl:apply-templates mode="latex" select="node()"/>
+	</xsl:template>
+	
+	<xsl:template match="only_xhtml" mode="xhtml">
+		<xsl:apply-templates mode="xhtml" select="node()"/>
+	</xsl:template>
+	<xsl:template match="only_xhtml" mode="latex">
+	</xsl:template>
+	
+	
+	
+	<!-- DZIAŁANIA SPECJALNE DLA LATEX -->
+	
+	<xsl:template name="latex_link" >
+		<xsl:param name="url" /><xsl:param name="txt" />
+		<xsl:param name="foot_url" select="$url" />
+		<xsl:text>\href{</xsl:text>
+			<xsl:value-of select="$url"/>
+		<xsl:text>}{</xsl:text>
+			<xsl:apply-templates mode="latex" select="$txt"/>
+		<xsl:text>}\footnote{</xsl:text>
+			<xsl:call-template name="latex_escape"><xsl:with-param name="txt" select="$foot_url"/></xsl:call-template>
+		<xsl:text>}</xsl:text>
+	</xsl:template>
+	
+	<xsl:template name="latex_escape" >
+		<xsl:param name="txt" />
+		<!-- uwaga na temat interpretacji poniższego kodu - xsl wymaga dodatkowo:
+			* podwojenia \ po obu stronach,
+			* zabezpieczenia $ poprzez poprzedzenie pojedynczym \ po obu stronach,
+			* zabezpieczenia { i } poprzez poprzedzenie pojedynczym \ po lewej stronie,
+		-->
+		<xsl:variable name="tekst1" select="fn:replace($txt, '\\', '\$\\backslash\$')" />
+		<xsl:variable name="tekst2" select="fn:replace($tekst1, '%', '\\%')" />
+		<xsl:variable name="tekst3" select="fn:replace($tekst2, '#', '\\#')" />
+		<xsl:variable name="tekst4" select="fn:replace($tekst3, '_', '\\_')" />
+		<xsl:variable name="tekst5" select="fn:replace($tekst4, '&amp;', '\\&amp;')" />
+		<xsl:variable name="tekst7" select="fn:replace($tekst5, '\}', '\\}')" />
+		<xsl:variable name="tekst8" select="fn:replace($tekst7, '\{', '\\{')" />
+		<xsl:variable name="tekst9" select="fn:replace($tekst8, '\^', '\\^{}')" />
+		<xsl:variable name="tekstA" select="fn:replace($tekst9, '\$', '\\\$')" />
+		<xsl:variable name="tekst"  select="fn:replace($tekstA, '\\\$\\backslash\\\$', '\$\\backslash\$')" />
+		<!-- uwaga na temat interpretacji powyższego kodu - xsl wymaga dodatkowo:
+			* podwojenia \ po obu stronach,
+			* zabezpieczenia $ poprzez poprzedzenie pojedynczym \ po obu stronach,
+			* zabezpieczenia { i } poprzez poprzedzenie pojedynczym \ po lewej stronie,
+		-->
+		<xsl:value-of select="$tekst"/>
+	</xsl:template>
+
+	<!-- w przypadku LaTeX zawartość tagów latex przenosimy bez zmian
+	     w przypadku XHTML tagi te nie powinny wystąpić w dokumencie źródłowym -->
+	<xsl:template match="latex" mode="latex">
+		<xsl:value-of select="."/>
+	</xsl:template>
+	<xsl:template match="latex" mode="xhtml">
+	</xsl:template>
+	
+	<!-- zastępujemy tag space zwykła spacją
+	     (używany w trybie latex do zabezpieczenia zwykłej pomiędzy dwoma tagami) -->
+	<xsl:template match="space" mode="latex">
+		<xsl:text> </xsl:text>
+	</xsl:template>
+	
+	<!-- dla nodów tekstowych wykonujemy zabezpieczenia znaków specjalnych -->
+	<xsl:template match="text()" mode="latex">
+		<xsl:call-template name="latex_escape"><xsl:with-param name="txt" select="."/></xsl:call-template>
+	</xsl:template>
+	
+	<!-- a dla jawnie niezdefiniowanych elementów nie wyświetlamy nic -->
+	<xsl:template match="*|@*|processing-instruction()" mode="latex">
+	</xsl:template>
+	
+	
+	
+	<!-- DZIAŁANIA SPECJALNE DLA XHTML -->
+	
+	<!-- w przypadku XHTML wszystko pozostałe przepisujemy bez zmian
+	     pozwala to na nie definiować tutaj opisu tagów które nie mają być modyfikowane -->
+	<xsl:template match="*|@*|processing-instruction()|text()" mode="xhtml">
+		<xsl:copy>
+			<xsl:apply-templates mode="xhtml" select="*|@*|processing-instruction()|text()" />
+		</xsl:copy>
+	</xsl:template>
+	<!-- warto zauważyć że taka instrukcja w połączeniu z zastosowaniem jej
+	     do wszystkich dzieci głównego elementu np. poprzez
+			<xsl:template match="doc"><doc><xsl:apply-templates mode="xhtml" /></doc></xsl:template>
+	     spowoduje wypisanie dokumentu XML z wykonaniem tylko jawnie podanych modyfikacji
+	     i ewentualną modyfikacją formatowania
+	-->
+	
+	
+	
+	<!-- ELEMENT GLOWNY -->
+	<xsl:template match="document">
+		<xsl:variable name="tryb_low"
+			select="translate($tryb, 'ABCDEFGHIJKLMNOPRSTWUYZQX', 'abcdefghijklmnoprstwuyzqx')" />
+		<xsl:choose>
+			<xsl:when test="$tryb_low='xhtml'">
+				<xsl:apply-templates mode="xhtml" />
+			</xsl:when>
+			<xsl:when test="$tryb_low='latex'">
+				<xsl:apply-templates mode="latex" />
+			</xsl:when>
+		</xsl:choose>
+	</xsl:template>
+</xsl:stylesheet>

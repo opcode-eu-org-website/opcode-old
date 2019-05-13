@@ -1,0 +1,49 @@
+<article>
+<title>Debugowanie (gdb)</title>
+
+<p>GDB czyli GNU Debugger jest narzędziem służącym do podglądania działania innego programu. Umożliwia ustawianie pułapek (powodujących przerwanie wykonywania na wywołaniu określonej funkcji, uruchamianie programu linia po linii, podgląd wartości zmiennych, ... . Umożliwia także sprawdzenie co program robił gdy się wywalił (na podstawie pliku core). Jest to narzędzie programistyczne, które niewątpliwie warto poznać, gdyż znacznie ułatwia poprawianie błędów w programach. Na wstępie polecam lekturę <man>gdb</man>, <kbd class="cmd_help">info gdb</kbd>.</p>
+
+<p>Dla skorzystania z części możliwości konieczne jest wkompilowanie informacji debugerowych w program (np. gcc z opcją -g). Program uruchamiany jest przez wywołanie gdb, zazwyczaj z jedną lub dwiema opcjami - plikiem wykonywalny oraz (ewentualnie) plikiem core. Do najistotniejszych poleceń należy:</p><ul>
+	<li><code>break <var>plik:linia</var></code> - ustawienie breakpointa na wskazanej linii</li>
+	<li><code>break <var>nazwa_funkcji</var></code> - ustawiające breakpointa na daną funkcję</li>
+	<li><code>rbreak <var>fragment_nazwy_funkcji</var></code> - ustawiające breakpointa na podstawie wyrażenia regularnego (np. fragmentu nazwy funkcji)</li>
+	<li><code>info breakpoint</code> - lista ustawionych breakpointow</li>
+	<li><code>watch <var>wyrazenie</var></code> - zatrzymanie gdy wartość wyrażenia ulegnie zmianie</li>
+</ul><ul>
+	<li><code>run</code> - uruchamiające program (zatrzymuje się na pierwszej napotkanej pułapce)</li>
+	<li><code>continue</code> - powoduje kontynuację programu do następnej pułapki</li>
+	<li><code>step</code> - powoduje wykonanie kolejnej linii programu, z wchodzeniem w kod funkcji</li>
+	<li><code>next</code> - powoduje wykonanie kolejnej linii programu, bez wchodzenia w kod funkcji</li>
+	<li><code>stepi</code> / <code>nexti</code> - jak <code>step</code> / <code>next</code>, tyle że nie operuje na liniach a instrukcjach</li>
+	<li><code>finish</code> - powoduje dokończenie bieżącej funkcji i zatrzymanie się</li>
+</ul><ul>
+	<li><code>print <var>zmienna</var></code> - wypisanie wartości zmiennej zmiennej/wyrażenia (do elementów składowych odwołujemy się jak w C++)</li>
+	<li><code>display <var>zmienna</var></code> - automatyczne wypisanie wartości zmiennej wyrażenia przy każdym zatrzymaniu (breakpoincie), odwołanie przez <code>undisplay <var>numer</var></code></li>
+	<li><code>ptype <var>zmienna</var></code> - wypisanie informacji o typie zmiennej (m.in. elementy składowe struktury)</li>
+	<li><code>info local</code> - podgląd zmiennych lokalnych</li>
+	<li><code>info args</code> - podgląd argumentów funkcji</li>
+	<li><code>backtrace</code> - wypisanie historii stosu wywołań funkcji</li>
+	<li><code>backtrace <var>num</var></code> - wypisanie historii stosu wywołań funkcji, wypisuje <var>num</var> pozycji (gdy num mniejsze od 0 to początkowych, gdy większe to końcowych)</li>
+</ul><ul>
+	<li><code>set <var>zmienna</var>=<var>wartosc</var></code> - ustawia wartość zmiennej na podaną</li>
+	<li><code>call <var>funkcja(argumenty)</var></code> - wywołuje podaną funkcję z podanymi argumentami</li>
+</ul><ul>
+	<li><code>help</code> wyświetlające pomoc "on-line"</li>
+	<li><code>list funkcja</code> - wyświetlenie kodu funkcji</li>
+	<li><code>list <var>linia1</var>,<var>linia2</var></code> - wyświetlenie kodu programu od linii do linii we aktualnym pliku</li>
+	<li><code>list <var>plik:linia1</var>,<var>plik:linia2</var></code> - wyświetlenie kodu programu od linii do linii</li>
+	<li><code>quit</code> kończące pracę gdb</li>
+</ul>
+<p>Oczywiście to tylko niewielka część wszystkich poleceń gdb, polecam zapoznać się z poszczególnymi grupami poleceń opisywanymi przez <code>help</code>.</p>
+
+<p>GDB umożliwia również debugowanie programów na zdalnych systemach (podłączonych przez port szeregowy bądź przez sieć - zobacz <man>gdbserver</man>), możliwość komunikacji przez sieć wykorzystują też programy zewnętrzne (takie jak simulavr, ice-gdb, ...).</p>
+
+<p>Uruchamianie poprzez GDB przydaje się także przy debugowaniu problemów typu "segmentation fault"  - po  zatrzymaniu programu z powodu takiego błędu możemy wydać w gdb polecenie "backtrace" aby zobaczyć w której funkcji wystąpił problem</p>
+
+<p>Wspomniany simulavr jest symulatorem mikrokontrolerów AVR (niestety nie działającym jeszcze idealnie ...) i z przystosowaną dla programowania AVR w C wersją gdb (avr-gdb), umożliwia stworzenie systemu do testowania i debugowania programów AVR na zwykłym komputerze. Aby programy te zechciały ze sobą współpracować należy:<br />
+	Uruchomić simulavr z opcjami -g i -p oraz określeniem odpowiedniego urządzenia i pliku z skompilowanym programem, np. (dla atmega128): <code>simulavr -d atmega128 -g -D -P simulavr-disp -p 2345 moj_program.hex</code>.<br />
+	Uruchomić avr-gdb z określeniem pliku zawierającego skompilowany program, a następnie kazać połączyć mu się z simulavr, poprzez komendę: <code>target remote localhost:2345</code> (numer portu oczywiście możemy zmienić, ale w obu programach musi być ten sam).<br />
+	Zamiast simulavr możemy sprobować debugowania w układzie za pomocą avarice: <code>avarice -d -f moj_program.hex -P atmega128 --jtag /dev/ttyS0 :2345</code>, natomiast jeżeli chcemy obejrzeć komendy asemblerowe zawarte w wygenerowanym kodzie polecam (analogicznie do objdump dla zwykłych programów): <code>avr-objdump -d moj_program.elf</code> lub (specjalnie dla AVR): <code>revava -e moj_program.hex</code></p>
+
+<p>Zobacz w Sieci: <wiki en="b:GCC Debugging">GCC Debugging</wiki>.</p>
+</article>

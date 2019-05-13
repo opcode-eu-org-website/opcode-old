@@ -1,0 +1,37 @@
+# uruchamiac make -r
+
+# programy i pliki dolaczane
+PROGS	= sprawdz_ack strojenie_generatora odczyt_pilota nadajnik_asm
+OBJECTS	= #czas.o
+HEADER	= config.h czasy.c pilot.dat pilot_kody.dat
+
+# zmienne środowiska - kompilatory, opcje, ...
+C++	= g++
+CPPFLAGS	= -Wall
+LDFLAGS	=
+
+all: $(PROGS)
+
+# ponizsza regulka pasuje do kazdej zadanej nazwy programu ( % ),
+# wymaga odpowiedniego do niej (o tej samej nazwie) pliku .o ( %.o )
+# oraz plikow .o okreslonych w $(OBJECTS)
+# nastepnie linkuje to wszystko ( $^ ) do kupy do pliku o nazwie
+# identyfikatora do jakiego zostala zastosowana
+% : %.o $(OBJECTS)
+	@ echo "LINKUJE: $@"
+	$(C++) $(LDFLAGS) -o $@ $^
+
+# ponizsza regulka stosuje sie do kazdego zadanego pliku .o ( %.o ),
+# wymaga odpowiedniego do niej (o tej samej nazwie) pliku .cpp ( %.cpp )
+# i kompiluje ten plik do postaci .o
+%.o : %.cpp
+	@ echo "KOMPILUJE: $@"
+	$(C++) $(CPPFLAGS) -c $<
+
+# czyszczenie mniej brutalne
+clean:
+	rm -f *.o *~
+
+# i bardziej brutalne ;-)
+cleanall:
+	rm -f *.o *~ $(PROGS)

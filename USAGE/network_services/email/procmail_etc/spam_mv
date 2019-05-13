@@ -1,0 +1,7 @@
+# antyspam - trzeba aktywować indywidualnie w ~/.procmailrc
+# INCLUDERC=/etc/procmail-filters/spam_check
+
+# przenoszenie wiadomosci uznanych za spam do mail/spam
+:0
+* ^X-Spam-Flag: YES
+mail/spam

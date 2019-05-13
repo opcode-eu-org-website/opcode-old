@@ -1,0 +1,11 @@
+<article>
+<title>Programowanie w AWK</title>
+
+<p>Tytułem wstępu zaznaczę że GAWK jest wersją interpretatora języka skryptowego <wiki pl="AWK">AWK</wiki>, opracowywaną w ramach projektu GNU, posiadającym własne rozszerzenia (zwane rozszerzeniami GNU). Z faktu iż jest to język skryptowy wynika iż program wykonywany jest tożsamy z kodem źródłowym - nie ma etapu kompilacji.</p>
+
+<p>Składnia języka jest dość podobna do C, oczywiście nie znajdziemy tu zdecydowanej większości funkcji z biblioteki standardowej C oraz są też bardzo istotne różnice w samej budowie programu. Podstawową z tych różnic jest to iż program w języku AWK składa się z bloków "warunek { instrukcje }" oraz (opcjonalnie) definicji funkcji "function nazwa (argumenty) { instrukcje }". Taka budowa składni wynika z głównego zastosowania do jakiego został stworzony AWK - przetwarzania tekstu.</p>
+
+<p>Skrypty AWK mogą być zapisywane go pliku - wywołujemy przez <code>gawk -f sciezka_pliku</code>, mogą też być podawane w linii poleceń: <code>gawk 'tresc programu'</code> (dla bezpieczeństwa treść tak podawanego programu należy ujmować w '' - inaczej powłoka może z nią zrobić coś niedobrego interpretując zawarte tam znaki specjalne ... . Możemy też w pliku z poleceniami AWK dodać jako pierwszą linię <code>#!/usr/bin/gawk -f</code> oraz dodać mu argument wykonywalności - będzie zachowywał się jak zwykły program przyjmujący dane z stdin lub plików podanych jako argumenty.</p>
+
+<p>Tym razem zaczniemy tradycyjnie ... od "Witaj Świecie" (zakładam że plik w którym umieszczane są przykładowe programy nazywa się "hello.awk" i ma atrybut wykonywalności):</p>
+</article>

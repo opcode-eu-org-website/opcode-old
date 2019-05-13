@@ -1,0 +1,9 @@
+<article>
+<title>QCad</title>
+
+<p>Jest to całkiem przyjemny program typu CAD, służący do tworzenia rysunków technicznych takich jak projekty architektoniczne (np. rzuty pięter), projekty elementów mechanicznych, schematy instalacji elektrycznych, czy nawet schematy elektroniczne lub blokowe (aczkolwiek tu lepiej u żyć bardziej specjalistycznego oprogramowania).</p>
+
+<p>Przy drukowaniu projektów warto szczególną uwagę zwrócić na rozmiar papieru zdefiniowanych w właściwościach bieżącego rysunku (menu edycja) - to ona odpowiada za wielkość kartki którą przykładamy na podglądzie wydruku.</p>
+
+<p>Przedstawiam także zestaw symboli, mojego autorstwa, przydatnych przy projektowaniu instalacji i rozdzielnic elektrycznych - <a class="int" href="./qcad-elektryczne.tgz">qcad-elektryczne.tgz</a> (<a class="int" href="./qcad-elektryczne.notar">w formie rozpakowanej</a>)</p>
+</article>

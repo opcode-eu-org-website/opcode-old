@@ -1,0 +1,40 @@
+<article>
+<title>Psi - kient XMPP</title>
+
+<p>Program ten cechuje dośc nieprzyjemna cecha polegająca na niemożności zalogowania się bez podania hasła klucza GPG, gdy taki ustawiliśmy. Prezentuje patch mojego autorstwa zmieniający to zachowanie (pozwalający na zalogowanie bez podpisywania statusu) - <a class="int" href="./gpg_sign_error.patch">patch</a> (<a class="ext" href="http://forum.psi-im.org/thread/4375">szczegóły</a>).</p>
+
+<p>Klient ten nie pozwala obecnie na korzystanie poprzez swój interfejs z archiwizacji wiadomości po stronie serwera (Message Archiving, JEP-0136). Mozna jednak usługę tą aktywować i używać z poziomu konsoli XML. Poniżej zamieszczam krótki przykład jak to robić:</p>
+<pre>
+&lt;!-- SPRAWDZENIE --&gt;
+&lt;iq type='get' id='save1' from='user@example.net'&gt;
+  &lt;save xmlns='http://jabber.org/protocol/archive'/&gt;
+&lt;/iq&gt;
+
+&lt;!-- WLACZENIE --&gt;
+&lt;iq type='set' id='save2' from='user@example.net'&gt;
+  &lt;save xmlns='http://jabber.org/protocol/archive'&gt;
+    &lt;default save='true'/&gt;
+  &lt;/save&gt;
+&lt;/iq&gt;
+
+&lt;!-- POBRANIE SPISU --&gt;
+&lt;iq type='get' to='example.net'&gt;
+  &lt;list xmlns='http://jabber.org/protocol/archive'
+        maxitems='50'/&gt;
+&lt;/iq&gt;
+
+&lt;!-- POBRANIE ZAPISU ROZMOWY --&gt;
+&lt;iq type='get' to='example.net' id='down5'&gt;
+  &lt;retrieve xmlns='http://jabber.org/protocol/archive'
+            with='testowy@conference.example.net'
+            start='2007-04-08T22:00:49Z'/&gt;
+&lt;/iq&gt;
+
+&lt;!-- USUNIECIE WSZYSTKICH --&gt;
+&lt;iq type='set' to='example.net'&gt;
+  &lt;remove xmlns='http://jabber.org/protocol/archive'/&gt;
+&lt;/iq&gt;
+</pre>
+
+<p>XML możemy także wykożystać do ustawienia innego statusu na jednym z transportów - np. na GG: <code>&lt;presence type="available" to="gg.serwer.xmpp"&gt;&lt;show&gt;away&lt;/show&gt;&lt;status&gt;jeżeli możesz pisz na jabbera, JID: rrp@n17.waw.pl&lt;/status&gt;&lt;/presence&gt;</code></p>
+</article>

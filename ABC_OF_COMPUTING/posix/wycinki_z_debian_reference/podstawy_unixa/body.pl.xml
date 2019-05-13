@@ -1,0 +1,8 @@
+<article>
+<title>Podstawy Unix'a:</title>
+<ul>
+	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tutorial.pl.html#s-text-process">Uniksopodobne przetwarzanie tekstów</a>, czyli narzędzia do przetwarzania plików tekstowych, wyrażenia regularne itp.</li>
+	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tutorial.pl.html#s-unixfile">Uniksopodobny system plików</a>, czyli uprawnienia, znaczniki czasu, dowiązania twrde i symboliczne</li>
+</ul>
+
+</article>

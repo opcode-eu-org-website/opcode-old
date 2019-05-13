@@ -1,0 +1,13 @@
+<article>
+<title>MOSFET (MOS)</title>
+
+<p>Ważną grupą tranzystorów polowych są tranzystory z izolowaną bramką (<wiki pl="IGFET">IGFET</wiki>). Najczęściej wytwarzane są one w technice <wiki pl="MOSFET">MOSFET</wiki>. Tranzystory te stanowią podstawę układów scalonych wykonywanych w technologi <wiki pl="CMOS">CMOS</wiki>. Dzięki izolowanej bramce tranzystory te regulowane są jeszcze bardziej napięciem a nie prądem (tu warto wspomnieć o pewnej ciekawostce - gdy elektrodę bramki wprowadzimy w stan NC (niepodłączona) tranzystor utrzymuje (przez dość długi czas) stan poprzedni). W wnętrzach układów scalonych spotyka się tranzystory z wieloma bramkami, jak również wyprowadzoną niezależnie elektrodą podłoża (normalnie zwarta do źródła).</p>
+<p>Tranzystor z kanałem typu P ma regulowane przewodzenie w kierunku od źródła do drenu (w drugą stronę zawsze przewodzi), wprowadzenie w stan przewodzenia odbywa się poprzez podanie na bramkę napięcia mniejszego od napięcia źródła. Tranzystor z kanałem typu N ma regulowane przewodzenie w kierunku od drenu do źródła (w drugą stronę zawsze przewodzi), wprowadzenie w stan przewodzenia odbywa się poprzez podanie na bramkę napięcia większego od napięcia źródła.</p>
+<p  class="center"><img_from_src name="mosfet" type="sch" alt="tranzystory N-MOSFET i P-MOSFET z warunkami przewodzenia" />
+	<br />N-MOSFET (wzbogacony) przewodzi gdy <i>V<sub>ster</sub> &gt; V<sub>GS (th)</sub></i>, gdzie <i>V<sub>GS (th)</sub> &gt; 0</i> jest parametrem tranzystora
+	<br />P-MOSFET (wzbogacony) przewodzi gdy <i>V<sub>ster</sub> &lt; V<sub>zasilania</sub> + V<sub>GS (th)</sub></i>, gdzie <i>V<sub>GS (th)</sub> &lt; 0</i> jest parametrem tranzystora
+	<br/>Pokazana dioda niekiedy jest pomijana w oznaczeniach. Występują także tranzystory z kanałem zubożonym (oznaczane innym symbolem) w których <i>V<sub>GS (th)</sub></i> ma przeciwne znaki.
+</p>
+
+<p>Warto wspomnieć iż występują także tranzystory bipolarne z izolowaną bramką (<wiki pl="IGBT">IGBT</wiki>), są one powszechnie stosowane w urządzeniach elektroenergetycznych do przełączania znacznych prądów. Na tranzystor taki możemy patrzeć jak na sterowany za pośrednictwem MOSFETa tranzystor bipolarny.</p>
+</article>

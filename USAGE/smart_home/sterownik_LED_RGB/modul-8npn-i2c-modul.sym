@@ -1,0 +1,50 @@
+v 20110115 2
+B 600 300 1200 800 3 0 0 0 -1 -1 0 -1 -1 -1 -1 -1
+T 1800 1200 8 10 1 1 0 6 1
+refdes=U?
+P 2100 500 1800 500 1 0 0
+{
+T 1895 545 5 8 0 1 0 0 1
+pinnumber=1
+T 1900 450 5 8 0 1 0 2 1
+pinseq=1
+T 1745 495 9 8 1 1 0 6 1
+pinlabel=GND
+T 1750 500 5 8 0 1 0 8 1
+pintype=in
+}
+P 2100 800 1800 800 1 0 0
+{
+T 1895 845 5 8 0 1 0 0 1
+pinnumber=1
+T 1900 750 5 8 0 1 0 2 1
+pinseq=1
+T 1745 795 9 8 1 1 0 6 1
+pinlabel=VCC
+T 1750 800 5 8 0 1 0 8 1
+pintype=in
+}
+P 300 800 600 800 1 0 0
+{
+T 505 845 5 8 0 1 0 6 1
+pinnumber=1
+T 500 750 5 8 0 1 0 8 1
+pinseq=1
+T 655 795 9 8 1 1 0 0 1
+pinlabel=SDA
+T 650 800 5 8 0 1 0 2 1
+pintype=in
+}
+P 300 500 600 500 1 0 0
+{
+T 505 545 5 8 0 1 0 6 1
+pinnumber=1
+T 500 450 5 8 0 1 0 8 1
+pinseq=1
+T 655 495 9 8 1 1 0 0 1
+pinlabel=SCL
+T 650 500 5 8 0 1 0 2 1
+pintype=in
+}
+T 100 100 8 10 1 1 0 0 1
+source=sterownik-rgb-i2c-modul.sch

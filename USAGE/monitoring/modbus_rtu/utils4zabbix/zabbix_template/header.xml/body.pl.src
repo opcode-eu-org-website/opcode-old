@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export version="1.0" date="13.01.11" time="14.14">
+	<hosts>
+		<host name="analizator PM710 full">
+			<proxy_hostid>0</proxy_hostid>
+			<useip>1</useip>
+			<dns></dns>
+			<ip>0.0.0.0</ip>
+			<port>10050</port>
+			<status>3</status>
+			<useipmi>0</useipmi>
+			<groups>
+				<group>@My_Templates</group>
+			</groups>
+			<triggers/>
+			<items>

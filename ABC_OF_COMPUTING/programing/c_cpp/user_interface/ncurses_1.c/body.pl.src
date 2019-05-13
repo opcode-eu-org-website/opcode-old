@@ -1,0 +1,57 @@
+/*
+ * plik ma na celu prezentację ciekawych zagadnień z programowania w języku C / C++
+ * prezentuje metody związane z sterowaniem wyświetlaniem na terminalu tekstowym
+ * plik ten wykorzystuje meodę opartą w całości na bibliotece termcap
+ * (przy tej metodzie mamy pewność że zawsze powinna zadziałać)
+ *
+ */
+
+#include <termcap.h>
+
+#include <stdio.h>
+
+#include <string.h> /* for memset() */
+#include <stdlib.h> /* for getenv() */
+
+/* Wymagane -ltermcap lub -lncurses przy linkowaniu */
+
+static	int max_x, max_y;
+static	char *tg_cm;
+
+/* inicjalizacja terminala */
+void inicjalizacja_terminalu() {
+/* oczywiscie wiekszosc tych funkcji moze nie zakonczyc sie powodzeniem co nalezaloby sprawdzac ... */
+	/* pobranie infa o terminalu */
+	tgetent (NULL, getenv ("TERM"));
+
+	/* zczytanie parametrow terminala */
+	max_x=tgetnum("co");
+	max_y=tgetnum("li");
+	
+	tg_cm=tgetstr("cm", 0); /* pozycja kursora */
+}
+
+/* wyczyszczenie terminala */
+void wyczysc_terminal(void) {
+
+	tputs(tgetstr("cl",0), 1, putchar);
+}
+
+/* wypisanie w zadanym punkcie ekranu,
+   warto zwrócić uwagę że jest to sposób tworzenia funkcji opartych na instrukcjach przeprocesora
+   - przed kompilacją kod funkcji zostanie wstawiony w mijsca jej wywołań */
+#define put_s(x,y,s) tputs ( tgoto(tg_cm,y,x) , 1, putchar); printf(s);
+
+/* funkcja glowna */
+int main(void) {
+	inicjalizacja_terminalu();
+
+	wyczysc_terminal();
+
+	put_s(2,8,"@")
+
+	/* oczekiwanie na nacisniecie q */
+	while (getchar()!='q');
+
+	return 0;
+}

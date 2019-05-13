@@ -1,0 +1,40 @@
+#ifndef CONFIG_WINDOW_H
+#define CONFIG_WINDOW_H
+
+// pliki nagłówkowe wykorzystywanych klas Qt
+#include <QDialog>
+#include <QMessageBox>
+#include <QTableWidgetItem>
+#include <QStandardItemModel>
+#include <QTextStream>
+
+#include <QtXml/QDomDocument>
+#include <QtXml/QDomElement>
+#include <QtXml/QDomNode>
+#include <QtXml/QDomText>
+#include <QFile>
+#include <QFileDialog>
+
+// plik nagłówkowy zawierający opis wyglądu okienka
+// wygenerowany automatycznie w oparciu o timer_window.ui
+#include "ui_config_window.h"
+
+// deklaracja klasy
+class ConfigWindow: public QDialog
+{
+Q_OBJECT
+ private:
+   int max_id;
+   QStringList naglowek_tabelki;
+ public:
+   Ui::ConfigWindow interfejs;
+   ConfigWindow(QWidget * parent = 0, Qt::WFlags f = 0 );
+   ~ConfigWindow(){};
+ public slots:
+   void SaveAction();
+   void AddTableRow();
+   void DelTableRow();
+   void IsTableCliced(int r, int c);
+};
+
+#endif

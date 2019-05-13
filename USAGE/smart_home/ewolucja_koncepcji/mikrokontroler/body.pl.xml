@@ -1,0 +1,50 @@
+<article>
+<title>Mikrokontrolery AVR</title>
+<p>Celem zmniejszenia rozmiarów oraz uproszczenia budowy zdecydowałem się na zastosowanie mikrokontrolera ATmega8. Układ taki miał też większe możliwości (w szczególności prostsze zarządzanie zdalne z wykorzystaniem RS-485 lub RS-422A). Równocześnie w miejsce przekaźników zdecydowałam się także na zastosowanie zestawu optotriak + triak. Pierwotna wersja sterownika posiadała na swoim PCB autonomiczne zasilacze sieciowe (niezależne dla każdego sterownika). Podyktowane zostało to rozwiązaniem zasilania instalacji oświetleniowej (układ zabezpieczeń nad i różnicowoprądowych) nie bardzo pozwalającym na centralne zasilenie (wyłączenie jego zabezpieczenia rozwalałoby cały system, który obecnie podzielony jest na strefy z niezależnymi zabezpieczeniami). Został zrealizowany jeden prototypowy sterownik (działający p;o dziś dzień) wg tego projektu.</p>
+<img_from_src name="sterownik_oswietlenia_v1b" type="sch" />
+
+<p>Porównanie z koncepcją realizacji na elementach dyskretnych pokazuje przewagę rozwiązań opartych na mikrokontrolerze (gdzie elektronika na układach dyskretnych pełni tylko pomocniczą funkcję). Jest ona spowodowana ogromnymi możliwościami mikrokontrolerów oraz drastycznym uproszczeniem budowy układu, zmniejszeniem rozmiarów, a często także kosztów w stosunku co do realizacji analogicznych układów cyfrowych w oparciu o bramki, przerzutniki itp..</p>
+
+<p>W drugiej wersjach sterownika scentralizowane zostało ich zasilanie, pojawiła się funkcja regulacji jasności wykonana w technologii <wiki pl="Modulacja szerokości impulsów">Pulse Width Modulation</wiki> dla jednej linii, a także (obok typowej "płaskiej" wersji) została zaprojektowana <a class="int" href="./sterownik_oswietlenia_din.pcb">wersja dwupoziomowa</a> do umieszczenia w typowej obudowie na szynę DIN.</p>
+
+<p>W trzeciej wersji sterowanie PWM zostało rozszerzone na wszystkie linie, a dzięki przeniesieniu obsługi linii sterujących z przełączników do innego modułu (pozostało tylko sterowanie po RS-485) zwiększono liczbę linii do 15tu. W (nie zrealizowanej) erracie tej wersji wprowadzone zostały także opcjonalne układy gasikowe (umożliwiające poprawną pracę z obciążeniem indukcyjnym - świetlówki) i dławiki. Z wersją trzecią zmieniona została także sama metoda projektowania - wykorzystana została powtarzalność układu do hierarchizacji projektu.</p>
+
+<p>Sterownik w trzeciej wersji zaprojektowany został do wykorzystania w 19" systemie rozdzielnic elektrycznych. Sterownik przystosowany był do montażu (max po dwa moduły sterownika) w obudowach rack 19" 3U/250mm mających od frontu szyna DIN do montażu zabezpieczeń (opcjonalnie można też umieścić szynę DIN do montażu dodatkowej aparatury prostopadle do frontowej wewnątrz obudowy panelu). Sterownik montowany powinien być na przestrzeni środkowego 1U. Sterownik może być montowany w pod-obudowie posiadającej otwarte wyprowadzenie kabli podłączeniowych od tyłu (do złączek szynowych montowanych na tylnej ścianie szafy) i zdejmowalną górną pokrywę. Na przedniej maskownicy aparatury modułowej można zamontować dodatkowo diody kontrolne (zasilanie sterownika + napięcie kontrolne sterownika + stan każdej linii) oraz gniazdo RJ-11 dla RS485 i gniazdo zasilania DC. Moduł sterownika odpowiedzialny za obsługę sygnałów wejściowych jest montowany w osobnej obudowie 1U, może być także zintegrowany z centralką alarmową itp urządzeniami. Zobacz także <photo_link tag="systemowy_sterownik_oswietlenia">zdjęcia prototypu</photo_link></p>
+
+<subtitle>Centralka</subtitle>
+<p>Jak wspomniałem funkcje obsługi wejść (przełaczników) w wrsji trrzeciej zostały przekazane do innego modułu - była nim centralka alarmowa, oparta na mikrokontrolerze Atmega16. Projekt oparty był na modułach podłączanych do mikrokontrolera poprzez magistralę równoległą utworzoną z portu B mikrokontrolera (8 bitów danych) i części portu A (6 bitów adresowych). Detekcja adresu w modułach realizowana była w oparciu 3 najmłodsze bity (i sygnał zezwolenia) adresu na układzie 74hc183. 3 najstarsze bity adresu mogłyby·ć wykorzystane przez switch magistrali oparty także na układzie 74hc183 do generowania sygnału zezwolenia.:</p>
+
+<p>Moduł wejścia-wyjścia (oparty na buforze dwukierunkowym) i bazujący na nim moduł wejść optoizolowanych (4 zwykłe, 4 z filtrem rc):</p>
+<img_from_src name="module-in-out" type="sch" />
+<img_from_src name="module-in-opto-special" type="sch" />
+
+<p>Moduł wyjścia (oparty na rejestrze 8 bitowym) i bazujący na nim moduł kluczy NPN oraz NPN (sterowanie układem od strony masy) + P-MOSFET (sterowanie układem od strony bieguna dodatniego):</p>
+<img_from_src name="module-out" type="sch" />
+<img_from_src name="module-out-transistors" type="sch" />
+
+<subtitle>Centralka - wnioski po-wdrożeniowe</subtitle>
+<ul>
+	<li>nie najlepszym pomysłem jest bezpośrednie przyłączanie przewodów wyjściowych (w wdrażanym rozwiązaniu były one zakończone wtykami RJ45 podłączanymi do panelu krosowego) do modułów ze względu na konieczność podpięcia przewodów od jednego urządzenia do kilku modułów wejściowych (np. od czujki p.poz z termometrem 1-wire były to moduły: wyjść mosfetowych, filtrowanych wejść optoizolowanych, wejściowo-wyjściowy)<ul>
+		<li>należy rozważyć zastosowanie modułów podłączania kabli - z złączami śrubowymi do podłączania przewodów i/lub bezpośrednio dolutowanymi przewodami oraz złączami taśmowymi IDC do podłączania kilku (np. czterech lub ośmiu modułów centralki), dodatkowo w ramach tego złącza taśmowego należy przewidzieć dystrybucję dodatkowych zasilań 5V, 9V, 12V na potrzeby podłączanego modułu centralki</li>
+	</ul></li>
+	<li>pewną uciążliwością charakteryzuje się brak możliwości podpięcia poszczególnych elementów na modułach (np. wejść optoizolowanych) do wspólnych mas/zasilań bez lutowania dodatkowych przewodów na tych modułach<ul>
+		<li>należy rozważyć bezpośrednie wprowadzenie tych linii na złącze sygnałów wejściowych i zapewnienie jakiegoś konfigurowalnego mechanizmu podłączania do szyn mas/zasilania na module przyłączeniowym</li>
+	</ul></li>
+	<li>problematyczne było podłączanie zewnętrznych magistral RS485<ul>
+		<li>należy przewidzieć stosowne miejsca w module wejściowym i piny dla magistrali RS485 w złączu taśmowym wejść lub w złączu taśmowym magistrali</li>
+	</ul></li>
+	<li>problem stanowił też brak standaryzacji wielkości modułów i mechanizmu ich mocowania do wspólnej płyty</li>
+	<li>można rozważyć realizację magistrali w oparciu o złącza krawędziowe na płytkach i płytę bazową zamiast obecnie stosowanego 20 pinowego złącza taśmowego</li>
+	<li>można rozważyć wykorzystanie złącz RJ45 umieszczanych bezpośrednio na module do łączenia modułów umieszczanych wewnątrz szafki z centralką (np. sterowników oświetlenia) - w tym wypadku możliwe byłoby pominięcie w ich podłączaniu panelu krosowego przy zachowaniu jednolitego standardu podłączeń</li>
+	<li>przyjęta koncepcja magistrali z rejestrami i buforami okazała się trudna do pogodzenia z stosowaną koncepcją linii sterowania jasnością gdzie na tym samym przewodzie mamy sygnał wyjściowy o możliwości regulacji i wejściowy zadający regulację - rozwiązanie to wymaga możliwości zmiany kierunku z zapamiętaniem wartości wyjściowej i rezystorami podciągającymi w wariancie wejściowym<ul>
+		<li>możliwe jest przeznaczenie na to bezpośrednich wejść mikrokontrolera, jednak ogranicza to znacznie ilość takich linii</li>
+		<li>innym rozwiązaniem jest skonstruowanie specjalnego modułu magistralowego realizującego tą funkcjonalność</li>
+		<li>możliwe jest też rozwiązanie tego problemu przez zmianę koncepcji linii sterowania jasnością i rozdzielenie funkcji wejściowej od wyjściowej</li>
+		<li>jeszcze innym (i chyba najprostszym) jest wydelegowanie tej funkcjonalności do modułu mikrokontrolerowego komunikującego się po RS485, wariant taki umożliwiłby także sygnalizację nastrojenia jasności (a nie tylko możliwego kierunku regulacji) z wykorzystaniem PWM</li>
+	</ul></li>
+	<li>interesująca koncepcją jest stosowanie rozproszonych systemów wejść wyjść opartych na projekcie <id_link id="manipulator_alarmowy">manipulatora alarmowego</id_link>, gdzie np. zamiast LCD podłączone byłyby dodatkowe linie na bezpośrednie przyciski, a sterowanie dowolną linią mogłoby odbywać się z klawiatury</li>
+	<li>warto rozważyć przy realizacji w centralce tylko jednego portu UART rozdzielenie linii nadawczej i odbiorczej - zapewnia to niezależność transmisji od centralki w stosunku co do transmisji do niej - komunikacja z układami wykonawczymi centralki tylko za jej pośrednictwem</li>
+</ul>
+
+<p>Aktualna wersje projektów (w szczególności dostosowane do wymogów projektowych opisanych w <id_link id="digital:programowalne">mikrokontrolery</id_link>) znajdują się w dziale z projektami związanymi z inteligentnym domem: <id_link id="smart_home:sterownik_oswietlenia">sterownik oświetlenia</id_link>, <id_link id="smart_home:centralka_nie_tylko_alarmowa">centralka alarmowa</id_link>. W pierwotnych założeniach przewijało się stosowanie magistral równoległych w niektórych modułach (np. sterownikach tranzystorowych) do zwiększania ilości wejść/wyjść. Pomysł ten nie został jednak zrealizowany ze względu na powyżej opisane trudności, zamiast tego zostały zastosowane moduły i2c podłączone do głównego sterowniki (w szczególności moduł oparty na mikrokontrolerze pełniącym funkcję slave'a i2c). W ogólności takie moduły można stosować jako (zaawansowane) rozszerzenia wejść wyjść mikrokontrolera (zaletą standaryzacja, niższy koszt na pin niż dedykowane układy i2c, oszczędność 3 pinów w stosunku co do wersji modbusowej).</p>
+</article>

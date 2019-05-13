@@ -1,0 +1,190 @@
+<?php
+
+/**
+ * Prosty system news'owy wykorzystujący bazę danych MySQL
+**/
+
+$admin_pass=""; // haslo umozliwiajace edycje niezaleznie od autora
+
+// informacje konfiguracyjne dostepu do bazy danych
+$db_host = "localhost";
+$db_database="www-news";
+$db_user="";
+$db_pass="";
+
+/* INSTALACJA BAZY DANYCH
+
+CREATE TABLE `news` (
+ `NID` INT NOT NULL AUTO_INCREMENT,
+ `title` VARCHAR( 255 ) NOT NULL ,
+ `UID` INT NOT NULL ,
+ `time` INT NOT NULL ,
+ `body` TEXT NOT NULL ,
+ PRIMARY KEY ( `NID` ) 
+);
+
+CREATE TABLE `users` (
+ `UID` INT NOT NULL AUTO_INCREMENT,
+ `username` VARCHAR( 255 ) NOT NULL ,
+ `password` VARCHAR( 255 ) NOT NULL ,
+ `status` VARCHAR( 255 ) NOT NULL ,
+ `obrazek` VARCHAR( 255 ) NOT NULL ,
+ `email` VARCHAR( 255 ) NOT NULL ,
+ `jabber` VARCHAR( 255 ) NOT NULL ,
+ PRIMARY KEY ( `UID` ) 
+);
+
+*/
+
+// nagłówek strony
+echo '<html>
+	<head>
+		<title>Aktualności/title>
+	</head>
+	<body>
+';
+
+// łączenie z bazą danych
+mysql_connect($db_host, $db_user, $db_pass);
+mysql_select_db($db_database);
+
+// funkcja wspierająca obsługę błędów bazy danych
+function geterrdesc($sql) {
+    $error = mysql_error() . "<BR>Error caused by statement: $sql";
+    return $error;
+}
+
+// WYSWIETLANIE
+if ($_GET['action']!="edit" && $_POST['action']!="save") {
+
+	if ($_GET['search'] != "") {
+		$warunek = "WHERE ";
+		$slowa = explode(" ", $_GET['search']);
+		$ile_slow = count($slowa) - 1;
+		$warunek .= "( ";
+		for ($i=0; $i<$ile_slow; $i++)
+			$warunek .= "instr(concat(body, ' ', title), '$slowa[$i]') <> 0 AND ";
+	}
+
+	echo "<table cellpadding=\"4\" border=\"0\" cellspacing=\"1\" width=\"100%\">";
+	$kolory[0]="#FFFFFF"; $kolory[1]="#CCCCCC"; $kolor=0;
+	
+	if ($_GET[start]=="") $start=0; else $start=$_GET[start];
+
+	$sql = "SELECT NID,title,UID,time,body FROM news $warunek ORDER BY time DESC LIMIT $start, 10";
+	$query = mysql_db_query($db_database, $sql) or die(geterrdesc($sql));
+	while ($news = mysql_fetch_array($query)) {
+		echo "	<tr bgcolor=\"#333333\">
+		<td width=\"15%\">&nbsp;</td>
+		<td width=\"85%\"><b><font color=\"#FFFFFF\" size=\"2\">" . $news[title] . "</font></b></td>
+	</tr>";
+	
+		$sql2 = "SELECT UID,username,status,obrazek,email,jabber FROM users WHERE UID=$news[UID]";
+		$query2 = mysql_db_query($db_database, $sql2) or die(geterrdesc($sql2));
+		$user = mysql_fetch_array($query2);
+	
+		echo "	<tr bgcolor=\"$kolory[$kolor]\">
+		<td width=\"15%\" valign=\"top\">
+			<font size=\"2\"><b>" . $user[username] . "</b></font><br><center><img src=\"news_img/" . $user[obrazek] . "\" /><br><br><font size=\"1\">" . $user[status] . "</font></center><br><font size=\"1\">wyślij e-mail: <a href=\"mailto:" . $user[email] . "\"><img src=\"news_img/email.gif\" /></a></font><br>&nbsp;
+		</td>
+		<td width=\"85%\" valign=\"top\"><font color=\"#000000\" size=\"2\">
+			<table border=\"0\" width=\"100%\"><tr>
+				<td><font size=\"1\">" . date('Y-m-d H:i:s O', $news[time]). "</font></td>
+				<td align=\"right\"><a href=\"index.php?action=edit&NID=" . $news[NID] . "\"><img src=\"news_img/edit.gif\" /></a></td></tr></table><hr>
+			" . $news[body] . "</font>
+		</td>
+	</tr>";
+		if ($kolor==0) $kolor=1; else $kolor=0;
+	}
+	
+	echo "</table><p align=\"center\">";
+	
+	if (($start-10) >= 0) echo "<a href=\"index.php?start=" . ($start-10) . "\">nowsze</a> ";
+	$sql = "SELECT COUNT(*) FROM news";
+	$query = mysql_db_query($db_database, $sql) or die(geterrdesc($sql));
+	$news = mysql_fetch_row($query);
+	if ($news[0] > $start+10) echo "<a href=\"index.php?start=" . ($start+10) . "\">starsze</a>";
+	
+	echo "</p>";
+	echo "<form name=\"search_form\" method=\"GET\" action=\"index.php\"><p align=\"center\"><input type=\"text\" name=\"search\" size=\"35\"><input type=\"submit\" value=\"Szukaj\"></p></form>";
+	echo "<p align=\"center\"><a href=\"index.php?action=edit\">dodaj news'a</a></p>";
+
+} elseif ($_GET['action']=="edit") {
+
+	if ($_GET[NID]=="") $NID=0; else $NID=$_GET[NID];
+	
+	if ($NID !=0 ) {
+		$sql = "SELECT NID,title,UID,body FROM news WHERE NID='$NID'";
+		$query = mysql_db_query($db_database, $sql) or die(geterrdesc($sql));
+		$news = mysql_fetch_array($query);
+		
+		$sql = "SELECT UID,username FROM users WHERE UID='$news[UID]'";
+		$query = mysql_db_query($db_database, $sql) or die(geterrdesc($sql));
+		$user = mysql_fetch_array($query);
+	}
+	
+	echo "<p><b>UWAGA:</b> Możliwość dodawania news'ów posiadają wyłącznie uprawnieniu użytkownicy posiadający konto w systemie.</p>";
+	echo "<form name=\"news_form\" method=\"POST\" action=\"index.php\"><table>
+	<tr><td>Temat:</td><td><input type=\"text\" name=\"title\" size=\"70\" value=\"$news[title]\"></td></tr>
+	<tr><td>Treść:</td><td><textarea name=\"body\" cols=\"70\" rows=\"14\">$news[body]</textarea></td></tr>";
+	if ($NID==0) {
+		echo "	<tr><td>Autor:</td><td><input type=\"text\" name=\"autor\" size=\"35\"></td></tr>";
+	} else {
+		echo "	<tr><td>Usuń:</td><td><input type=\"checkbox\" name=\"delete\" value=\"yes\" /></td></tr>";
+		echo "	<tr><td>Autor:</td><td>$user[username]</td></tr>";
+	}
+	echo "<tr><td>Hasło:</td><td><input type=\"password\" name=\"haslo\" size=\"35\"></td></tr>
+	<tr><td colspan=\"2\" align=\"center\"><input type=\"hidden\" name=\"action\" value=\"save\"><input type=\"hidden\" name=\"NID\" value=\"$NID\"><input type=\"submit\" value=\"Wyślij\"></td></tr>
+</table></form>";
+
+} else {
+
+	if ($_POST[NID]==0) {
+		// wstawiamy nowy
+		$sql = "SELECT UID,username,password FROM users WHERE username='$_POST[autor]'";
+		$query = mysql_db_query($db_database, $sql) or die(geterrdesc($sql));
+		$user = mysql_fetch_array($query);
+		
+		if ($user[password] != $_POST[haslo] || $_POST[haslo]=="") {
+			echo "<h2>Błędne hasło</h2></body></html>";
+			exit;
+		}
+		
+		$sql = "INSERT INTO news VALUES (NULL, '$_POST[title]', '$user[UID]', '" . time() . "', '$_POST[body]')";
+		$query = mysql_db_query($db_database, $sql) or die(geterrdesc($sql));
+		
+		echo "<h2>News został dodany</h2>";
+	
+	} else {
+		// aktualizujemy
+		$sql = "SELECT NID,UID FROM news WHERE NID='$_POST[NID]'";
+		$query = mysql_db_query($db_database, $sql) or die(geterrdesc($sql));
+		$news = mysql_fetch_array($query);
+		
+		$sql = "SELECT UID,password FROM users WHERE UID='$news[UID]'";
+		$query = mysql_db_query($db_database, $sql) or die(geterrdesc($sql));
+		$user = mysql_fetch_array($query);
+		
+		if (($user[password] != $_POST[haslo] && $admin_pass != $_POST[haslo]) || $_POST[haslo]=="") {
+			echo "<h2>Błędne hasło</h2></body></html>";
+			exit;
+		}
+		
+		if ($_POST[delete]=="yes") {
+			$sql = "DELETE FROM news WHERE NID='$_POST[NID]'";
+			$query = mysql_db_query($db_database, $sql) or die(geterrdesc($sql));
+		
+			echo "<h2>News został usunięty</h2>";
+		} else {
+			$sql = "UPDATE news SET title='$_POST[title]', body='$_POST[body]' WHERE NID='$_POST[NID]'";
+			$query = mysql_db_query($db_database, $sql) or die(geterrdesc($sql));
+		
+			echo "<h2>News został zmieniony</h2>";
+		}
+	}
+
+}
+
+echo "</body></html>";
+?> 
+ 

@@ -1,0 +1,281 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <fcntl.h>
+#include <termios.h>
+#include <sqlite3.h>
+
+#include "error_reporting.h"
+
+#define DATABESE_FILE "/tmp/sms_spool.db"
+#define TTY_DEVICE "/dev/ttyS1"
+#define MAX_RETRY_IF_ERROR 4
+#define RESTART_MODEM_AFTER_RETRY 2
+#define RESTART_MODEM_CMD "/bin/gsmoff; sleep 2; /bin/gsmon; sleep 2"
+#define MODEM_TIMEOUT 3
+#define MAX_ERROR_DROP 6
+
+int write_to_modem(int tty_fd, const char *txt, const char *expected_return, int sleep_time) {
+	char buf[100];
+	int ret, len;
+	struct timeval timeout;
+	fd_set modem_fd_set;
+	
+	timeout.tv_sec = 3;
+	timeout.tv_usec = 0;
+	
+	FD_ZERO(&modem_fd_set);
+	FD_SET(tty_fd, &modem_fd_set);
+	
+	len=strlen(txt);
+	ret = write(tty_fd, txt, len);
+	if (ret != len) {
+		LOG_PRINT_WARN("Error write data to modem: %m");
+		return -1;
+	}
+	
+	sleep(sleep_time);
+
+	ret = select(tty_fd+1, &modem_fd_set, NULL, NULL, &timeout);
+	if (ret > 0) {
+		ret = read(tty_fd, buf, 100);
+		if (ret < 1) {
+			LOG_PRINT_WARN("Error read data from modem - read: %m");
+			return -2;
+		} else {
+			buf[ret-1] = 0;
+			LOG_PRINT_INFO(">> %s", buf);
+			if (expected_return != NULL && strstr(buf, expected_return) == 0)
+				return -4;
+			else
+				return 0;
+		}
+	} else if (ret == 0) {
+		LOG_PRINT_WARN("Timeout on write to modem");
+		return -1;
+	} else {
+		LOG_PRINT_WARN("Error read data from modem - select: %m");
+		return -3;
+	}
+}
+
+int init_tty() {
+	int tty_dev;
+	struct termios term;
+	
+	tty_dev = open (TTY_DEVICE, O_RDWR);
+	if (tty_dev < 0) {
+		LOG_PRINT_WARN("Opening serial port: %m");
+	} else {
+		tcgetattr (tty_dev, &term);
+		term.c_iflag = IGNBRK | IGNPAR;
+		term.c_oflag = term.c_lflag = term.c_line = 0;
+		term.c_cflag = CS8 | CREAD |  CLOCAL | HUPCL | B115200;
+		tcsetattr (tty_dev, TCSAFLUSH, &term);
+	}
+	
+	return tty_dev;
+}
+
+int init_modem(int argc, char **argv) {
+#ifdef RESTART_MODEM_CMD
+	system(RESTART_MODEM_CMD);
+#endif
+	
+	int tty_fd = init_tty();
+	if (tty_fd < 0)
+		return tty_fd;
+	
+	if (argc == 2){
+		char buf[20];
+		snprintf(buf, 20, "at+cpin=%s\r", argv[1]);
+		if (write_to_modem(tty_fd, buf, "OK", 2) < 0) {
+			LOG_PRINT_WARN("Error sending PIN to modem");
+			return -1;
+		}
+	}
+	
+	return tty_fd;
+}
+
+int send_sms(int tty_fd, const char *to, const char *msg) {
+	int ret;
+	char buf[100];
+	ret = write_to_modem(tty_fd, "ATV1Q0E1\r", "OK", 2);
+	if (ret != 0) return ret;
+	ret = write_to_modem(tty_fd, "AT+CSCA=\"+48501200777\"\r", "OK", 2);
+	if (ret != 0) return ret;
+	ret = write_to_modem(tty_fd, "AT+CMGF=1\r", "OK", 2);
+	if (ret != 0) return ret;
+	
+	snprintf(buf, 100, "AT+CMGS=\"+%s\"\r", to);
+	ret = write_to_modem(tty_fd, buf, ">", 2);
+	if (ret != 0) return ret;
+	
+	snprintf(buf, 100, "%.97s%c", msg, 0x1a);
+	ret = write_to_modem(tty_fd, buf, "OK", 10);
+	return ret;
+}
+
+int main(int argc, char **argv) {
+	openlog("sms_queued", LOG_PID, LOG_DAEMON);
+	
+	// initialize modem
+	int tty_fd = init_modem(argc, argv);
+	if (tty_fd < 0) {
+		LOG_PRINT_CRIT("Init modem ERROR");
+		exit(EXIT_FAILURE);
+	}
+	
+	// database exists ?
+	FILE *db_file;
+	char init_required = 0;
+	db_file=fopen(DATABESE_FILE, "r");
+	if (db_file != NULL)
+		fclose(db_file);
+	else
+		init_required = 1;
+	
+	// open or create database
+	sqlite3 *db;
+	if ( sqlite3_open(DATABESE_FILE, &db) ) {
+		LOG_PRINT_CRIT("Can't open database: %s", sqlite3_errmsg(db));
+		sqlite3_close(db);
+		exit(EXIT_FAILURE);
+	}
+	
+	// creating table for queue
+	char *ErrMsg = NULL;
+	if (init_required == 1) {
+		LOG_PRINT_INFO("Initialize database: %s", DATABESE_FILE);
+		if ( sqlite3_exec(db, "CREATE TABLE queue (id INTEGER PRIMARY KEY, time INT, pri INT, tel INT, msg TEX);",
+		  NULL, NULL, &ErrMsg) != SQLITE_OK ) {
+			LOG_PRINT_CRIT("Initialize database - SQL error: %s", ErrMsg);
+			sqlite3_free(ErrMsg);
+			sqlite3_close(db);
+			exit(EXIT_FAILURE);
+		}
+	}
+	
+	// message queue loop
+	int drop_cnt = 0, retry_cnt = 0, last_id = -1, ret_code = 0;
+	while (1) {
+		sqlite3_stmt *stmt;
+		int ret;
+		
+		// getting message to send
+		if ( ( ret = sqlite3_prepare_v2(db, "SELECT id, time, pri, tel, msg FROM queue ORDER BY pri,time LIMIT 1;", -1,
+		  &stmt, NULL) ) != SQLITE_OK ) {
+			LOG_PRINT_ERROR("Getting SMS from queue ERROR - sqlite3_prepare_v2() exit with code %d", ret);
+			sqlite3_finalize(stmt);
+			continue;
+		}
+		while ( ( ret = sqlite3_step(stmt) ) == SQLITE_BUSY ) {
+			LOG_PRINT_WARN("Waiting for getting SMS from queue");
+			usleep( 1000 );
+		}
+		
+		int id = -3, time = 0, pri = 0;
+		const char *text_tmp = NULL;
+		char phone_number[16], message[100];
+		if ( ret == SQLITE_ROW ) {
+			id   = sqlite3_column_int(stmt, 0);
+			time = sqlite3_column_int(stmt, 1);
+			pri  = sqlite3_column_int(stmt, 2);
+			
+			text_tmp = (const char*)sqlite3_column_text(stmt, 3);
+			strncpy(phone_number, text_tmp, 16);
+			text_tmp = (const char*)sqlite3_column_text(stmt, 4);
+			strncpy(message, text_tmp, 100);
+		} else if ( ret == SQLITE_DONE ) {
+			id = -1;
+			usleep( 200000 );
+		} else {
+			id = -2;
+			LOG_PRINT_ERROR("Getting SMS from queue ERROR - sqlite3_step() exit with code %d", ret);
+		}
+		
+		if ( ( ret = sqlite3_finalize(stmt) ) != SQLITE_OK ) {
+			LOG_PRINT_ERROR("Getting SMS from queue ERROR - sqlite3_finalize() exit with code %d", ret);
+			continue;
+		}
+		
+		if (id < 0)
+			continue;
+		
+		// sending SMS
+		if (last_id != id) {
+			last_id = id;
+			retry_cnt=0;
+		}
+		LOG_PRINT_INFO("=== SEND SMS (retry %d): id=%d time=%d pri=%d tel=+%s msg=%s ===",
+		               retry_cnt, id, time, pri, phone_number, message);
+		ret = send_sms(tty_fd, phone_number, message);
+		if (ret == 0) {
+			LOG_PRINT_INFO("DONE! (id=%d)", id);
+			retry_cnt=0;
+			drop_cnt=0;
+		} else {
+			LOG_PRINT_INFO("ERROR! (id=%d, code=%d)", id, ret);
+			
+			if (retry_cnt < MAX_RETRY_IF_ERROR) {
+				if (retry_cnt == RESTART_MODEM_AFTER_RETRY) {
+					LOG_PRINT_ERROR("RESTARTING MODEM");
+					close(tty_fd);
+					
+					tty_fd = init_modem(argc, argv);
+					if (tty_fd < 0) {
+						LOG_PRINT_CRIT("Reinit modem ERROR");
+						exit(EXIT_FAILURE);
+					}
+				}
+				sleep(1);
+				retry_cnt++;
+				continue;
+			} else {
+				LOG_PRINT_CRIT("MAX_RETRY_IF_ERROR exceeded - droping this message and sleep for 60s");
+				sleep(60);
+				drop_cnt++;
+				retry_cnt=0;
+			}
+		}
+		
+		if (drop_cnt > MAX_ERROR_DROP) {
+			LOG_PRINT_CRIT("MAX_ERROR_DROP exceeded - exit");
+			ret_code = -1;
+			break;
+		}
+		
+		// remove SMS from queue
+		if ( ( ret = sqlite3_prepare_v2(db, "DELETE FROM queue WHERE id = ?1;", -1, &stmt, NULL) ) != SQLITE_OK ) {
+			LOG_PRINT_WARN("Deleting SMS from queue ERROR - sqlite3_prepare_v2() exit with code %d", ret);
+			sqlite3_finalize(stmt);
+			continue;
+		}
+		if ( ( ret = sqlite3_bind_int(stmt, 1, id) ) != SQLITE_OK ) {
+			LOG_PRINT_WARN("Deleting SMS from queue ERROR - sqlite3_bind_int() exit with code %d", ret);
+			sqlite3_finalize(stmt);
+			continue;
+		}
+		while ( ( ret = sqlite3_step(stmt) ) == SQLITE_BUSY ) {
+			LOG_PRINT_WARN("Waiting for delete SMS (id=%s) from queue", argv[0]);
+			usleep( 1000 );
+		}
+		if ( ret != SQLITE_DONE ) {
+			LOG_PRINT_WARN("Can't delete SMS (id=%s) from queue - sqlite3_step() exit with code %d", argv[0], ret);
+			sqlite3_finalize(stmt);
+			continue;
+		}
+		if ( sqlite3_finalize(stmt) ) {
+			LOG_PRINT_WARN("Deleting SMS from queue ERROR - sqlite3_step() exit with code %d", ret);
+			continue;
+		}
+	}
+	
+	// clean up
+	sqlite3_close(db);
+	close(tty_fd);
+	closelog();
+	return ret_code;
+}

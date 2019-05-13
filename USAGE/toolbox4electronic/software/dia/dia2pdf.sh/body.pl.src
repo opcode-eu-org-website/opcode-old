@@ -1,0 +1,33 @@
+#!/bin/bash
+
+tmpdir="/tmp"
+tmpfile=`mktemp "$tmpdir/pcb2pdf.XXXXXX"`
+
+convert_dia2pdf() { (
+	set -e
+	cd $tmpdir
+	
+	base_name=`basename $1`
+	base_name="${base_name%.dia}"
+	
+	dia -e ${tmpfile}.eps "$2/$base_name.dia" &> /dev/null
+	
+	epstopdf ${tmpfile}.eps -o ${tmpfile}.pdf
+	
+	# optional write png
+	if [ "$3" = "true" ]; then
+		# convert ${tmpfile}.pdf "$2/$base_name.png"
+		pdftoppm -r 60 ${tmpfile}.pdf ${tmpfile}
+		pnmtopng ${tmpfile}-*1.ppm > "$2/$base_name.png" 2> /dev/null
+	fi
+	
+	# move pdf to workdir
+	mv ${tmpfile}.pdf "$2/$base_name.pdf"
+) }
+
+base_pwd=$PWD
+for f in "$@"; do
+	convert_dia2pdf "$f" "$base_pwd" "true" || echo "dia2pdf fail for $f" > /dev/stderr
+done
+
+rm ${tmpfile}*

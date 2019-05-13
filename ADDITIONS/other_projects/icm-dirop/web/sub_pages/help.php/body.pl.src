@@ -1,0 +1,33 @@
+<?php
+xhtml_print_file_head("DIR - Pomoc");
+xhtml_print_header("DIR - Pomoc");
+?>
+
+<div class="content">
+	<h2>Wyszukiwanie</h2>
+	<ul>
+		<li>Funkcja wyszukiwania pozwala na szukanie fraz w treści (&bdquo;wyszukiwanie w treści&rdquo;). Dla niektórych pozycji (np. "Słownik geograficzny") dostępne jest wyszukiwanie w indeksie. W chwili obecnej nie jest możliwe równoczesne wyszukiwanie w hasłach i indeksie.</li>
+		<li>Minimalna długość wyszukiwanej frazy to trzy znaki</li>
+		<li>Znak specjalny &bdquo;%&rdquo; zastępuje dowolny ciąg znaków, a &bdquo;_&rdquo; &ndash; pojedynczy znak</li>
+		<li>Wyszukiwarka rozróżnia polskie znaki diakrytyczne (ó&nbsp;&ne;&nbsp;o)</li>
+	</ul>
+	
+	<h2>Nawigacja</h2>
+	<ul>
+		<li>Do stron tytułowych poszczególnych tomów można przejść, klikając numer tomu wybranego ze spisu, który znajduje się pod tytułem publikacji</li>
+		<li>Funkcja &bdquo;idź do&rdquo; pozwala na przejście do wybranej strony w określonym tomie</li>
+		<li>Strony w danym tomie można przeglądać za pomocą linków &bdquo;następna strona&rdquo; i &bdquo;poprzednia strona&rdquo;.</li>
+	</ul>
+	
+	<h2>Funkcje dodatkowe</h2>
+	<ul>
+		<li>Uzywając linku "pobierz skan", umieszczonego nad skanem, można zapisać go na dysku (jako plik TIFF)</li>
+	</ul>
+	
+	<h2>Pełny opis</h2>
+	<ul>
+		<li>Link "pełny opis", znajdujący się poniżej tytułu oglądanej publikacji, prowadzi do jej opisu bibliograficznego</li>
+	</ul>
+</div>
+
+<?php xhtml_print_footer(); ?>

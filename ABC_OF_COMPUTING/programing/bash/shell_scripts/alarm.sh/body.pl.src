@@ -1,0 +1,18 @@
+#!/bin/bash
+
+SOUND="path/to/alarm/wav.file"
+
+PATH="$PATH:/usr/bin"
+
+aplay "$SOUND" 2> /dev/null
+
+if [ `who | grep ${USER-""} | awk '$2 == ":0" {print "OK";}'` != "" ]; then
+	export DISPLAY=:0.0
+	( kdialog --title "ALARM" --msgbox "INFO: $*" 2> /dev/null || echo "ALARM (kdialog error): $*" >&2 ) &
+	sleep 5
+	if [ `jobs -r | wc -l` -eq 1 ]; then
+		aplay "$SOUND" 2> /dev/null
+	fi
+else
+	echo "ALARM (no X session): $*" >&2
+fi

@@ -1,0 +1,37 @@
+/**
+ * Program prezentujący podstawy programowania w Qt4 - prezentuje sposoby podstawy
+ * interfejsu, komunikaty, okno zapisu pliku, tworzenie subokna,
+ * obsługę plików xml, timera oraz tabelek i drzewek ...
+ *
+ * jest plik główny programu z funkcją main
+ * poostałe elementy umieszczone są w plikach klas obsługujących poszczególne okienka
+ *
+ * KOMPILACJA: qmake -project && echo 'QT += xml' >> *.pro && qmake && make
+ * POSPRZĄTANIE: make distclean && rm -f *.pro config.NEW.xml
+ **/
+
+// nagłówki Qt
+#include <QApplication>
+#include <QTextCodec>
+
+// nagłowek klasy związanej z głównym okienkiem aplikacji
+#include "timer_window.h"
+
+int main(int argc, char *argv[]) {
+	QApplication aplikacja(argc, argv);
+	
+	// ustawiamy kodowanie dla wyświetlanych i dla przetwarzanych napisów
+	QTextCodec::setCodecForTr (QTextCodec::codecForName ("UTF-8"));
+	QTextCodec::setCodecForCStrings (QTextCodec::codecForName ("UTF-8"));
+	
+	// tworzymy okienko w oparciu o klase TimerWindow
+	TimerWindow okienko(0, 0);
+	
+	// wyświelamy okienko
+	okienko.show();
+	
+	// uruchamiamy aplikację
+	// -> będzie działała nawet po zamknięciu okienka
+	// -> trzeba kończyć przez qApp->quit() a nie przez close() na okienku
+	return aplikacja.exec();
+}

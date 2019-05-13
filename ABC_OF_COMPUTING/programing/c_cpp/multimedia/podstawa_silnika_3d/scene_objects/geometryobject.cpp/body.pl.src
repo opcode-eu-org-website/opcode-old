@@ -1,0 +1,28 @@
+#include "geometryobject.h"
+
+GeometryObject::GeometryObject(int mode) {
+	draw_mode = mode;
+	/*
+	GL_POINTS         0
+	GL_LINES          1
+	GL_LINE_LOOP      2
+	GL_LINE_STRIP     3
+	GL_TRIANGLES      4
+	GL_TRIANGLE_STRIP 5
+	GL_TRIANGLE_FAN   6
+	GL_QUADS          7
+	GL_QUAD_STRIP     8
+	GL_POLYGON        9
+	*/
+}
+
+void GeometryObject::push_point(float desc[5]) {
+	obj.push_back(VertexPoint(desc[0], desc[1], desc[2], desc[3], desc[4]));
+}
+void GeometryObject::push_index(int index) {
+	ind.push_back(index);
+}
+void GeometryObject::render() {
+	glInterleavedArrays(GL_T2F_V3F, 0, &obj.front());
+	glDrawElements(draw_mode, ind.size(), GL_UNSIGNED_BYTE, &ind.front());
+}

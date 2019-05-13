@@ -1,0 +1,80 @@
+// kompilacja: g++ -lpython2.7 -lboost_python -I/usr/include/python2.7/ run_from_cpp.cpp
+
+#include <boost/python.hpp>
+
+namespace engine {
+	class Testuj {
+	public:
+		Testuj() {
+			std::cout << "inicjalizuje Testuj" << "\n";
+			liczba=0;
+			liczba2=0;
+		}
+		void setLiczba(int a) {
+			std::cout << "ustawiam liczba na: " << a << "\n";
+			liczba = a;
+		}
+		
+		void run(int b) {
+			std::cout << "Wynik wynosi: " << liczba + b << "\n";
+		}
+		
+		int liczba2;
+	private:
+		int liczba;
+	};
+
+	BOOST_PYTHON_MODULE(EngineScripts) {
+		boost::python::class_<Testuj>("Testuj", boost::python::init<>())
+			.def("run", &Testuj::run)
+			.def_readwrite("value",    &Testuj::liczba2)
+		;
+	}
+}
+
+int main(int, char **) {
+	engine::Testuj *tt = new engine::Testuj();
+	tt->setLiczba(3);
+
+	engine::Testuj *ttt = new engine::Testuj();
+	ttt->setLiczba(4);
+
+	// initialise python
+	Py_Initialize();
+	
+	try {
+		// initialise and import EngineScripts module
+		//  through the calling initEngineScripts() we not need build python module separately via:
+		//  g++ -shared -fPIC -lpython2.7 -lboost_python -I/usr/include/python2.7/  EngineScripts.cpp -o EngineScripts.so
+		engine::initEngineScripts();
+		PyRun_SimpleString("from EngineScripts import *" );
+		
+		// prepare script to run
+		boost::python::object main = boost::python::import("__main__");
+		boost::python::object global(main.attr("__dict__"));
+		
+		// export object to python
+		global["CPPobject"] = boost::python::ptr(ttt);
+		
+		boost::python::object result = boost::python::exec_file("./run_from_cpp_script.py", global, global);
+		boost::python::object script = global["foo"];
+		
+		if(!script.is_none()) {
+				// run scripts
+				std::cout << "run\n";
+				std::cout << "return = " << boost::python::extract<int>(  script(boost::python::ptr(tt))  ) << "/n";
+				std::cout << "finish\n";
+		}
+		
+		global["abc"] = boost::python::ptr(tt); // podobnie możemy dostawać się do zmiennych/obiektów tworzonych w pythonie
+		PyRun_SimpleString("abc.run(20)" );
+	} catch(boost::python::error_already_set &) {
+		PyErr_Print();
+		exit(-1);
+	}
+	
+	std::cout << "ttt->liczba2 = " << ttt->liczba2 << std::endl;
+	
+	//Py_Finalize();
+	return 0;
+}

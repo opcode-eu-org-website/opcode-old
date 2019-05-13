@@ -1,0 +1,12 @@
+#ifndef _OUTPUT_ALSA_H
+#define _OUTPUT_ALSA_H
+
+#include <alsa/asoundlib.h>
+
+#include "config.h"
+#include "signal.h"
+
+snd_pcm_t* output_alsa_init(config_t *config);
+void output_alsa_write(snd_pcm_t* alsa_dev, signal_t *signal);
+
+#endif

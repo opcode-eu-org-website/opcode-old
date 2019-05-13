@@ -1,0 +1,9 @@
+<article>
+<title>Podstawy "życia" w Debianie</title>
+
+<p><a class="ext_homepage" href="http://www.debian.org/"><strong>Debian</strong></a> jest to wolny system operacyjny, zawierający bardzo dużo oprogramowania, od innych dystrybucji odróżnia go położenie bardzo dużego nacisku na kwestie wolności poszczególnych składników oraz posiadanie wersji opartych na różnych jądrach (Linux, Hurd, BSD).
+W standardowej dystrybucji znajdziemy większość opisywanych wyżej programów.
+Należy jednak zwrócić uwagę iż w pojedynczej paczce .deb może być kilka programów (np. procmail zawiera formail; w takich wypadkach przydatna jest wyszukiwarka wewnątrz pakietowa - <a class="ext" href="http://packages.debian.org/">http://packages.debian.org/</a>, gdyż komendy włączające program są na ogół zgodne z jego nazwą ...), jak również jeden pakiet może być podzielony na bardzo wiele paczek .deb na ogół (ale nie zawsze) powiązanych zależnościami (np. KDE).
+Jednak niektórych wymienionych wyżej programów (cinelerra) nie ma (jeszcze ...) w oficjalnej dystrybucji, stosownych paczek warto dodać do <kbd class="path">/etc/apt/sources.list</kbd>. Warto także zwrócić uwagę na <a class="ext" href="http://snapshot.debian.net/">snapshot.debian.net</a> przechowujący starsze wersje pakietów (może być bardzo przydatny gdy używając Sid'a dorobimy się zabugowanej wersji kluczowego dla nas pakietu).</p>
+
+</article>

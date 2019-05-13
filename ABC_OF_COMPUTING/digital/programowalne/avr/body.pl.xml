@@ -1,0 +1,23 @@
+<article>
+<title>Mikrokontrolery</title>
+
+<p><wiki pl="Mikrokontroler">mikrokontrolery</wiki> są to programowalne, scalone układy cyfrowe integrujące w sobie jednostkę centralną (CPU), pamięć (zarówno operacyjną jak i służącą do przechowywania programu oraz danych) oraz układy wspomagające takie jak przetworniki analogowo-cyfrowe, ... .</p>
+
+<p>W dziale tym zajmiemy się głównie układami opartymi na mikrokontrolerach <wiki pl="Atmel AVR">AVR</wiki> oraz programowaniem tych układów w C (z elementami asemblera). Na wstępie zachęcam do zapoznania się z instrukcją modułu zawierającego mikrokontroler ATMega128, dodatkowy RAM (z zewnętrznym kontrolerem pamięci) oraz kontroler ethernetowy: <doc url="http://www.propox.com/download/docs/MMnet02_pl.pdf">MMnet02</doc> (zwłaszcza opis działania kontrolera pamięci i metody podłączenia do wyświetlacza LCD - uświadamia też pewne aspekty działania PC). Zachęcam też do zajrzenia do artykułów o podstawach programowania w <id_link id="ABC_OF_COMPUTING:programing:c_cpp">C i C++</id_link>.</p>
+
+<p>Przy projektowaniu układów z mikrokontrolerami należy:</p>
+<ul>
+	<li>przewidzieć i wmontować co najmniej 2 (lepiej 3) diody sygnalizacyjne - pokazujące poziom pracy, wykonywaną funkcję, etc</li>
+	<li>przewidzieć i wmontować zestandaryzowane złącze ISP (Kanada lub jakiś własny konsekwentnie przestrzegany standard)</li>
+	<li>piny ISP wykorzystywać wyłącznie do podłączenia diód sygnalizacyjnych, inne wykorzystanie tych pinów dopuszczalne jest tylko wtedy gdy jest to absolutnie niezbędne, może to być:<ul>
+		<li>komunikacja SPI z układem obsługującym "chip select" (w stanie resetu ma być nieaktywny)</li>
+		<li>GPIO przez multiplekser sterowany sygnałem resetu uC (bardzo nie zalecane)</li>
+	</ul></li>
+	<li>w przypadku stosowania magistrali równoległej zaleca się multipleksowanie linii adresowej i danych</li>
+	<li>pamiętać że wiele uC potrafi podciągać linię wejście w górę ale nie w dół, więc przyciski powinny być zwierane do masy</li>
+	<li>pamiętać że sterowanie lampkami sygnalizacyjnymi (zwłaszcza gdy wymagany jest do tego zewnętrzny tranzystor) prostsze jest od strony masy (tranzystor NPN), zatem stale podłączonym pinem takich kontrolek należy robić VCC (a nie masę); niestety w połączeniu z powyższym oznacza to iż do modułu z przyciskami i kontrolką oprócz linii sygnałowych musimy doprowadzić zarówno masę jak i biegun dodatni zasilania</li>
+	<li>jeżeli korzystamy z modułów podłączanych jakąś magistralą (nieważne czy szeregową czy równoległą) umożliwić wymuszenie resetu takich modułów z poziomu mikrokontrolera (istotne także/zwłaszcza gdy mówimy o jakimś ARMie z systemem operacyjnym i np. Atmegach jako moduły)</li>
+</ul>
+<p>Warto także bazować w swoich projektach na kilku mikrokontrolerach z jednej rodziny - w przypadku nie seryjnej produkcji oszczędności z zastosowania bardzo małego mikrokontrolera zostaną zatarte "kosztami" związanymi z trudnościami w jego użyciu (brak pinów do debugowania, mała pamięć programu, ...) oraz związanymi z rozwijaniem projektów na różnych mikroprocesorach (bo do kolejnego był już za mały). Osobiście polecam za minimum przyjąć Atmega8 (a jeżeli jest nie wystarczający to Atmega16). Niestety niektóre z starszych, porzuconych projektów przedstawionych na stronie są niezgodne z przedstawionymi wytycznymi dotyczącymi projektowania układów bazujących na mikrokontrolerach.</p>
+
+</article>

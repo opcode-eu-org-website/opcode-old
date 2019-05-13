@@ -1,0 +1,17 @@
+#!/bin/bash
+
+echo '<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+  xmlns="http://www.google.com/schemas/sitemap/0.84"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.google.com/schemas/sitemap/0.84
+                      http://www.google.com/schemas/sitemap/0.84/sitemap.xsd">'
+
+TZ=UTC find . -type f -a ! -path './archiwum*' -a ! -path './MIRRORS*' -a ! -path '*/.*' -a ! -path './~rrp*' -exec ls -ld --time-style=+"%FT%TZ" \{\} \; |
+	grep -v 'page[.][A-Z-]+[.]xhtml' | cut -d' ' -f6- | awk ' {
+		gsub("^./", "", $2)
+		printf("<url><loc>http://www.opcode.eu.org/%s</loc>", $2)
+		printf("<lastmod>%s</lastmod><priority>0.5000</priority></url>\n", $1)
+	}'
+
+echo '</urlset>'

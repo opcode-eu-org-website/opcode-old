@@ -1,0 +1,45 @@
+<article>
+<title>Ekrany dotykowe zgodne z GUNZE</title>
+
+<p>Dawniej w przypadku ekranów dostępnych poprzez port szeregowy (występujących np. w laptopach Panasonic CF-M34) można było zastosować dedykowany sterownik X-serwera [<homepage url="http://ar.linux.it/software/gunzets/">homepage</homepage>], jednak sterownik ten nie che współdziałać z nowszymi wersjami Xorg. Dlatego konieczne jest użycie odpowiedniego modułu jądra (używanego również przez ekrany z interfejsem USB - występujących np. w Itronix GoBook IX250). Do skonfigurowania tego modułu potrzebna jest zmodyfikowana wersja programu inputattach (z pakietu <homepage url="http://packages.debian.org/lenny/joystick">joystick</homepage>). Modyfikacja polega na dodaniu do <code>input_types[]</code> wpisu:</p>
+<pre>{ "--gunze",		"-gun",		B9600, CS8,			SERIO_GUNZE,	0,	0,	0,	NULL },</pre>
+
+<p>Po skompilowaniu i dodaniu do skryptów startowych uruchomienia tego programu: <code>inputattach -gun /dev/ttyS3</code> dalsza konfiguracja (identyczna jak dla przypadku ekranów USB) odbywa się w xorg.conf i związana jest głównie z kalibracją urządzenia. Poniżej zamieszczam stosowne fragmenty xorg.conf z komentarzem dotyczącym procesu kalibracji</p>
+<pre>Section "InputDevice"
+	Identifier "dummy"
+	Driver "void"
+	Option "Device" "/dev/input/mice"
+EndSection
+	
+Section "InputDevice"
+	Identifier	"Toutchpad"
+	Driver		"mouse"
+	Option          "Device" "/dev/input/mouse1"
+EndSection
+
+Section "InputDevice"
+	Identifier	"Touchscreen"
+	Driver          "evtouch"
+	Option          "Device"           "/dev/input/event1"
+	Option          "ReportingMode"    "Raw"
+	Option          "DeviceName"       "touchscreen"
+	Option          "MoveLimit"        "5"
+	# kalibracja uzyskana w wyniku dzialania /usr/lib/xf86-input-evtouch/calibrate.sh
+	# kalibracje wykonujemy z aktywana opcja:
+	Option "Calibrate" "1"
+	# wg opisu z /usr/share/doc/xserver-xorg-input-evtouch/README.calibration
+	# wynik kalibracji zapisywany jest w $PWD/out.txt umieścić poniżej
+	#
+	# aby ev_calibrate dzialal do czasu rozwiazania Debian Bug #482195 nalezy wykonac:
+	# cp /usr/share/xf86-input-evtouch/empty_cursor.xbm /
+EndSection
+
+Section "ServerLayout"
+	Identifier      "Default Layout"
+	Screen          "Default Screen"
+	InputDevice     "dummy"
+	InputDevice     "Keyboard"
+	InputDevice     "Toutchpad"
+	InputDevice     "Touchscreen"
+EndSection</pre>
+</article>

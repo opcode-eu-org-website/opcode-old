@@ -1,0 +1,9 @@
+<article>
+<p>Teraz ./hello.awk  działa jak byśmy oczekiwali (identycznie też ./hello.awk jakis_plik) - wypisuje "Hello World !!!" i kończy.</p>
+
+<p>Powyższe przykłady obrazują (chyba) podstawową własność języka AWK to co jest zawarte w klamrach wykonywane jest dla każdej pasującej linii (przed klamrami może stać warunek w stylu <code>FNR == 1</code>, co oznacza numer_rekordu == 1 bądź wyrażenie regularne np. <code>^T[ye]</code> co oznacza że linia zaczyna się od T po którym jest y lub e) oraz są specjalne identyfikatory - poznany BEGIN i END wykonywane odpowiednio na początku i końcu programu. Widzimy też funkcję printf - bliźniaczo podobną do tej z C (powyżej pominąłem nawiasy ale jest to to samo co <code>printf("Hello World !!!\n")</code>).</p>
+
+<p>Widzimy tez że nie ma średników, gdy instrukcja kończy się z końcem linii (ale nic nie stoi na przeszkodzie aby je stawiać), są natomiast konieczne gdy w jednej linii mamy kilka instrukcji.</p>
+
+<p>Kolejnym ważnym aspektem są zmienne i tablice. Nie ma potrzeby określania typu zmiennej, wszystkie zmienne poza zmiennymi wewnętrznymi funkcji są globalne. AWK używa tablic asocjacyjnych - indeksem w tablicy może być cokolwiek (liczba lub napis), nie ma potrzeby ustalania długości tablicy ani typu elementów w niej przechowywanych; poniżej przykład ilustrujący tablice w AWK. Wszystkie te cechy ilustruje poniższy przykładowy kod</p>
+</article>

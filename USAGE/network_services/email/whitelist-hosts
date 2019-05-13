@@ -1,0 +1,221 @@
+########################################################################
+### FILE:	/etc/greylistd/whitelist-hosts
+### PURPOSE:	List of hosts from which we do not want to greylist mail
+########################################################################
+### 
+### This file is not actually read by greylistd, but is normally referenced
+### from the Mail Transport Agent (MTA) that invokes greylistd.  As such,
+### the format of the entries is MTA-dependent.
+### 
+### Most MTAs support at least the following:
+###  - A single IPv4 address, consisting of 4 octets (0-255):  192.168.0.1
+###  - Between one and three octets, indicating an IPv4 network:  192.168.0
+###  - A single host name:  gluck.debian.org
+###  - Wildcards in a host name:  *.debian.org
+###
+### Exim 4 supports much more elaborate syntax, including regular expressions
+### starting with "^" (e.g.: ^..crm[hx]c..\.comcast\.net), IP addresses with
+### netmasks (10.0.0.0/8, 10.0.0.0/255.0.0.0), etc.  For full detail, refer to
+### section 10.8 in the Exim 4 "spec.txt" file.
+###
+### !!! IMPORTANT !!!
+### If you use host names in this list, beware that lookup failures will
+### cause your MTA to temporarily reject the mail - indefinitely.  For that
+### reason, it is generally better to use IP addresses than host names.
+
+#*.debian.org
+#*.amazon.com
+#^..crm[hx]c..\.comcast\.net
+#10.0.0.0/8
+
+*.google.com
+*.wp.pl
+*.onet.pl
+*.mx.aol.com
+*.scd.yahoo.com
+*.amazon.com
+*.ebay.com
+*.icm.edu.pl
+
+# http://www.hmailserver.com/forum/viewtopic.php?f=7&t=6817&start=0&st=0&sk=t&sd=a
+# awk 'BEGIN{FS="[./-]"} {if(last != $5){printf("#%s\n",$5); last=$5} if($4 == "* "){tmp="/24";}else{tmp="." $4;} printf("%s.%s.%s%s\n", $1,$2,$3,tmp)}' >> /etc/greylistd/whitelist-hosts
+
+# Amazon
+207.171.168/24
+207.171.180/24
+207.171.187/24
+207.171.188/24
+207.171.190/24
+# Ameritrade (no retry)
+204.107.120/24
+# AOL Outgoing Mail Server
+205.188.139.136
+205.188.139.137
+205.188.144.207
+205.188.144.208
+205.188.156.66
+205.188.157.33
+205.188.157.34
+205.188.157.35
+205.188.157.36
+205.188.157.37
+205.188.157.38
+205.188.157.39
+205.188.157.40
+205.188.157.41
+205.188.157.42
+205.188.159.7
+64.12.137.1
+64.12.137.2
+64.12.137.3
+64.12.137.4
+64.12.137.5
+64.12.137.6
+64.12.137.7
+64.12.137.8
+64.12.137.9
+64.12.137.10
+64.12.137.11
+64.12.138.201
+64.12.138.202
+64.12.138.203
+64.12.138.204
+64.12.138.205
+64.12.138.206
+64.12.138.207
+64.12.138.208
+# Appscorp
+66.100.210.82
+# AXKit mailing list (unique sender per attempt)
+217.158.50.178
+# BellSouth
+65.82.241.160
+# collab
+64.125.132.254
+64.125.133.202
+# cox
+68.15.115.88
+# crt
+216.157.204.5
+# Private network (Do not delay)
+127.0.0.1
+#
+192.168.* . Private network (Do not delay)
+# Ebay (common pool)
+66.135.197/24
+# Ebay (for time critical alerts)
+66.135.209/24
+# gmail
+216.239.32/24
+216.239.56/24
+64.233.162/24
+64.233.170/24
+64.233.182/24
+64.233.184/24
+66.249.82/24
+72.14.204/24
+# greywolftech
+204.60.8.162
+# kernel
+12.107.209.244
+# ljbtc
+66.27.51.218
+# moveon
+64.124.204.39
+# MyFujiMail server (bad 451 handling)
+84.45.71.76
+# Mysql
+213.136.52.31
+# optusnet
+211.29.132/24
+# PLEXOR
+66.206.22.82
+66.206.22.83
+66.206.22.84
+66.206.22.85
+# Prodigy (broken software that retries continually)
+207.115.63/24
+# SecurityFocus
+205.206.231/24
+# sentex
+205.211.164.50
+64.7.153.18
+# skynet
+195.238.2.105
+195.238.2.124
+195.238.3.12
+195.238.3.13
+# SLmail
+63.82.37.110
+# sourceware
+209.132.176.174
+# Southwest Airlines (unique sender, no retry)
+12.5.136.141
+12.5.136.142
+12.5.136.143
+12.5.136.144
+63.169.44.143
+63.169.44.144
+# Ticketmaster (poor retry config)
+209.104.63/24
+# Tid InfoMail Exchanger v2
+195.235.39.19
+# twtelecom
+66.162.216.166
+# xo
+66.89.73.101
+# Yahoo Groups servers (common pool, no retry)
+66.163.187/24
+66.218.66/24
+66.218.67/24
+66.218.69/24
+66.94.237/24
+# Yahoo Mail servers (common pool, no retry)
+216.136.226/24
+216.155.201.64
+216.155.201.65
+# Zen Internet (common Pool)
+212.23.2.21
+212.23.8.67
+212.23.3.20
+212.23.3.27
+212.23.8.62
+212.23.3.142
+212.23.3.141
+212.23.3.140
+# Adelphia
+68.168.78.176
+68.168.78.177
+68.168.78.178
+68.168.78.179
+68.168.78.137
+68.168.78.175
+68.168.78.44
+68.168.78.180
+68.168.78.181
+68.168.78.182
+68.168.78.183
+68.168.78.184
+68.168.78.185
+68.168.78.186
+68.168.78.187
+68.168.78.188
+68.168.78.189
+68.168.78.190
+68.168.78.191
+68.168.78.192
+68.168.78.193
+68.168.78.194
+68.168.78.195
+68.168.78.196
+68.168.78.197
+68.168.78.198
+68.168.78.199
+68.168.78.200
+68.168.78.201
+68.168.78.202
+68.168.78.203
+68.168.78.204
+68.168.78.205
+68.168.78.206
+68.168.78.207

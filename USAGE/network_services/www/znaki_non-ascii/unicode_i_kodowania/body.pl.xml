@@ -1,0 +1,57 @@
+<article>
+<title>Słów kilka o Unicode i kodowaniach</title>
+
+<p><wiki pl="Unicode">Unicode</wiki> sam w sobie przypisuje tylko jednoznaczny kod numeryczny znakom. Nie określa on sposobu zapisu tego kodu numerycznego - za to odpowiadają standardy tupu UCS i UTF:</p>
+<ul>
+	<li><wiki pl="UTF-32/UCS-4">UTF-32/UCS-4</wiki> - każdemu znakowi odpowiada jedno 32-bitowe słowo</li>
+	<li><wiki pl="UCS-2">UCS-2</wiki> - każdemu znakowi odpowiada jedno 16-bitowe słowo (nie są reprezentowane wszystkie znaki Unicode!)</li>
+	<li><wiki pl="UTF-16">UTF-16</wiki> - każdemu znakowi odpowiada co najmniej jedno 16-bitowe słowo, część znaków jest kodowana ciągami dłuższymi</li>
+	<li><wiki pl="UTF-8">UTF-8</wiki> - każdemu znakowi odpowiada co najmniej jedno 8-bitowe słowo, część znaków jest kodowana ciągami dłuższymi</li>
+	<li><wiki pl="UTF-7">UTF-7</wiki> - metoda kodowania Unicode dla systemów 7 bitowych</li>
+	<li><wiki pl="Punycode">Punycode</wiki> - metoda kodowania Unicode dla systemu nazw domenowych (pierwotnie proponowane były UTF-5 i UTF-6)</li>
+</ul>
+<p>Kodowania o długości słowa powyżej 8 bitów (UTF-16, UCS-2, UTF-32/UCS-4) wymagają stosowania znacznika kolejności bajtów <wiki pl="Bom (ujednoznacznienie)">BOM</wiki> (kodowania te - w odróżnieniu od np. protokołów sieciowych - nie ustalają stałej kolejności bajtów w słowach wielobajtowych). Znacznik ten jest dopuszczany także w UTF-8, jednak jego używanie przy starszych implementacjach jest problematyczne.</p>
+
+<p>Ponadto istnieje kilka metod kodowania znaków 8bitowych (bez względu na to czy są znakami UTF-8 czy jakiegoś kodowania narodowego) do 7-bitowego (lub mniejszego) podzbioru ASCII:</p>
+<ul>
+	<li><wiki pl="Quoted-Printable">Quoted-printable</wiki></li>
+	<li><wiki en="Percent-encoding">Percent-encoding</wiki> - zwane także URL-encoding, podobne do Quoted-printable</li>
+	<li><wiki pl="Base64">Base64</wiki></li>
+	<li><wiki en="Base32">Base32</wiki></li>
+</ul>
+
+<p>Poniżej zamieszczam skrypt pokazujący różnice pomiędzy poszczególnymi kodowaniami:</p>
+<pre>NAPIS="ą_ś_ _ź"
+echo "ORYGINALNY HEX:"
+echo "$NAPIS" | od -t x1
+
+echo -e "\nUTF-32/UCS-4 HEX:"
+echo "$NAPIS" | iconv -t utf32 | od -t x4
+
+echo -e "\nUCS2 HEX:"
+echo "$NAPIS" | iconv -t ucs2 | od -t x2
+
+echo -e "\nUTF-16 HEX:"
+echo "$NAPIS" | iconv -t utf16 | od -t x2
+
+echo -e "\nUTF-8 HEX:"
+echo "$NAPIS" | iconv -t utf8 | od -t x1
+
+echo -e "\nUTF-7:"
+echo "$NAPIS" | iconv -t utf7
+
+echo -e "\nPunycode:"
+echo "$NAPIS" | idn --quiet
+
+echo -e "\nkodowanie Quoted-Printable:"
+echo "$NAPIS" | konwert 8bit-qp
+
+echo -e "\nkodowanie URL:"
+echo "$NAPIS" | php -r '$stdin=fopen("php://stdin","r"); while($line=fgets($stdin)) {echo rawurlencode(substr($line,0,strlen($line)-1)) . "\n";}'
+
+echo -e "\nkodowanie BASE64:"
+echo "$NAPIS" | mewencode -b
+</pre>
+
+<p>Zobacz też: <id_link id="email2text.sh">email2text.sh</id_link> - prosta implementacja konwersji e-maila na zwykły tekst z próbą dekodowania znaków non-ASCII, <wiki en="Comparison of Unicode encodings">Comparison of Unicode encodings</wiki></p>
+</article>

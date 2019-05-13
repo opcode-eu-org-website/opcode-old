@@ -1,0 +1,62 @@
+\documentclass[a4paper, portrait, 11pt]{article}
+%lokalizacja
+        \usepackage{polski}
+        \usepackage[utf8]{inputenc}
+        \usepackage[OT4]{fontenc}
+% geometria strony i czcionki
+        \usepackage{geometry} % geometria strony - marginesy, ...
+        \usepackage{ulem} % podkreślenia, przekreślenia, ...
+        % więcej http://www.ia.pw.edu.pl/~wujek/tex/latex2e/macro/ulem.html
+% linki
+        \usepackage{hyperref} % hyperlinki także wewnętrzne
+        % więcej http://www.ia.pw.edu.pl/~wujek/tex/latex2e/macro/hyperref.html
+        \usepackage{url} % łącza internetowe
+% naglowki, stopki, daty, ...
+        \usepackage{fancyhdr} % nagłówek i stopka
+        \usepackage[iso]{isodateo} % aktualna data w iso
+        \usepackage{lastpage} % numer ostatniej strony wstawiany przez \pageref{LastPage}
+% obrazki
+        \usepackage{graphics} % wlaczanie grafik
+        \usepackage{color} % kolory
+        \usepackage{overpic} % napisy na obrazkach
+        \usepackage{floatflt}
+% matematyka
+        \usepackage{amssymb} % podwójne literek trybu matematycznego
+        \usepackage{pictexwd,dcpic}
+
+\setcounter{secnumdepth}{0 }
+
+\newcommand\minifrac[2]{\raisebox{.3ex}{$#1$}/\raisebox{-.6ex}{$#2$}}
+\newcommand\inpoint[1]{\hspace{.4ex}\raisebox{-.55ex}{\scalebox{0.7}{$\bigg|_{#1}$}}\hspace{-1.2ex}}
+
+\geometry{verbose,a4paper,tmargin=2.2cm,bmargin=2.2cm,lmargin=2.2cm,rmargin=2.2cm}
+\hypersetup{pdfauthor={Autor},pdftitle={Tytuł dokumentu},pdfpagemode=None,
+ colorlinks=true,linkcolor=black,urlcolor=blue}
+\sloppy
+
+\def\headrulewidth{0pt}
+
+\DeclareGraphicsExtensions{.pdf,.mps,.png,.jpg}
+
+\newcommand{\kolumny}[2]{
+\hbox{
+	\vtop{\hsize = .45\hsize
+			#1
+	}
+	\hskip .05\hsize
+	\vtop{\hsize = .45\hsize
+			#2
+	}
+}}
+
+
+\begin{document} \baselineskip=14pt %\thispagestyle{empty}
+\pagestyle{fancy}
+\lfoot{\tiny \copyright 2008 Robert Paciorek, http://www.opcode.eu.org/}
+\cfoot{}
+\rfoot{\footnotesize\thepage}
+\rhead{}
+\lhead{}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{12pt}
+

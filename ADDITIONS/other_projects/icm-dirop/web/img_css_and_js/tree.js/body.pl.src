@@ -1,0 +1,112 @@
+/** tablica asocjacyjna: klucz = id pozycji spisu tresci,
+    wartość == true => pozycja rozwinięta
+    wartość == false => pozycja zwinięta
+    brak wpisu w tablicy pozycja niezmieniona **/
+var navtree_co_rozwiniete = new Object();
+
+/** podstawowe funkcje operujące drzewkiem **/
+function navtree_zwin(co) {
+	if (co.className.match(/(^|\s)nav_uncollapsed(\s|$)/)) {
+		co.className = "nav_collapsed";
+		co.getElementsByTagName("ul")[0].style.display = "none";
+		
+		var id = parseInt(co.getAttribute("id").substr(9));
+		navtree_co_rozwiniete[id] = false;
+		return true;
+	}
+	return false;
+}
+function navtree_rozwin(co) {
+	if (co.className.match(/(^|\s)nav_collapsed(\s|$)/)) {
+		co.className = "nav_uncollapsed";
+		co.getElementsByTagName("ul")[0].style.display = "list-item";
+		
+		var id = parseInt(co.getAttribute("id").substr(9));
+		navtree_co_rozwiniete[id] = true;
+		return true;
+	}
+	return false;
+}
+function navtree_save() {
+	var napis = "navtree_list="
+	for (var klucz in navtree_co_rozwiniete) {
+		if (navtree_co_rozwiniete[klucz])
+			napis += klucz + "-t "
+		else
+			napis += klucz + "-f "
+	}
+	document.cookie=napis;
+}
+
+
+/** funkcje skojarzone z zdarzeniami **/
+function navtree_przelacz() {
+	// zdarzenia sa do span, a my chemy operowac na li bedacym jego rodzicem
+	navtree_rozwin(this.parentNode) || navtree_zwin(this.parentNode);
+	navtree_save();
+}
+function navtree_collapse_all() {
+	var spis_tresci_entry = document.getElementsByTagName("li");
+	for(i=0; i < spis_tresci_entry.length; i++)
+		navtree_zwin(spis_tresci_entry[i]);
+	navtree_save();
+}
+function navtree_uncollapse_all() {
+	var spis_tresci_entry = document.getElementsByTagName("li");
+	for(i=0; i < spis_tresci_entry.length; i++)
+		navtree_rozwin(spis_tresci_entry[i]);
+	navtree_save();
+}
+
+
+
+/** funkcja inicjalizująca - dokonuje ustawienia skojarzeń dla zdarzeń
+oraz zwija listę i ustawia zapamiętane wartości rozwinięć **/
+function navtree_inicjalizuj() {
+	var spis_tresci_entry = document.getElementsByTagName("li");
+	for(i=0; i < spis_tresci_entry.length; i++) {
+		if (spis_tresci_entry[i].className.match(/(^|\s)nav_collapsed(\s|$)/)) {
+			// zwijamy pozycję (dzieki umieszczeniu tego tutaj a nie w arkuszu styli
+			// eliminujemy problem gdy css właczone a js wyłaczona)
+			spis_tresci_entry[i].getElementsByTagName("ul")[0].style.display = "none";
+			// przypisujemy funkcje rozwijającą (do span - bo li sie zagniezdzaja)
+			spis_tresci_entry[i].getElementsByTagName("span")[0].onclick = navtree_przelacz;
+		} else if (spis_tresci_entry[i].className.match(/(^|\s)nav_uncollapsed(\s|$)/)) {
+			// przypisujemy funkcję rozwijającą (do span - bo li sie zagniezdzaja)
+			spis_tresci_entry[i].getElementsByTagName("span")[0].onclick = navtree_przelacz;
+		}
+	}
+	var element = document.getElementById('navtree_coll');
+	if (element != null) element.onclick = navtree_collapse_all;
+	element = document.getElementById('navtree_uncoll');
+	if (element != null) element.onclick = navtree_uncollapse_all;
+	
+	// rozwinięcie bierzącej
+	element = document.getElementById('nav_conttent_current');
+	if (element != null) {
+		var co = element.parentNode;
+		while (co != null) {
+			// nie chemy pamiętać tych rozwinieć dlatego nie navtree_rozwin(co) a ten if...
+			if (co.className.match(/(^|\s)nav_collapsed(\s|$)/)) {
+				co.className = "nav_uncollapsed";
+				co.getElementsByTagName("ul")[0].style.display = "list-item";
+			}
+			co = co.parentNode;
+		}
+	}
+	
+	// zapamietane z poprzedniego
+	var ciasteczko = document.cookie.substr(document.cookie.search("navtree_list=")+13);
+	ciasteczko = ciasteczko.substr(0, document.cookie.indexOf(';')-1);
+	var ciasteczka = ciasteczko.split(" ");
+	for(i=0; i < ciasteczka.length; i++) {
+		var tmp = ciasteczka[i].split("-");
+		element = document.getElementById('conttent_' + tmp[0]);
+		if (element !=null && tmp.length>1)
+			if (tmp[1].charAt(0)=="t") { // rozwiń
+				navtree_rozwin(element);
+			} else { // zwiń
+				navtree_zwin(element);
+			}
+	}
+}

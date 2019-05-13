@@ -1,0 +1,153 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <math.h>
+
+#include "signal.h"
+
+void run_calc(config_t *config, signal_t *signal) {
+	int write_pipe[2], read_pipe[2];
+	if ( pipe(write_pipe) == -1 || pipe(read_pipe) == -1 ) {
+		fprintf(stderr, "Error in pipe\n");
+		exit(-1);
+	}
+	
+	switch (fork()) {
+		case -1:
+			fprintf(stderr, "Error in fork\n");
+			exit(-1);
+		case 0: {
+			dup2(write_pipe[0], 0);
+			close(write_pipe[1]); close(write_pipe[0]);
+			
+			dup2(read_pipe[1], 1);
+			close(read_pipe[1]); close(read_pipe[0]);
+			
+			execlp("calc", "calc", NULL);
+		}
+	
+		default: {
+			close(write_pipe[0]);
+			close(read_pipe[1]);
+			
+			char buf[255], buf_tmp[255];
+			double val;
+			int i;
+			
+			double x = 0;
+			double dx = 2 * M_PI / (double)signal->num_of_sample;
+			for (i=0; i < signal->num_of_sample; i++){
+				sprintf(buf, "x=%f;", x);
+				write(write_pipe[1], buf, strlen(buf));
+				write(write_pipe[1], config->function, config->function_len);
+				read(read_pipe[0], buf, 255);
+				sscanf(buf, "%[^0-9]%lf", buf_tmp, &val);
+				signal->data[i] = CONVERT_TO_SIGNAL(val);
+				buf[20]='\0'; printf ("%c %f -- %s -- %f -- %d\n", buf[0], x, buf, val, signal->data[i]);
+				x += dx;
+			}
+		}
+	}
+}
+
+signal_t signal_prepare(config_t *config) {
+	signal_t signal;
+	signal.num_of_sample = config->rate * config->one_period_time; // obliczamy liczbę próbek na jeden okres sygnału
+	signal.data = ALLOC_SIGNAL_DATA(signal);
+	
+	// obliczamy liczbę próbek na jeden okres tworzonego sygnału
+	int num_of_nonzero_sample = config->rate * config->macro_args[0];
+	if (num_of_nonzero_sample > signal.num_of_sample)
+		num_of_nonzero_sample = signal.num_of_sample;
+	int i;
+	float tmp;
+	
+	switch(config->macro) {
+		case SQUARE: {
+			for (i = 0; i < num_of_nonzero_sample; i++) {
+				signal.data[i] = SIGNAL_DATA_MAX;
+			}
+			break;
+		}
+		case SIN: {
+			signal.data[0] = 0;
+			double x = 0;
+			double dx = 2 * M_PI / (double)num_of_nonzero_sample;
+			
+			for (i = 1; i < num_of_nonzero_sample; i++) {
+				x += dx;
+				signal.data[i] = CONVERT_TO_SIGNAL(sin(x));
+			}
+			break;
+		}
+		case SAW_R: {
+			int dy = SIGNAL_DATA_MAX / num_of_nonzero_sample;
+			signal.data[0] = SIGNAL_DATA_MAX;
+			
+			for (i = 1; i < num_of_nonzero_sample; i++) {
+				signal.data[i] = signal.data[i-1] - dy;
+			}
+			break;
+		}
+		case SAW_L: {
+			int dy = SIGNAL_DATA_MAX / num_of_nonzero_sample;
+			signal.data[0] = 0;
+			
+			for (i = 1; i < num_of_nonzero_sample; i++) {
+				signal.data[i] = signal.data[i-1] + dy;
+			}
+			break;
+		}
+		case TRIANGLE: {
+			int dy = SIGNAL_DATA_MAX / num_of_nonzero_sample;
+			signal.data[0] = 0;
+			
+			for (i = 1; i < num_of_nonzero_sample; i++) {
+				signal.data[i] = signal.data[i-1] + dy;
+			}
+			
+			int num_of_nonzero_sample2 = config->rate * config->macro_args[1];
+			dy = SIGNAL_DATA_MAX / num_of_nonzero_sample2;
+			signal.data[num_of_nonzero_sample] = SIGNAL_DATA_MAX;
+			
+			num_of_nonzero_sample2 += num_of_nonzero_sample;
+			if (num_of_nonzero_sample2 > signal.num_of_sample)
+				num_of_nonzero_sample2 = signal.num_of_sample;
+			for (i = num_of_nonzero_sample+1; i < num_of_nonzero_sample2; i++) {
+				signal.data[i] = signal.data[i-1] - dy;
+			}
+			
+			num_of_nonzero_sample = num_of_nonzero_sample2;
+			break;
+		}
+		case FUNCTION: {
+			run_calc(config, &signal);
+			num_of_nonzero_sample = signal.num_of_sample;
+			break;
+		}
+		case PCM: {
+			for (i = 1; i < signal.num_of_sample; i++) {
+				if ( fscanf(config->config_file, "%f", &tmp) < 1 ){
+					break;
+				} else {
+					signal.data[i] = CONVERT_TO_SIGNAL(tmp);
+					clean_line(config->config_file);
+				}
+			}
+			num_of_nonzero_sample = i;
+			break;
+		}
+	}
+	
+	// do końca okresu dopełniamy zerami
+	for (i = num_of_nonzero_sample; i < signal.num_of_sample; i++) {
+		signal.data[i] = 0;
+	}
+	
+	return signal;
+}
+
+void signal_free(signal_t *signal) {
+	free(signal->data);
+}

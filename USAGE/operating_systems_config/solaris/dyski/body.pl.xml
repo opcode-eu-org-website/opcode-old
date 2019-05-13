@@ -1,0 +1,23 @@
+<article>
+<title>Dyski i filesystemy - ZFS, NFS, ...</title>
+<p>Na koniec kilka słów na temat zarządzania dyskami oraz ZFS. Urządzenia reprezentujące dyski znajdują się w <kbd class="path">/dev/dsk/</kbd> i mają nazwy oparte na schemacie <code>c<var>{numer_kontrolera}</var>t<var>{numer_"tasku"}</var>d<var>{numer_dysku_w_tasku}</var></code>, na końcu może być <code>s<var>X</var></code> oznaczające partycje solarisowa <var>X</var> (numerujemy od zera) lub <code>p<var>X</var></code> oznaczający odpowiednią partycje x86 (0 == cały dysk). <code>p<var>X</var></code> nie występują na sparc'ach, <code>s2</code> odnosi się tradycyjnie do partycji "backup" obejmującej cały dysk (partycje solarisowe mogą się nakładać). Do zarządzania dyskami służy komenda <code>format</code>, w jej ramach mamy do dyspozycji polecenia takie jak:</p>
+<ul>
+	<li><code>fdisk</code> - partycje x86 (fdisk możemy też wywołać niezależnie korzystając do tego celu z urządzenia <kbd class="path">/dev/rdsk/c0t0d0p0</kbd></li>
+	<li><code>verify</code> - wyświetlanie informacji o podziale fdiskowej (x86) partycji solarisowej na "podpatycje" (slice)</li>
+	<li><code>partition</code> - partycje w ramach partycji fdiskowej (x86) lub całego dysku (sparc)</li>
+	<li><code>disk</code> - wybór dysku</li>
+	<li><code>current</code> - informacje o dysku</li>
+	<li><code>type</code> - przełączanie pomiędzy aktywnymi tablicami partycji solarisowych / partycjami x86 na których są partycje o typie solarisowym</li>
+</ul>
+<p>Takie podejście do zarządzania dyskami narzuca skojarzenia z OpenBSD i jego "disklabel", jest ono zresztą rzeczą dość charakterystyczną dla nie PC centrycznych systemów.</p>
+
+<p>Do zarządzania i obsługi ZFS służą zasadniczo dwa narzędzia:</p>
+<ul>
+	<li><code>zpoll</code> - dyski, ich połączenia (mirrory, raidy, grupy dysków wchodzące w skład danego fs, itp) oraz podstawowy system plików na urządzeniu (np. przy pomocy tej komendy możemy zamienić pool mający jeden dysk na poll oparty o mirror - wystarczy zrobić "attach" - mirror utworzy się samoczynnie)</li>
+	<li><code>zfs</code> - dodatkowe ustawienia systemu plików i dodatkowe systemy plików tworzone na założonym wcześniej pool-fs</li>
+</ul>
+
+<p>Udostępnianie zasobów po <id_link id="network_file_system">NFS</id_link> odbywa się za pomocą komendy <code>share -F nfs -o rw=<samp>hostA:hostB</samp>,ro=<samp>hostC</samp> <samp>/sciezka/do/eksportu</samp></code>. Komendy te mogą być wpisane do pliku <kbd class="path">/etc/dfs/dfstab</kbd> celem automatycznego ich wykonywania przy starcie systemu. DNS dla hostów podawanych w komendzie share musi być wpisany w <kbd class="path">/etc/hosts</kbd> (nawet jeżeli jest skonfigurowany normalny DNS). Można także zdefiniować eksport NFSowy w samym ZFSie (jest to o tyle lepsze że nie rodzi problemów z kolejnością podmontowywania i robienia exportu) - służy do tego komenda <code>zfs set sharenfs=on <var>eksportowany/katalog</var>;</code>, opcje eksportowania ustawia się wtedy w sposób następujący <code>sharemgr set -P nfs -S sys -p <var>rw</var>=<var>hostname</var> zfs/<var>eksportowany/katalog</var></code>, a sprawdzić można je za pomocą <code>sharemgr show -p</code>. Ponadto należy zwrócić uwagę na niską wydajność NFS'a ciągniętego z ZFSa w niektórych zastosowaniach (związaną z realizacją sync) - wybitnym tego przykładem może być konwersja z bmp do tif przy pomocy convert (operacja gdy zapis jest robiony na nfs ta trwa 80 razy dłużej niż gdy jest robiony lokalnie a wynik jest przenoszony na nfs).</p>
+
+<p>Należy też wspomnieć iż istnieje konkurencyjna wobec ZFS technologia tego typu systemów plików, nie mającą obecnie wolnej implementacji, jest nią <wiki en="Write Anywhere File Layout">WAFL</wiki>.</p>
+</article>

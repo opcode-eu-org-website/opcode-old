@@ -1,0 +1,81 @@
+#include <stdio.h>
+
+#include "config.h"
+#include "signal.h"
+#include "output_dsp.h"
+#include "output_alsa.h"
+#include "output_uC.h"
+
+int main(int argc, char *argv[]) {
+	int i;
+	
+	config_t *config;
+	config = config_init(); DEBUG()
+	config_read_cmdline(config, argc, argv); DEBUG()
+	config_parse_file(config); DEBUG()
+	
+	printf("# OUTPUT_MODES=%d rate=%d one_period_time=%f num_of_periods=%d\n",
+		config->output_mode, config->rate, config->one_period_time, config->num_of_periods);
+	printf("# MACRO=%d (%f, %f)\n",
+		config->macro, config->macro_args[0], config->macro_args[1]);
+	printf("# FUNCTIONS STRING:\n# \t%s\n",
+		config->function);
+	
+	/// utworzenie pojedynczego okresu sygnalu w oparciu o konfig;
+	signal_t signal = signal_prepare(config); DEBUG()
+	
+	/// opcjonalny dump sygnału do wskazanego pliku
+	if (config->display_file != NULL) {
+		for(i=0; i<signal.num_of_sample; i++)
+			fprintf(config->display_file, "%d\n", signal.data[i]);
+		fclose(config->display_file);
+		config->display_file = NULL;
+	}
+	DEBUG()
+	
+	
+	
+	
+	/// wysyłanie sygnału na wyjście audio lub do uC
+	
+	if (config->output_mode == OUTPUT_DSP) {
+		/// DSP
+		DEBUG()
+		int dsp_dev = output_dsp_init(config);
+		
+		if (config->num_of_periods > 0)
+			for(i=0; i<config->num_of_periods; i++)
+				output_dsp_write(dsp_dev, &signal);
+		else
+			while(1)
+				output_dsp_write(dsp_dev, &signal);
+		
+		close(dsp_dev);
+	} else if (config->output_mode == OUTPUT_ALSA) {
+		/// ALSA
+		DEBUG()
+		snd_pcm_t *alsa_dev = output_alsa_init(config);
+		
+		if (config->num_of_periods > 0)
+			for(i=0; i<config->num_of_periods; i++)
+				output_alsa_write(alsa_dev, &signal);
+		else
+			while(1)
+				output_alsa_write(alsa_dev, &signal);
+		
+		snd_pcm_close(alsa_dev);
+	} else if (config->output_mode == OUTPUT_UC) {
+		/// uC czyli port szeregowy
+		DEBUG()
+		int uC_dev = output_uC_init(config);
+		output_uC_write(uC_dev, &signal);
+	} else {
+		fputs("Unknow output mode", stderr);
+	}
+	DEBUG()
+	
+	signal_free(&signal); DEBUG()
+	config_free(config); DEBUG()
+	
+	return 0;
+}

@@ -1,0 +1,64 @@
+<article>
+<title>RAID i LVM - bezpieczniejsze, większe i bardziej elastyczne partycje dyskowe</title>
+
+<p>Linux oferuje dwie przydatne technologie dotyczące zarządzania pamięciami masowymi - jest to programowy <wiki pl="RAID">RAID</wiki> oraz woluminy logiczne <wiki pl="LVM">LVM</wiki>. RAID umożliwia realizację różnych form mirroringu mających na celu zabezpieczenie przed utratą danych, a także uzyskiwanie większych przestrzeni złożonych z kilku dysków. LVM służy umożliwieniu bardziej elastycznego podziału dysku oraz uzyskania logicznych partycji złożonych z wielu różnych fragmentów dysków fizycznych. Również główny system plików (/) może korzystać z tych dobrodziejstw, należy tylko pamiętać aby gdy korzystamy z LVM bądź RAID'a innego niż RAID1 zostawić zwykłą partycję na /boot (pliki bootloadera i obrazy jądra).</p>
+
+<pre>
+	# tworzymy RAID1 dla partycji /
+	mdadm -C -v /dev/md0 --level=1 -n 2 /dev/sda1 /dev/sdb1
+	# tworzymy zdegradowany RAID1 dla dwóch partycji na których będzie /home
+	mdadm -C -v /dev/md1 --level=1 -n 2 /dev/sda3 missing
+	mdadm -C -v /dev/md2 --level=1 -n 2 /dev/sdb3 missing
+	
+	# tworzymy volumeny fizyczne na urządzeniach RAID dla potrzeb LVM
+	pvcreate /dev/md1
+	pvcreate /dev/md2
+	# tworzymy grupę voluminów dla LVM
+	vgcreate lvm0 /dev/md1
+	# dodajemy volumen fizyczny do grupy
+	vgextend lvm0 /dev/md2
+	# można też usunąć przy pomocy:
+	# vgreduce lvm0 /dev/md2
+	# tworzenie volumenu logicznego o zadanej wielkości i nazwie w ramch podanej grupy
+	# będzie z nim związane urządzenie /dev/lvm0/home
+	lvcreate -L 25G -n home lvm0
+	# ogladamy to co żesmy stworzyli
+	pvdisplay
+	vgdisplay
+	lvdisplay
+	# powiększamy volumen logiczny
+	lvextend  -L +1GB  /dev/sys/homes
+	# powiększamy system plików, np.
+	#  xfs_growfs /home
+	#  resize2fs /dev/lvm0/home
+	#  btrfs filesystem resize max /home
+	#  # więcej poleceń btrfs-owych: https://btrfs.wiki.kernel.org/index.php/Btrfs%28command%29
+	
+	# uzupełniamy nasz zdegradowany raid
+	/sbin/mdadm -a /dev/md1 /dev/sdc1
+	/sbin/mdadm -a /dev/md2 /dev/sdc2
+</pre>
+
+<p>Do kasowania macierzy możemy posłużyc się komendą: <code>mdadm -S --zero-superblock /dev/md14; mdadm -S /dev/md11</code></p>
+
+<p>Warto zachęcać LVM do używania identyfikatorów dysków w tym celu: w <kbd class="path">/etc/mdadm/mdadm.conf</kbd> umieszczamy wpis <code>DEVICE /dev/disk/by-id/*</code>, macierz budujemy (w tym przykładzie raid 6 na 8 dyskach) np. <code>mdadm -C -v --auto=mdp --level=raid6 --raid-devices=8 /dev/disk/by-id/scsi-*part2</code> i w oparciu o wynik <code>mdadm --detail --scan</code> edytujemy <kbd class="path">/etc/mdadm/mdadm.conf</kbd></p>
+
+<p>W zasadzie LVM sam się konfiguruje przy uruchamianiu jądra, ale niekiedy może zajść potrzeba ręcznego uruchamiania LVM w trakcie startu systemu. Procedura takiej operacji wygląda następująco:</p>
+<ol>
+	<li>załadowanie modułów od devicemaper <code>dm-mod</code> i od lvm <code>lvm*</code> (jeżeli jest jako moduły)</li>
+	<li>jeżeli udev nie potworzył urządzeń to tworzymy ręcznie:<pre>
+mknod --mode=600 /dev/lvm c 109 0
+mknod --mode=600 /dev/mapper/control c 10 62
+# numery możemy odczytać z /proc/device:
+#  major = misc
+#  minor = device-mapper</pre></li>
+	<li>wykonanie <code>/sbin/vgscan</code>, ewentualnie z opcjami <code>--ignorelockingfailure</code> i/lub <code>--mknodes</code></li>
+	<li>wykonanie <code>/sbin/vgchange -a y</code>, ewentualnie z opcją <code>--ignorelockingfailure</code></li>
+	<li>ustawienie odpowiednich uprawnień do urządzeń</li>
+</ol>
+<p>W przypadku ręcznej konfiguracji LVM na wczesnych etapach działania systemu może pojawić się problem z tworzeniem pliku blokady - "LVM - Locking type 1 initialisation failed", spowodowane to może być tym iż partycja zawierająca <kbd class="path">/var/lock</kbd> jest w trybie tylko do odczytu, rozwiązaniem jest np. <code>mount -t tmpfs tmpfs /var/lock</code></p>
+
+<p>Niekiedy (np. niezgodne UUIDy dysków/partycji wchodzących w skład RAIDa) może zajść potrzeba ręcznego wystartowania RAIDa wg podanego trybu i na podanych urządzeniach. W tym celu należy (po zatrzymaniu raida który wystartował z błędem poprzez <code>mdadm -S /dev/mdX</code>) skorzystać z opcji <code>--create --assume-clean</code> do polecenia mdadm wraz z określeniem jaki typ raida, z ilu dysków i wylistoiwaniem tych dysków, np. <code>mdadm --create --assume-clean --level=1 --raid-devices=2 /dev/md1 /dev/sda1 /dev/sdb1</code>. Odczyt UUIDów oraz innych informacji odnośnie RAIDa zapisanych na składowym dysku możliwy jest za pomocą: <code>mdadm --examine /dev/sda1</code>. W przypadku kłopotów z mdadm'em przydatne mogą być także opcje <code>--scan</code>, <code>--detail</code>, <code>--verbose</code>.</p>
+
+<p>Zobacz w Sieci: <doc url="http://pl.docs.pld-linux.org/soft_raid.html" mirror="oprogramowanie/dokumentacja_PLD/pld_dok.html">RAID programowy</doc>, <doc url="http://andrzej.dopierala.name/2007-04-09_Instalacja_linuksa_na_raid1">Instalacja Linuksa Na Raid1</doc>, <doc url="http://andrzej.dopierala.name/2007-04-11_Migracja_serwera_na_RAID1">Migracja Serwera Na RAID1</doc>, <doc url="http://pl.docs.pld-linux.org/lvm2.html" mirror="oprogramowanie/dokumentacja_PLD/pld_dok.html">LVM</doc>, <doc url="https://wiki.archlinux.org/index.php/LVM" mirror="oprogramowanie/ArchLinuxWiki">LVM</doc>.</p>
+</article>

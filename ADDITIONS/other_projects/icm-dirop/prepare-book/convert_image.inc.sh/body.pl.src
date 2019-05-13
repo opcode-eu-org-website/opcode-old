@@ -1,0 +1,96 @@
+#!/bin/bash
+
+echo "FUNCTION LIST:
+	is_img_one_page_exception INPUT_PLIK
+		this function return 0 if file is in ONE_PAGE_EXCEPTION table
+			or return 1 if isn't
+	split_image INPUT_FILE OUTPUT_FILE_1 OUTPUT_FILE_2
+	make_small_png_img IN_DIR OUT_DIR INPUT_FILE_1 [INPUT_FILE_2 ...]
+	parse_all_img IN_DIR OUT_DIR_TIFF OUT_DIR_PNG"
+
+IMG_OUT_EXT="tif"
+
+# funkcja sprawdza czy plik zadany przez $1 jest na liście wyjątków
+is_img_one_page_exception() {
+	for (( i=0 ; $i<=$OPEC ; i++ )) ; do
+		if [ "${ONE_PAGE_EXCEPTION[$i]}" = "$1" ]; then
+			return 0
+		fi
+	done
+	return 1
+}
+
+# funckcja dzieli pionowo obrazek wskazany jako $1
+# na dwa obrazki wskazanej jako $2 i $3
+split_image() {
+	# uzyskanie informacji o obrazku
+	dim=`identify $1 | grep '(TIFF)|(BMP)' | gawk '{print $3}'`
+	dim_w=`echo -n $dim | gawk -Fx '{print $1}'`
+	dim_h=`echo -n $dim | gawk -Fx '{print $2}'`
+	# potrzebujemy połowę długości
+	dim_w=$((${dim_w} / 2))
+	
+	# podział obrazka
+	convert -crop ${dim_w}x${dim_h}+0+0! -strip "$1" "$2"
+	convert -crop ${dim_w}x${dim_h}+${dim_w}+0! -strip "$1" "$3"
+}
+
+# tworzy "miniaturki" png dla zadanej listy plików
+# $1 określna katalog wejściowy $2 określna katalog wyjściowy 
+make_small_png_img() {
+	in_dir="$1"
+	out_dir="$2"
+	shift 2
+	for f in $@; do
+		convert -resize 720 -type Palette -depth 8 -colors 15 -colorspace Gray -quality 95 \
+			-strip "$in_dir/$f" "$out_dir/${f%.$IMG_OUT_EXT}-small.png"
+	done
+}
+
+# funkcja set_out_file_number
+. ${DIROP_SYSTEM_DIR}parse_config.inc.sh > /dev/null
+
+# funkcja przetwarza wszystkie pliki *.$IMG_EXT w zadanym ($1) katalogu
+# wyniki zapisując do katalogu $2 (tif) i $3 (png)
+# wymaga zmiennych konfiguracyjnych $OUTPUT_FIRST_NUM $PAGES_PER_SCAN
+parse_all_img() {
+	tmp_name="/tmp/${RANDOM}_${PPID}.tif"
+	
+	pushd $1 > /dev/null
+	
+	# uzyskujemy out_file_number
+	set_out_file_number "$2" "$IMG_EXT"
+	
+	# czytamy wszystkie pliki *.$IMG_EXT z katalogu INPUT_DIR
+	# robimy to przez ls | while read
+	# bo w ten sposób możemy panować nad sortowaniem
+	ls -1 *.$IMG_EXT | while read input_file; do
+		# nazwa pierwszego pliku wynikowego
+		out_file_1=`printf "%04d.$IMG_OUT_EXT" $out_file_number`; out_file_number=$(( $out_file_number + 1))
+		out_file_2=""
+		
+		is_img_one_page_exception "$input_file"
+		case $(($? + $PAGES_PER_SCAN)) in
+			1 | 3) # dwie strony
+				out_file_2=`printf "%04d.$IMG_OUT_EXT" $out_file_number`; out_file_number=$(( $out_file_number + 1))
+				echo -e "\\033[32m $input_file - dokonuje podziału na $out_file_1 $out_file_2\\033[0m"
+				split_image "$input_file" "$2/$out_file_1" "$2/$out_file_2"
+				;;
+			2) # jena strona
+				if [ "$IMG_EXT" = "$IMG_OUT_EXT" ]; then
+					echo -e "\\033[32m $input_file - kopiuje na $out_file_1\\033[0m"
+					cp "$input_file" "$2/$out_file_1"
+				else
+					echo -e "\\033[32m $input_file - konwetruje na $out_file_1\\033[0m"
+					# for NFS - convert to tif on NFS is very slow:
+					convert "$input_file" $tmp_name
+					mv $tmp_name "$2/$out_file_1"
+				fi
+				;;
+		esac
+		echo -e "\\033[32m  generuje \"miniaturki\" dla $out_file_1 $out_file_2\\033[0m"
+		make_small_png_img "$2" "$3" "$out_file_1" "$out_file_2"
+	done
+	
+	popd > /dev/null
+}

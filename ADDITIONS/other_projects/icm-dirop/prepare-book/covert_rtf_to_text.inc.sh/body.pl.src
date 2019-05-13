@@ -1,0 +1,89 @@
+#!/bin/bash
+
+echo "USAGE:
+	rtf2text INPUT_RTF_FILE > OUTPUT_TXT_FILE"
+
+# $1 plik rtf do przetworzenia
+rtf2text() {
+	# zamieniamy rtf na htm następnie zamieniamy znaki nowej linii na znaczniki <new_line>
+	# i następnie przetwarzamy przy pomocy SED:
+	unrtf --nopict --html "$1" | awk '{ORS="{new_line}"} {print $0}' | konwert html-UTF8 | sed -f <(echo '
+		# # znaki narodowe polskie
+		# s#&ecirc;#ę#g
+		# s#&oacute;#ó#g
+		# s#&sup1#ą#g
+		# s#<!--- char 0x9c --->#ś-#g
+		# s#&sup3;#ł#g
+		# s#&iquest;#ż#g
+		# s#<!--- char 0x9f --->#ź-#g
+		# s#&aelig;#ć#g
+		# s#&ntilde;#ń#g
+		# s#&Ecirc;#Ę#g
+		# s#&Oacute;#Ó#g
+		# s#&yen;#Ą#g
+		# s#&OElig;#Ś#g
+		# s#&pound;#Ł#g
+		# s#&macr;#Ż#g
+		# s#<!--- char 0x8f --->#Ź-#g
+		# s#&AElig;#Ć#g
+		# s#&Ntilde;#Ń#g
+		# 
+		# # inne znaki specjalne
+		# s#&deg;#°#g
+		# s#&ouml;#ö#g
+		
+		# twarde spacje i pozostałe znaki specjalne
+		# s#&nbsp;# #g
+		s#&quot;#"#g
+		s#<!--- char \([0-9a-fA-FxX]*\) --->#{SPECIAL_CHAR: \1}#g
+		s#&\([^;]*\);#{SPECIAL_CHAR: \&\1;}#g
+		
+		# pozostałe elementy html
+		# s#<!---[^>]*--->{new_line}##g
+		s#<[^>]*>##g
+		s#<p>#\n\n#g
+		
+		# nowe linie
+		s#-{new_line}##g
+		s#{new_line}{new_line}#\n\n#g
+		s#{new_line}# #g
+	')
+}
+
+# funkcja set_out_file_number
+. ${DIROP_SYSTEM_DIR}parse_config.inc.sh > /dev/null
+
+# funkcja przetwarza wszystkie pliki *.rtf w zadanym ($1) katalogu
+# wyniki zapisując do katalogu $2 (tekst)
+# wymaga zmiennych konfiguracyjnych $OUTPUT_FIRST_NUM
+parse_all_rtf() {
+	pushd $1 > /dev/null
+	
+	# uzyskujemy out_file_number
+	set_out_file_number "$2" "txt"
+	
+	ls -1 *.rtf | while read input_file; do
+		last_file=$out_file
+		out_file=`printf "%04d" $out_file_number`; out_file_number=$(( $out_file_number + 1))
+		# konwersja do pliku tekstowego
+		echo -e "\\033[32m przetwarzam RTF \"$input_file\" na \"$out_file.txt\"\\033[0m"
+		rtf2text "$input_file" > "$2/$out_file.txt"
+		# kontrola podobienstwa
+		# czy różnica wielkości jest mniejsza od 8% rozmiaru większego pliku
+		size1=`/bin/ls -l "$2/$last_file.txt" | cut -f5 -d' '`
+		size2=`/bin/ls -l "$2/$out_file.txt" | cut -f5 -d' '`
+		size=`echo "a=${size1:-0}; b=${size2:-0}; "'max=a*(a>=b)+b*(b>a); min=a*(a<=b)+b*(b<a); (max-min)<(max*0.08)' | bc`
+		if [ "$size" = "1" ]; then
+			# jeżeli jest mniejsza czy pliki są do siebie podobne
+			cmp -l "$2/$last_file.txt" "$2/$out_file.txt" 2>/dev/null | awk '
+				BEGIN {L=0; P=0; roznosc=0}
+				{R=$1; L+=$2; P+=$3}
+				END {if (L-P>0) {roznosc=(L-P)*NR/R} else if (P-L>0) {roznosc=(P-L)*NR/R}}
+				END {if (roznosc < 30) printf("\033[38m  WARNING: plik '"$out_file.txt"' jest zbyt podobny do poprzedniego\033[0m\n") > "/dev/stderr"}
+			'
+		fi
+	done
+	
+	popd > /dev/null
+}
+

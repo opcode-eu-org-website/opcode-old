@@ -1,0 +1,18 @@
+#!/usr/bin/python
+
+import sys
+sys.path.append('/path/to/dir/with/mojmodul.so/')
+
+from mojmodul import *
+
+print "XXX"
+print "from python: " + funkcja1()
+
+num=4
+print f2(num) * 2
+
+k = Klasa('AAAA')
+print k.show()
+
+print funkcja3(k)
+print k.f3()

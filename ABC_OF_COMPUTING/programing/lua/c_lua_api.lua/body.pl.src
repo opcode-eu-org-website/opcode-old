@@ -1,0 +1,17 @@
+-- funkcja ktora bedziemy wywolywac z C
+function jakas_funkcja(val)
+	print("To jakas funkcja", val, tabelka[1])
+	return 2*val
+end
+
+-- wypisanie tabelki przekazanej z C
+print "Wyglad tabelki:"
+for index, value in pairs(tabelka) do
+	 print(index, value, type(value))
+end
+
+-- wywolanie funkcji zdefiniowanej w programie w C
+print("Funcka z C zwrocila:", funkcja_z_c(12, 4))
+
+-- zwrocenie wynikow do C
+return 23, 20.34, "Ala ma kota"

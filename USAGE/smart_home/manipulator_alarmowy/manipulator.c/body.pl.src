@@ -1,0 +1,358 @@
+/*
+ * program sterownika manipulator (szyfratora) systemu alarmowego
+ * z komunikacją poprzez port RS oraz obsługą wyświetlacza LCD
+ * dla mikrokontrolera Atmega8
+ *
+ * wymaga plików odpowiedzialnych za obsługę komunikacji modbus
+ * (z użyciem FreeMODBUS) i budowę całości projektu z:
+ * http://opcode.eu.org/usage_and_config/toolbox4electronic/libs4avr/
+ *
+ * kompilacja i wgranie przez ISP z użyciem USBasp:
+ *  make sterownik_oswietlenia flash
+ *
+ * konfiguracja układu na zewnętrzny kwarc 8MHz (lub troche mniejszy)
+ *  sudo avrdude -c usbasp -p m8 -U lfuse:w:0xef:m
+ * 
+ */
+
+#include <inttypes.h>
+#include <stdio.h>
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+
+/** nagłówki obsługi MODBUS RTU **/
+#include "modbus.c"
+
+#define VERSION        0x0002
+#define SLAVE_ADDR     0x0A
+#define SLAVE_BASE_REG 0x0010
+
+
+/** nagłówki obsługi wyświetlacza LCD **/
+#define lcd_send(byte) PORTC = byte
+#define LCD_E        0x02
+#define LCD_RS_DATA  0x01
+#define LCD_RS_CMD   0x00
+#define LCD_DATA_OFFSET 2
+#include "lcd.c"
+
+#define LINE_LEN     16
+#define STATUS_LEN   3*LINE_LEN+2
+
+void short_beep(int8_t wait1, int8_t wait2) {
+	int8_t i;
+	PORTD |= 1 << PD3;
+	for (i=0; i<wait1; i++) _delay_ms(30);
+	PORTD &= ~(1 << PD3);
+	for (i=0; i<wait2; i++) _delay_ms(30);
+}
+
+
+volatile uint8_t  status[ STATUS_LEN + 1 ];
+/** status[0 ... LINE_LEN-1]             = data from keyboard
+    status[LINE_LEN]                     = mode
+                                            0     : reserved for internal use (initialising state)
+                                          1 -  99 : show message
+                                        100 - 149 : show message and wait for enter number
+                                        150 - 199 : show message and wait for enter secret
+                                        200 - 250 : action (state don't storage)
+                                           200    : backlight pernament ON
+                                           201    : backlight timer ON
+                                           203    : backlight OFF
+                                           204    : beeper ON
+                                           205    : beeper - short beep       short_beep(4, 0);
+                                           206    : beeper - two short beep   short_beep(4, 6); short_beep(4, 0);
+                                           207    : beeper - long beep        short_beep(7, 0);
+                                           208    : beeper - extra long beep  short_beep(20, 0);
+                                           209    : beeper OFF
+                                           210    : led 1 ON
+                                           211    : led 1 OFF
+                                           212    : led 2 ON
+                                           213    : led 2 OFF
+                                           214    : led 3 ON
+                                           215    : led 3 OFF
+                                           216    : clear LCD message buffer (status[LINE_LEN+2   ... 3*LINE_LEN+1])
+    status[LINE_LEN+1]                     = number of valid chars in data from keyboard
+    status[LINE_LEN+2   ... 2*LINE_LEN+1]  = message first line
+    status[2*LINE_LEN+2 ... 3*LINE_LEN+1]  = message second line
+**/
+
+
+volatile uint8_t  new_mode = 0;
+
+
+void reset_display( void ) {
+	lcd_clear();
+	_delay_ms(25);
+	
+	switch (status[LINE_LEN]) {
+		case 0:
+			lcd_send_string("Initialising ...", 16);
+			break;
+		case 1:
+			lcd_send_string("Invalid PIN", 11);
+			break;
+		case 100:
+			lcd_send_string("enter CMD CODE", 14);
+			break;
+		case 150:
+			lcd_send_string("enter PIN", 9);
+			break;
+		case 99:
+		case 149:
+		case 199:
+			lcd_send_string((char *)((uint8_t*)status + LINE_LEN+2), LINE_LEN);
+			break;
+	}
+	
+	lcd_second_line();
+	
+	if(status[LINE_LEN] == 99)
+		lcd_send_string((char *)((uint8_t*)status + 2*LINE_LEN+2), LINE_LEN);
+}
+
+void set_new_mode( void ) {
+	int i;
+	
+	if (new_mode < 200) {
+		status[LINE_LEN]   = new_mode;
+		status[LINE_LEN+1] = 0;
+		reset_display();
+	} else {
+		switch (new_mode) {
+			case 200:
+				PORTD |= 0x04;
+				TIMSK &= ~_BV( OCIE1A );
+				break;
+			case 201:
+				PORTD |= 0x04;
+				TIMSK |= _BV( OCIE1A );
+				TCNT1 = 0x0000;
+				break;
+			case 202:
+				PORTD &= 0xfb;
+				TIMSK |= _BV( OCIE1A );
+				TCNT1 = 0x0000;
+				break;
+			
+			case 204:
+				PORTD |= 1 << PD3;
+				break;
+			case 206:
+				short_beep(4, 6);
+			case 205:
+				short_beep(4, 0);
+				break;
+			case 207:
+				short_beep(7, 0);
+				break;
+			case 208:
+				short_beep(20, 0);
+				break;
+			case 209:
+				PORTD &= ~(1 << PD3);
+				break;
+			
+			case 210:
+				PORTB |= ( _BV( PB3 ) );
+				break;
+			case 211:
+				PORTB &= ~( _BV( PB3 ) );
+				break;
+			case 212:
+				PORTB |= ( _BV( PB4 ) );
+				break;
+			case 213:
+				PORTB &= ~( _BV( PB4 ) );
+				break;
+			case 214:
+				PORTB |= ( _BV( PB5 ) );
+				break;
+			case 215:
+				PORTB &= ~( _BV( PB5 ) );
+				break;
+			
+			case 216:
+				for (i=LINE_LEN+2; i<3*LINE_LEN+2; i++)
+					status[i] = ' ';
+		}
+	}
+	new_mode = 0;
+}
+
+int main( void ) {
+	uint8_t i = 0;
+	
+	// port B -output - klawiatura, sterowanie RS, diody
+	DDRB = 0xff;
+	PORTB = 0;
+	
+	// port C - output - sterowanie LCD
+	DDRC = 0xff;
+	PORTC = 0;
+	
+	// port D - output (pin 2,3) - buzzer, podświetlenie, input (pin4-7) - klawiatura
+	DDRD = 0x0f;
+	PORTD = 0xfc;
+	
+	// initial wait and "BEEP"
+	for (i=0; i<33; i++) _delay_ms(30);
+	PORTD = 0xf4;
+	
+	// initialise status
+	for (i=0; i<STATUS_LEN; i++)
+		status[i]=0;
+	
+	// initialise LCD display
+	lcd_set_4bit_2line();
+	// wait and re-initialise LCD display ... i don't know why but this LCD need this ...
+	_delay_ms(30); lcd_set_4bit_2line();
+	lcd_set_display_on_cursor_off();
+	lcd_set_move_right();
+	reset_display();
+	
+	// counter - 15k ticks per second == 150 ticks per pwm period  (for F_CPU ~= 3MHz)
+ 	TCNT1 = 0x0000;
+	TIMSK |= _BV( OCIE1A ); // enable interrupt from this timer
+	OCR1A = 14648; // 5s
+	TCCR1B = _BV( CS10 ) | _BV( CS12 ); // timer ticks = F_CPU / 1024
+	
+	// modbus
+	eMBInit( MB_RTU, SLAVE_ADDR, 0, 9600, MB_PAR_NONE );
+	sei();
+	eMBEnable(  );
+	
+	// initializion finish "BEEP"
+	short_beep(3, 0);
+	
+	new_mode = 100;
+	
+	uint8_t row = 0, col = 0, kbd = 0, last_kbd = 0;
+	uint8_t kbd_cnt[4] = {0, 0, 0, 0};
+	while(1) {
+		if (new_mode) {
+			set_new_mode();
+		}
+		
+		if (++i > 250) {
+			i = 0;
+			
+			// podsumowujemy głosowanie
+			kbd = 255;
+			for (row=0; row<4; row++) {
+				// gdy 75% trafień w iedną wartość to uznaiemy ią za poprawną
+				if (kbd_cnt[row] > 0xbd) {
+					if (col != 3) {
+						if (row != 3) {
+							kbd = '0' + col + 1 + row * 3;
+						} else { // last row:  *, 0, #
+							if (col == 0)
+								kbd = '*';
+							else if (col == 2)
+								kbd = '#';
+							else
+								kbd = '0';
+						}
+					} else { // last col:  A, B, C, D
+						kbd = 'A' + row;
+					}
+				}
+				kbd_cnt[row] = 0;
+			}
+			
+			// jeżeli głosowanie wyłoniło nowy klawisz
+			if (kbd != 255 && kbd != last_kbd) {
+				// start backlight
+				PORTD |= 0x04;
+				TCNT1 = 0x0000;
+				if (status[LINE_LEN] > 99 ) {
+					// when entering new key ...
+					if (kbd == '*') {
+						// clear
+						status[LINE_LEN+1] = 0;
+						short_beep(7, 0);
+						reset_display();
+					} else {
+						if (status[LINE_LEN+1] < LINE_LEN) {
+							// save key-code to status register
+							status[ status[LINE_LEN+1]++ ] = kbd;
+							
+							if (status[LINE_LEN] < 150 ) {
+								lcd_send_data(kbd);
+							} else {
+								lcd_send_data('*');
+							}
+							short_beep(3, 0);
+						}
+					}
+				}
+			}
+			
+			// zapamiętujemy bierzący klawisz (lub jego brak)
+			last_kbd = kbd;
+			
+			// przechodzimy do następnej kolumny
+			if (++col > 3)
+				col = 0;
+			
+			// na wybrany wiersz podawana jest masa
+			PORTB = (PORTB & 0xfc) | col;
+		} else {
+			// odczytujemy wejście i liczymy głosy
+			kbd = PIND & 0xf0;
+			switch (kbd) {
+				case 0xe0:
+					kbd_cnt[0]++;
+					break;
+				case 0xd0:
+					kbd_cnt[1]++;
+					break;
+				case 0xb0:
+					kbd_cnt[2]++;
+					break;
+				case 0x70:
+					kbd_cnt[3]++;
+					break;
+			}
+		}
+		
+		eMBPoll();
+	}
+}
+
+// timer
+ISR(TIMER1_COMPA_vect, ISR_NOBLOCK) {
+	PORTD &= 0xfb; // disable lcd backlight
+}
+
+// modbus read/write callback
+eMBErrorCode eMBRegHoldingCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs, eMBRegisterMode eMode ) {
+	// zapytanie dotyczy usNRegs rejestrów począwszy od rejestru usAddress
+	uint8_t line = usAddress - SLAVE_BASE_REG - 1;
+	uint8_t eline = line + usNRegs;
+	
+	if (eMode == MB_REG_READ) {
+		if (line >=0 && eline < STATUS_LEN) {
+			for (; line< eline; line++) {
+				*pucRegBuffer++ = status[2*line];
+				*pucRegBuffer++ = status[2*line+1];
+			}
+			return MB_ENOERR;
+		} else if (usAddress == 0xf0ff) {
+			*pucRegBuffer++ = VERSION >> 8;
+			*pucRegBuffer++ = VERSION & 0xff;
+			return MB_ENOERR;
+		}
+	} else if (eMode == MB_REG_WRITE) {
+		if (2*line == LINE_LEN) { // set mode
+			new_mode = *(pucRegBuffer+1);
+			return MB_ENOERR;
+		} else if (line >LINE_LEN/2 && eline < STATUS_LEN/2) { // set data for LCD
+			status[2*line]   = *pucRegBuffer++;
+			status[2*line+1] = *pucRegBuffer;
+			return MB_ENOERR;
+		}
+	}
+	return MB_ENOREG;
+}

@@ -1,0 +1,35 @@
+/*
+ * plik ma na celu prezentację ciekawych zagadnień z programowania w języku C / C++
+ * prezentuje metody związane z sterowaniem wyświetlaniem na terminalu tekstowym
+ * plik ten wykorzystuje meodę opartą w całości na bibliotece ncurses
+ *
+ */
+
+#include <ncurses.h>
+/* Wymagane -lncurses przy linkowaniu */
+
+int main(void) {
+	initscr(); /* inicjalizacja */
+	noecho(); /* nie bedzie widac wpisywanych znakow */
+	curs_set(false); /* nie pokazuj kursora */
+
+	/* można by jeszcz używać m.in.:
+
+	cbreak(); - wylacza buferowanie linii
+	nonl(); - sterowanie wejsciem
+	intrflush(stdscr, FALSE); - sterowanie wejsciem
+	keypad(stdscr, TRUE); - sterowanie wejsciem
+
+	*/
+
+	/* wypisz znak na zadanej pozycji */
+	mvaddch(2,8,'@');
+
+	/* oczekiwanie na nacisniecie q */
+	while (getch()!='q');
+
+	curs_set(true); /* pokazuj normalnie kursor */
+	endwin(); /* zakoncz */
+
+	return 0;
+}

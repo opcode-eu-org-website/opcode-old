@@ -1,0 +1,9 @@
+<article>
+<title>Potrzebne oprogramowanie i sprzęt:</title>
+<ul>
+	<li>mikrokontroler z podpiętym czymś do wejść oraz wyjść</li>
+	<li>kompilator avr-gcc (dostępny dla Linuxa oraz w WinAVR dla Windows) wraz z blibliotek avrc</li>
+	<li>programator isp (np. <homepage url="http://www.fischl.de/usbasp/" mirror="soft/electronics_uC/USBasp">USBasp</homepage>, <homepage url="http://www.elektroda.pl/rtvforum/topic1115734.html" mirror="soft/electronics_uC/USBasp/HVSP">Programator USB z obsługą HVSP</homepage>, <homepage url="http://www.elektroda.pl/rtvforum/topic2359783.html" mirror="soft/electronics_uC/USBasp/ATxmega">Programator ATxmega za złotówkę, czyli obsługa PDI w USBASP</homepage>) lub jtag, niekiedy przydatny może okazać się także <doc url="http://elm-chan.org/works/avrx/report_e.html" mirror="elektronika/Electronic Lives Manufacturing/works/avrx/report_e.html">programator równoległy</doc></li>
+	<li>debugger, symulator, ...</li>
+</ul>
+</article>

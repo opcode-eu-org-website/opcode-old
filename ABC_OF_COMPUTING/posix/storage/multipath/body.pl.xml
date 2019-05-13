@@ -1,0 +1,15 @@
+<article>
+<title>multipath i SAN</title>
+
+<p>Multipath może być uzyty do konfioguracji ścieżek dostepu do dysków/macierzy dyskowych <wiki pl="Storage Area Network">SAN</wiki> podłączanych naprzykład poprzez <wiki pl="Fibre Channel">Fibre Channel</wiki>. Na ogół jest narzędziem na tyle sprytnym iż radzi sobie z autodetekcją poprawnej ścieżki itd, oczywiście istnieje także możlwiość manualnej konfiguracji ścieżek.</p>
+
+<p>Multipath pokazuje identyfikatory <wiki pl="Fibre Channel">Fibre Channel</wiki> LUN - konkretnie "tgt_node_name" (np. 0x500a09808657d365) oraz "h:b:t:l" (np. 0:0:2:5), gdzie "h:b:t" to <code>${target_id}</code>, "tgt_port_name", "port_id" i inne można zobaczyć w <kbd class="path">/sys/class/fc_transport/target${target_id}/port_name</kbd> i jemu podobnych. Z koleji identyfikator WWN karty (interfejsu) FC (potrzebny do wystawienia zasobów z macierzy) możemy odczytać przez: <code>cat /sys/class/fc_host/host<var>0</var>/port_name</code>.</p>
+
+<p>Uwaga: włączenie multipath może spowodować jego zadziałanie na dysku lokalnym co objawi się np. komunikatem o zajętości urządzenia przy próbie tworzenia systemu plików na nim (mkfs mówi "is apparently in use by the system; will not make a filesystem here") - należy wtedy (jeżeli nie jest nam potrzebne) wyłączyć działanie multipath na takim urządzeniu lub operować na urządzeniu multipathowym.</p>
+
+<p>Aby zabronić odpalania się multipath na konkretnym urządzeniu należy w pliku <kbd class="path">/etc/multipath.conf</kbd> umieścić wpis postaci:</p><pre>blacklist {
+	wwid <var>NASZ_WWID</var>
+}</pre><p>gdzie <code><var>NASZ_WWID</var></code> można uzyskać z wyniku komendy <code>multipath -ll</code> jest to to identyfikator bez spacji pokazywany w pierwszej linii opisującej dany zastaw ścieżek - należy odrzucić ostatnie znaki tożsame z oznaczeniem urządzenia device mappera w /dev (np. dm-0). Opcjonalnie zamiast wpisu <code>wwid <var>NASZ_WWID</var></code> można podać wpis typu <code>devnode <var>/dev/sda*</var></code>, ale może to rodzić problemy gdy oznaczenia dysków z jakiś powodów się pozmieniają.</p>
+
+<p>Zobacz też inne zagadnienia związane z rozproszonym storagem: <wiki pl="ISCSI">iSCSI</wiki>, <wiki pl="Lustre (system plików)">Lustre</wiki>, <wiki pl="RAID">RAID</wiki>, <wiki pl="Network Attached Storage">NAS</wiki>, <wiki pl="Direct Attached Storage">DAS</wiki> oraz <homepage url="http://www.freenas.org/">FreeNAS</homepage> - serwer NAS dla FreeBSD</p>
+</article>

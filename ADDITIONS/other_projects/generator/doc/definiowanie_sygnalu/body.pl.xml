@@ -1,0 +1,22 @@
+<article>
+<title>Definiowanie sygnału - plik konfiguracyjny</title>
+<p>Tryb wyjścia oraz częstotliwość próbkowania podawane są jako parametry linii poleceń, natomiast sygnał opisywany jest w pliku tekstowym o następującym formacie:</p>
+<ul>
+	<li>pierwsza linia zaczyna się od słowa kluczowego <code>TIME</code> i zawiera dwa parametry (rozdzielane pojedynczą spacjami):<ul>
+		<li>liczbę okresów przez którą będzie powtarzany sygnał (0 oznacza bez ograniczeń)</li>
+		<li>czas trwania pojedynczego okresu (wyrażony w sekundach, mogą być także zastosowane oznaczenia typu 10m i 10u co odpowiada 10 ms oraz 10 us)</li>
+	</ul></li>
+	<li>druga linia zaczynająca się od słowa kluczowego określającego tryb działania i zawierająca stosowne do niego parametry może mieć postać:<ul>
+		<li><code>SQUARE time</code> - sygnał kwadratowy, gdzie stan wysoki trawa przez podany czas (parametr <code>time</code>)</li>
+		<li><code>SIN period</code> - sygnał sinusoidalny, o podanym okresie (parametr <code>period</code>)</li>
+		<li><code>SAW_R time</code> - sygnał piłokształtny, opadający przez podany czas (parametr <code>time</code>)</li>
+		<li><code>SAW_L time</code> - sygnał piłokształtny, narastający przez podany czas (parametr <code>time</code>)</li>
+		<li><code>TRIANGLE timeA timeB</code> - sygnał trójkątny, narastający i opadający przez podany czas (odpowiednio parametry <code>timeA</code> i <code>timeB</code>)</li>
+		<li><code>FUNCTION</code> - dowolnie definiowana funkcja od argumentu x który w trakcie okresu zmienia się od 0 do 2pi</li>
+		<li><code>PCM</code> - dowolnie definiowany przebieg PCM (każda kolejna linia to pojedyncza próbka sygnału, podana jako liczba od -1 do 1)</li>
+	</ul>
+	atrybuty określające czas wyrażone są w sekundach, podobnie jak w linii TIME mogą posiadać miejsca po przecinku oraz określenia u i m oznaczające odpowiednie mnożniki SI.</li>
+	<li>atrybut określający okres trwania sygnału z linii TIME ma większą siłę od określeń z linii definiującej sygnał (nadmiar sygnału zostanie ucięty, a niedomiar dopełniony zerami)</li>
+	<li>w makrach posiadających jeden parametr może zostać on pominięty (zostanie wtedy użyty atrybut określający długość sygnału z linii TIME)</li>
+</ul>
+</article>

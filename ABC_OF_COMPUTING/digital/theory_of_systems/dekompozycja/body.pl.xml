@@ -1,0 +1,23 @@
+<article>
+<title>Dekompozycja</title>
+
+<p>Czyli (rozsądny) podział na podfunkcje (tak aby każda z nich zależała od mniejszej liczby zmiennych niż wejściowa)</p>
+
+<p>Tworzymy macierz gdzie kolumny odpowiadają pewnemu podzbiorowi argumentów wejściowych, a wiersze reszcie zbioru argumentów wejściowych. Wyszukujemy w niej kolumny zgodne (o takich samych wartościach lub akceptujące takie same wartości). Dokonujemy optymalnego sklejenia kolumn zgodnych otrzymując w ten sposób funkcję g o ilości argumentów nie większej niż wielkość podzbioru przeznaczonego na opis kolumn oraz ilości wyjść odpowiadającej logarytmowi ilości kolumn po sklejeniu przybliżonemu w górę.</p>
+
+<subtitle id="zgodne">Obliczanie maksymalnych klas zgodnych metodą par zgodnych</subtitle>
+<p>Para zgodna = dwie kolumny zgodne ze sobą.</p>
+
+<p>W oparciu o indeksy elementów wchodzących w skład par zgodnych tworzymy zbiory <eq>R<sub>i</sub></eq>. <eq>R<sub>i</sub></eq> jest zbiorem takich j że <eq>(i,j)</eq> jest parą zgodną oraz <eq>i&gt;j</eq>.</p>
+
+<p>Mając obliczone <eq>R<sub>J</sub></eq> generujemy rodzinę maksymalnych klas zgodnych wg następujących reguł:</p>
+<ol>
+	<li>jeżeli <eq>R<sub>k</sub></eq> jest zbiorem pustym to rodzinę MKZ powiększamy o KZ <eq>k</eq></li>
+	<li>jeżeli <eq>R<sub>k</sub></eq> przecięty z KZ jest pusty to bez zmian</li>
+	<li>jeżeli <eq>R<sub>k</sub></eq> przecięty z KZ jest nie pusty to to przecięcie powiększamy o <eq>k</eq> i zastępujemy nim daną KZ</li>
+</ol>
+<p>Punkty 2 i 3 powtarzamy dla każdej klasy zgodnej w rodzinie. Jeżeli jakaś KZ zawiera się w innej to o niej zapominamy.</p>
+
+<subtitle id="sprzeczne">Obliczanie maksymalnych klas zgodnych metodą par sprzecznych</subtitle>
+<p>Pary sprzeczne to wszystkie pary które nie są zgodne. Poprzez zbudowanie wyrażenia boolowskiego typu iloczyn sum (gdzie każda suma jest zbudowana z jednej pary sprzecznej) i przekształcenie go do postaci sumy iloczynów, uzyskujemy rodzinę MKZ (każdy iloczyn wchodzący do tej sumy reprezentuje MKZ).</p>
+</article>

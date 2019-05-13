@@ -1,0 +1,14 @@
+// dluzszy czas impulsu w standardzie danego pilota
+	#define CZAS_DLUGI 2
+// ktotszy czas impulsu w standardzie danego pilota
+	#define CZAS_KROTKI 1
+// czas zera po impulsie (dla Sony dokladnie to samo co CZAS_KROTKI)
+	#define CZAS_ZERA 1
+// czas startowy w wielokrotnosciach CZAS_PODSTAWOWY (glownie dla Sony)
+	#define CZAS_POCZATKU 4
+// polokres fali nosnej wyrazony w mikroosekundach
+	#define CZAS_PODSTAWOWY 600
+// dane dotyczace kodow pilota wypluwane przez "odczyt_pilota"
+#ifndef NO_PILOT_KODY_DAT
+	#include "pilot_kody.dat"
+#endif

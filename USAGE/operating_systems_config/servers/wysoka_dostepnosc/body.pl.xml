@@ -1,0 +1,7 @@
+<article>
+<title>Usługi wysokiej dostępności</title>
+
+<p>Nierzadko mamy doczynienia z koniecznością zapewnienia (niemal) bezprzerwowej dostępności jakiejś usługi (np. serwera www). Z pomocą przychodzi nam tutaj oprogramowanie takie jak <homepage url="http://www.linux-ha.org/Heartbeat">heartbeat</homepage>, czy też nawet cały <homepage url="http://www.openais.org/">openais</homepage> wraz z innymi narzędziami takimi jak <homepage url="http://ctdb.samba.org/">ctdb</homepage>, <homepage url="http://www.drbd.org/">drbd8-utils</homepage> (klastrowa baza danych tymczasowych oraz raid1 over tcp/ip).</p>
+
+<p>Zasada działania <wiki en="Heartbeat">heartbeat</wiki> polega na kontrolowaniu działania hosta (poprzez komunikację z swoim klientem) i w przypadku wykrycia padu tamtego hosta automatycznym uruchomieniu odpowiednich usług (i przeniesieniu adresu) na inny host.</p>
+</article>

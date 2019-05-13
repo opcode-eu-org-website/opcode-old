@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# skrypt konweruje skazany katalog z wiadomosciami w formacje skrzynki BeOS'owej
+# na format standardowego mboxa (konwersja postaci linii From)
+#
+# katalog podawany jest jako pierwszy argument,
+# listy zapisywane s do korespondencja_zbiorcza_nazwa_katalogu
+
+
+if [ "$1" = "" ]; then
+	echo "Musisz podać katalog"
+	exit
+fi
+
+
+for f in ./$1/*; do
+	#echo "$f"; formail -x "Date:" < "$f"
+	formail -a "Date:" < "$f" >> korespondencja_zbiorcza_tmp_$1
+	echo "" >> korespondencja_zbiorcza_tmp_$1
+done;
+
+
+# Konwersja linii From do postaci : From user@host.domena  Thu Aug 19 19:43:33 2004
+awk '
+	# przypadek gdy mamy dzien tygodnia
+	$1 == "From"  &&  $3 ~ "[A-Z][a-z][a-z]," {
+		printf("%s %s %s %s %02d %s %s\n", $1, $2, substr($3,1,3), $5, $4, $7, $6);
+	}
+
+	# przypadek gdy nie mamy dnia tygodnia
+	$1 == "From"  &&  $3 !~ "[A-Z][a-z][a-z]," {
+		printf("%s %s %s %s %02d %s %s\n", $1, $2, "Xxx", $4, $3, $6, $5);
+	}
+
+	#pozostałe linie
+	$1 != "From" {
+		printf("%s\n", $0);
+	}
+' < korespondencja_zbiorcza_tmp_$1 > korespondencja_zbiorcza_$1

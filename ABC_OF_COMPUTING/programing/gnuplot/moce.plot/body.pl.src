@@ -1,0 +1,53 @@
+#!/usr/bin/gnuplot -p
+
+# napiecie (napięcie skuteczne = 1V, amplituda = sqrt(2)V)
+Usk     = 1
+u(t)    = sin(t) * Usk * sqrt(2)
+
+# prad (prąd skuteczny = 1A,  amplituda = sqrt(2)A)
+Isk     = 1
+i(t,fi) = sin(t+fi) * Isk * sqrt(2)
+
+
+# moc chwilowa [VA]
+p(t,fi) = i(t,fi)*u(t)
+
+
+# moc pozorna (1VA)
+S       = Isk * Usk
+
+# moc czynna = calka po okresie (T=2*pi) z p(t,fi)
+P(fi)   = S * cos(fi)
+
+# moc bierna = sqrt (S^2 - P^2)
+Q(fi)   = S * sin (fi)
+
+
+set term wxt size 900,680
+set multiplot layout 3,2 rowsfirst
+
+set key left bottom at graph 0.13,0.06 # samplen 2 spacing .7 font ",8"
+set border 3; set xtics nomirror; set ytics nomirror
+set xzeroaxis
+
+set title "obc. indukcyjne, cos(fi) = 0.9, tg(fi) = 0.48, fi = 0.45"; fi=0.4510
+plot [0 : 2*pi] u(x) title "u(t)", i(x,fi) title "i(t)", p(x,fi) title "p(t)"
+
+set title "obc. pojemnościowe, cos(fi) = 0.8 tg(fi) = -0.75, fi = -0.64"; fi=-0.6435
+plot [0 : 2*pi] u(x) title "u(t)", i(x,fi) title "i(t)", p(x,fi) title "p(t)"
+
+set title "obc. indukcyjne, cos(fi) = 0.6, tg(fi) = 1.3, fi = 0.93"; fi=0.9273
+plot [0 : 2*pi] u(x) title "u(t)", i(x,fi) title "i(t)", p(x,fi) title "p(t)"
+
+set title "moce w funkcji cos(fi), zakres indukcyjny";
+set key right center at graph 0.97,0.55
+plot [1 : 0] S title "pozorna" , P(acos(x)) title "czynna", Q(acos(x)) title "bierna"
+unset xrange # trzeba posprzatac po odwroconym zakresie osi x ...
+
+set size 1,0.33; set origin 0.0,0.0;
+set title "moce w funkcji przesunięcia fazowego fi";
+set key right bottom at graph 0.95,0.05
+plot [-pi/2 : pi/2] S title "pozorna" , P(x) title "czynna", Q(x) title "bierna"
+
+unset multiplot
+

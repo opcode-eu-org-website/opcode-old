@@ -1,0 +1,115 @@
+<article>
+<title>konwersje</title>
+
+<p>Diagram prezentujący kierunki konwersji typowych interfejsów w systemie automatyki opartym na mikrokontrolerach:<br /><img_from_src name="mikrokontrolery_sieci_i_interfejsy" type="dia" alt="Diagram prezentujący kierunki konwersji typowych interfejsów w systemie automatyki opartym na mikrokontrolerach" /><br />A także tabelaryczne zestawienie różnych wariantów konwersji (wraz z układami to realizującymi) interfejsów typowych dla elektroniki (typowych interfejsów mikrokontrolera) oraz popularnych sieci czujnikowych:</p>
+<table border="1" style="vertical-align:middle; text-align:center; border-collapse:collapse; border-spacing:50px; empty-cells:show"><col /><col /><col /><col /><col /><col />
+	<tr>
+		<td colspan="2">konwersja z (kolumny) / na (wiersze):</td>
+		<td style="font-weight:bold;">I2C</td>
+		<td style="font-weight:bold;">UART TTL</td>
+		<td style="font-weight:bold;">GPIO, data_bus</td>
+		<td style="font-weight:bold;">SPI</td>
+	</tr>
+	<tr>
+		<td style="font-weight:bold;" colspan="2">I2C / TWI / SMBus</td>
+		<td> </td>
+		<td> </td>
+		<td> </td>
+		<td>CP2120</td>
+	</tr>
+	<tr>
+		<td style="font-weight:bold;" rowspan="3">UART</td>
+		<td style="font-weight:bold;">TTL</td>
+		<td>MAX3107, SC16IS7?0</td>
+		<td> </td>
+		<td>SC26C92</td>
+		<td>MAX310?, SC16IS7?0</td>
+	</tr>
+	<tr>
+		<!-- UART -->
+		<td style="font-weight:bold;">RS232</td>
+		<td> </td>
+		<td>MAX232, ...</td>
+		<td> </td>
+		<td> </td>
+	</tr>
+	<tr>
+		<!-- UART -->
+		<td style="font-weight:bold;">RS2485</td>
+		<td> </td>
+		<td>SN75176, MAX485, ...</td>
+		<td> </td>
+		<td> </td>
+	</tr>
+	<tr class="ro5">
+		<td colspan="2" style="font-weight:bold;">GPIO, data_bus</td>
+		<td><b>MCP2300?</b>, PCF8574, PCA9554</td>
+		<td> </td>
+		<td> </td>
+		<td>MCP23S0?</td>
+	</tr>
+	<tr class="ro3">
+		<td colspan="2" style="font-weight:bold;">Analog input/output</td>
+		<td><b>PCF8591</b></td>
+		<td> </td>
+		<td> </td>
+		<td> </td>
+	</tr>
+	<tr>
+		<td colspan="2" style="font-weight:bold;">SPI</td>
+		<td>SC18IS602</td>
+		<td> </td>
+		<td> </td>
+		<td> </td>
+	</tr>
+	<tr>
+		<td colspan="2" style="font-weight:bold;">1Wire</td>
+		<td><b>DS2482</b></td>
+		<td>DS2480</td>
+		<td> </td>
+		<td> </td>
+	</tr>
+	<tr>
+		<td rowspan="2" style="font-weight:bold;">CAN</td>
+		<td>warstwa fizyczna</td>
+		<td> </td>
+		<td> </td>
+		<td> </td>
+		<td>MCP2515</td>
+	</tr>
+	<tr>
+		<!-- CAN -->
+		<td>warstwa łącza danych</td>
+		<td> </td>
+		<td> </td>
+		<td> </td>
+		<td>MCP2515</td>
+	</tr>
+	<tr>
+		<td rowspan="2" style="font-weight:bold;">LIN</td>
+		<td>warstwa fizyczna</td>
+		<td> </td>
+		<td>MCP2003</td>
+		<td> </td>
+		<td> </td>
+	</tr>
+	<tr>
+		<!-- LIN -->
+		<td>warstwa łącza danych</td>
+		<td> </td>
+		<td> </td>
+		<td> </td>
+		<td> </td>
+	</tr>
+	<tr>
+		<td style="font-weight:bold;">Mbus / Metter-Bus</td>
+		<td>warstwa fizyczna</td>
+		<td> </td>
+		<td>MSP430</td>
+		<td> </td>
+		<td> </td>
+	</tr>
+</table>
+
+<p>Zobacz także: <id_link id="snmp-bacnet_gateway">SNMP-BACnet gateway</id_link>, <homepage url="http://bacnet.sourceforge.net/" mirror="soft/BACnet">BACnet Stack</homepage>, <homepage url="http://pes.free.fr/" mirror="soft/LinuxModbus">libmodbus</homepage>.</p>
+</article>

@@ -1,0 +1,22 @@
+<article>
+<title>Dioda Zenera</title>
+<p>Najprostsze stabilizatory napięcia można zrealizować w oparciu o diodę Zenera. Niestety spadek napięcia na diodzie jest funkcją prądu, ponadto najprostszy układ bez tranzystorowy charakteryzuje się znaczną rezystancją wyjściową. Problemem może być także to, iż aby uzyskać nominalny spadek napięcia trzeba puścić zazwyczaj przynajmniej 5mA, a jednocześnie należy uważać aby nie przekroczyć maksymalnej mocy która może wydzielić się na diodzie.</p>
+
+<p class="center"><img_from_src name="stabilizatory_z_zenerem" type="sch" alt="przykłąd stabilizatora na diodzie Zenera" /></p>
+
+<p>Obliczanie elementów (stabilizator bez tranzystora):</p>
+<ol>
+	<li><eq_latex>R_1 \le {V_{CC_{min}} - U_{Z} \over I_{Z_{min}}}</eq_latex></li>
+	<li><eq>R<sub>WY</sub> = R<sub>1</sub> || r<sub>d</sub></eq></li>
+	<li><eq_latex>S_u = {\Delta U_{WY} \over \Delta V_{CC}} = {r_{d} \over R_1 + r_{d}}</eq_latex></li>
+	<li>wartość <eq>R<sub>O</sub></eq> wpływa na <eq>R<sub>1</sub></eq> (w warunku na nie musimy uwzględnić odpływ prądu na obciążenie <eq_latex>I_{Z_{min}} \rightarrow I_{Z_{min}} + I_{O_{max}}</eq_latex>)</li>
+</ol>
+
+<p>Obliczanie elementów (stabilizator z tranzystorem):</p>
+<ol>
+	<li>z założenia o <eq>I<sub>E<sub>min</sub></sub></eq> otrzymujemy wartość <eq>R<sub>E</sub> = U<sub>WY</sub>/I<sub>E<sub>min</sub></sub></eq></li>
+	<li><eq_latex>R_1 = {V_{CC_{min}} - U_{Z} \over I_{Z_{min}} + I_{O_{max}}/\beta}</eq_latex></li>
+	<li><eq_latex>R_{WY}(I) = r_{d} / \beta + r_{eb'}(I)</eq_latex></li>
+</ol>
+
+</article>

@@ -1,0 +1,18 @@
+<article>
+<title>Konfiguracja Ldap Account Manager</title>
+
+<p>Ldap Account Manager jest wygodnym interfejsem web-owym do zarządzania bazą użytkowników opartą o LDAP. Logowanie do systemu odbywa się przy pomocy konta i hasła administracyjnego LDAP (jest od razu logowaniem do serwera LDAP).</p>
+
+<p>Przed zalogowaniem należy skonfigurować system do pracy ze swoim serwerem LDAP. W tym celu łączymy się z stroną konfiguracyjną LAM dostępną pod adresem http://<var>nazwa.lub.IP.serwera</var>/lam/templates/config/index.php i w sekcji dotyczącej profili serwerowych ("server profiles"):</p>
+<ul>
+	<li>ustawiamy adres serwera (jeżeli LAM jest na innym serwerze niż LDAP)</li>
+	<li>ustawiamy "Tree suffix" na zgodny z konfiguracją naszego serwera (można sprawdzić w <kbd class="path">/etc/ldap/slapd.conf</kbd> - opcja <code>suffix</code>, jest to domena podawana w konfiguracji serwera LDAP w zapisie ldapowym)</li>
+	<li>dostosowujemy do naszych potrzeb typy kont i moduły obsługiwane przez LAM. Uwaga: dla każdego z typów kont należy ręcznie zmienić standardowy surfix (dc=my-domain,dc=com) na taki który my używamy</li>
+	<li>dostosowujemy zakresy UIDów i GIDów do naszych potrzeb (ważne aby nie dochodziło do konfliktów z lokalnymi konfiguracjami)</li>
+	<li>edytujemy listę kont uprawnionych do korzystania z LAM (ważne aby tu podać poprawnego usera z prawami administracyjnymi - np. podanego jako <code>rootdn</code> w <kbd class="path">/etc/ldap/slapd.conf</kbd></li>
+	<li>zmieniamy hasło dostępowe do tej konfiguracji</li>
+</ul>
+<p>Warto także ustawić odpowiednie wymagania dotyczące haseł oraz zmienić hasło dostępu do sekcji dotyczącej ustawień globalnych. W obu wypadkach domyślnym hasłem dostępowym jest <em>lam</em></p>
+
+<p>Po tych zmianach należy zalogować się do LAM. System zaproponuje utworzenie brakującej struktury dla wybranych typów kont - zgadzamy się. Gdy utworzenie struktury zostanie wykonane, możemy przystąpić do zakładania grup i kont.</p>
+</article>

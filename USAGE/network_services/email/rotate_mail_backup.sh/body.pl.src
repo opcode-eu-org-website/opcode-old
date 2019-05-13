@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# wyciszenie skryptu ...
+exec 1> /dev/null
+exec 2> /dev/null
+
+#e-mail
+cd /home/mail/kopie/ ;
+savelog -r older -m 640 -u mail -g mail -c 2 * ;
+
+exit 0

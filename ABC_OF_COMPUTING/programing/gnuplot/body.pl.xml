@@ -1,0 +1,40 @@
+<article>
+<title>GnuPlot</title>
+
+<ul>
+	<li>rysowanie danych z plików (wynik.dat - kolumna 1 jako x kolumna 9 jako y) i zadanej funkcji (sinus) na jednym wykresie - <code>plot 'wynik.dat' using 1:9, sin(x)</code></li>
+	<li>tytuł wykresu w legendzie - <code>plot sin(x) title "sinus"</code></li>
+	<li>nieumieszczanie wykresu w legendzie - <code>plot sin(x) notitle</code></li>
+	<li>wyłączanie wyświetlania legendy - <code>unset key</code></li>
+	<li>legenda po prawej na dole - <code>set key right bottom</code></li>
+</ul><ul>
+	<li>zakres osi od -10 do 25 - <code>set yrange [-10:25]</code>, <code>set xrange [-10:25]</code></li>
+	<li>automatyczny zakres osi - <code>set yrange [ * : * ]; set xrange [ * : * ];</code></li>
+	<li>opis osi - <code>set xlabel "na osi x mamy ..."; set ylabel "na osi y mamy ...";</code></li>
+	<li>skala logarytmiczna na osi x - <code>set log x</code></li>
+	<li>podziałki na osi X od 0 co 0.5 do 16 - <code>set xtics 0,0.5,16</code></li>
+	<li>ukrycie podziałek - <code>unset tics</code></li>
+	<li>pokazanie siatki - <code>set grid</code></li>
+</ul><ul>
+	<li>tytuł wykresu - <code>set title "tytuł wykresu"</code></li>
+	<li>ukrycie ramki otaczającej wykres - <code>unset border</code></li>
+</ul><ul>
+	<li>definiowanie własnych funkcji oraz instrukcja warunkowa - <code>sp(x,a)=x&lt;1 &amp;&amp; x&gt;-1 ? x/a : x&lt;=-1 ? -1.0/a : 1.0/a;</code> oraz użycie <code>plot [-6:6] [-1.7:1.7] sp(x,1)</code> (dodatkowo ustawianie zakresów osi wewnątrz komendy plot)</li>
+	<li>wiele komend plot na jednym wykresie - <code>set multiplot</code> (zakończenie: <code>unset multiplot</code>)</li>
+	<li>rysowanie w trybie parametrycznym - <code>set parametric; set trange [-1.7:1.7]; plot 1.9,t with dots linecolor 1 notitle</code> (dodatkowo ustawiamy styl linii na kropkowanie)</li>
+	<li>kółko w trybie parametrycznym - <code>set parametric; plot [0:2*pi] sin(t),cos(t); unset parametric</code> (także zakończenie parametrycznego)</li>
+</ul><ul>
+	<li>zapis do PostScriptu - <code>set terminal postscript color; set output "wykresy.ps"</code></li>
+	<li>zapis do SVG - <code>set term svg; set output "wykresy.svg"</code> po narysowaniu warto zrobić <code>! echo "&lt;/svg&gt;" >> "wykresy.svg"</code> co poprawnie zakończy plik (wykonanie zewnętrznej komendy <code>echo ...</code>)</li>
+	<li>zapis do "epslatex" - <code>set terminal epslatex color; set output "plot.tex"; plot f(x) title $V_{sum}-2\\varphi$; set output; set terminal pop;</code>, potem <code>epstopdf plot.ps; pdflatex plot-make.tex</code>, gdzie "plot-make.tex":<pre>
+\documentclass[10pt]{article}
+\usepackage{graphicx}
+\usepackage[paperwidth=330px,paperheight=260px,margin=0px,lmargin=-50px]{geometry}
+\begin{document}\thispagestyle{empty}\input{plot.tex}\end{document}</pre>
+	potem ewentualnie także <code>pdftoppm plot-make.pdf plot-make; pnmtopng plot-make-000001.ppm &gt; plot-make.png</code>; podobny efekt można uzyskać generując zwykły eps i korzystając z psfrag</li>
+</ul>
+
+<p>Zobacz w Sieci: <doc url="http://www.fuw.edu.pl/~pablo/pracownia/gpcard.ps">Quick Reference Card for gnuplot</doc> - kilkustronicowa broszurka z najważniejszymi poleceniami, <doc url="http://www.fuw.edu.pl/~pablo/pracownia/gnuplot.pdf">Wstęp do gnuplota</doc>, <doc url="http://gnuplot.sourceforge.net/docs/gnuplot.pdf" mirror="oprogramowanie/gnuplot.pdf">Gnuplot Manual</doc> - oficjalny podręcznik [en], <doc url="http://www.gnuplot.info/docs/tutorial.pdf">LaTeX and the Gnuplot Plotting Program</doc></p>
+
+<p>Poniżej zamieszam też przykładowy skrypt gnuplot-owy obrazujący zagadnienia mocy czynnej, biernej i tangensa fi:</p>
+</article>

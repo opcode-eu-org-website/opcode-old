@@ -1,0 +1,368 @@
+<?php
+/**
+	System prezentacji zasobów DIROP na WWW
+	
+	plik zawierający definicje szablonów xml używanych w systemie obsługi DIROPu
+	jest to jedyne (oprócz stron definiowanych w katalogu sub_pages)
+	miejsce gdzie pojawia się kod XHTML, w pozostałych plikach
+	
+	tutaj także deklarowane są wszystkie stałe napisowe wykorzystywane w innych plikach systemu
+	(wyjątkiem są strony w katalogu sub_pages oraz kod RDF w view_full_info.php)
+**/
+
+
+/// stałe napisowe używane w systemie (na stronach view_*.php)
+define('TITLE_SURFIX', ' - wynik wyszukiwania - DIR');
+define('SEARCH_IN_BOOK_TITLE_SURFIX', ' - wynik wyszukiwania - DIR');
+define('BOOK_LIST_TITLE', 'DIR - Zasoby polskie');
+
+define('WYNIK_WYSZUKIWANIA', 'Wyniki wyszukiwania frazy: ');
+define('FIND_IN_INDEX', 'Znaleziono w indeksie');
+define('FIND_IN_TEXT', 'Znaleziono w tekście');
+define('NIESTETY_NIC_NIE_ZNALEZIONO', 'Niestety nie znaleziono pasujących pozycji.');
+
+define('NAGLOWEK_LISTY_VOLUMENOW_W_SERII', 'Seria zawiera następujące pozycje:');
+define('NAGLOWEK_LISTY_POZYCJI', 'Lista pozycji znajdujących się w zasobach DIR:');
+define('POKAZANO_OD_DO_Z', 'pozycje od %1$d do %2$d z %3$d');
+
+define('PRZEFILTROWANO_WZGLEDEM_NOWOSCI', 'Lista pozycji ostatnio dodanych pozycji:');
+define('PRZEFILTROWANO_WZGLEDEM_KATEGORII', 'Lista pozycji w kategorii "%s":');
+define('PRZEFILTROWANO_WZGLEDEM_WYNIKOW_WYSZUKIWANIA', 'Wynik wyszukiwania "%1$s" w "%1$s":');
+function find_in_to_str($str) {
+	switch ($str) {
+		case 'dc_title':
+			return 'tytuł';
+		case 'dc_creator':
+			return 'autor';
+		case 'dc_contributor':
+			return 'współtwórca';
+		default:
+			return '';
+	}
+}
+
+define('OPIS_BIBLIOGRAFICZNY', 'Opis bibliograficzny:');
+define('DANE_DUBLIN_CORE', 'Dostępne metadane Dublin Core:');
+define('DC_TITLE', 'Tytuł:');
+define('DC_CREATOR', 'Twórca:');
+define('DC_SUBJECT_AND_KEYWORDS', 'Temat i słowa kluczowe:');
+define('DC_DESCRIPTION', 'Pełen opis:');
+define('DC_PUBLISHER', 'Wydawca:');
+define('DC_CONTRIBUTOR', 'Współtwórca:');
+define('DC_DATE', 'Data wydania:');
+define('INNE_INFORMACJE', 'Inne informacje o pozycji');
+define('URL', 'URL:');
+define('DOWNLOAD_RDF', 'Pobierz pełny opis w formacie RDF');
+
+
+/// link
+function xhtml_return_link($text, $url) {
+	return '<a href="'. $url .'">'. $text .'</a>';
+}
+/// okienko po lewej z dowolnym tekstem ...
+function xhtml_print_leftside_box($text, $id='') {
+	if ($id == '')
+		echo '<div id="'. $id .'" class="graybox">'. $text .'</div>' . "\n";
+	else
+		echo '<div class="graybox">'. $text .'</div>' . "\n";
+}
+
+/// nagłówek dokumentu XHTML
+function xhtml_print_file_head($title, $comment="") {
+echo '<?xml version="1.0" encoding="utf-8" ?>
+	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+	<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl">
+	<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>' . $title . '</title>
+	<!-- ' . $comment . ' -->
+	<link rel="home" title="Strona główna" href="'. DIROP_FULL_URL_PREFIX .'" />
+	<link rel="stylesheet" type="text/css" media="screen,projection" href="'. DIROP_LINK_DIR_PATH .'img_css_and_js/';
+		if ( strpos($_SERVER['HTTP_USER_AGENT'], "MSIE") && ! strpos($_SERVER['HTTP_USER_AGENT'], "MSIE 7") )
+			echo 'layout_IE.css';
+		else
+			echo 'layout.css';
+	echo '" />
+	<link rel="stylesheet" type="text/css" media="screen,projection" href="'. DIROP_LINK_DIR_PATH .'img_css_and_js/dirop.css" />
+	<link rel="stylesheet" type="text/css" media="screen,projection" href="'. DIROP_LINK_DIR_PATH .'img_css_and_js/tree.css" />
+	<script src="'. DIROP_LINK_DIR_PATH .'img_css_and_js/tree.js" type="text/javascript"></script>
+	</head>
+	<body onload="navtree_inicjalizuj()">' . "\n";
+}
+/// nagłówek strony
+function xhtml_print_header($title, $title_book="", $title_volume="", $url_book="", $url_full="", $curr="", $pdf_path="") {
+	echo '
+<div class="header">
+	<div id="title">
+		<h1>' . $title . '</h1>
+		<p id="links">';
+		if ($url_full != "")
+			echo '<a href="' . DIROP_SCRIPT_PATH . $url_full . 'info_full">pełny opis</a>&nbsp;&middot;&nbsp;';
+		if ($pdf_path != "")
+			echo '<a href="' . $pdf_path . '">pobierz całość w PDF</a>&nbsp;&middot;&nbsp;';
+		echo '<a href="' . DIROP_SCRIPT_PATH . '?help">pomoc</a>&nbsp;&middot;&nbsp;<a href="' . DIROP_SCRIPT_PATH . '?contact">kontakt</a></p>
+	</div>
+	<p id="path" class="path">
+		<a href="http://www.icm.edu.pl">ICM</a>
+		&nbsp;&rsaquo;&nbsp;<a href="http://dir.icm.edu.pl">DIR</a>
+		&nbsp;&rsaquo;&nbsp;<a href="' . DIROP_SCRIPT_PATH . '/">Zasoby&nbsp;polskie</a>' . "\n";
+		if ($url_book != "")
+			echo '		&nbsp;&rsaquo;&nbsp;<a href="' . DIROP_SCRIPT_PATH . $url_book . '">' . $title_book . "</a>\n";
+		if ($url_full != "")
+			echo '		&nbsp;&rsaquo;&nbsp;<a href="' . DIROP_SCRIPT_PATH . $url_full . '">' . $title_volume . "</a>\n";
+		else if ($title_volume != "")
+			echo '		&nbsp;&rsaquo;&nbsp;' . $title_volume . "\n";
+		if ($curr != "")
+			echo '		&nbsp;&rsaquo;&nbsp;strona ' . $curr . "\n";
+		echo "
+	</p>
+</div>\n";
+	global $system_message, $div_to_close;
+	if ($system_message != "") echo '<div class="system_message">'. $system_message . "</div>\n";
+	$div_to_close++;
+	echo '<div class="page">' . "\n";
+}
+/// stopka dokumentu XHTML
+function xhtml_print_footer(){
+	global $div_to_close;
+	for ($i=0; $i<$div_to_close; $i++)
+		echo '</div>' . "\n";
+	echo "\n" . STATISTIC_SCRIPT;
+	echo '<div class="footer"><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml11-blue" alt="Valid XHTML 1.1" height="31" width="88" /></a></div>';
+	echo "\n</body></html>";
+}
+
+
+/// zawartość strony z skanem
+function xhtml_print_content($url_full, $img_path, $prev, $next) {
+	echo '
+<div class="content">
+	<div class="navigation-top">' . "\n";
+		if ($prev != "") echo '		&laquo; <a href="' . DIROP_SCRIPT_PATH . $url_full . $prev . '">poprzednia strona</a> &nbsp;&middot;&nbsp;';
+		echo '<a href="' . $img_path .'.tif">pobierz skan</a>';
+		if ($next != "") echo '&nbsp;&middot;&nbsp;<a href="' . DIROP_SCRIPT_PATH . $url_full . $next . '">następna strona</a> &raquo;';
+		echo '
+	</div>
+	<div class="image">
+		<a href="' . $img_path . '.tif"><img src="' . $img_path . '-small.png" alt="skan" /></a>
+	</div>
+	<div class="navigation-bottom">' . "\n";
+		if ($prev != "") echo '		&laquo; <a href="' . DIROP_SCRIPT_PATH . $url_full . $prev . '">poprzednia strona</a> &nbsp;&middot;&nbsp;';
+		echo '<a href="' . $img_path .'.tif">pobierz skan</a>';
+		if ($next != "") echo '&nbsp;&middot;&nbsp;<a href="' . DIROP_SCRIPT_PATH . $url_full . $next . '">następna strona</a> &raquo;';
+		echo "
+	</div>
+</div>\n";
+	global $div_to_close;
+	$div_to_close++;
+	echo '<div class="left_menu">' . "\n";
+}
+
+
+/// nagłówek listy pozycji - zawartość volumenu / biblioteki, wyniki wyszukiwania
+function xhtml_print_volumes_list_head($text1, $text2) {
+	echo '<div class="content">' . "\n";
+	echo "	<h2>$text1</h2>\n";
+	if ($text2 != "")
+		echo "	<h3>$text2</h3>\n";
+}
+/// sub nagłówek listy pozycji
+function xhtml_print_volumes_list_subhead($text) {
+	echo '	<p>&nbsp;</p><h2>' . $text . "</h2>\n";
+}
+/// pozycja listy
+function xhtml_print_list_entry($summary, $url="", $fulltext="") {
+	echo '	<div class="result"><p class="summary">';
+	if ($url != "")
+		echo '<a href="'. $url .'">'. $summary .'</a>';
+	else
+		echo $summary;
+	echo '</p>';
+	if ($fulltext != "")
+		echo '<p class="fulltext">' . $fulltext . '</p>';
+	echo "</div>\n";
+}
+/// stopka listy pozycji
+function xhtml_print_list_foot($prev="", $next="", $curr="") {
+	if ($curr != "") {
+		echo '	<div class="navigation-bottom">' . "\n";
+			if ($prev != "") echo '&laquo; <a href="' . DIROP_SCRIPT_PATH . $url_full . $prev . '">poprzednia strona</a> &nbsp;&middot;&nbsp;';
+			echo "$curr";
+			if ($next != "") echo '&nbsp;&middot;&nbsp;<a href="' . DIROP_SCRIPT_PATH . $url_full . $next . '">następna strona</a> &raquo;';
+			echo "</div>";
+	}
+	echo "</div>\n";
+	global $div_to_close;
+	$div_to_close++;
+	echo '<div class="left_menu">' . "\n";
+}
+
+
+/// nagłówek spisu treści
+function xhtml_print_navigation_head($title_book, $title_volume, $url_book, $url_full, $lista_tomow, $cur_vol, $cur_page, $not_empty = false) {
+	echo '	<div class="graybox">
+		<form action="'. DIROP_SCRIPT_PATH . $url_full .'" method="post" id="goto" class="navigation"><fieldset>
+			<h6>Idź do</h6>' . "\n";
+	if ($lista_tomow != NULL) {
+		echo '			<select name="volume_url" id="v">';
+		foreach ($lista_tomow as $arr_tmp) {
+			if ($cur_vol == $arr_tmp['volume_id'])
+				echo '<option value="'. $arr_tmp['v.url'] .'" selected="selected">'. $arr_tmp['v.title'] .'</option>';
+			else
+				echo '<option value="'. $arr_tmp['v.url'] .'">'. $arr_tmp['v.title'] .'</option>';
+		}
+		echo '			</select>&nbsp;';
+	}
+	echo '			<label for="p">strona: </label><input type="text" name="pare_url" id="p" size="3" value="'. $cur_page .'" />
+			<input type="image" name="gotobtn" id="gotobtn" alt="przejdź" src="'. DIROP_LINK_DIR_PATH .'img_css_and_js/submit.png" />
+		</fieldset></form>' . "\n";
+	if ($title_volume != "") {
+		echo '		<h6>Nawigacja</h6>' . "\n";
+		echo '		<ul id="navtree" class="navigation">' . "\n";
+		
+		if ($url_book != "") echo '			<li class="selected"><span><a href="' . DIROP_SCRIPT_PATH . $url_book . '"><strong>' . $title_book . '</strong></a></span><ul>' . "\n";
+		
+		echo '				<li class="selected"><span><a href="' . DIROP_SCRIPT_PATH . $url_full . '"><strong>' . $title_volume . '</strong></a></span>';
+		if ($not_empty) echo "<ul>";
+		echo "\n";
+	}
+}
+/// zawartość spisu treści
+function xhtml_print_navigation_entry($url_full, $end_counter, $zagniezdzenie, $page_url, $page_title, $content_id, $is_current_page) {
+	echo '					';
+	if($end_counter == -1) {
+		if ($zagniezdzenie < STANDAR_SHOW_CONTENT_LEVEL)
+			$class = "nav_uncollapsed";
+		else
+			$class = "nav_collapsed";
+		
+		echo '<li class="'. $class .'" id="conttent_'. $content_id .'">';
+		if ($is_current_page)
+			echo '<span id="nav_conttent_current">';
+		else
+			echo '<span>';
+		if ($page_url != "")
+			echo '<a href="' . DIROP_SCRIPT_PATH . $url_full . $page_url . '">' . $page_title . '</a>';
+		else
+			echo $page_title;
+		echo '</span><ul>' . "\n";
+	} else if ($end_counter >= 0) {
+		if ($page_url == "")
+			$class = "nav_entry_nolink";
+		else
+			$class = "nav_entry_link";
+			
+		echo '<li class="'. $class .'" id="conttent_'. $content_id .'">';
+		if ($is_current_page)
+			echo '<span id="nav_conttent_current">';
+		if ($page_url != "")
+			echo '<a href="' . DIROP_SCRIPT_PATH . $url_full . $page_url . '">' . $page_title . '</a>';
+		else
+			echo $page_title;
+		if ($is_current_page)
+			echo '</span>';
+		echo '</li>' . "\n";
+		for ($i=0; $i<$end_counter; $i++) {
+			echo "					</ul></li>\n";
+		}
+	}
+}
+/// końcówka spisu treści
+function xhtml_print_navigation_foot($title_volume, $url_book, $not_empty = false) {
+	if ($title_volume != "") {
+		// zamykamy pozycji, gdy była zawrtość to także <ul>
+		echo '				';
+		if ($not_empty) echo '</ul>';
+		echo '</li>' . "\n";
+		
+		// zamykamy serii gdy był otwarty
+		if ($url_book != "") echo '			</ul></li>' . "\n";
+		
+		// zamykamy navtree
+		echo "		</ul>\n";
+	}
+	echo '	<p id="navtree_func"><span id="navtree_coll">zwiń wszystkie</span> | <span id="navtree_uncoll">rozwiń wszystkie</span></p>
+	</div>' . "\n";
+}
+
+
+/// okienko wyszukiwarki tekstowej
+function xhtml_print_search_box($volume_id, $single_volume, $is_book_page=false) {
+	echo '	<div class="graybox">
+		<h6>Wyszukiwanie</h6>
+		<form action="'. DIROP_SCRIPT_PATH . '/" method="get" id="search_form" class="search_fulltext"><fieldset>
+			<input type="hidden" name="find_in" value="fulltext" />
+			<input type="hidden" name="volume_id" value="'. $volume_id .'" />
+			<label for="f">w książce</label><input type="text" name="find_text" id="f" size="30" value="" />' . "\n";
+	if ($is_book_page) {
+		echo '			<input type="hidden" name="search_volume" id="s" value="all" />';
+	} else if ($single_volume == -2) {
+		echo '			<label for="s">szukaj w całej serii</label><input type="checkbox" name="search_volume" id="s" value="all" />';
+	} else if ($single_volume == -3) {
+		echo '			<label for="s">szukaj w całej serii</label><input type="checkbox" name="search_volume" id="s" value="all" checked="checked" />';
+	}
+	echo '
+			<input type="image" name="" value="" id="searchbtn" alt="szukaj" src="'. DIROP_LINK_DIR_PATH .'img_css_and_js/search.png" />
+		</fieldset></form>
+	</div>' . "\n";
+}
+
+
+/// okienko wyszukiwarki bibliotecznej
+function xhtml_print_library_search($curr) {
+	/// jeżeli było wyszukiwanie pamiętamy formularz, jeżeli nie domyślne szukanie wg tytułu
+	switch ($curr[2]) {
+		case 'dc_creator':
+			$dc_creator_sel=' selected="selected"'; break;
+		case 'dc_contributor':
+			$dc_contributor_sel=' selected="selected"'; break;
+		case 'fulltext':
+			$fulltext_sel=' selected="selected"'; break;
+		default:
+			$dc_title_sel=' selected="selected"'; break;
+	}
+	
+	echo '	<div class="graybox">
+		<h6>Wyszukiwanie książki</h6>
+		<form action="" method="get" class="search_library">
+		<fieldset>
+			<input type="text" name="find_text" id="t" size="30" value="'. $curr[3] .'" />
+			<select name="find_in">
+				<!--option value="dc_description">w pełnym opisie&#32;&#32;&#32;</option-->
+				<option value="dc_title"'. $dc_title_sel .'>według tytułu</option>
+				<option value="dc_creator"'. $dc_creator_sel .'>według autora</option>
+				<option value="dc_contributor"'. $dc_contributor_sel .'>według współtwórcy</option>
+				<option value="fulltext"'. $fulltext_sel .'>w tekście wszystkich pozycji</option>
+			</select>
+			<input type="hidden" name="volume_id" value="all" />
+			<input type="image" name="" value="" id="searchbtn" alt="szukaj" src="'. DIROP_LINK_DIR_PATH .'img_css_and_js/search.png" />
+		</fieldset>
+		</form>
+	</div>' . "\n";
+}
+
+
+/// okienko nawigacji po kategoriach
+function xhtml_print_category_navigation() {
+	echo '	<div class="graybox">
+		<h6>Przeglądanie</h6>
+		<ul class="treeview navigation">
+			<li><b class="bigger"><a href="' . DIROP_SCRIPT_PATH . '?novelty">Nowości</a></b></li>
+			<li><b class="bigger"><a href="' . DIROP_SCRIPT_PATH . '?category=Ekonomia">Ekonomia</a></b></li>
+			<li><b class="bigger"><a href="' . DIROP_SCRIPT_PATH . '?category=Filozofia">Filozofia</a></b></li>
+			<li><b class="bigger"><a href="' . DIROP_SCRIPT_PATH . '?category=Geografia">Geografia</a></b></li>
+			<li><b class="bigger"><a href="' . DIROP_SCRIPT_PATH . '?category=Historia">Historia</a></b></li>
+			<li><b class="bigger"><a href="' . DIROP_SCRIPT_PATH . '?category=Prawo">Prawo</a></b></li>
+			<li><b class="bigger"><a href="' . DIROP_SCRIPT_PATH . '?category=Socjologia">Socjologia</a></b></li>
+			<li><b class="bigger"><a href="' . DIROP_SCRIPT_PATH . '">Wszystkie pozycje</a></b></li>
+		</ul>
+	</div>' . "\n";
+}
+
+
+/// błędy wyszukiwania
+function xhtml_print_search_error($error) {
+	/// brak poprawnych kryteriów wyszukiwania
+	echo '<p>Nie podano żadnych poprawnych kryteriów wyszukiwania. W celu uzyskania więcej informacji prosimy sprawdzić <a href="' . DIROP_LINK_DIR_PATH . '/help.php">pomoc</a>.</p>';
+}
+?>

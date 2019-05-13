@@ -1,0 +1,31 @@
+<article>
+<title>Podstawy technologii baz danych</title>
+
+<p><wiki pl="Model bazy danych">Modele danych</wiki> są zbiorami zasad dotyczących: definicji danych, operowania danymi oraz integralności danych. Wyróżnić możemy hierarchiczny, sieciowy, relacyjny i obiektowy model danych. Oprócz nich mamy często też doczynienia z prostymi modelami danych (np. plik tekstowy o ustalonej strukturze jednak bez odniesień do zawartości innych plików).</p>
+
+<p>W modelu hierarchicznym mamy doczynienia z związkami pomiędzy rekordami (nadrzędność i podrzędność), różnymi typami rekordów, rekordy posiadają klucze (unikalne identyfikatory). Dane w tym modelu mają strukturę drzewiastą, utworzoną przez rekordy nadrzędne i podrzędne, nie da się usunąć rekordu bez usuwania rekordów podrzędnych wobec niego. Przykładem takiej bazy danych jest system plików. W modelu sieciowym oprócz zwykłych pól posiadamy pola kolekcji zawierające odniesienia do innych rekordów.</p>
+
+<p>W <wiki pl="Model relacyjny">modelu relacyjnym</wiki> (<wiki pl="System zarządzania relacyjną bazą danych">RDBMS</wiki>) relacje zazwyczaj reprezentowane są przez tabele stanowiące nieuporządkowany zbiór <wiki pl="Rekord (informatyka)">rekordów</wiki> o atrybutach określonych w kolumnach. Kolumny, również stanowiące nieuporządkowany zbiór, określają typy wartości <wiki pl="Pole (informatyka)">pól</wiki>. Pola są wartościami atomowymi lub wartością NULL. Wyróżnia się klucze główne (stanowiące unikalny identyfikator rekordu w tabeli) oraz klucze obce stanowiące powiązania pomiędzy tabelami - kolumny będące kluczami obcymi muszą mieć ten sam typ co klucz główny tabeli do której mają prowadzić klucze obce. Powiązania takie tworzy się przez wstawianie do kolumny klucza obcego odpowiednich wartości klucza głównego. Operacje  na danych opisuje <wiki pl="Rachunek relacyjny">algebra relacyjna</wiki> możliwa jest:</p>
+<ul>
+	<li>selekcja</li>
+	<li>rzut - wybór podzbioru wierszy</li>
+	<li>iloczyn kartezjański - w sensie teorii mnogości, w wyniku otrzymujemy iloczyn ilości wierszy i sumę ilości kolumn</li>
+	<li>równo-złączenie - z iloczynu kartezjańskiego wybieramy tylko wiersze spełniające równość pomiędzy dwiema kolumnami o tym samym typie z dwóch tabel (klucz główny = klucz obcy)</li>
+	<li>złączenie naturalne - z równo-złączenia usuwamy powtórzenia kolumn</li>
+	<li>złączenie zewnętrzne - podobnie jak złączenie naturalne tyle że gdy nie ma pasującego to wstawiamy wiersz z tabeli uprzywilejowanej a w miejscu pól z drugie wstawiamy NULL</li>
+	<li>suma - w sensie teorii mnogości</li>
+	<li>przecięcie - w sensie teorii mnogości</li>
+	<li>różnica - w sensie teorii mnogości</li>
+</ul>
+
+<p>Baza zapewnia także integralność danych, w szczególności integralność referencyjną - dotyczącą kluczy głównych i obcych (nie jest możliwe usunięcie wiersza na który wskazują klucze obce bez usuwania wierszy wskazujących, nie jest możliwe dodanie wiersza z kluczem obcym wskazującym na nieistniejący wiersz, nie jest możliwe dodanie wiersza powodujące zduplikowanie klucza głównego. Z zachowaniem poprawnością danych w modelu relacyjnym związane są więzy. Są to narzucone przez projektanta ograniczenia i dodatkowe relacje które muszą być spełniane przez wartości danego pola.</p>
+
+<p>W modelu obiektowym występuje niejednorodna struktura danych zawierająca (obok wartości - atrybutów) także procedury. W modelu tym występuje "jednoznaczna tożsamość", oznacza to że mamy te same atrybuty i metody, ale różne obiekty (danego typu). Procedury związane związane z obiektem nazywane są metodami. Wzorce wg których tworzone są obiekty (typ obiektu) określany jest mianem klasy. Model ten umożliwia dziedziczenie, czyli tworzenie klas potomnych na bazie już istniejących przez ich modyfikację oraz zapewnia enkapsulację czyli ukrycie szczegółów implementacji tak aby nie były dostępne z zewnątrz ("to co w środku nieważne").</p>
+
+<p>Drugą sprawą z teorii baz danych, którą trzeba poruszyć jest <wiki pl="Normalizacja bazy danych">normalizacja danych</wiki> i tzw. <wiki pl="Postać normalna (bazy danych)">postać normalna</wiki>. Ma to na celu unikanie powtórzeń, redukcję anomalii w modyfikacji danych oraz uproszczenie reguł integralności. Anomaliami nazywamy efekt uboczny modyfikacji, wstawiania lub usuwania danych pociągający za sobą zbyt duże zmiany. Wyróżnia się kilka postaci normalnych, każda kolejna jest tą bliższą ideałowi:</p>
+<ul>
+	<li>1NF - każdy atrybut niekluczowy jest funkcyjnie zależny od klucza głównego ("bez powtórzeń ...")</li>
+	<li>2NF - dodatkowo każdy atrybut niekluczowy jest w pełni zależny od klucza głównego ("... pola zależą od klucza ...")</li>
+	<li>3NF - dodatkowo każdy atrybut niekluczowy jest bezpośrednio zależny od klucza głównego ("... od całego klucza ...")</li>
+</ul>
+</article>

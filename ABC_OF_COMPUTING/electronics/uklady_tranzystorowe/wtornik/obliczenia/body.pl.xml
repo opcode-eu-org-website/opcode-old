@@ -1,0 +1,18 @@
+<article>
+<title>obliczanie układu typu wtórnik emiterowy</title>
+<p>Punkt pracy ustalany tak samo jak dla układów WE.</p>
+
+<p>Ustalanie parametrów układu (bipolarny):</p>
+<ol>
+	<li><eq_latex>R_{WY} = R_E || {R_G + r_{b'e} \over \beta +1}</eq_latex></li>
+	<li><eq_latex>R_{WE} = R_{b'e} + (\beta + 1) (R_E || R_L)</eq_latex></li>
+	<li><eq_latex>k_u = {(\beta + 1) (R_E || R_L) \over R_{b'e} + (\beta + 1) (R_E || R_L)}</eq_latex></li>
+</ol>
+
+<p>Ustalanie parametrów układu (JFET):</p>
+<ol>
+	<li><eq_latex>R_{WY} = R_S || {1 \over g_m}</eq_latex></li>
+	<li><eq>R<sub>WE</sub> = R<sub>B</sub></eq></li>
+	<li><eq_latex>k_u = {g_m (R_S || R_O) \over 1 + g_m (R_S || R_O)}</eq_latex></li>
+</ol>
+</article>

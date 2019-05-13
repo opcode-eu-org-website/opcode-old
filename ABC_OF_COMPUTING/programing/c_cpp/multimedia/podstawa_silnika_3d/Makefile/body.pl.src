@@ -1,0 +1,15 @@
+include Makefile.config
+
+MISC_INCLUDE=$(PROJECTPATH)/misc/
+
+CFLAGS=$(GLOBAL_CFLAGS)
+OBJ_WITH_CPP_H=
+OBJ=main.o $(OBJ_WITH_CPP_H)
+SUBDIR=scene_manager scene_objects misc
+
+all: $(OBJ) scene_manager scene_objects misc
+	gcc $(OBJ) scene_manager/*.o scene_objects/*.o misc/*.o $(LIBS) -o $(PROJECTNAME)
+
+include $(PROJECTPATH)/Makefile.rules
+
+main.o: main.cpp $(MISC_INCLUDE)global.h $(MISC_INCLUDE)config.h $(MISC_INCLUDE)input.h $(MISC_INCLUDE)camera.h scene_manager/objectsspace.h

@@ -1,0 +1,14 @@
+<article>
+<title>Podstawy programowania Unixa/Linuxa</title>
+<ul>
+	<li><id_link id="c_cpp:posix:katalogi.c">katalogi.c</id_link> - katalogi, czyli nasze własne ls ;-) + obsługa błędów z wykorzystaniem errno.h (mechanizm bardzo przydatny przy korzystaniu z bardziej zaawansowanych funkcji ... w celu ustalenia dlaczego to nie działa)</li>
+	<li><id_link id="c_cpp:posix:unix.c">unix.c</id_link> - funkcje Unix'owate ... (w tym sygnały, deskryptory i czas)</li>
+	<li><id_link id="c_cpp:posix:opcje.c">opcje.c</id_link> - przetwarzanie opcji unix'owych (-h) i GNU (--help)</li>
+	<li><id_link id="c_cpp:posix:fork.c">fork.c</id_link> - wywołania innych programów i pipe</li>
+	<li><id_link id="c_cpp:posix:watki.c">watki.c</id_link> - tworzenie aplikacji wielowątkowych z wykorzystaniem pthread</li>
+	<li><id_link id="c_cpp:posix:watki_clone.c">watki_clone.c</id_link> - tworzenie aplikacji wielowątkowych z wykorzystaniem clone()</li>
+	<li><id_link id="c_cpp:posix:semafory_posix.c">semafory_posix.c</id_link> - używanie semaforów, timerów, pamięci współdzielonej oraz asynchronicznego wyjścia zgodnych ze standardem <wiki pl="POSIX">POSIX</wiki>owych</li>
+	<li><id_link id="c_cpp:posix:semafory_ipc.c">semafory_ipc.c</id_link> - wykorzystywanie semaforów i innych mechanizmów SystemV <wiki pl="Komunikacja międzyprocesowa">IPC</wiki> (svipc) do komunikacji między procesami,<br />więcej o komunikacji międzyprocesorowej w <doc url="http://loqi01.eti.pg.gda.pl/pracownicy/macpi/info/SOLab/Linux-synchronizacjakomunikacjaprocesow.htm">LINUX - Synchronizacja i komunikacja procesów</doc>, <wiki en="b:">Distributed Systems</wiki></li>
+	<li><id_link id="c_cpp:posix:tty-listener.c">tty-listener.c</id_link> - program wykorzystujący urządzenia vcs i vcsa do podebrania ekranu (tekstu) z terminala tty</li>
+</ul>
+</article>

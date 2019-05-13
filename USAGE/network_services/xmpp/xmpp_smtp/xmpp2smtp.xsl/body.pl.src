@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+
+<!--
+Copyright (c) 2010, Robert Paciorek (http://www.opcode.eu.org/), BSD-type license
+
+Redystrybucja wersji źródłowych i wynikowych, po lub bez dokonywania
+modyfikacji JEST DOZWOLONA, pod warunkiem zachowania niniejszej informacji o
+prawach autorskich. Autor NIE ponosi JAKIEJKOLWIEK odpowiedzialności za skutki
+użytkowania tego dokumentu/programu oraz za wykorzystanie zawartych tu informacji.
+
+This program is free software. Redistribution and use in source and binary
+forms, with or without modification, ARE PERMITTED provided save this copyright
+notice. This document/program is distributed WITHOUT any warranty, use at YOUR
+own risk.
+-->
+
+<xsl:stylesheet version="2.0"
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+	xmlns:fn="http://www.w3.org/2005/xpath-functions"
+	xmlns:d="urn:xmpp:delay"
+	exclude-result-prefixes="fn"
+>
+	<xsl:output method='text' encoding='utf-8' />
+
+	<xsl:variable name="LF"><xsl:text>
+</xsl:text></xsl:variable>
+
+	<xsl:strip-space elements="*" />
+	
+	<xsl:template match="message">
+		<text>IM from:    </text>
+		<xsl:value-of select="@from"/>
+		<xsl:value-of select="$LF"/>
+		<xsl:apply-templates select="subject"/>
+		<xsl:apply-templates select="body"/>
+		<xsl:apply-templates select="d:delay"/>
+		<xsl:value-of select="$LF"/>
+	</xsl:template>
+
+	<xsl:template match="subject">
+		<text>   subject: </text>
+		<xsl:value-of select="."/>
+		<xsl:value-of select="$LF"/>
+	</xsl:template>
+	<xsl:template match="body">
+		<text>   body:    </text>
+		<xsl:value-of select="."/>
+		<xsl:value-of select="$LF"/>
+	</xsl:template>
+	<xsl:template match="d:delay">
+		<text>   date:    </text>
+		<xsl:value-of select="@stamp"/>
+		<xsl:value-of select="$LF"/>
+	</xsl:template>
+</xsl:stylesheet>
+

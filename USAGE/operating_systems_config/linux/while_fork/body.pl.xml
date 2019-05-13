@@ -1,0 +1,6 @@
+<article>
+<title>Problem z while(1) { fork(); }</title>
+<p>Jak łatwo się przekonać wykonanie programu zawierającego powyższy kod kompletnie zablokuje system (w skutek zapełnienia pamięci / tablicy procesów). Aby to uniemożliwić należy w pliku /etc/security/limits.conf dodać linijkę <code>* hard  nproc 200</code> i w konfiguracji PAM'a (np. /etc/pam.d/common-session) dodać: <code>session required pam_limits.so</code>. W tym celu możnaby także uzyć starszego pliku /etc/limits (będącego plikiem konfiguracji pakietu shadow), jednak beardziej preferowane jest korzystanie z konfiguracji PAM (podobnie jak z większością opcji z /etc/login.defs).</p>
+
+<p>Zobacz w Sieci: <wiki en="Fork bomb">Fork bomb</wiki>, <wiki en="Cgroups">Cgroups</wiki></p>
+</article>

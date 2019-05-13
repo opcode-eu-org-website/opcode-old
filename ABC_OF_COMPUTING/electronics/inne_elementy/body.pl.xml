@@ -1,0 +1,9 @@
+<article>
+<title>Inne elementy (analogowe), symbole</title>
+<p>Oprócz omówionych mamy jeszcze wiele innych elementów półprzewodnikowych w tym układów scalonych. Wspomnę może tutaj o jednym z nich - NE555 jest to bardzo popularny układ czasowy służący do generacji drgań i wytwarzania impulsów. Dokumentacje do różnych układów elektronicznych (tzw. datasheet) można znaleźć na stronie producenta układu lub na stronach poświęconym notom katalogowym układów elektronicznych, takich jak <homepage url="http://www.elenota.pl/">EleNota</homepage>.</p>
+
+<p>Każdy element ma swój symbol graficzny (a nawet kilka ...). Poniżej zamieszczam obrazek (PNG) prezentujący najpopularniejsze symbole podstawowych elementów elektronicznych (<a class="int" href="./symbole1.sch">symbole1.sch</a>).</p>
+
+<p class="center"><img src="./symbole1.png" alt="popularne symbole elektroniczne" /></p>
+
+</article>

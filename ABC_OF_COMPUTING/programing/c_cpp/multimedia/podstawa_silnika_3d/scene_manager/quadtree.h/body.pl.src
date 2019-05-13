@@ -1,0 +1,127 @@
+#ifndef QUADTREE_H
+#define QUADTREE_H
+
+#include <stddef.h> // NULL
+
+namespace QuadTreeTypes {
+	template <typename coord_t, typename data_t> struct Node {
+		coord_t xl; /// x left
+		coord_t xr; /// x right
+		coord_t zb; /// z back
+		coord_t zf; /// z front
+	};
+	
+	template <typename coord_t, typename data_t> struct Leaf : Node<coord_t, data_t> {
+		data_t data;
+		
+		Leaf(int level_num, coord_t x_l, coord_t z_b, coord_t base_x, coord_t base_z) {
+			this->xl = x_l;
+			this->xr = x_l + base_x;
+			this->zb = z_b;
+			this->zf = z_b + base_z;
+			// krawędź jest wspólna dla sąsiadujących Node
+		}
+	};
+	
+	template <typename coord_t, typename data_t> class Parent : public Node<coord_t, data_t> {
+		private:
+			Node<coord_t, data_t> *br; /// back right (1)
+			Node<coord_t, data_t> *fr; /// front right (2)
+			Node<coord_t, data_t> *fl; /// front left (3)
+			Node<coord_t, data_t> *bl; /// back left (4)
+		public:
+			Parent(int level_num, coord_t x_l, coord_t z_b, coord_t base_x, coord_t base_z) {
+				// obliczamy ilość kolumn/wierszy siatki na obecnym poziomie == 2^(level_num-1)
+				int num_row_col = 2;
+				for (int i=2; i<level_num; i++) {
+					num_row_col = num_row_col << 1;
+				}
+				// i ustawiamy rozmiary bierzącej komórki
+				this->xl = x_l;
+				this->xr = x_l + num_row_col*base_x;
+				this->zb = z_b;
+				this->zf = z_b + num_row_col*base_z;
+				
+				// dzielimy jej rozmiary przez 2 i tworzymy potomków
+				if (level_num-- >= 1){
+					num_row_col = num_row_col >> 1;
+					this->br = new typename Parent<coord_t, data_t>::Parent(level_num, x_l + num_row_col*base_x, z_b, base_x, base_z);
+					this->fr = new typename Parent<coord_t, data_t>::Parent(level_num, x_l + num_row_col*base_x, z_b + num_row_col*base_z, base_x, base_z);
+					this->fl = new typename Parent<coord_t, data_t>::Parent(level_num, x_l, z_b + num_row_col*base_z, base_x, base_z);
+					this->bl = new typename Parent<coord_t, data_t>::Parent(level_num, x_l, z_b, base_x, base_z);
+				} else {
+					this->br = new typename Leaf<coord_t, data_t>::Leaf(level_num, x_l + base_x, z_b, base_x, base_z);
+					this->fr = new typename Leaf<coord_t, data_t>::Leaf(level_num, x_l + base_x, z_b + base_z, base_x, base_z);
+					this->fl = new typename Leaf<coord_t, data_t>::Leaf(level_num, x_l, z_b + base_z, base_x, base_z);
+					this->bl = new typename Leaf<coord_t, data_t>::Leaf(level_num, x_l, z_b, base_x, base_z);
+				}
+			}
+			~Parent() {
+				delete this->br;
+				delete this->fr;
+				delete this->fl;
+				delete this->bl;
+			}
+			
+			Parent<coord_t, data_t>* get_child(char num) {
+				switch(num) {
+					case 1:
+						return (Parent<coord_t, data_t>*) br;
+					case 2:
+						return (Parent<coord_t, data_t>*) fr;
+					case 3:
+						return (Parent<coord_t, data_t>*) fl;
+					case 4:
+						return (Parent<coord_t, data_t>*) bl;
+					default:
+						return NULL;
+				}
+			}
+	};
+}
+
+template <typename coord_t, typename data_t> class QuadTree {
+	private:
+		QuadTreeTypes::Parent<coord_t, data_t> *root;
+		int level_num;
+	public:
+		/// rozmiar liniowy: 2^(level_num-1) * base
+		/// powierzchnia:    4^(level_num-1) * base^2
+		QuadTree(int level_num, coord_t x_l, coord_t z_b, coord_t base) {
+			this->level_num = level_num;
+			this->root = new typename QuadTreeTypes::Parent<coord_t, data_t>::Parent(level_num, x_l, z_b, base, base);
+		}
+		QuadTree(int level_num, coord_t x_l, coord_t z_b, coord_t base_x, coord_t base_z) {
+			this->level_num = level_num;
+			this->root = new typename QuadTreeTypes::Parent<coord_t, data_t>::Parent(level_num, x_l, z_b, base_x, base_z);
+		}
+		~QuadTree() {
+			delete this->root;
+		}
+		
+		QuadTreeTypes::Parent<coord_t, data_t>* get_root() {
+			return root;
+		}
+		int get_level_num() {
+			return level_num;
+		}
+};
+
+/** USAGE SAMPLE:
+// linking with stdc++: gcc -lstdc++ -Wall quadtree.cpp
+
+#include "quadtree.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(){
+	QuadTree<int, int> *drzewko;
+	
+	system("free");
+	drzewko = new QuadTree<int, int>::QuadTree(7,0,0,16); // rozmiar planszy 1024 <=> 64 pola po 16 jedn dlugosci
+	system("free"); // zurzycie pamięci ~2MB
+	
+	printf("%d %d\n", drzewko->get_root()->get_child(4)->get_child(4)->get_child(4)->xr, drzewko->get_level_num());
+} */
+#endif

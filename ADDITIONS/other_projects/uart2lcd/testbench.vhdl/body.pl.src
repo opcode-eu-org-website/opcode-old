@@ -1,0 +1,60 @@
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity testbench is
+end;
+
+architecture logic of testbench is
+	signal CLK, RST: std_logic := '1';
+	
+	signal RXD, RXD_RUN: std_logic := '0';
+	signal RXD_CNT: integer := 0;
+	signal RXD_IN: std_logic_vector (7 downto 0) := "01010011";
+begin
+	-- zegar
+	process
+		begin
+		wait for 1 ns;
+		CLK <= not CLK;
+	end process;
+	
+	-- zatrzymanie symulacji
+	process
+		begin
+		wait for 1200 us;
+		assert FALSE
+			report "koniec symulacji"
+		severity FAILURE;
+	end process;
+	
+	RST <= '1', '0' after 0.5 ns;
+	
+	--RXD_IN <= "01011010" after 162 ns;
+	--RXD_RUN <= '1' after 82 ns, '0' after 162 ns, '1' after 170 ns;
+	RXD_RUN <= '1' after 20 ns;
+	process
+		begin
+			if (RXD_RUN = '1') then
+				if (RXD_CNT = 0) then
+					RXD <= '0'; -- bit startu
+					RXD_CNT <= 1;
+				elsif (RXD_CNT < 9) then
+					RXD <= RXD_IN(RXD_CNT-1);
+					RXD_CNT <= RXD_CNT + 1;
+				else
+					RXD <= '1'; -- bit stopu
+				end if;
+			else
+				RXD <= '1'; -- cisza na linii
+				RXD_CNT <= 0;
+			end if;
+			wait for 104166 ns;
+	end process;
+	
+	calosc: entity work.PRUS1(logic)
+		port map(
+			clk => CLK,
+			reset => RST,
+			rxd => RXD
+		);
+end;

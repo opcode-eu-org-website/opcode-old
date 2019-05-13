@@ -1,0 +1,29 @@
+#ifndef OBJECTSSPACE_H
+#define OBJECTSSPACE_H
+
+/// włączamy definicje przestrzeni 2D dla obiektów
+/// z funkcją wyszukiwania i zawartości komórek
+///  - patrz opis metody find_and_copy()
+#include "space.h"
+
+/// włączamy definicje kstruktury ObjectsList
+#include "objectslist.h"
+
+class ObjectsSpace {
+	private:
+		ObjectsList to_render;
+		Space<ObjectsList*> *space;
+	public:
+		// metody twotrzące przestrzeń o biektów o zadanych rozmiarach i ją usuwające
+		void create_space(int x) {
+			create_space(x, x);
+		}
+		void create_space(int z, int x);
+		void delete_space();
+		
+		ObjectsList* get_from_space(int z, int x);
+		void find(PointXZ<float> p[4], PointXZY<float> eye);
+		void render();
+		bool check_collisions(float x, float y, float z);
+};
+#endif

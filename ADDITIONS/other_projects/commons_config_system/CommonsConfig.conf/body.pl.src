@@ -1,0 +1,58 @@
+# lista repozytoriów automatycznie aktualizowanych przy zamykaniu systemu
+#  nazwy wymienione na liście wchodzą w skład nazwy katalogu .bzr danego repo w nastepujacy sposob:
+#  .CommonsConfig-BZR-nazwa
+#  jako że nazwy są powiązane z ścieżką składowania kopii na serwerze nie jest możliwe używanie takiejsamej nazwy
+#  na dwuch hostach jeżeli chcemy aby były to różne repozytoria
+BZR_REPO_LIST_AUTOPUSH="global `hostname`"
+
+# lista repozytoriów bzr których kopie robocze aktualizujemy przy starcie systemu
+BZR_REPO_LIST="$BZR_REPO_LIST_AUTOPUSH "
+
+# lista plików przechowywanyach na SSHFS złożona z linii postaci:
+#  sciezka/do_pliku/na_sshf sciezka/do_pliku/w_home
+SSHFS_LINK_LIST="psi-history	.psi/profiles/domyslny/history
+knotes.ics	.kde/share/apps/knotes/notes.ics
+addressbook-dir	.kde/share/apps/kabc/stdvcf"
+
+# lista plików trzymanych w bzr
+bzr_auto_add() {
+	case $1 in
+	"global")
+		ADD_LIST=".kde/share/apps/konqueror/bookmarks.xml
+		.kde/share/apps/kabc/std.vcf
+		.kde/share/config/kmailrc
+		.kde/share/config/emaildefaults
+		.kde/share/config/emailidentities
+		.kde/share/config/knoderc
+		.kde/share/apps/knode
+		.linphonerc
+		.kde/share/services/searchproviders
+		.kde/share/config/konversationrc
+		.gEDA
+		.pcb
+		.tex
+		.w3m/config
+		.bashrc
+		.ssh/config
+		.vimrc
+		.gnupg
+		.CommonsConfig-SSHFS.local_backup"
+	;;
+	"`hostname`")
+		ADD_LIST="
+		.ssh/authorized_keys
+		.psi/profiles/domyslny/config.xml
+		.psi/profiles/domyslny/options.xml
+		.bin"
+	;;
+	esac
+		bzr add $ADD_LIST
+}
+
+# konfiguracja dostępu do hosta udostępniającego BZR
+BZR_HOST=""
+BZR_REMOTE_DIR=""
+
+# konfiguracja dostępu do hosta udostępniającego SSHFS
+SSHFS_HOST="$BZR_HOST"
+SSHFS_REMOTE_DIR="$BZR_REMOTE_DIR/SSHFS"

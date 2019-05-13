@@ -1,0 +1,11 @@
+<article>
+<title>obliczanie punktu pracy, rezystancji i wzmocnień</title>
+<ol>
+	<li><eq>I<sub>CQ</sub> = I<sub>EE</sub>/2</eq> (także w niesymetrycznym!)</li>
+	<li><eq>R<sub>WE</sub> = 2 r<sub>b'e</sub></eq></li>
+	<li><eq>R<sub>WY<sub>i</sub></sub> = R<sub>C<sub>i</sub></sub></eq></li>
+	<li><eq_latex>k_{u_i} = {R_{C_i} \over r_{eb'_1} + r_{eb'_2}}</eq_latex> (gdy korzystamy tylko z we1 to wy1 odwracające więc <eq>k<sub>u_1</sub></eq> może być podawane jako ujemne)</li>
+	<li><eq>k<sub>u<sub>sum</sub></sub> = |k<sub>u<sub>1</sub></sub>| +| k<sub>u<sub>2</sub></sub>|</eq></li>
+</ol>
+<p>Ewentualna niesymetryczność wpływa na zakres napięć wyjściowych.</p>
+</article>

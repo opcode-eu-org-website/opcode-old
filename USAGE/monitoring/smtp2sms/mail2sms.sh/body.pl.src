@@ -1,0 +1,122 @@
+#!/bin/sh
+
+/usr/bin/gawk -F': *' -v from_email=$1 -v to_email=$2 '
+	function send_sms(sms_priority, sms_number, sms_message) {
+		cmd = sprintf("/opt/smtp2sms/sms_queue_add %s %d \"%s\"", sms_priority, sms_number, sms_message)
+		printf("RUN: %s\n", cmd);
+		system(cmd)
+	}
+	
+	BEGIN {
+		MAIL_ENTRY_HEAD = 0
+		MAIL_ENTRY_BODY = 1
+		MAIL_ENTRY_END = -1
+		
+		mail_entry = MAIL_ENTRY_HEAD
+		
+		MESSAGE_TYPE_UNKNOW = 0
+		MESSAGE_TYPE_GENERIC = 1
+		MESSAGE_TYPE_BMS = 2
+		MESSAGE_TYPE_ZABBIX = 3
+		
+		message_type = MESSAGE_TYPE_UNKNOW
+		
+		message = ""
+		priority = ""
+		phone = ""
+	}
+	
+	mail_entry == MAIL_ENTRY_END {
+		next;
+	}
+	
+	
+	#                     #
+	#  PARSE MAIL HEADER  #
+	#                     #
+	
+	mail_entry == MAIL_ENTRY_HEAD && $1 == "X-SMS-Number" {
+		phone = $2;
+	}
+	
+	mail_entry == MAIL_ENTRY_HEAD && $1 == "X-SMS-Priority" {
+		priority = $2;
+	}
+	
+	mail_entry == MAIL_ENTRY_HEAD && $1 == "Subject" {
+		header_subject = $2
+		if ($2 ~ "Alarm z BMS")
+			message_type = MESSAGE_TYPE_BMS;
+	}
+	
+	mail_entry == MAIL_ENTRY_HEAD && $1 == "From" {
+		header_from = $2
+		if ($2 ~ "zabbix@icm.edu.pl")
+			message_type = MESSAGE_TYPE_ZABBIX;
+	}
+	
+	mail_entry == MAIL_ENTRY_HEAD {
+		# check for end of headers
+		if ($0 ~ /^\r*$/) {
+			mail_entry = MAIL_ENTRY_BODY;
+			if (message_type == MESSAGE_TYPE_UNKNOW && phone != "" && priority != "")
+				message_type = MESSAGE_TYPE_GENERIC
+		}
+		# do not parse body if in header
+		next;
+	}
+	
+	
+	#                     #
+	#   PARSE MAIL BODY   #
+	#                     #
+	
+	message_type == MESSAGE_TYPE_GENERIC {
+		message = $0
+	}
+	
+	message_type == MESSAGE_TYPE_BMS && $1 == "Site number" {
+		gsub("^.*Priority", "", $2)
+		gsub("\r*$", "", $2)
+		priority = $2
+	}
+	message_type == MESSAGE_TYPE_BMS && $1 ~ "Alarm block description" {
+		gsub("^ *", "", $2)
+		gsub("\r*$", "", $2)
+		message = $2
+	}
+	
+	message_type == MESSAGE_TYPE_ZABBIX && $1 ~ "Problem$" {
+		msg1 = $2
+	}
+	message_type == MESSAGE_TYPE_ZABBIX && $1 ~ "Problem status$" {
+		message = sprintf("%s: %s", msg1, $2)
+	}
+	
+	
+	#                     #
+	#  PUT SMS TO QUEUE   #
+	#                     #
+	
+	phone != "" &&  message != "" && priority != "" {
+		# wiadomosci na wskazany numer
+		send_sms(priority, phone, message);
+		mail_entry = MAIL_ENTRY_END;
+		next
+	}
+	
+	message != "" && priority != "" && message_type == MESSAGE_TYPE_BMS {
+		# wiadomosci z systemu BMS - adresaci ustalani w oparciu o priorytet
+		if (priority < 40 && priority != 6) {
+			send_sms(priority, 12345, message);
+			send_sms(priority, 22345, message);
+			send_sms(priority, 32345, message);
+			mail_entry = MAIL_ENTRY_END;
+		} else if (priority == 99) {
+			message = sprintf("TRAFO: %s", message)
+			send_sms(40, 45678, message);
+			mail_entry = MAIL_ENTRY_END;
+		}
+	}
+	END {printf ("END %s - %s - %s\n", priority, phone, message);}
+' | logger -p local0.info -t mail2sms

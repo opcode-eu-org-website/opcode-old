@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# deklaracja funkcji o nazwie wypisz, argumenty podstawiane są jako $1 $2 ...
+wypisz() {
+        echo "$1 World !!!"
+}
+
+# deklarację możnaby poprzedzić słowem kluczowym "function" ale nie jest to wymagane,
+# a na dodatek jest niekompatybilne z innymi sh
+
+# wywolanie funkcji petla z jednym argumentem - Witaj
+wypisz Witaj

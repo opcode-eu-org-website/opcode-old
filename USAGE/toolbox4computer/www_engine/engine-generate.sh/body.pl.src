@@ -1,0 +1,502 @@
+##############################
+#     FUNKCJE - GENERACJA    #
+##############################
+
+FUNCTIONS_HELP="$FUNCTIONS_HELP"
+
+# $1 - kompleksowy plik menu
+parse_menu_file() {
+	mkdir -p "$PAGE_DIR/$SITE_MAP_DIR"
+	echo -n "<head1>Mapa serwisu OpCode</head1><ul>" > "$PAGE_DIR/$SITE_MAP_DIR/body.xml"
+	:> "$PAGE_DIR/id_index"
+	
+	sed -f <(echo '
+		# obsluga ewentualnych pustych dir
+		s#<dir\([^>]*\)/>#<dir\1></dir>#g
+		
+		# odpowiednie ułożenie spacji przy argumentach podawanych do atrybutów znacznika
+		s#"# " #g
+		s#[ \n\t]*=[ \n\t]*"# =" #g
+		
+		# spacja po znaczniku otwierającym komentarz oraz po i przed zamykającym 
+		s#<!--#<!-- #g
+		s#--># --> #g
+		
+		# poprzedzenie zamykającego /> lub > spacją
+		s#\(/*\) *># \1>#g') "$1" | gawk -f $PARSE_MENU_AWK
+
+	echo "</ul>" >> "$PAGE_DIR/$SITE_MAP_DIR/body.xml"
+
+	# usunięcie pustych wpisów z mapy
+	while grep '<ul></ul>' "$PAGE_DIR/$SITE_MAP_DIR/body.xml" > /dev/null ; do
+		sed -f <(echo '
+			s#<ul></ul>##g
+			s#<li></li>##g
+		') "$PAGE_DIR/$SITE_MAP_DIR/body.xml" > "$PAGE_DIR/$SITE_MAP_DIR/body2.xhtml"
+		mv "$PAGE_DIR/$SITE_MAP_DIR/body2.xhtml" "$PAGE_DIR/$SITE_MAP_DIR/body.xml"
+	done
+}
+
+
+
+
+# funkcja przetwarzająca zadany przez $1 katalog powinien być określony ścieżką
+# względem $PAGE_DIR rozpoczynającą się od katalogu podrzędnego (nie od .)
+parse_xhtml_dir() {
+	echo -e "\\033[34mParse $1\\033[0m"
+	
+	# informacje dodatkowe włączonych dokumentów <file /> oraz przetwarzanego katalogu na podstawie menu.xml
+	use_menu=""; inhead=""; coauthors=""; copyright_add=""; years=""; multi_body=""
+	title=`basename $1`
+	if [ -f "$1/body.info" ] ; then
+		source "$1/body.info"
+		coauthors=`grep "coauthors" "$1/body.info" | cut -s -f2 -d"=" | sort | uniq`
+	fi
+	[ "$years" = "" ] && years="$STD_YEAR";
+	
+	# zapamiętanie danych dla nagłówka
+	header_title="$title"
+	header_inhead="$inhead"
+	header_use_menu="$use_menu"
+	if [ "$header_use_menu" != "STATIC" -a "$header_use_menu" != "DYNAMIC" ]; then
+		header_use_menu="$DEFAULT_MENU_MODE"
+	fi
+	header_art_menu="$art_menu"
+	
+	# zapamietanie danych dla stopki
+	footer_years="$STD_YEAR"
+	footer_coauthors="$coauthors"
+	footer_copyright_add="$copyright_add"
+	
+	# obsługa daty modyfikacji artykułu
+	footer_max_date=`grep "^time=" "$1/body.info" 2>/dev/null | cut -f2 -d= | sort -r | grep UTC | sed -n -e '1p'`
+	footer_max_date=${footer_max_date:-"?"}
+	
+	# znajdowanie pliku menu
+	if [ "$use_menu" != "NO" -a "$use_menu" != "NEVER" -a $OUT_MODE = "xhtml" ]; then
+		# gdy chcemy menu to sprawdzamy czy
+		if [ "$use_menu" = "SPECIAL" ]; then
+			# chcemy specjalnego
+			menu="$1/$use_menu_spec"
+		elif [ -f "$1/menu.xhtml" ]; then
+			# mamy standardowe w bierzącym katalogu
+			menu="$1/menu.xhtml"
+		else
+			# mamy standardowe w jakimś nadrzednym katalogu i nie ma tam use_menu ustawionego na NEVER*
+			for par_dir in ".." "../.." "../../.."; do
+				if test -f "$1/$par_dir/body.info" && egrep 'use_menu="?NEVER' "$1/$par_dir/body.info" > /dev/null; then
+					menu="no"
+					break;
+				elif [ -f "$1/$par_dir/menu.xhtml" ]; then
+					menu="$1/$par_dir/menu.xhtml"
+					break;
+				else
+					menu="no"
+				fi
+			done
+		fi
+	else
+		menu="no"
+	fi
+	
+	# ustalenie listy plików body.xml do przetworzenia
+	if [ "$multi_body" != "" ]; then
+		body_files="$multi_body"
+	elif [ -f "$1/body.xml" -o "$menu" != "no" ]; then
+		body_files="body.xml"
+	fi
+	
+	# tworzenie nagłówka menu
+	if [ "$menu" != "no" ] ; then
+		up_dir="$1"
+		menu_head="$title:</p>"
+		while [ "$up_dir" != "/" -a "$up_dir" != "." -a "$up_dir" != "" ] ; do
+			up_dir=`dirname "$up_dir"`
+			if [ -f "$up_dir/body.info" ] ; then
+				. "$up_dir/body.info"
+				if [ $up_dir != "" ]; then
+					menu_head="<a class=\"int\" href=\"[[!URL""PREFIX!]]/$up_dir/[[!URLPOSTFIX!]]\">$title</a> -&gt; $menu_head"
+				else
+					menu_head="<a class=\"int\" href=\"[[!URL""PREFIX!]]/[[!URLPOSTFIX!]]\">$title</a> -&gt; $menu_head"
+				fi
+			fi
+		done
+		menu_head="<p class=\"menu_path\">$menu_head"
+		
+		sed -e 's#</li><lisub>#<ul class="submenu_link">\n\t<li>#g' \
+		    -e 's#</lisub><li>#</li>\n</ul></li>\n<li>#g' \
+		    -e 's#</lisub><lisub>#</li>\n\t<li>#g' \
+		    -e 's#</lisub><lisubsub>#<ul class="subsubmenu_link">\n\t\t<li>#g' \
+		    -e 's#</lisubsub><lisub>#</li>\n\t</ul></li>\n\t<li>#g' \
+		    -e 's#</lisubsub><lisubsub>#</li>\n\t\t<li>#g' \
+		    -e 's#</lisubsub><li>#</li>\n\t</ul></li>\n</ul></li>\n<li>#g' -i $menu
+	else
+		menu_head="-"
+	fi
+	
+	# przygotowywanie menu artykułu
+	if [ "${header_art_menu:-0}" -ge "1" ]; then
+		# gdy istnieje plik z menu artykułu używamy go (wprowadzając pewne modyfikacje)
+		if [ -f "$1/art_menu.xhtml" ]; then
+			sed -i -e '1i<p class="art_menu">' -e 's#</a> <a #</a> :: <a #g' "$1/art_menu.xhtml"
+			echo '</p>' >> "$1/art_menu.xhtml"
+		# w przeciwnym razie generujemy go z pliku z treścią artykułu
+		elif [ -f "$1/body.xml" ]; then
+			echo -n '<p class="art_menu">' >> "$1/art_menu.xhtml"
+			
+			tr '\n' ' ' < "$1/body.xml" | sed 's#<head[0-9] id="\([^<>"]*\)">\([^<>]*\)</\(head[0-9]\)>#\n<art_menu>\1<art_menu>\2<art_menu>\3<art_menu>\n#g' | awk '
+				BEGIN {FS="<art_menu>"; separator="";}
+				$2=="" {next}
+				$4=="head1" {
+					printf("%s<a href=\"#%s\" class=\"art_menu1\">%s</a>", separator, $2, $3);
+					separator=" :: ";
+				}
+				$4=="head2" {
+					printf("%s<a href=\"#%s\" class=\"art_menu2\">%s</a>", separator, $2, $3);
+					separator=" :: ";
+				}
+				$4=="head3" {
+					printf("%s<a href=\"#%s\" class=\"art_menu3\">%s</a>", separator, $2, $3);
+					separator=" :: ";
+				}
+			' >>  "$1/art_menu.xhtml"
+			
+			echo '</p>' >> "$1/art_menu.xhtml"
+		fi
+	# gdy wyłączone czyścimy ewentualne śmieci w art_menu.xhtml
+	else
+		:> "$1/art_menu.xhtml"
+	fi
+	
+	# gdy są standardowe dokumenty do przetworzenia to dla każdego z nich
+	[ "$body_files" != "" ] && for body_file in $body_files; do
+		if [ ! -e "$1/$body_file" -a "$menu" = "no" ]; then
+			continue
+		fi
+		
+		# ustalamy nazwę pliku wyjściowego
+		out_file=`expr $body_file : 'body[.]\(.*[.]\)xml'`
+		out_file="${out_file}index"
+		
+		# wstawiamy naglowek dokumentu
+		if [ "$header_use_menu" = "STATIC" ]; then
+			std_xhtml_header "$header_title" "[[!URL""PREFIX!]]" "static" "$header_inhead" > "$TMP_DIR/page.base.xhtml"
+		else
+			std_xhtml_header "$header_title" "[[!URL""PREFIX!]]" "dynamic" "$header_inhead" > "$TMP_DIR/page.base.xhtml"
+		fi
+		
+		# wstawiamy menu artykulu
+		[ -f "$1/art_menu.xhtml" ] && cat "$1/art_menu.xhtml" >> "$TMP_DIR/page.base.xhtml"
+		
+		# wstawiamy artykul
+		if [ -f "$1/$body_file" ] ; then
+			pushd "$1" > /dev/null
+			xml2view "$body_file" >> "$TMP_DIR/page.base.xhtml" || mv -n "$body_file" "$body_file.error.bck"
+			popd > /dev/null
+		fi
+		
+		# wstawiamy stopke wraz z menu
+		std_xhtml_fotter "$1" "$footer_max_date" "$menu" "$menu_head" "[[!URL""PREFIX!]]" \
+			"$footer_years" "$footer_coauthors" "$footer_copyright_add" >> "$TMP_DIR/page.base.xhtml"
+		
+		#
+		# w tym momęcie mamy poprawny XHTML ale zawierający [[!URL''PREFIX!]] i [[!URL''POSTFIX!]]
+		# które będą służyły do generacji wariantów strony
+		#
+		# znaki '' (lub "") w powyzszych napisach zostały wprowadzone w treści skryptu aby napisy te
+		# nie były podmieniane w trakcie generacji stron prezentujących kod silnika
+		#
+		
+		URL_PREFIX=`revpath $1`
+		if [ "$URL_PREFIX" = "" ]; then
+			URL_PREFIX="."
+		fi
+		URL_PREFIX="$BASE_URL_PREFIX$URL_PREFIX"
+		
+		sed \
+			-e '# wstawienie prefiku URL zamiast stałej napisowej URLPREFIX
+				s#\[\[!URLPREFIX!\]\]#'"$URL_PREFIX"'#g' \
+			-e '# wstawienie nazwy pliku xhtml zamiast stałej napisowej URLPOSTFIX dla katalogów mających wiele plików NUM.page.xhtml
+				s#[.]\[\[!URLPOSTFIX!\]\]#'.index.xhtml'#g' \
+			-e '# wstawienie nazwy pliku xhtml zamiast stałej napisowej URLPOSTFIX dla pozostałych linków
+				s#\[\[!URLPOSTFIX!\]\]#'"$LINK_PAGE_FILE"'#g' "$TMP_DIR/page.base.xhtml" > "$1/$out_file.xhtml"
+		
+# 		# podstawowy wariant (linkowanie absolutne do katalogu)
+# 		sed \
+# 			-e '# wstawienie prefiku URL zamiast stałej napisowej URLPREFIX
+# 				s#\[\[!URLPREFIX!\]\]#'"$BASE_URL_PREFIX"'#g' \
+# 			-e '# wstawienie nazwy pliku xhtml zamiast stałej napisowej URLPOSTFIX dla katalogów mających wiele plików NUM.page.xhtml
+# 				s#[.]\[\[!URLPOSTFIX!\]\]#'.page.xhtml'#g' \
+# 			-e '# wstawienie nazwy pliku xhtml zamiast stałej napisowej URLPOSTFIX dla pozostałych linków
+# 				s#\[\[!URLPOSTFIX!\]\]#'"$LINK_PAGE_FILE"'#g' "$TMP_DIR/page.base.xhtml" > "$1/$out_file.xhtml"
+# 		
+# 		# inne warianty - linkowana względnie
+# 		URL_PREFIX=`revpath $1`
+# 		if [ "$URL_PREFIX" = "" ]; then
+# 			URL_PREFIX="."
+# 		fi
+# 		URL_PREFIX="$BASE_URL_PREFIX$URL_PREFIX"
+# 		sed -i -e '# dodanie blokady robotów
+# 				s#<title>#<meta name="robots" content="noindex, nofollow" /><title>#g' \
+# 			-e '# wstawienie prefiku URL zamiast stałej napisowej URLPREFIX
+# 				s#\[\[!URLPREFIX!\]\]#'"$URL_PREFIX"'#g' "$TMP_DIR/page.base.xhtml"
+# 		
+# 		# wersja offline
+# 		sed \
+# 			-e '# wstawienie nazwy pliku xhtml zamiast stałej napisowej URLPOSTFIX
+# 				s#\[\[!URLPOSTFIX!\]\]#page.OFFLINE.xhtml#g' \
+# 				"$TMP_DIR/page.base.xhtml" > "$1/$out_file.OFFLINE.xhtml"
+# 		
+# 
+# 		# ascii
+# 		konwert UTF8-ascii "$TMP_DIR/page.base.xhtml" | 
+# 			sed  \
+# 			-e '# wstawienie nazwy pliku xhtml zamiast stałej napisowej URLPOSTFIX
+# 				s#\[\[!URLPOSTFIX!\]\]#page.ASCII.xhtml#g' \
+# 			-e '# podmiana kodowania w nagłówku <meta />
+# 				s#<meta \([^<>]*\) charset=utf-8" />#<meta \1 charset=ascii" />#g' > "$1/$out_file.ASCII.xhtml"
+# 
+# 		# z statycznym menu
+# 		#sed \
+# 		#	-e '# wstawienie nazwy pliku xhtml zamiast stałej napisowej URLPOSTFIX
+# 		#		s#\[\[!URLPOSTFIX!\]\]#page.STATIC-MENU.xhtml#g' \
+#  		#	-e '# podmiana css na statyczne menu
+# 		#		s#\(<link[^>]*layout\)_dynamic[.]\(css[^>]*>\)#\1_static.\2#g' \
+# 		#		"$TMP_DIR/page.base.xhtml" > "$1/$out_file.STATIC-MENU.xhtml"
+	done
+	unset out_file body_file body_files menu menu_head header_art_menu\
+		header_title title header_inhead inhead header_use_menu use_menu \
+		footer_years footer_coauthors coauthors footer_copyright_add copyright_add
+	
+	# gdy jest README.xhtml katalogu notar
+	if [ -f "$1/README.notar.xhtml" ]; then
+		URL_PREFIX="$BASE_URL_PREFIX$notar_url_prefix"
+
+		sed 's#<a href="\([^"]*\)">\([^<>]*\)</a>#<a href="'"$URL_PREFIX"'/\1">'"$URL_PREFIX"'/\2</a>#g' \
+			"$1/README.notar.xhtml" > "$1/README.xhtml"
+		rm "$1/README.notar.xhtml"
+	fi
+	
+	# generowanie obiektów tworzonych dynamicznie ze źródeł
+	make_objects $1
+}
+
+
+
+# funkcja buduje plik latex z podanego w $1 katalogu
+parse_latex_dir() {
+	pushd "$1" > /dev/null
+	
+	# uzyskujemy informacje dla stopki z body.info
+	coauthors=""
+	copyright_add=""
+	# informacje dodatkowe włączonych dokumentów <file /> oraz przetwarzanego katalogu na podstawie menu.xml
+	if [ -f "./body.info" ] ; then
+		coauthors=`grep "coauthors" "./body.info" | cut -s -f2 -d"=" | sort | uniq`
+	fi
+	years="$STD_YEAR"
+	
+	# generujemy plik page.tex
+	std_latex_header > "page.tex"
+	xml2view "body.xml" | sed -e 's#&gt;#>#g' -e 's#&lt;#<#g' -e 's#&amp;#\&#g' \
+		-e '# wstawienie prefiku URL zamiast stałej napisowej URLPREFIX
+			s#\[\[!URLPREFIX!\]\]#'"$URL_PREFIX"'#g' \
+		-e '# wstawienie nazwy pliku xhtml zamiast stałej napisowej URLPOSTFIX
+			s#\[\[!URLPOSTFIX!\]\]#'"$LINK_PAGE_FILE"'#g' >> "page.tex"
+	std_latex_fotter "$years" "$coauthors" "$copyright_add" >> "page.tex"
+	
+	# generujemy obiekty tworzone dynamicznie ze źródeł
+	make_objects .
+	
+	popd > /dev/null
+}
+
+
+
+# funkcja budująca drzewo wynikowe lub generująca wersję latex i pdf
+#  (w zależności od zmiennej OUT_MODE)
+# $1 == menu.xml
+build_out_tree() {
+	# funkcja wspomagająca pdflatex w tworzeniu zakładek pdf'owych
+	# jako $1 przyjmuje wychodzący z pdflatex plik .out
+	correct_hierarhy_in_pdf_bookmark() {
+		mv $1 $1.old
+		awk '
+		BEGIN {
+			FS="[{}]"
+			types["chapter"]=0
+			types["section"]=1
+			types["subsection"]=2
+			types["subsubsection"]=3
+		}
+		# ustalamy typ rekordu bierzącego i typ podawanego mu rodzica
+		{
+			rtype=gensub("[*.].*", "", "g", $2)
+			ptype=gensub("[*.].*", "", "g", $6)
+		}
+		# jeżeli bierzący rekord obniżył się gwałtownie w hierarchi to zapamiętujemy jego rodzica
+		types[ptype] < types[rtype]-1 {parent=$6}
+		
+		# jeżeli rodzić rakordu jest tego samego typu co rekord to rodzica zastepujemy zapamiętanym
+		rtype == ptype {
+			printf("%s{%s}{%s}{%s}\n", $1, $2, $4, parent)
+			next
+		}
+		# w przeciwnym razie przepisujemy bez zmian
+		{
+			print $0
+		}
+		' < $1.old > $1
+	}
+	
+	mkdir -p "$PAGE_DIR"
+	mkdir -p "$CACHE_DIR"
+	
+	cd "$TMP_DIR"
+	:> "$TMP_DIR/todo_links.xml"
+	case $OUT_MODE in
+		"xhtml"*)
+			# wygenerowanie styli highlight
+			echo "" | highlight --out-format=xhtml -S c > /dev/null
+			mv highlight.css "$PAGE_DIR"
+			
+			
+			# zbudowanie struktury strony body.xml zgodnie z menu.xml
+			cd "$SRC_DIR"
+			parse_menu_file "$1"
+			
+			# przetwarzanie body.xml na page.xhtml w każdym z katalogów strony
+			cd "$PAGE_DIR"
+			find * -type d | grep -v "^~" |
+			while read katalog; do 
+				parse_xhtml_dir "$katalog"
+			done
+			parse_xhtml_dir .
+			
+			# sprzątanie ...
+			if $REMOVE_XML; then
+				echo -e "\\033[34mCleaning up output directory\\033[0m"
+				find "$PAGE_DIR" -name "page.base.xhtml" -o -name "*menu.xhtml" -o -name "body.info" -o -name "body*.xml" |
+					while read f ; do rm -f "$f" ; done
+			else
+				echo "WARNING: -V is set - we DON'T remove: page.base.xhtml body*.xml, body.info, menu.xhtml, and art_menu.xhtml from out tree"
+			fi
+			
+			# utworzenie dolinkowania do ~DOWNLOAD
+			#ln -s "$DOWNLOAD_DIR" "~DOWNLOAD"
+			;;
+		"latex"*)
+			# wygenerowanie styli highlight
+			echo "" | highlight --out-format=latex -S c > /dev/null
+			grep -e '\definecolor' -e '\newcommand' highlight.sty > "$PAGE_DIR/highlight.sty"
+			
+			# przygotowanie wersji menu.xml dla pdf'owanej wersji strony
+			# remove <* pdf="no>
+			# replace <pdf-text> by <text>
+			grep -v -e 'pdf="no"' -e '<tar' -e '<addtar' "$1" |
+				sed -e 's#pdf-text>#text>#g' > "$TMP_DIR/OpCode_menu-PDF.xml"
+			
+			
+			# zbudowanie zbiorczego body.xml zgodnie z zmodyfikowanym menu.xml
+			cd "$SRC_DIR"
+			parse_menu_file "$TMP_DIR/OpCode_menu-PDF.xml"
+			
+			# zbudowanie zbiorczego page.tex i plików pomocniczych
+			cd "$PAGE_DIR"
+			URL_PREFIX="$PAGE_URL$BASE_URL_PREFIX"
+			parse_latex_dir "."
+			
+			# wykonywanie pdflatex
+			echo -e "\\033[34mGenerate pdf file\\033[0m"
+			if  [ "$OUT_MODE" != "latex-nopdf" ]; then
+				echo
+				echo "In case LaTeX error install Debian packages:"
+				echo "       texlive-luatex texlive-xetex texlive-latex-recommended texlive-generic-recommended"
+				echo "       fonts-lmodern texlive-fonts-recommended texlive-lang-polish fonts-linuxlibertine"
+				lualatex page.tex
+				echo
+				echo "Powtorna generacja pdf - w celu uzyskania spisu tresci:"
+				echo "  lualatex -interaction scrollmode page.tex"
+				if  [ "$OUT_MODE" != "latex-onepdf" ]; then
+					sleep 0.1
+					correct_hierarhy_in_pdf_bookmark page.out
+					lualatex -interaction scrollmode page.tex > /dev/null
+					correct_hierarhy_in_pdf_bookmark page.out
+					lualatex -interaction scrollmode page.tex > /dev/null
+				fi
+			fi
+			;;
+	esac
+}
+
+# generacja katalogu ~DOWNLOAD, w tym:
+#  * archiwum tar.gz z wersjami źródłowymi strony
+#  * paczek *.deb
+build_download_dir() {
+	# tworzenie strony ~DOWNLOAD
+	rm -fr "$DOWNLOAD_DIR"
+	mkdir -p "$DOWNLOAD_DIR"
+	
+	if [ "$DOWNLOAD_README_1" != "" ]; then
+		:> "$DOWNLOAD_DIR/README.xhtml"
+		echo "$DOWNLOAD_README_1<ul>" >> "$DOWNLOAD_DIR/README.xhtml"
+		
+		for p in $NO_TAR_LINK; do
+			echo "<li><a href=\"$URL_PREFIX$p\">$p</a></li>" >> "$DOWNLOAD_DIR/README.xhtml"
+		done
+		
+		echo "</ul>$DOWNLOAD_README_2" >> "$DOWNLOAD_DIR/README.xhtml"
+	fi
+
+	if [ "$SOURCE_ARCHIVE_NAME" != "" ]; then
+		# tworzenie archiwum tar z źródłami strony
+		cd "$SRC_DIR"
+		for p in $NO_TAR; do
+			NEW_NO_TAR="$NEW_NO_TAR --exclude=$p"
+		done
+		tar -czh --exclude="*/.git" --exclude="*/ARCHIVE/*" --exclude="*/PHOTO/*" $NEW_NO_TAR -f "$DOWNLOAD_DIR/$SOURCE_ARCHIVE_NAME" .
+	fi
+
+	if [ "$OFFLINE_ARCHIVE_NAME" != "" ]; then
+		# tworzenie archiwum tar z wersją off-line strony
+		cd "$PAGE_DIR"
+		tar -czh --exclude="*/.git" --exclude="*$PHOTO_DIR*" --exclude="*/archiwum/*" --exclude="*~DOWNLOAD*" --exclude="*MIRRORS*" \
+			-f "$DOWNLOAD_DIR/$OFFLINE_ARCHIVE_NAME" .
+	fi
+
+	cd "$TMP_DIR"
+	
+	# budowanie PDFów
+	echo "$MAKE_PDF" | while read path num; do
+		path=`expr "$path" : '[ \t]*\(.*\)'`
+		
+		if [ -f "$PAGE_DIR/$path" ]; then
+			basename=`basename "$PAGE_DIR/$path"`
+			basename=${basename%.tex}
+			
+			for f in `seq 1 ${num:-1}`; do
+				pdflatex "$PAGE_DIR/$path"
+			done
+			
+			mv $basename.pdf "$DOWNLOAD_DIR"
+		fi
+	done
+	
+	# budowanie DEBów
+	for p in $MAKE_DEB; do
+		basename=`basename "$PAGE_DIR/$p"`
+		basename=${basename%.*}
+		version="1.0.`date +"%Y%m%dT%H%M%S"`"
+		
+		tar -xzf "$PAGE_DIR/$p"
+		
+		pushd $basename > /dev/null
+		debchange -v $version "auto build"
+		dpkg-buildpackage -rfakeroot
+		popd > /dev/null
+		
+		mv ${basename}_${version}_*.deb "$DOWNLOAD_DIR/${basename}.deb"
+		rm -fr $basename ${basename}_${version}*
+	done
+}
+

@@ -1,0 +1,65 @@
+<?php
+/**
+	System prezentacji zasobów DIROP na WWW
+	
+	plik definujący stałe i zmienne konfiguracyjne oraz urucjhamiający system
+	url właśnie tego pliku podawany jest w DIROP_SCRIPT_PATH i poprzedzqa ścieżki zasobów
+	
+	celem umożliwienia działania na pojedyńczym systemie wielu systemów tego typu
+	plik ten może występować w wielu warianatch konfiguracyjnych dla jednenej kopi reszty kodu
+**/
+
+/** SYSTEM TODO
+	- znaczniki todo fixme
+	- rezygnacja z generacji spisów w oparciu o content_id w tabeli page
+**/
+
+
+/// Debugowanie
+ini_set('display_errors', 'On' );
+ini_set('error_reporting', E_ALL);
+//ini_set('error_reporting', E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR);
+$debug = true;
+
+ini_set( 'display_errors', 'Off' );
+$debug = false;
+
+$system_message = '<p style="color:gray">Podstawowym adresem systemu jest <a href="http://dir.icm.edu.pl/pl/">http://dir.icm.edu.pl/pl/</a>.</p>';
+
+
+/// stałe konfiguracyjne
+
+// łączenie się z bazą danych
+define('CONNECTION_STRING', 'host=localhost port=62108 dbname=dirop user=diropusr');
+// URL katalogu z prezentowanymi skanami
+define('IMG_PATH_PREFIX', '/pages');
+
+// URL tego pliku - poprzedza ściezki wykorzystywane w systemie
+define('DIROP_SCRIPT_PATH', '/pl');
+// ścieżka katalogu w którym umieszczony jest system
+define('DIROP_INCLUDE_DIR_PATH', '/opt/www/dirw/dirop2.6/');
+// URL katalogu w którym zainstalowany jest system
+define('DIROP_LINK_DIR_PATH', '/dirop2.6/');
+// URL serwera na którym zainstalowany jest system
+define('DIROP_FULL_URL_PREFIX', 'http://dir.icm.edu.pl');
+// długość śieżki bazowej (ilość członów pomiędzy / które trafiają do skryptu)
+$BASE_PATH_LEN=1;
+// skrypt można wywoływać z samego vhosta (DIROP_SCRIPT_PATH puste):
+// 	RewriteEngine On
+// 	RewriteRule ^/img_css_and_js/.*$ - [L]
+// 	RewriteRule ^/pages/.*$ - [L]
+// 	RewriteRule ^/.*$ /index-vhost.php [L]
+
+// adres e-mail do osoby odpowiedzialnej za system
+//define('DIROP_CONTACT_EMAIL', 'info@dir.edu.pl');
+define('DIROP_CONTACT_EMAIL', 'rrp@icm.edu.pl');
+define('DIROP_ERROR_EMAIL', 'rrp@icm.edu.pl');
+$auto_send_500_error = false;
+
+define('STATISTIC_SCRIPT', '');
+
+/// włączenie głównego pliku systemu
+
+include(DIROP_INCLUDE_DIR_PATH . "startup.php");
+
+?>

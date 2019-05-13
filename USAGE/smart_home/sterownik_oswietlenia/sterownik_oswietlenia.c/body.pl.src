@@ -1,0 +1,229 @@
+/*
+ * program sterownika oświetlenia z funkcją zdalnego sterowania poprzez UART
+ * z użyciem protokołu MODBUS RTU dla mikrokontrolera Atmega8
+ *
+ * wymaga plików odpowiedzialnych za obsługę komunikacji modbus
+ * (z użyciem FreeMODBUS) i budowę całości projektu z:
+ * http://opcode.eu.org/usage_and_config/toolbox4electronic/libs4avr/
+ *
+ * kompilacja i wgranie przez ISP z użyciem USBasp:
+ *  make sterownik_oswietlenia flash
+ *
+ * konfiguracja układu na zewnętrzny kwarc 3-8MHz
+ *  sudo avrdude -c usbasp -p m8 -U lfuse:w:0xef:m
+ */
+
+#include "modbus.c"
+
+#define VERSION        0x0015
+#define SLAVE_ADDR     0x0C
+#define SLAVE_BASE_REG 0x0010
+#define SLAVE_NUM_REG  9
+
+#define ON_DELAY 16
+
+// otput lines status
+volatile uint16_t  status[SLAVE_NUM_REG];
+
+// pwm counters
+volatile uint8_t   counters[4];
+
+// led counter
+volatile uint16_t  led_cnt;
+
+
+int main( void ) {
+	led_cnt = 0;
+	counters[0] = 0;
+	counters[1] = 0;
+	counters[2] = 0;
+	counters[3] = 0;
+	
+	status[0] = 0;
+	status[1] = 0;
+	status[2] = 0;
+	status[3] = 0;
+	
+	status[4] = 0;
+	status[5] = 0;
+	status[6] = 0;
+	status[7] = 0;
+	
+	status[8] = 0xff;
+	
+	DDRB = 0xfc; // PB0, PB1 input
+	PORTB = 0;
+	DDRC = 0xcf; // PC4, PC5 input
+	PORTC = 0;
+	DDRD = 0xf3; // PD2, PD3 input
+	PORTD = 0;
+	
+	/*
+	// interrupt from PD2 (int0)
+	GIMSK = (1 << INT0);
+	MCUCR = (1 << ISC00) | (1 << ISC01);
+	// reagujemy na zbocze narastajace, a nie opadajace (1 << ISC01) i czekamy chwile w procedurze obslugi przerwania
+	*/
+	
+	// counter - 15k ticks per second == 150 ticks per pwm period  (for F_CPU ~= 3MHz)
+	TCNT1 = 0x0000;
+	TIMSK |= _BV( OCIE1A ); // enable interrupt from this timer
+	OCR1A = 3;
+	TCCR1B = _BV( CS10 ) | _BV( CS11 ); // timer ticks = F_CPU / 64
+
+	// modbus
+	eMBInit( MB_RTU, SLAVE_ADDR, 0, 9600, MB_PAR_NONE );
+	sei();
+	eMBEnable(  );
+	
+	while(1) {
+		eMBPoll();
+	}
+}
+
+// PWM counter (step) interrupt  +  softwere detect zero-cross (and reinit PWM)
+ISR(TIMER1_COMPA_vect, ISR_NOBLOCK) {
+	uint8_t i, zero_cross_status, zero_cross_mask;
+	
+	PORTB |= ( _BV( PB5 ) ); // for debuging
+	
+	// programowa detekcja zbocza narastającego na pinach detekcji zera
+	// nie używamy sprżetowego gdyż mamy tylko 2 a potrzebujemy 4
+	// a ciężko zsumować te sygnały do jednego sygnału podłączonego do int0
+	// (problem jest to że w przypadku braku zasilania cały czas mamy wykrywane zero ...)
+	zero_cross_status = ((PINB & 0x03) << 2) | ((PINC & 0x30) >> 4);
+	zero_cross_mask = (status[8] ^ zero_cross_status) & zero_cross_status;
+		// interesuje nas zmiana w wyniku której mamy stan wysoki
+	if (zero_cross_mask) {
+		PORTB |= ( _BV( PB3 ) ); // for debuging
+		for (i=0; i<4; i++) {
+			if (zero_cross_mask & (1 << i)) {
+				if (status[i] == 1) {
+					// ON
+					PORTC |= ( 1 << i );
+					counters[i] = 0;
+				} else if (status[i] == 0) {
+					// OFF
+					PORTC &= ~( 1 << i );
+					counters[i] = 0;
+				} else {
+					// start/init PWM coundown
+					counters[i] = status[i];
+				}
+			}
+		}
+		PORTB &= ~( _BV( PB3 ) ); // for debuging
+	}
+	status[8] = zero_cross_status;
+	
+	
+	// obsługa ściemniacza
+	for (i=0; i<4; i++) {
+		if (counters[i] > 2) {
+			counters[i]--;
+		} else if (counters[i] == 2) {
+			// ON
+			PORTC |= ( 1 << i );
+			counters[i] = 1;
+		} else if (counters[i] == 1) {
+			// OFF
+			PORTC &= ~( 1 << i );
+			counters[i] = 0;
+		}
+	}
+	
+	// obsługa diody sygnalizującej pracę
+	led_cnt++;
+	if (led_cnt == 15625) {
+		// LED off
+		PORTB &= ~( _BV( PB4 ) );
+	} else if (led_cnt == 31250) {
+		// LED on
+		PORTB |= ( _BV( PB4 ) );
+		// restart LED counter
+		led_cnt = 0;
+	}
+	
+	// reste timera
+	TCNT1 = 0x0000;
+	
+	PORTB &= ~( _BV( PB5 ) ); // for debuging
+
+	/*
+	 *  - sygnał z IL250 trwa 1.7ms - 1.88ms
+	 *  - stabilne załączenie triakaokoło 2.38ms (niestabilne ~2.14ms)
+	 *  - detekcja zera po 200us, 250us, 280us (przy napięciu: 1.9V, 2.2V, 2.5V)
+	 *  - przerwanie zegarowe co ~100us + czas obsługin przerwania:
+	 *  	- krótkiego ~50us
+	 *  	- długiego ~100us (detekcja zera)
+	 *  - szczyt (zero) po ~860us po początku sygnału (~600-660us po detekcji zera)
+	 */
+}
+
+/*
+// PWM zero-cross (reinit) interrupt
+SIGNAL( INT0_vect ) {
+	uint8_t i;
+	
+	status[8] = ((PINB & 0x03) << 2) | ((PINC & 0x30) >> 4);
+	
+	for (i=0; i<4; i++) {
+		if (status[8] & (1 << i)) {
+			if (status[i] == 1) {
+				// ON
+				PORTC |= ( 1 << i );
+				counters[i] = 0;
+			} else if (status[i] == 0) {
+				// OFF
+				PORTC &= ~( 1 << i );
+				counters[i] = 0;
+			} else {
+				// start/init PWM coundown
+				counters[i] = status[i];
+			}
+		}
+	}
+}
+*/
+
+// modbus read/write callback
+eMBErrorCode eMBRegHoldingCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs, eMBRegisterMode eMode ) {
+	// zapytanie dotyczy usNRegs rejestrów począwszy od rejestru usAddress
+	int8_t line = usAddress - SLAVE_BASE_REG - 1;
+	int8_t eline = line + usNRegs;
+	
+	if (eMode == MB_REG_READ) {
+		if (line >= 0 && eline <= SLAVE_NUM_REG) {
+			for (; line< eline; line++) {
+				*pucRegBuffer++ = status[line] >> 8;
+				*pucRegBuffer++ = status[line] & 0xff;
+			}
+			return MB_ENOERR;
+		} else if (usAddress == 0xf0ff) {
+			*pucRegBuffer++ = VERSION >> 8;
+			*pucRegBuffer++ = VERSION & 0xff;
+			return MB_ENOERR;
+		}
+	} else if (eMode == MB_REG_WRITE) {
+		if (line < 8) {
+			status[line] = *pucRegBuffer++ << 8;
+			status[line] |= *pucRegBuffer++;
+			
+			if (line < 4 && status[line] > 1)
+				status[line] += ON_DELAY;
+			
+			// sterowanie liniami on/off
+			if (line > 3) {
+				if (status[line] == 0) {
+					// OFF
+					PORTD &= ~( 1 << line );
+				} else {
+					// ON
+					PORTD |= ( 1 << line );
+				}
+			}
+			return MB_ENOERR;
+		}
+	}
+	return MB_ENOREG;
+}

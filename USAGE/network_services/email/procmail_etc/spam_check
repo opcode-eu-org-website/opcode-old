@@ -1,0 +1,7 @@
+:0 fw: spamassassin.lock
+* < 200000
+| /usr/bin/spamc
+
+# w celu oznaczania wiadomości jako spam poprzez zmianę tematu
+# należy w ~/.spamassassin/user_prefs ustawić: rewrite_subject  0
+

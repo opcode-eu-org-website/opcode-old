@@ -1,0 +1,20 @@
+<article>
+<title>SSH, scp, sftp</title>
+<p>Składnia poleceń SSH: <br />
+	<code>ssh użytkownik@serwer</code> (następnie akceptujemy klucz kodowania (przy pierwszym połączeniu) i podajemy hasło) lub <code>ssh serwer</code> (następnie podajemy nazwę użytkownika, akceptujemy klucz kodowania (przy pierwszym połączeniu) i podajemy hasło)<br />
+	<code>scp ścieżka-źródła ścieżka-celu</code> lub <code>scp -r ścieżka-źródła ścieżka-celu</code> (pozwala na rekurencyjne kopiowanie katalogów), gdzie ścieżka oznacza ścieżkę lokalną lub użytkownik@serwer: ścieżka-na-serwerze (następnie również akceptujemy klucz kodowania (przy pierwszym połączeniu) i podajemy hasło)<br />
+	<code>sftp</code>
+</p>
+
+<p>Przy pomocy ssh (bez scp) tez da się przesyłać pliki (w przypadku dużej ilości plików jest to metoda wydajniejsza, którą możemy także łatwo wzbogacić o kompresję):</p>
+<ul>
+	<li>na host zdalny:  <code>tar cf - <var>pliki do przeslania</var> | ssh <var>user@host</var> 'cd <var>katalog/docelowy</var>; tar xf -'</code></li>
+	<li>z hosta zdalnego:  <code>ssh <var>user@host</var> 'cd <var>katalog/docelowy</var>; tar cf - <var>pliki do przeslania</var>' | tar xf -</code></li>
+</ul>
+
+<p>W przypadku gdy chcemy bezpośrednio poprzez ssh wywołać jakąś komendę interaktywną po zdalnej stronie (bez odpalania shell'a przydatna może być opcja <code>-t</code> wymuszająca utworzenie wirtualnego terminala - dzięki niej zadziała poprawnie <code>ssh 'sudo bash'</code> itp komendy.</p>
+
+<p>W <kbd class="path">~/.ssh/config</kbd> możemy definiować skrócone nazwy dla hostów wraz z określeniem opcji używanych przy logowaniu (np. port, użytkownik). Ponadto nazwy hostów podane w tym pliku będą rozwijane w ramach pakietu "bash_completion" poprzez tab. Dodanie do tego pliku <code>HashKnownHosts no</code> powoduje że nazwy hostów w <kbd class="path">~/.ssh/known_hosts</kbd> będą zapisywane w sposób jawny i również będą autouzupełniane przez "bash_completion".</p>
+
+<p>W przypadku systemów Windows konieczna jest instalacja programów "Putty" (do połączeń SSH, tekstowe programy scp, sftp dostarczane z Putty noszą nazwy pscp i psftp) i/lub WinSCP (graficzny interfejs do SCP) i/lub "ssh secure shell client" (terminal SSH i graficzny interfejs do SFTP).</p>
+</article>

@@ -1,0 +1,77 @@
+/*
+ * plik ma na celu prezentację ciekawych zagadnień z programowania w języku C / C++
+ * prezentuje korzystanie z pliku /dev/dsp oraz serwera dźwiękowego arts,
+ *
+ * kompilacja: gcc `artsc-config --cflags` `artsc-config --libs` dsp1.c
+ *
+ * praktycznym wykorzystaniem tego programu jest implementacja pętli pomiędzy
+ * wejściem liniowym a wyjściem głośnikowym w karcie dźwiękowej opartej o ICH6 + CMI9880
+ *
+ * pierwotna wersja tego programu była tylko prostą modyfikacja programu obrazującego
+ * korzystanie z /dev/dsp - parrot.c ( ftp://adlib.rsch.tuis.ac.jp/pub/Linux/multi_media_guide/ )
+ * obecnie kod programu został całkowicie przepisany oraz wzbogacony o obsługę serwera dźwięku arts
+ *
+ * więcej o arts: http://www.arts-project.org/doc/mcop-doc/artsc.html
+ *
+ */
+
+#include <linux/soundcard.h>
+#include <kde/artsc/artsc.h>
+
+#include <stdlib.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <errno.h>
+
+#define SAMPLE_PER_SECOND 48000
+#define SAMPLE_SIZE 16
+#define CHANNELS 2
+
+int tmp;
+
+int main() {
+	
+	/// inicjalizacja arts
+	arts_init();
+	arts_stream_t arts_stream = arts_play_stream( SAMPLE_PER_SECOND, SAMPLE_SIZE, CHANNELS, "arts_dsp_copy" );
+	arts_stream_set( arts_stream, ARTS_P_BUFFER_TIME, 50 );
+	    // bufor na 50 ms gdyby nie bylo tej instrukcji to byloby duze opoznienie
+	arts_stream_set( arts_stream, ARTS_P_BLOCKING, 0 );
+	int packet_size = arts_stream_get( arts_stream, ARTS_P_PACKET_SIZE );
+	
+	/// bufor
+	char * buf;
+	buf = malloc(packet_size);
+	
+	/// otwarcie /dev/dsp do odczytu
+	int source_d = open("/dev/dsp", O_RDONLY);
+	if (source_d < 0) {
+		fprintf(stderr, "%s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+	
+	/// konfiguracja /dev/dsp
+	// funkcja ioctl w przypadku bledu zwraca < 0 i ustawia errno
+	// ale dla uproszczenia nie obsługuję tu tych błedów
+	tmp = SAMPLE_PER_SECOND;
+	ioctl(source_d, SOUND_PCM_WRITE_RATE, &tmp);
+	tmp = SAMPLE_SIZE;
+	ioctl(source_d, SOUND_PCM_WRITE_BITS, &tmp);
+	tmp = CHANNELS;
+	ioctl(source_d, SOUND_PCM_WRITE_CHANNELS, &tmp);
+	
+	/// pętla kopiująca
+	while (1) {
+		tmp = read(source_d, buf, packet_size);
+		arts_write(arts_stream, buf, tmp);
+		// kiedys program ten zapisywal tutaj do /dev/dsp zamiast do arts ...
+	}
+	
+	/// zakanczanie programu
+	// w zasadzie to to powinno byc w obsludze sygnalu SIGINT (Ctrl+C) i SIGTERM (program kill bez opcji)
+	// ale i tak przy zakonczeniu to zostanie zwolnione ...
+	close(source_d);
+	arts_close_stream( arts_stream );
+	arts_free();
+	free(buf);
+}

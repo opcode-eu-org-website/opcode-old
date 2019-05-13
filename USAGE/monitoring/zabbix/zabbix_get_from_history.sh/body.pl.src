@@ -1,0 +1,14 @@
+#!/bin/bash
+
+USER=zabbix
+PASSWORD=secret
+DATABASE=zabbix
+
+if [ $# -ne 2 ]; then
+	echo "USAGE: $0 hostname item.key"
+	exit
+fi
+
+echo "SELECT v.value FROM hosts h JOIN items i JOIN history v ON
+	(i.hostid=h.hostid AND v.itemid = i.itemid AND v.clock = i.lastclock AND h.host='$1' AND i.key_='$2');" |
+	mysql -u$USER -p$PASSWORD $DATABASE | tail -n1 

@@ -1,0 +1,29 @@
+// kontrola jednorazowego wczytywania
+#ifndef _MYWINDOW_H
+#define _MYWINDOW_H
+
+	/* teraz to co naprawde istotne ... */
+	
+	// wczytujemy nagłówki dla elementow beos'owego GUI
+	#include <InterfaceKit.h>
+
+	#define MSG_PRZYSISK_1 'CONV'
+	#define MSG_SELECT_1 'SS1'
+	#define MSG_SELECT_2 'SS2'
+	
+	// deklarujemy to z czego bedziemy korzystac w wlasciwym pliku - MyWindow.cpp
+	class MyWindow : public BWindow
+	{
+		public:		// publics functions
+			MyWindow(BRect frame,const char *title,window_look look,
+				window_feel feel,uint32 flags,uint32 workspace = B_CURRENT_WORKSPACE);
+			void MessageReceived(BMessage *message);
+			virtual	bool 	QuitRequested();
+		
+		protected:	// protected members
+			BAlert *alert_1;
+			BMenu *select_menu;
+			BMenuField *select;
+	};
+
+#endif

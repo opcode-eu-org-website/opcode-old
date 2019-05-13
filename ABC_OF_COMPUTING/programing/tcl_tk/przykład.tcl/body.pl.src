@@ -1,0 +1,79 @@
+#!/usr/bin/wish
+
+label .info_label -text "To testowy programik"
+pack .info_label
+
+# deklaracja pola wczytywania/wypisywania tekstu
+entry .pole_tekstowe
+pack .pole_tekstowe
+
+# funkcja z jednym argumentem
+proc dodawanie { ctrl } {
+	# deklaracja pustego napisu
+	set napis ""
+	
+	# warunek if
+	if { $ctrl == 2 } {
+		# wypisanie (na terminal) wyniku dodawania
+		puts [expr $ctrl+5]
+	} elseif {$ctrl == 1} {
+		set lista [list "Ala " {ma } kota]	
+		# pętla forech - for jak w bashu ;-)
+		foreach wyraz $lista {
+			set napis "$napis$wyraz"
+		}
+		# podnapis na terminal
+		puts [string range $napis 3 end]
+	} else {
+		# pętla for
+		for { } {$ctrl>0} { set ctrl [expr $ctrl-1] } {
+			# wypisanie napisu
+			puts "Hi hi hi"
+		}
+	}
+	# wypisanie $napis w gui
+	.pole_tekstowe insert end $napis
+}
+
+# funkcja z dwoma argumentami
+proc odejmowanie { mode ile } {
+	switch $mode {
+		"pierwszy" {
+			while { $ile >= 10 } {
+				puts $ile
+				set ile [expr $ile - $ile/2]
+			}
+		}
+		"drugi" {
+			# odczyt pliku
+			set input_file [open "/etc/passwd" r]
+			set zawartosc_pliku [read $input_file]
+			close $input_file
+			# wypisanie zawartości pliku
+			puts $zawartosc_pliku
+			# rozłożenie zawartości na linijki i wypisanie jednej z nich
+			set linijki [split $zawartosc_pliku "\n"]
+			puts [lindex $linijki 2]
+			# wykorzystane tu listy mają jeszcze parę możliwości ...
+		}
+		default {
+			set "I co ja mam robić ?"
+		}
+	}
+}
+
+# tworzymy przycisk
+button .button1 -text "Dodaj 1" -command "dodawanie 1"
+button .button2 -text "Dodaj 2" -command "dodawanie 2"
+button .button3 -text "Dodaj 3" -command "dodawanie 3"
+button .button4 -text "Odejmij 1" -command "odejmowanie pierwszy 100"
+button .button5 -text "Odejmij 2" -command "odejmowanie drugi 10"
+button .button6 -text "Odejmij 3" -command "odejmowanie trzeci"
+
+# wyświetlamy przyciski
+pack .button1
+pack .button2
+pack .button3
+pack .button4
+pack .button5
+pack .button6

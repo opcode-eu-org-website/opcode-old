@@ -1,0 +1,24 @@
+<article>
+<title>Restricted SFTP/SSH</title>
+
+<p>Niekiedy zachodzi potrzeba nałożenia pewnych ograniczeń na to co mogą robić użytkownicy którym dajemy dostęp poprzez ssh i pochodne.</p>
+
+<p>Jednym z takich ograniczeń może być dostęp tylko przez klucze do jakiejś wskazanej komendy - wymaga to utworzenia użytkownika baz hasła (w /etc/shadow dajemy coś co na pewno nie jest hashem hasła) oraz utworzeniu wpisu w <kbd class="path">~/.ssh/authorized_keys</kbd> postaci: <code>command="<var>svnserve -t</var>",no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty ssh-rsa <var>__KLUCZ__ITD</var></code> (podana w przykładzie <code><var>svnserve -t</var></code> pozwala na dostęp do svn poprzez ssh - <code>svn ls svn+ssh://<var>serwer</var>/<var>repo/path</var></code>).</p>
+
+<p>Innym ograniczeniem jest dostęp tylko do SFTP bez możliwości zalogowania się do shella, uzyskać to można poprzez wpis w <kbd class="path">/etc/passwd</kbd> postaci: <code><var>sftponly</var>:x:<var>UID</var>:<var>GID</var>:<var>SFTP uploader</var>:<var>HOME/PATH</var>:/usr/lib/openssh/sftp-server</code>. Jeżeli chemy udostępnic także inne protokoły kopiowania plików - takie jak np. rsync możemy skorzystać także z <homepage url="http://www.pizzashack.org/rssh/">rssh</homepage>.</p>
+
+<p>Aby użytkownik nie tylko nie miał dostępu do shella ale także nie mógł wyjść poza swój katalog trzeba zastosować chroot, współczesne wersje OpenSSH bardzo ułatwiają budowę takiego środowiska należy w konfiguracji SSH umieścić następujące wpisy (polecam zwrócić uwagę na informacje w komentarzach):</p>
+<pre>Subsystem sftp internal-sftp
+# zamiast Subsystem sftp /usr/lib/openssh/sftp-server
+Match User ftplim1
+	ForceCommand internal-sftp
+	# należy też ustawić "Subsystem sftp" na internal-sftp
+	X11Forwarding no
+	AllowTcpForwarding no
+	ChrootDirectory /var/chroot-sftp/%u
+	# %u podmieniane jest na nazwę użytkownika, dzięki czemu można zamiast Match User użyć Match Group
+	# w passwd $HOME musi wskazywać na coś nadrzędnego $SHELL może być /dev/null
+	# jeżeli nie chcemy robić go global-writable to wewnątrz niego powinien być katalog który należy do ftplim1</pre>
+
+<p>Wpisanie <code>session optional pam_lastlog.so</code> w <kbd class="path">/etc/pam.d/sshd</kbd> spowoduje logowaniw wszystkich połączeń ssh (np. połączeń sftp) w pliku wtmp (podobnie można uczynić z /etc/pam.d/su). Natomiast jeżeli występuje problem z starszymi klientami ssh (nieprzyjmowanie poprawnego hasła) to warto w konfiguracji tego serwera ustawić opcję "PasswordAuthentication yes".</p>
+</article>

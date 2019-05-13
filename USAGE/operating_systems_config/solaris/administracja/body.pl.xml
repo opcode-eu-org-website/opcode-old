@@ -1,0 +1,21 @@
+<article>
+<title>Komendy do zarządzania systemem</title>
+<ul>
+	<li><code>pfexec</code> - wykonanie komendy uprzywilejowanej przez użytkownika, którego rola na to pozwala</li>
+	<li><code>svcs</code>, <code>svcadm</code> - konfiguracja uruchamiania usług podczas startu systemu</li>
+	<li><code>pkgadd -d $FILEMANE</code> - instalacja paczek z oprogramowaniem z poza repozytoriów (<code>pkgrm `pkginfo -d $FILEMANE | cut -f2 -d' '`</code> - usuwanie tak zainstalowanych paczek)</li>
+	<li><code>pkg</code> - zarządzanie oprogramowaniem w oparciu o repozytoria (np. <code>pkg search -r <var>vim</var></code> - wyszukanie w jakich paczkach nielokalnych jest plik vim, <code>pkg install SUNWvim SUNWscreen SUNWtop</code> - instalacja vim'a screen'a i top'a)</li>
+	<li><code>crle -l <var>/lib:/usr/lib:/usr/local/ssl/lib</var></code> - konfiguracja ścieżek wyszukiwania bibliotek - odpowiednik ldconf z Linuxów (<code>LD_LIBRARY_PATH</code> współcześnie nie używana)</li>
+	<li><code>devfsadm</code> - zarządzanie urządzeniami w <kbd class="path">/dev/</kbd></li>
+	
+	<li><code>netstat</code> - statystyki sieci (z opcją <code>-r</code> pokazuje tablice routingu, z opcją <code>-s</code> pokazuje statystyki dla protokołów, z opcją <code>-i</code> pokazuje statystyki ruchu IP dla interfejsów)</li>
+	<li><code>prstat</code> - statystyki aktywnych procesów</li>
+	<li><code>mpstat</code> - statystyki dla procesów i grup procesów</li>
+	<li><code>sar</code> - raporty aktywności systemu</li>
+	<li><code>vmstat</code> - statystyki pamięci wirtualnej</li>
+	<li><code>swap</code> - administracja oraz pokazanie wykorzystania przestrzeni swap</li>
+	
+	<li><code>zoneadm</code> - administracja zonami (odpowiednik jail'i)</li>
+</ul>
+
+</article>

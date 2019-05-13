@@ -1,0 +1,24 @@
+<?xml version = '1.0' encoding = 'ISO-8859-2'?>
+<baza>
+ <termin pokazuj="false" id="1">
+  <Rok>2007</Rok>
+  <Miesiac>12</Miesiac>
+  <Dzien>14</Dzien>
+  <Godzina>23</Godzina>
+  <Minuty>59</Minuty>
+ </termin>
+ <termin pokazuj="true" id="2">
+  <Rok>1970</Rok>
+  <Miesiac>01</Miesiac>
+  <Dzien>01</Dzien>
+  <Godzina>00</Godzina>
+  <Minuty>00</Minuty>
+ </termin>
+ <termin pokazuj="true" id="3">
+  <Rok>2035</Rok>
+  <Miesiac>01</Miesiac>
+  <Dzien>19</Dzien>
+  <Godzina>03</Godzina>
+  <Minuty>14</Minuty>
+ </termin>
+</baza>

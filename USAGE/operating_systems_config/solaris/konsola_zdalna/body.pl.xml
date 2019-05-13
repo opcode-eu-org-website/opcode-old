@@ -1,0 +1,20 @@
+<article>
+<title>Konsola na porcie szeregowym</title>
+<p>Jest to szczególnie przydatne w Solarisach działających na maszynach z jakimś ILOM/ALOM/ELOM. Aby uruchomić ją należy zadbać o następujące wpisy (zakładamy tutaj iż interesującym nas portem jest pierwszy port szeregowy - może się to różnić w zależności od konfiguracji sprzętowej) w <kbd class="path">/boot/solaris/bootenv.rc</kbd>:</p>
+<pre>setprop ttya-rts-dtr-off false # na SUN FIRE X4540 true
+setprop ttya-ignore-cd true
+setprop ttya-mode 9600,8,n,1,-
+setprop console text</pre>
+<p>oraz w <kbd class="path">/rpool/boot/grub/menu.lst</kbd> (ta ścieżka wskazuje położenie konfiguracji gruba gdy / jest na zfs'ie, a config dla takiego przypadku jest podany):</p>
+<pre>serial --unit=0 --speed=9600 --ord=8 --parity=no --stop=1
+terminal --timeout=5 serial console
+timeout 5
+default 0
+
+title OpenSolaris
+# uwaga: po zbootowaniu z ta konsola nie będzie działała graficzna konsola na ILOM
+findroot (pool_rpool,0,a)
+bootfs rpool/ROOT/opensolaris
+kernel$ /platform/i86pc/kernel/$ISADIR/unix -B $ZFS-BOOTFS,console=ttya -kv -m verbose
+module$ /platform/i86pc/$ISADIR/boot_archive</pre>
+</article>

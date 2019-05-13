@@ -1,0 +1,4 @@
+<article>
+<title>Generowanie sygnału PCM</title>
+<p>Tworzony sygnał PCM przechowywany jest jako tablica 16 bitowych liczb całkowitych ze znakiem. Tablica jest alokowana dynamicznie w oparciu o informacje o częstotliwości próbkowania i długości okresu sygnału. Proste funkcje (kwadrat, sinus, piły i trójkąt) generowane są bezpośrednio w kodzie programu w oparciu o przebieg pętli po kolejnych próbkach należących do okresu sygnału. Bardziej złożone funkcje (tryb <code>FUNCTION</code>) generowane są z wykorzystaniem programu calc, który w sposób strumieniowy wykorzystywany jest w pętli przebiegającej po kolejnych próbkach sygnału.</p>
+</article>

@@ -1,0 +1,17 @@
+<article>
+<title>Rzeczy trochę ciekawsze</title>
+<ul>
+	<li><id_link id="c_cpp:misc:alokacja_pamieci.c">alokacja_pamieci.c</id_link> - ręczna alokacja pamięci oraz mapowanie plików na obszary pamięci (zobacz też: w  <wiki pl="b:C/Wskaźniki#Dynamiczna_alokacja_pami.C4.99ci">wikibooks</wiki>)</li>
+	<li><id_link id="c_cpp:misc:openmp.c">openmp.c</id_link> - urównoleglanie obliczeń z wykorzystaniem <wiki pl="OpenMP">OpenMP</wiki>, zobacz też <doc url="http://www.cmmsigma.eu/labs/parallel_comp/openmp_tutorial/index.pl.html">Kurs OpenMP - pierwsze kroki</doc></li>
+	
+	<li><id_link id="c_cpp:misc:c_lua_api.c">c_lua_api.c</id_link> - wykorzystanie języka skryptowego <id_link id="lua">Lua</id_link> w programach w C, z programem współpracuje skrypt <id_link id="c_lua_api.lua">c_lua_api.lua</id_link></li>
+
+	<li><id_link id="python_api_run_from_cpp.cpp">python_api_run_from_cpp.cpp</id_link> - wykorzystanie języka skryptowego Python w programach w C++ (w tym wystawienie obiektu z C++ do Pythona, zarówno przez argument, jak i jako obiektu globalnego), z programem współpracuje skrypt <id_link id="python_api_run_from_cpp_script.py">python_api_run_from_cpp_script.py</id_link></li>
+	<li><id_link id="python_api_modul.cpp">python_api_modul.cpp</id_link> - moduł w C++ wykożytywany w Pythonie (demonstracja użycia: <id_link id="python_api_modul_test.py">python_api_modul_test.py</id_link>)</li>
+	
+	<li><id_link id="c_cpp:misc:wyrazenia_regularne.cpp">wyrazenia_regularne.cpp</id_link> - wyrażenia regularne w C++</li>
+	<li><id_link id="c_cpp:misc:watki.cpp">watki.cpp</id_link> - wątki, zdarzenia asynchroniczne, zagadnienia czasowe, ... w C++</li>
+</ul>
+
+<p>Warto też zajrzeć na <wiki pl="C++11">C++0x</wiki> aby zobaczyć jakie zmiany planowane są w następnej wersji standardu C++.</p>
+</article>

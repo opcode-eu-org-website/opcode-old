@@ -1,0 +1,7 @@
+<article>
+<title>Dyski</title>
+
+<p>Systemy *BSD korzystają z własnego sytemu partycjonowania dysku (tzw. disklabel). Polega to na tym iż na wybranym dysku (<kbd class="path">/dev/adX</kbd>, w OpenBSD <kbd class="path">/dev/wd...</kbd>) w ramach jednej "zwyczajnej" partycji (zwanej partycją fdiskową, lub segmentem) <kbd class="path">/dev/adXsY</kbd> tworzone są partycje  BSD (oznaczane literami od a do h). Więcej na temat tego mechanizmu w <doc url="http://freebsd.therek.net/handbook/install-steps.html#SYSINSTALL-LABEL">Tworzenie partycji z wykorzystaniem Disklabel</doc>.</p>
+
+<p>W tym miejscu warto zwrócić uwagę na podobieństwo w zarządzaniu dyskami do <id_link id="operating_systems_config:solaris:dyski">Solarisa</id_link>. Standardowymi dla tych systemów systemami plików są <wiki pl="Berkeley Fast File System">FFS</wiki>, <wiki pl="Unix File System">UFS</wiki>.</p>
+</article>

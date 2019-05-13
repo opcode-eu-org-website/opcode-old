@@ -1,0 +1,131 @@
+#!/usr/bin/perl -w
+
+# konfiguracja
+$SERVER = "jabber.moja.domena";
+$PORT = 5222;
+$TLS = 1;
+$USER = "mail-system";
+$PASS = "secret";
+
+require "/etc/xmmp-mail-system-conf.pl";
+
+$RES = "Mail Info System";
+
+# deklaracje wstepne
+use Net::XMPP;
+use open ":encoding(utf8)";
+use open ":std";
+use POSIX qw(strftime);
+
+
+# obsługa zakonczenia
+$SIG{HUP} = \&End;
+$SIG{KILL} = \&End;
+$SIG{TERM} = \&End;
+$SIG{INT} = \&End;
+
+
+# tworzenie klienta
+my $bot = new Net::XMPP::Client();
+$bot->SetCallBacks(message=>\&ReciveMessage, presence=>\&RecivePresence);
+
+
+# łączenie
+my $con = $bot->Connect(hostname=>$SERVER, port=>$PORT, tls=>$TLS);
+if (!(defined($con))) {
+	print "Nie można połączyć się z serwerem\n";
+	exit(-1);
+}
+
+
+# logowanie
+my @aut = $bot->AuthSend(username=>$USER, password=>$PASS, resource=>$RES);
+if ($aut[0] ne "ok") {
+	print "Błąd autoryzacji";
+	exit(-2);
+}
+
+# Roster i Presence
+$bot->RosterGet();
+$bot->PresenceSend();
+
+# petla oczekiwania
+while(defined($bot->Process())) { }
+
+exit(0);
+
+
+
+
+sub End{
+	# zamkniecie polaczenia i zakonczenie
+	$bot->Disconnect;
+	exit(0);
+}
+
+sub ReciveMessage
+{
+	my $sid = shift;
+	my $message = shift;
+	
+	if ($message->GetFrom("jid")->GetServer() ne $SERVER) {
+		$bot->Send($message->Reply(body=>"Tylko dla uzytkownikow z $SERVER"));
+		return;
+	}
+	
+	my $from = $message->GetFrom("jid")->GetUserID();
+	my $body = $message->GetBody();
+	
+	if ($body eq "num") {
+		# lsmbox -ots mail/INBOX | awk '$1=="mail/INBOX" {print $2}'
+		my $wynik="";
+		open(DATA, "mail2text num user $from | ");
+		while (<DATA>) {$wynik .= $_;}
+		close(DATA);
+		
+		$bot->Send($message->Reply(body=>"Masz $wynik NOWYCH wiadomosci"));
+	} elsif  ($body eq "info") {
+		$bot->Send($message->Reply(body=>"prosze czekac ..."));
+		
+		my $wynik="Streszczenia otrzymanych wiadomosci:\n";
+		open(DATA, "mail2text info user $from | ");
+		while (<DATA>) {$wynik .= $_;}
+		close(DATA);
+		
+		$bot->Send($message->Reply(body=>"$wynik"));
+	} elsif  ($body eq "time") {
+		my $czas = time;
+		my $wynik="CZAS:\n";
+		$wynik .= " time stamp: $czas\n";
+		$wynik .= " utc:        " . strftime("%Y-%m-%d %H:%M:%S +0000 (UTC)", gmtime($czas)) . "\n";
+		$wynik .= " local:      " . strftime("%Y-%m-%d %H:%M:%S %z (%Z), %A", localtime($czas)) . "\n";
+		$bot->Send($message->Reply(body=>"$wynik"));
+	} else {
+		my $wynik="XMPP New Mail Info Bot:\n\n";
+		$wynik .= "num = ilosc nowych wiadomosci pocztowych\n";
+		$wynik .= "info = streszczenie z wiadomosci\n";
+		$wynik .= "time = aktualny czas\n";
+		$wynik .= "help = ten komunikat\n\n";
+		$wynik .= "Sprawdzane sa tylko wiadomosci w ~/mail/INBOX\n\n";
+		$wynik .= "W celu przyspieszenia pracy nalezy przenosic starsze wiadomosci";
+		$wynik .= "z INBOX do innych folderow pocztowych";
+		$bot->Send($message->Reply(body=>"$wynik"));
+	}
+}
+
+
+sub RecivePresence {
+	my $sid = shift;
+	my $presence = shift;
+
+	my $type = $presence->GetType();
+
+	# pozwalamy dodawc i usuwac siebie z listy kontaktow
+	if ($type eq "subscribe") {
+		$bot->Send($presence->Reply(type=>'subscribed'));
+	} elsif ($type eq "unsubscribe") {
+		$bot->Send($presence->Reply(type=>'unsubscribed'));
+	}
+	
+	print "OOOOO";
+}

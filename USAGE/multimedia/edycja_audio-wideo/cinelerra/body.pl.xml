@@ -1,0 +1,16 @@
+<article>
+<title>Cinelerra</title>
+
+<p>Cinelerra jest programem do montażu wideo, umożliwia składanie filmu, dodawanie efektów itp. W przypadku problemów z uruchamianiem (biblioteki) polecam sprawdzenie wersji bibliotek faad i faac (najlepiej stosować z tego samego źródła co sama cinelerra).</p>
+
+<subtitle if="fx">Efekty specjalne</subtitle>
+	<p>1) zaznaczamy interesujący nas fragment (w oknie głównym)<br />
+		2) w menu prawego przycisku myszy wybieramy Attach effect<br />
+		3) jego ustawienia znajdziemy w tym menu pod pozycją Show</p>
+
+<subtitle id="przejscia">Efekty przejść</subtitle>
+	<p>Wstawiamy je przeciągając wybrany efekt z okna efektów do okna głównego i umieszczając na połączeniu dwóch fragmentów. W menu prawego przycisku myszy mamy czas trwania i ustawienia.</p>
+
+<subtitle id="eksport">Eksport</subtitle>
+	<p>Należy przewinąć film do początku (eksport zaczyna się od aktualnego czasu) następnie File -> Render ... . Polecam ustawić "File Format" na RawDV oraz "Insertion strategy" na "Insert nothing" (nie testowałem ustawień z eksportem audio).</p>
+</article>

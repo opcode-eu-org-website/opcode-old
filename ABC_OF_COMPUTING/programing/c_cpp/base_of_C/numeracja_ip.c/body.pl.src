@@ -1,0 +1,93 @@
+/*
+ * plik ma na celu prezentację podstawowych zagadnień z programowania w języku C / C++
+ * prezentuje logiczne operacje bitowe oraz zasady numeracji IP
+ *
+ */
+
+
+#include <stdio.h>
+
+
+void print_binary(unsigned int x) {
+	int position = 31;
+	int i, y, ctr = 0;
+
+	for (i=position; i>=0; i--) {
+		y = (x >> i)%2; // wyciagam kolejny bit w dobrej kolejnosci
+		if (ctr == 1) { // jezeli byl juz niezerowy to ...
+			printf("%d", y); // ...  wypisuje
+		} else if (y == 1){ // jezeli nie bylo niezerowego a teraz jest to ...
+			printf("%d", y); // ... wypisuje i ...
+			ctr = 1; // ... zacznaczm ze byl
+		}
+	}
+}
+void print_binary_with_zero(unsigned int x) {
+	int position = 31; int i;
+	for (i=position; i>=0; i--)
+		printf("%d", (x >> i)%2);
+}
+
+
+int main() {
+
+	unsigned int numer_ip = 0xC0A81801; // 192.168.24.1
+	unsigned int maska_podsieci = 0xFFFF0000; // 255.255.0.0
+	
+	unsigned int adres_sieci = numer_ip & maska_podsieci;
+	// logiczny operator bitowy & wykonuje logiczne AND na odpowiadających bitach swoich argumentów
+
+	unsigned int adres_rozgloszeniowy = numer_ip | ( ~ maska_podsieci);
+	// logiczny operator bitowy | wykonuje logiczne OR na odpowiadających bitach swoich argumentów
+	// logiczny operator bitowy ~ wykonuje negacje każdego bitu swojego argumentu
+	
+	printf("Numer IP:              "); print_binary_with_zero(numer_ip); printf("\n");
+	printf("Maska podsieci:        "); print_binary_with_zero(maska_podsieci); printf("\n");
+		// poprawna maska podsieci musi tak wyglądać - ciąg samych jedynek a potem ciąg samych zer
+	printf("Adres sieci:           "); print_binary_with_zero(adres_sieci); printf("\n");
+	printf("Adres rozgłoszeniowy:  "); print_binary_with_zero(adres_rozgloszeniowy); printf("\n");
+	
+	printf("\nAdres sieci to: %X,\n", adres_sieci);
+	printf("    co jak łatwo pzeliczyć odpowiada 192.168.0.0:\n        192=0xC0, 168=0xA8\n");
+	printf("\nAdres rozgłoszeniowy to: %X,\n", adres_rozgloszeniowy);
+	printf("    co jak łatwo pzeliczyć odpowiada 192.168.255.255:\n        192=0xC0, 168=0xA8, 255=0xff\n");
+	
+	// aby sprawdzić czy dwa numer należą do tej samej sieci nalezy wykonąć AND binarny z
+	// ich maskami podsieci (gdy różne to z maską mniejszej sieci) i porównać wyniki ...
+	
+	
+	printf("\n\n");
+	
+	
+	// oprócz poznanych operacji bitowych mamy też EXOR i przesunięcia bitowe
+	unsigned int liczba = 0xB9031CAE;
+	int liczba2 = 0xB9031CAE;
+	printf("jedynka:                         "); print_binary_with_zero(0x1); printf("\n");
+	printf("jakaś liczba:                    "); print_binary_with_zero(liczba); printf("\n");
+	printf("po operacji EXOR z 0x0000ffff:   "); print_binary_with_zero(liczba ^ 0x0000ffff); printf("\n");
+	// gdy w drugim argumencie 1 to w bierwszym negujemy ...
+	
+	printf("\n");
+	
+	printf("jakaś liczba:                    "); print_binary_with_zero(liczba); printf("\n");
+		// liczba bez znaku
+	printf("przesunięta o 16 bitów w prawo:  "); print_binary_with_zero(liczba >> 16); printf("\n");
+		// warto zwrócić uwage że dopełnianie jest zerami ...
+	printf("przesunięta o 16 bitów w lewo:   "); print_binary_with_zero(liczba << 16); printf("\n");
+		// warto zwrócić uwage że dopełnianie jest zerami ...
+	
+	printf("\n");
+	
+	printf("jakaś inna liczba:               "); print_binary_with_zero(liczba2); printf("\n");
+		// liczba ze znakiem
+	printf("przesunięta o 16 bitów w prawo:  "); print_binary_with_zero(liczba2 >> 16); printf("\n");
+		// warto zwrócić uwage że dopełnianie jest jedynkami ...
+	printf("przesunięta o 16 bitów w lewo:   "); print_binary_with_zero(liczba2 << 16); printf("\n");
+		// warto zwrócić uwage że dopełnianie jest zerami ...
+	
+	printf("\n");
+	
+	// na koniec jak działa funkcja print_binary ...
+	printf("jedynka przesunięta o 3 bity w lewo:    "); print_binary(0x1 << 3); printf("\n");
+
+} 

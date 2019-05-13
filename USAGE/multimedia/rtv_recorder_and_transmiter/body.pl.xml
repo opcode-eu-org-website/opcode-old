@@ -1,0 +1,28 @@
+<article>
+<title>Transmisja i rejestracja RTV</title>
+
+<p>Prezentuje skrypt służący do prostszego uruchamiania transmisji lub rejestracji sygnału RTV. Warto zapoznać się także z komendami wykorzystywanymi przez skrypt, gdyż jest całkiem prawdopodobne iż może być potrzebne ich wywołanie z innymi opcjami (np. rejestracja obrazu odbieranego przez sieć).</p>
+
+<p>Alternatywna motoda rejestracji sygnału z karty telewizyjnej może byc taka funkcja którą możemy dopisac do <kbd class="path">~/.bashrc</kbd>:</p>
+
+<pre>
+	function tv_record() {
+		if [ $# -lt 1 ]; then
+			echo "USAGE: $0 STATION"
+			echo "USAGE: $0 STATION /dev/videoX hw.X"
+			return -1
+		fi
+		
+		STATION="$1"
+		
+		VIDEO="${2:-/dev/video1}"
+		AUDIO="${3:-hw.2}"
+		
+		v4lctl -c $VIDEO setstation $STATION
+		
+		mencoder tv:// -tv device=$VIDEO:input=0:norm=PAL-DK:adevice=$AUDIO:alsa:input=0:amode=1:immediatemode=0:decimation=1 -ffourcc XVID -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=3000:keyint=125:vhq -oac mp3lame -lameopts cbr:br=96:mode=0 -o tv_`date +%F_%T`.avi
+	}
+</pre>
+
+<p>Z użyciem rtmpsuck możliwe jest także nagrywanie strumieni RTMP (np. filmików z rutube), posłużyć do tego może komenda: <code>iptables -t nat -A OUTPUT -p tcp --dport 1935 -m owner  \! --uid-owner root  -j REDIRECT;   rtmpsuck</code></p>
+</article>

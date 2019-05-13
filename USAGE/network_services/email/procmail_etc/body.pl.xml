@@ -1,0 +1,68 @@
+<article>
+<title>Programy wspierające - procmail, vacation, fetchmail i plik ~/.forward)</title>
+<p>Plik <code>.forward</code> (jest to standardowa ścieżka do tego pliku) umieszczany w katalogu domowym pozwala na przekazywanie poczty na inny adres (adres w pełnej postaci (z @), nazwa lokalnego użytkownika, aby dostarczyć bezpośrednio do skrzynki (z pominięciem forward'ów) należy adres poprzedzić znakiem <code>\</code>), na kilka adresów (oddzielamy je przecinkiem) oraz do innych programów (<code>"|polecenie"</code>).</p>
+<p>Program <code>procmail</code> pozwala na sortowanie, filtrowanie, przesyłanie, automatyczne odpowiadanie na pocztę, pocztę do niego można przekazać przez plik <code>.forward</code> może też być automatycznie dostarczana przez systemowy MTA. Plikiem konfiguracyjnym tego programu zazwyczaj jest <code>.procmailrc</code>. Każda reguła zapisana w tym pliku składa się z kilku linii, zaczyna się od linii postaci: <code>:0 [flagi] [:[plik-blokujący]]</code>, do ważniejszych flag należy zaliczyć A - wykonanie reguły zależne od warunku z poprzedniej reguły i c - wykonanie kopii wiadomości, po linii tej następują linie warunków (jeden warunek w linii zaczynającej się od <code>*</code>, opcjonalnie można pominąć linię z warunkiem) a po nich następuje linia zawierająca akcję (linia taka w jednej regule może być tylko jedna !); reguły możemy zagnieżdżać przy pomocy nawiasów klamrowych <code>{ </code> i <code>}</code> (po nawiasie otwierającym musi wystąpić spacja tabulator lub nowa linia). Zobacz także: <man section="1">procmail</man>, <man section="5">procmailrc</man>, <man section="5">procmailex</man></p>
+
+<pre>
+# przykładowy plik .procmailrc
+# test zaczynający się od znaku # to komentarz i jest on ignorowany przez procmail
+
+# gdy nie ma w naglowku pola "X-Envelope-To:" to dodaje pole i przekazuje do ponownie  procmaila
+# jako wartość pola (zmienna $dla) ustawiany jest pierwszy ($1) argument przekazany do procmaila'
+# przy wywolaniu go z pliku jako lokalnego agenta dostarczania z pliku sendmail.cf - makro $h
+#
+# będzie on ustawiony na user1@domena gdy przy przekazywaniu poczty z tego adresu
+# do rzeczywistego użytkownika - user (pliki aliases, virtusertable i .forward)
+# podane będzie przekazanie do user+"user1@domena"
+# (znaki "" służą do zabezpieczneia symbolu @ i będą w zmiennej wynikowej)
+# zamiast adresu user1@domena można podawac dowolny inny tekst
+dla=$1
+:0
+*!X-Envelope-To:
+| formail -i "X-Envelope-To: "$dla |procmail
+
+# pocztę adresowaną (opisywane wyżej pole X-Envelope-To:)
+# do user1@domena1 umieszczam w skrzynce (pliku) mail/skrzynka1
+:0
+*X-Envelope-To: "user1@domena1"
+mail/skrzynka1
+
+# poczte mającą w temacie "wazne" przesyłam na swoje drugie konto (login@domena.drugiego.konta)
+# i do programu vacation aby odpowiedzial na list
+# jest to jedno z możliwych rozwiązań - najbardziej logiczne
+:0
+* ^Subject:.*wazne
+{
+	:0 c
+	! login@domena.drugiego.konta
+
+	:0
+	|vacation
+}
+
+# powiadomienia o wiadomosciach IM
+:0 :
+*From:.*xmpp-system@n17.waw.pl
+mail/jabber
+
+# wysylanie powiadomien poprzez IM o mailach które dotarły do teego miejsca
+INCLUDERC=/path-to/notify_to_xmpp
+
+# na poczte od konto@jakas.domena odrazu odpowiadam
+# (wysylajac zawartosc pliku odpowiedz.txt) i jej nie zapisuje
+:0
+* ^From:.*konto@jakas.domena
+| (formail -r ; cat odpowiedz.txt) | $SENDMAIL -oi -t
+</pre>
+
+<p>Innymi przykładami wykorzystania procmaila mogą być:</p><ul>
+	<li>konwersja na kodowanie 8bitowe (z base64 i quoted-printable) - <a class="int" href="./konwert_to_8bit">konwert_to_8bit</a></li>
+	<li>filtrowanie wirusów - <id_link id="wirus_check">wirus_check</id_link>, <id_link id="wirus.sh">wirus.sh</id_link></li>
+	<li>filtrowanie spamu - <a class="int" href="./spam_check">spam_check</a>, <a class="int" href="./spam_mv">spam_mv</a>, naukę można zrealizować dodając do cron'a <code>sa-learn --mbox --spam ~/mail/spam_niewykryty; :> ~/mail/spam_niewykryty</code></li>
+	<li>powiadamianie przez XMPP <id_link id="notify_to_xmpp">notify_to_xmpp</id_link>, <a class="int" href="./notify_to_xmpp_chat">notify_to_xmpp_chat</a></li>
+</ul>
+
+<p>Program <code>vacation</code> pozwala na proste automatyczne generowanie odpowiedzi, pocztę do programu tego przekazujemy z pliku <code>.forward</code> (warto pamiętać o bezpośrednim przekazaniu listu do swojej skrzynki). Wiadomość zwracana przez ten program przechowywana jest w pliku <code>.vacation.msg</code>, plik ten rozpoczynać się może od pól nagłówków (takich jak <code>Subject:</code> (zawierającego tytuł), <code>From:</code> (zawierającego adres nadawcy, przy braku tego pola zostanie ono wygenerowane automatycznie), <code>Reply-To:</code> (informującego o tym gdzie należy wysłać odpowiedź), w treści tego pliku można także skorzystać ze zmiennej <code>$SUBJECT</code> wstawiającej tytuł wiadomości, na którą generowana jest odpowiedź. Przydatnymi opcjami programu są <code>-j</code> nakazująca odpowiadać m.in. na przeforwardowane wiadomości (nie sprawdza pola To: ani Cc:) oraz opcja <code>-t[N]</code> nakazująca wysyłanie tylko jednego powiadomienia na dany adres w ciągu N dni (aby wyczyścić bazę tych adresów należy wywołać <code>vacation -I</code>). Uwaga na wywołanie samego <code>vacation</code> otwiera ono edycję pliku <code>.vacation.msg</code> i zmienia plik <code>.forward</code>, zapisując starą wersję jako <code>.forward.old</code>. Zobacz także: <man section="1">vacation</man></p>
+<p>Program <code>fetchmail</code> pozwala na pobieranie (zarówno automatyczne jak i ręczne) poczty z zdalnych serwerów i umieszcza je w skrzynce systemowej (działa tak jak forward z komputera z którego pobiera pocztę). Plikiem konfiguracyjnym tego programu zazwyczaj jest <code>.fetchmailrc</code>, plik ten zawiera konfiguracje kont pocztowych wraz z nazwami użytkowników i hasłami (one są opcjonalne przy uruchamianiu manualnym, ale ze względu na to prawa do pliku muszą przysługiwać tylko właścicielowi) podstawowy wpis składa się z pozycji: <code>poll "nazwa serwera" username "użytkownik" password "hasło"</code>, dodanie opcji <code>keep</code> powoduje pozostawienie wiadomości na serwerze. Opcja <code>-d 600 -N</code> pozwala na uruchomienie programu w trybie pracy ciągłej gdzie sprawdzanie poczty odbywa się co 600 sekund, opcja <code>-f</code> pozwala określić alternatywny plik konfiguracyjny i przydaje się, gdy trzeba wykonać jakieś jednorazowe sprawdzenie, a fetchmail działa w trybie pracy ciągłej. Jeżeli jest to możliwe, zawsze należy używać forward'u zamiast fetchmail'a. Jeżeli zachodzi potrzeba rzadszego uruchamiania fetchmail'a (np. kilka razy na dobę), to warto rozważyć skorzystanie z systemowego mechanizmu corn, pozwalającego na uruchamianie programów o zadanej porze, w tym celu należy uruchomić <code>crontab nazwa-pliku</code> aby utworzyć wpis z podanego pliku, każda linia pliku powinna wyglądać następująco: <code>minuta godzina dzień miesiąc dzień tygodnia komenda</code> (przy czym dzień tygodnia - liczba od 0 (niedziela) do 6 (sobota) a także każdy z parametrów można zastąpić gwiazdką co oznacza że dla każdej wartości tego parametru będzie następowało uruchomienie. Zobacz także: <man section="1">fetchmail</man></p>
+
+</article>

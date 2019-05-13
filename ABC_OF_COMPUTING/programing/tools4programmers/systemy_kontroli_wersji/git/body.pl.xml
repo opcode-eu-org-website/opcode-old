@@ -1,0 +1,177 @@
+<article>
+<title>GIT</title>
+
+<p><wiki pl="Git (oprogramowanie)">Git</wiki> jest rozproszonym systemem kontroli wersji.</p>
+
+<subtitle id="repo">utworzenie pustego repozytorium</subtitle>
+<pre>
+mkdir -p <var>NAME</var> &amp;&amp; cd <var>NAME</var> &amp;&amp; git init
+</pre>
+
+<subtitle id="kopia">utworzenie kopii repozytorium (bez checkout-u / bez katalogu roboczego)</subtitle>
+<pre>
+# metoda wypychająca
+#  chyba nie istnieje
+
+# metoda wciągająca
+git clone -n <var>ssh://user@host/sciezka/do/repozytorium</var> <var>NEWREPO</var>
+</pre>
+
+<subtitle id="update">aktualizacja kopii repozytorium</subtitle>
+<pre>
+# metoda wypychająca
+git push <var>ssh://user@host/sciezka/do/repozytorium</var>
+
+# metoda wciągająca
+#  -> tworzy katalog roboczy
+#  -> w pewnych sytuacjach robi jawnego merge
+#  -> automatycznie commituje jeżeli nie ma konfliktów
+#  -> pozwala na połączenie dwóch zupełnie niezależnych repozytoriów w jedno
+#     (niestety robi to bez wymagania jakiegokolwiek potwierdzenia)
+git pull <var>ssh://user@host/sciezka/do/repozytorium</var> master
+# mozna to takze zrobic w dwoch krokach jako "fetch" i "merge"
+</pre>
+
+<p>Jeżeli mamy poprawnie zdefiniowane w <kbd class="path">.git/config</kbd> wpisy: <code>[remote "origin"]</code> i <code>[branch "master"]</code> (jest tak np. gdy nasze repo powstało poprzez "clone" repo z którego chcemy robić pull) to zamiast powyżej pokazanej pełnego wywołania pull możemy używać krótszej (i bezpieczniejszej - bez ryzyka wciągnięcia innego repozytorium) bezargumentowej postaci: <code>git pull</code>.</p>
+
+<p>Możemy też ustawić automatyczne robienie push po wykonaniu commit poprzez utworzenie stosownego pliku <kbd class="path">.git/hooks/post-commit</kbd> (po stronie robiącej push), plik musi mieć atrybut wykonalności. Jeżeli chcemy żeby push działało do repozytorium na którym mamy utworzoną kopie roboczą w <kbd class="path">.git/config</kbd> (po stronie przyjmującej push) należy ustawić:</p>
+<pre>[receive]                                                                                  
+	denyCurrentBranch = warn</pre>
+
+
+<subtitle id="workdir">obsługa katalogu roboczego w oparciu o lokalne repozytorium</subtitle>
+<pre>
+# aktualizacja (reset kopi roboczej do stanu repozytorium)
+# UWAGA: lokalne zmiany zostana bezpowrotnie utracone
+git checkout -f
+
+# dodawanie plikow do poczekalni
+git add <var>PLIK</var>
+
+# usuwanie plikow z poczekalni
+git reset HEAD <var>PLIK</var>
+
+
+# usuwanie pliku z repozytorium
+git rm <var>PLIK</var>
+# zadziala także usunięcie z kopi roboczej i "git add" lub git "commit -a"
+
+# zmiana nazwy pliku (jest to rownowazne z git rm ...; git add ...)
+git mv
+
+
+# podglad zmian kopi roboczej i poczekalni
+git status          # aby ignorować jakieś niedodane do repozytorium pliki katalogi należy skorzystać z pliku .gitignore
+git diff            # roznica kopi roboczej do poczekalni
+git diff --cached   # roznica poczekalni do ostatniej rewizji
+
+# zatwierdzanie zmian z poczekalni (tworzenie rewizji)
+# git commit -a [-m "<var>OPIS</var>"]
+
+# poprawianie ostatniej rewizji
+git commit --amend
+# jezeli zmiany zostaly wypchniete to takze:
+git push origin HEAD --force
+
+
+# przegladanie historii zmian
+git log --graph --name-status [<var>PLIK</var>]
+git log [-p] [<var>PLIK</var>]
+
+# obejrzenie starej wersji pliku
+git revert -n <var>42200238cbd4c862a0b6ce919e5a4dc2a47cc20b</var>
+git ls-tree <var>REV</var>
+git cat-file blob <var>file-SHA1</var>
+git show <var>rev:path</var>
+</pre>
+
+<subtitle id="branch">Gałęzie</subtitle>
+<pre>
+# tworzenie nowej gałęzi
+git branch <var>nazwa</var>
+
+# utworzenie galezi po stronie zdalnej
+git push --set-upstream origin <var>nazwa</var>
+
+# pobranie / aktualizcja informacji (m.in.) o zdalnych galeziach
+git fetch
+
+# listowanie galezi
+git branch -av
+
+# przelaczanie sie pomiedzy galeziami (zmiany w kopi roboczej inie zostana utracone)
+# (w przypadku konfliktu przed przelaczeniem bedzie koniecznosc ich zaakceptowania lub odrzucenia)
+git checkout <var>nazwa</var>
+
+# scalanie wskazanej galezi do aktualnej
+git merge [<var>zasob_zdalny</var>] <var>nazwa</var>
+</pre>
+
+<subtitle id="remotes">Zasoby zdalne</subtitle>
+<pre>
+# listowanie zasobów zdalnych
+git remote -v
+
+# dodawanie nowego zasobu zdalnego
+git remote add <var>nazwa</var> <var>URL</var>
+
+# wysylanie zmian do wskazanego zasobu zdalnego
+git push <var>nazwa</var>
+</pre>
+
+<subtitle id="merge">łączenie dwóch rozforkowanych repozytów</subtitle>
+<p>Np. repozytoriów z github celem przygotowania pull request.</p>
+<pre>
+# to nie jest skrypt, a to nie są jego argumenty ...
+REPO1_URL="adres URL repo podstawowego"
+REPO2_URL="adres URL repo wlaczanego"
+REPO2_NAME="moj_identyfikator_wlaczanego_repo"
+PLIKI_DO_EDYCJI="pliki z konfliktami ktore bedziemy modyfikowac"
+
+#
+# POBRANIE OBU REPO
+#
+git clone $REPO1_URL repo_merge; cd repo_merge
+git remote add -t master $REPO2_NAME $REPO2_URL
+git remote
+git fetch $REPO2_NAME
+
+
+#
+# POŁĄCZENIE OBU REPO JAKO OSOBNYCH BANCH'ÓW
+#
+git checkout $REPO2_NAME/master
+git checkout -b from_$REPO2_NAME
+git branch
+git push -u origin from_$REPO2_NAME
+
+# alternatywnie (od razu MERGE):
+#   git merge $REPO2_NAME/master
+# lub:
+#   git rebase -i $REPO2_NAME/master; git status; FIX CONFLICTS; git add ...; git rebase --continue
+
+#
+# OPCJONALNE MODYFIKACJE DODATKOWEGO REPO UŁATWIAJĄCE MERGE (np. poprawki konca linii)
+#
+f=SCIEZKA/do/PLIKU/do.POPRAWIENIA &amp;&amp; mv $f /tmp/fwsa &amp;&amp; tr -d '\r' &lt; /tmp/fwsa &gt; $f
+git commit -a -m "fix line endings in modified files"
+git push
+
+#
+# MERGE
+#
+git checkout master
+git merge from_$REPO2_NAME
+
+#
+# USUNIECIE KONFLIKTÓW I COMMIT
+#
+vi $PLIKI_DO_EDYCJI
+git diff from_$REPO2_NAME $PLIKI_DO_EDYCJI
+git add $PLIKI_DO_EDYCJI
+git commit -a -m "merge linux keyboard changes from $REPO2_NAME"
+git push
+
+git branch -d from_$REPO2_NAME
+</pre>
+</article>

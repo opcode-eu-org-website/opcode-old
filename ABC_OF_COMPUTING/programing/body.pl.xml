@@ -1,0 +1,20 @@
+<article>
+<title>Kilka słów (wstępu) o programowaniu</title>
+
+
+<p>Generalnie programowanie jest czynnością polegającą na pisaniu programów ... czyli chodzi o to aby zmusić komputer do zrobienia czegoś. Wystarczy spojrzeć na hasło <wiki pl="Język programowania">Język programowania</wiki> w Wikipedii aby przekonać się jak bardzo wiele jest różnych języków programowania, jednak wymienienie tych istotnych nie jest większym problemem:</p>
+<ul>
+	<li><wiki pl="Asembler">Asembler</wiki> (zobacz w Sieci: <doc url="http://webster.cs.ucr.edu/">Art of Assembly Language Programming and HLA by Randall Hyde</doc>, <wiki pl="b:Asembler">Asembler @ Wikibooks</wiki>);</li>
+	<li><id_link id="ABC_OF_COMPUTING:programing:c_cpp">C i C++</id_link>, <wiki pl="Fortran">Fortran</wiki>, <wiki pl="Ada (język programowania)">Ada</wiki>;</li>
+	<li><wiki pl="C Sharp">C#</wiki>, <wiki pl="Java">Java</wiki>, <wiki pl="JavaScript">JavaScript</wiki> (zobacz <id_link id="tree.js">skrypt rozwijanego menu</id_link> i współpracujący <id_link id="tree.css">arkusz CSS</id_link>), <wiki pl="Object Pascal">Object&nbsp;Pascal</wiki>, <wiki pl="Objective-C">Objective-C</wiki>, <wiki pl="Visual Basic">Visual&nbsp;Basic</wiki>;</li>
+	<li><id_link id="ABC_OF_COMPUTING:programing:awk">AWK</id_link>, <id_link id="ABC_OF_COMPUTING:programing:bash">sh</id_link>,</li>
+	<li><id_link id="perl">Perl</id_link>, <id_link id="ABC_OF_COMPUTING:programing:php">PHP</id_link>, <id_link id="python">Python</id_link>, <id_link id="ruby">Ruby</id_link>, <id_link id="tcl_tk">Tcl/Tk</id_link>;</li>
+	<li>za języki programowania uważa się także niekiedy:<ul>
+		<li>znacznikowe języki formatowań: <wiki pl="SGML">SGML</wiki>, <wiki pl="XML">XML</wiki>, <wiki pl="HTML">HTML</wiki>/<wiki pl="XHTML">XHTML</wiki> (wraz z arkuszami styli <wiki pl="Kaskadowe arkusze stylów">CSS</wiki>) - zobacz <id_link id="layout.css">layout beztabelkowy</id_link> źródła tej strony :-), <id_link id="ABC_OF_COMPUTING:programing:xml_xsl_itp">XML, XSL itp</id_link> a także zobacz zobacz w Sieci: <wiki pl="b:HTML" en="b:HyperText Markup Language">HTML @ Wikibooks</wiki>, <wiki pl="b:CSS" en="b:Cascading Style Sheets">CSS @ Wikibooks</wiki>, <wiki pl="b:SVG">SVG @ Wikibooks</wiki>, <doc url="http://www.xs4all.nl/~peterned/examples/cssmenu.html">rozwijane menu na CSS</doc>, <wiki en="b:XForms">XForms</wiki></li>
+		<li>języki skaładu tekstu oraz inne języki specjalistyczne (np. zapytań baz danych): <wiki pl="TeX">TeX</wiki> (zobacz artykuł na temat <id_link id="latex">(La)TeX</id_link>'a), <wiki pl="SQL">SQL</wiki> (zobacz w Sieci: <wiki pl="b:Bazy danych">Bazy danych @ Wikibooks</wiki>).</li>
+	</ul></li>
+</ul>
+ 
+<p>Jednak umiejętność programowania to  nie jest znajomość jakiegoś języka, jest to raczej umiejętność logicznego myślenia, myślenia "jak zrobiłby to komputer" i znajomość (dość uniwersalnych) podstaw; dlatego też jeżeli umie się programować w jednym języku to umie się praktycznie w każdym (można bardzo łatwo się nauczyć). <!--Więcej o podstawach programowania i o tym dlaczego warto używać bibliotek, korzystać z istniejących projektów/fragmentów kodu w <id_link id="Introduction">wstęp do techniki</id_link>.-->
+	Zainteresowanym polecam także wykłady dotyczące konstrukcji kompilatorów z <doc url="http://math.uni.lodz.pl/~pustelj/">strony domowej Jana Pustelnika</doc>.</p>
+</article>

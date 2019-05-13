@@ -1,0 +1,77 @@
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity tester is
+end;
+
+architecture logic of tester is
+	signal CLK,RST,a,b,c: std_logic := '1';
+	-- uwaga takie przypisanie wartosi poczatkowej nie podlega syntezie (!)
+	--       podobnie nie da sie syntezowac opoznien czasowych,
+	--       ale to jest testbanch wiec nam to nie przeszkadza
+	signal tryb: std_logic_vector (1 downto 0);
+	signal wej1, wej2: std_logic_vector (2 downto 0);
+	-- w miejscu tym warto wspomnieć o możliwości definiowania aliasów np:
+	--  alias pocz_wej1 : std_logic_vector (1 downto 0) is wej1 (1 downto 0);
+	-- spowoduje że nazwa pocz_wej1 będzie się odnosiła do dwuelementowego wektora
+	-- tożsamego z pierwszymi dwoma elementami wej1
+	
+	begin
+		-- zegar
+		process
+			begin
+			wait for 2 ns;
+			CLK <= not CLK;
+		end process;
+		
+		-- zatrzymanie symulacji
+		process
+			begin
+			wait for 100 ns;
+			assert FALSE
+				report "koniec symulacji"
+			severity FAILURE;
+		end process;
+		
+		RST <= '0', '1' after 0.5 ns;
+		
+		a <= '0' after  5 ns, '1' after  25 ns;
+		b <= '0' after  9 ns, '1' after  21 ns;
+		c <= '0' after 13 ns, '1' after  17 ns;
+		
+		tryb <= "00", "10" after 11 ns, "01" after 22 ns;
+		
+		mux1: entity work.mux_3to1(z_N_bitowego) port map(MODE=>tryb, a=>a, b=>b, c=>c);
+		mux2: entity work.mux_3to1(wybierany_case) port map(MODE=>tryb, a=>a, b=>b, c=>c);
+		mux3: entity work.mux_3to1(proces_case) port map(MODE=>tryb, a=>a, b=>b, c=>c);
+		mux4: entity work.mux_3to1(wybierany_if_else) port map(MODE=>tryb, a=>a, b=>b, c=>c);
+		mux5: entity work.mux_3to1(proces_if_else) port map(MODE=>tryb, a=>a, b=>b, c=>c);
+		
+		wej1 <= a&b&c;
+		wej2 <= O"5";
+		-- zapis 3 bitowej wartosci w notacji oktalnej ...
+		-- 8 bitowy wektor w notacji szesnastkowej mozemy wypelnic poprzez X"fa"
+		--
+		-- z koleji 2#0# oznacza ze pomiedzy # jest zapisana licza stalopozycyjna (integer)
+		-- w notacji o podstawie 2
+		
+		nor1: entity work.nor3(logic) port map(wej=>wej1);
+		nor2: entity work.nor3(proces_while) port map(wej=>wej1);
+		nor3: entity work.nor3(proces_loop) port map(wej=>wej1);
+		
+		
+		przes1: entity work.rejestr_przesuwny(logic)
+			generic map(N=>4)
+			port map(D=>a,CLK=>CLK,RST=>RST,ENABLE=>'1');
+		-- nalezy wspomniec ze zarowno w generic jak i port map mozemy  uzywac pozycyjnego jak i
+		-- nazewniczego sposobu podawania przypisan jednak jezeli jest ich wiecej niz jedno to
+		-- sposob poprzez nazwa=>... ("nazewniczy") jest czytelniejszy i wygodniejszy ...
+		przes2: entity work.rejestr_przesuwny(modularna)
+			generic map(4)
+			port map(D=>a,CLK=>CLK,RST=>RST,ENABLE=>'1');
+	-- na koniec warto wspomniec o tym iz do tworzenia rozbudowanych testbench'ow mozna
+	-- wykorzystac mechanizmy vhdl do obslugi pliku, dzieki czemu pobudzenia testbencha moga
+	-- byc umieszczane w zewnetrznym pliku (np. generowanym przez jakies inne oprogramowani)
+	-- podobnie ewentualne wyniki zostana zapisane do plikow co umozliwi ich analize
+	-- zewnetrznymi narzedziami
+end;

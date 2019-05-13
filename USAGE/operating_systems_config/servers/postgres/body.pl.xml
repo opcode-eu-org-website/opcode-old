@@ -1,0 +1,13 @@
+<article>
+<title>Tworzenie "instalacji" postgres'a</title>
+
+<p>Niekiedy potrzebujemy utworzenia dodatkowej instancji bazy danych postgres. w tym celu należy:</p>
+<ol>
+	<li>utworzyć użytkownika (<var>user-db</var>) który będzie penem i władcą tej instancji bazy danych</li>
+	<li>utworzyć katalog (<var>/var/postgres-mydb</var>) w którym będziemy trzymali naszą bazę, jego właścicielem musi być <var>user-db</var></li>
+	<li>zainicjalizować bazę w tym katalogu komendą <code>initdb</code> (uruchomioną z pod <var>user-db</var> - tak samo będzie nazywał się użytkownik mający prawa administracyjne w naszej nowej bazie danych)</li>
+	<li>uruchomić jako <var>user-db</var> postgres'a <code>postgres -D <var>/var/postgres-mydb</var></code> lub <code>pg_ctl -D <var>/var/postgres-mydb</var> -l logfile start</code></li>
+	<li>bazy danych i użytkowników może tworzyć <var>user-db</var> poprzez wywołania komend <code>createdb</code> i <code>createuser</code></li>
+</ol>
+<p>Do wykonywania zapytań SQLowych może posłużyć narzędzie <code>psql</code>. Warto w nim zwócić uwagę na komendy <code>\l</code> i <code>\d</code> listujące odpowiednio bazy danych oraz tabele w aktualnej bazie danych (więcej informacji <code>\?</code>). Do kasowania użytkowinów i baz służą komendy <code>dropuser</code> i <code>dropdb</code>. Jeżeli mamy problem z kasowaniem bazy z powodu używania przez innego usera (ERROR:  database ... is being accessed by other users) przydatne może się okazać wyświetlenie aktywności na tej bazie poprzez zapytanie SQLowe: <code>select * from pg_stat_activity where datname='NAZWABAZY';</code></p>
+</article>

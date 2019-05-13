@@ -1,0 +1,23 @@
+// takie rozwiazanie moze ulatwic nam zycie gdybysmy chcielu uzyc innego pinu LPT lub innego portu
+
+// nadawanie - LPT
+//#define NADAJ_JEDYNKE	outb(3, 0x378 +2)
+//#define NADAJ_ZERO	outb(11, 0x378 +2)
+
+// nadawanie - COM
+#define NADAJ_JEDYNKE	outb(3, 0x3f8 +4)
+#define NADAJ_ZERO	outb(1, 0x3f8 +4)
+
+// odczyt - LPT
+#define ODCZYTAJ	inb(0x378 +1)
+#define _BUSY_		128
+#define _ACK_		64
+
+// jezeli chcemy korzystac z pomiaru czasu opartego na taktach procesora
+// jest on duzo (> 10 razy) wydajniejszy od pomiaru opartego na funkcjach systemowych
+// ktory bedzie uzywany w przeciwnym razie
+//#define USE_RDTSC
+
+// jezeli nie chcemy mierzyc predkosci procesora tylka ja predfiniowac
+// wymaga wlaczonego USE_RDTSC, podajemy prędkosc procesora w MHz
+//#define PROCESOR 400.0

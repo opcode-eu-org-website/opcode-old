@@ -1,0 +1,23 @@
+; przykładowa konfiguracja jingle.conf oraz gtalk.conf dla serwera asterisk
+; używającąca lokalnego serwera jabber'a
+
+[general]
+allowguest=yes
+bindaddr=::
+context=incoming_from_external                           
+
+; połączenia przychodzące
+[guest]                                   
+disallow=all
+allow=ulaw
+context=incoming_from_external
+
+; konfiguracja połączeń dla użytkowników (aby mogli dzwonić poprzez jingle/gtalk)
+#include <jingle-outcoming.conf>
+;  typowe wpisy:
+; 	[rrp1]
+; 		username=rrp@voip.opcode.eu.org
+; 		disallow=all
+; 		allow=ulaw
+; 		; powiązane konto w jabber-outcoming.conf
+; 		connection=rrp1

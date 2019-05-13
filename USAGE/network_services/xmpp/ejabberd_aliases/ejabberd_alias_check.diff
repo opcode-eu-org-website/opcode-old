@@ -1,0 +1,57 @@
+*** ../ejabberd_auth_pam.erl	2007-09-05 19:25:05.000000000 +0200
+--- ejabberd_auth_pam.erl	2007-09-13 02:46:35.000000000 +0200
+***************
+*** 16,21 ****
+--- 16,31 ----
+  	 check_password/5
+          ]).
+  
++ %% patch start (C) 2007 Robert Paciorek, BSD-type licence
++ %% login to alias JID
++ check_alias( User, Server ) ->
++ 	Port = open_port({spawn, "PATH_TO_EXTERN_CHECK_SCRIPT"}, [{packet, 2}]),
++ 	Port ! {self(), {command, ["alias\n", User, " ", Server, "\n"]}},
++ 	receive {Port,{data,Data}} -> Data end,
++ 	Port ! {self(), close},
++ 	{string:sub_word(Data, 1), string:sub_word(Data, 2)}.
++ %% patch end
++ 
+  start( _Host ) ->
+    case erl_ddll:load_driver( ejabberd:get_so_path(), ejabberd_auth_pam) of
+      ok -> ok;
+***************
+*** 26,32 ****
+  plain_password_required() ->
+    true.
+  
+! check_password( User, Server, Password ) ->
+    PAMService = 
+          case ejabberd_config:get_local_option( { pam_service, Server } ) of
+                  undefined -> 
+--- 36,43 ----
+  plain_password_required() ->
+    true.
+  
+! check_password( _User, _Server, Password ) ->
+!   {User, Server} = check_alias( _User, _Server ),
+    PAMService = 
+          case ejabberd_config:get_local_option( { pam_service, Server } ) of
+                  undefined -> 
+***************
+*** 68,74 ****
+  get_vh_registered_users( _Server ) ->
+    [].
+      
+! is_user_exists( _User, _Server ) ->
+    {ok,FileBin}=file:read_file("/etc/passwd"),
+    Tmp=binary_to_list(FileBin),
+    FileStr=string:concat("\n", Tmp),
+--- 79,86 ----
+  get_vh_registered_users( _Server ) ->
+    [].
+      
+! is_user_exists( User, Server ) ->
+!   {_User, _Server} = check_alias( User, Server ),
+    {ok,FileBin}=file:read_file("/etc/passwd"),
+    Tmp=binary_to_list(FileBin),
+    FileStr=string:concat("\n", Tmp),

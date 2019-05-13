@@ -1,0 +1,17 @@
+#ifndef _MOJA_APLIKACJA_H
+#define _MOJA_APLIKACJA_H
+	
+	#include <Application.h>
+	
+	class MyWindow;
+	
+	class moja_aplikacja : public BApplication
+	{
+		public:		// publics functions
+			moja_aplikacja(const char *signature);
+		
+		protected:	// protected members
+			MyWindow		*_mywindow;
+	};
+
+#endif

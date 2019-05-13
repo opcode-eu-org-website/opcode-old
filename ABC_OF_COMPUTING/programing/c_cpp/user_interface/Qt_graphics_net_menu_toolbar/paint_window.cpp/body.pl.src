@@ -1,0 +1,220 @@
+#include "paint_window.h"
+#include "net_window.h"
+#include "singleton.h"
+
+#define _OBRAZEK_ "./tmp.gif"
+
+// uwaga: to musi być zmienna plikowa a nie klasowa ;-)
+QGraphicsEllipseItem *kolko;
+
+void PaintWindow::zakonczonoPobieraniePliku() {
+	printf("Pobieranie zakończone %d\n", http->state());
+	if (trawa_pobieranie) {
+		http->close();
+		plik_obrazka->close();
+		
+		sleep(2);
+		trawa_pobieranie = false;
+		info->reject();
+	}
+}
+
+void PaintWindow::terminateInfoThread() {
+	// kończymy wątek
+	watek->terminate();
+	// ukrywamy pole tekstowe, podobnie można uczynić z dowolnym elementem interfejsu
+	interfejs.lineEdit->setVisible(false);
+	// mechanizm ten można spróbować wykorzystać do budowy okna z zmiennym interfejsem
+	// (np. najpierw formularz logowania a potem dopiero normalny program)
+	// w tym celu warto by go użyć do jakiegoś groupBox
+	//
+	// efekt taki można także próbować osiągnąć z wykorzystaniem setLayout lub addWidget/removeWidget
+	// albo przy pomocy QStackedWidget, który potrafi wybierać do wyświetlania jeden z swoich widgetów
+}
+void PaintWindow::startInfoThread() {
+	// pokazujemy pole tekstowe
+	interfejs.lineEdit->setVisible(true);
+	// startujemy wątek
+	watek->start();
+}
+void PaintWindow::printNewValue(QString info, double val) {
+	interfejs.lineEdit->setText(QString::number(val, 'g', 3) + " (" + info + ")");
+}
+
+void PaintWindow::showNetRun() {
+	NetWindow okno_sieci(0, 0);
+	okno_sieci.show();
+	okno_sieci.exec();
+}
+
+void PaintWindow::showPing() {
+	QMessageBox::information (this, "szczegóły pingu", wynik_pingu);
+}
+void PaintWindow::doPing() {
+	pingProces = new QProcess;
+	connect( pingProces, SIGNAL(readyReadStandardOutput()), this, SLOT(odczytajWynikPingu()) );
+	pingProces->start("/bin/ping", QStringList() << "-c 1" << Singleton::use().adres_ip, QIODevice::ReadOnly);
+}
+void PaintWindow::odczytajWynikPingu() {
+	kod_powrotu_pingu = pingProces->exitStatus();
+	wynik_pingu = pingProces->readAll();
+	pingProces->close();
+	
+	printf ("PING: %d\n\n------------\n%s------------\n\n", kod_powrotu_pingu, wynik_pingu.toUtf8().constData() );
+	if (kod_powrotu_pingu == 0) {
+		pasek_statusu->showMessage("Host osiągalny");
+	} else {
+		pasek_statusu->showMessage("Host nie osiągalny");
+	}
+}
+
+PaintWindow::PaintWindow(QWidget * parent, Qt::WFlags f):QMainWindow(parent, f) {
+	// skonfigurowanie interfeju w oparciu o obiekt klasy wygenerowanej na podstawie pliku .ui
+	interfejs.setupUi(this);
+	
+	/// OBRAZEK przez HTTP
+	// sprawdzamy czy jest obrazek gdy nie ma pobieramy przez http
+	plik_obrazka = new QFile(_OBRAZEK_);
+	if (! plik_obrazka->exists()) {
+		// otwieramy plik do zapisu
+		plik_obrazka->open(QIODevice::WriteOnly);
+		
+		// tworzymy QHttp i powiązujemy sygnał done
+		http = new QHttp(this);
+		connect(http, SIGNAL( done(bool) ), this, SLOT( zakonczonoPobieraniePliku() ));
+		
+		// ustawiamy host
+		http->setHost("www.google.com");
+		// wysyłamy żadanie http GET,
+		// bardziej zaawansowane operacje na nagłówkach umożliwia nam QHttpRequestHeader
+		http->get("/images/logo.gif", plik_obrazka);
+		
+		trawa_pobieranie = true;
+		info = new QMessageBox("Please wait ...", "Proszę czekać na pobranie pliku", QMessageBox::Information,\
+			QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
+		info->setModal(false);
+		while(trawa_pobieranie)
+			info->exec();
+	}
+	
+	/// RYSOWANIE po okienku
+	/// wiele przykładów jak co rysować w http://doc.trolltech.com/qpainter.html
+	
+	// załadowanie obrazka
+	obrazek = new QImage(_OBRAZEK_);
+	
+	// pędzelek i rysik
+	pedzel = new QBrush(QColor(255,83,24,125));
+	rysik = new QPen(*pedzel, 16);
+	
+	// robimy rysunek
+	rysunek = new QPicture();
+	QPainter pole_rysunku;
+	// przywiązanie pola po którym rysujemy do naszego rysunku
+	pole_rysunku.begin(rysunek);
+	// ustawiamy rysik i rysujemy elipsę
+	pole_rysunku.setPen(*rysik);
+	pole_rysunku.drawEllipse(10,20, 180,70);
+	// zmieniamy rysik na predefiniowany i rysujemy prostą
+	pole_rysunku.setPen(Qt::green);
+	pole_rysunku.drawLine(QPoint(0,0), QPoint(40,30));
+	// zmieniamy rysik na oparty na predefiniownym pędzlu i zadanej grubości
+	// i rysujemy kolejną linię
+	// warto zauważyć że po wstawieniu tego obrazka wszystkie pozycje są wyrażone
+	// względem punktu wstawienia, ale rysunek nie ma ograniczenia rozmiarowego
+	// (jest tak duży jak narysujemy)
+	pole_rysunku.setPen(QPen(Qt::red, 5));
+	pole_rysunku.drawLine(QPoint(40,30), QPoint(60,-30));
+	// kończymy przygotowywanie naszego rysunku
+	pole_rysunku.end();
+	
+	// zmieniamy pedzelek i rysik
+	pedzel->setTextureImage(*obrazek);
+	// jak dalej zobaczymy możemy pisać przy pomocy obrazka 9tekstury0 ...
+	rysik->setBrush(*pedzel);
+	
+	/// RYSOWANIE w QGraphicsView
+	/// wiele przykładów i dokładny opis w http://doc.trolltech.com/graphicsview.html
+	
+	QGraphicsScene *scenka = new QGraphicsScene();
+	scenka->addRect(QRectF(0, 0, 100, 100));
+	kolko = scenka->addEllipse(QRectF(0, 0, 100, 100), QPen(Qt::red, 5));
+	
+	interfejs.graphicsView->setScene(scenka);
+	interfejs.graphicsView->show();
+	
+	/// można też programować w qt WIELOWATKOWO
+	
+	// wątek informacji i rzeczy z nim związne
+	watek = new InfoThread();
+	connect(watek, SIGNAL( putNewValue(QString, double) ), this, SLOT( printNewValue(QString, double) ));
+	// gdyby nie to że chcemy ukryć pole tekstowe można by od razu wywolać sloty terminate oraz start z watek
+	connect(interfejs.radio_stop, SIGNAL( clicked(bool) ), this, SLOT( terminateInfoThread() ));
+	connect(interfejs.radio_start, SIGNAL( clicked(bool) ), this, SLOT( startInfoThread() ));
+	// zaznaczamy przycisk radio - umieszczenie zespołu tych przycisków w ramce
+	// gwarantuje że zaznaczony może być conajwyżej jeden
+	interfejs.radio_start->setChecked(true);
+	watek->start();
+	
+	/// MENU TRYBU SIECIOWEGO
+	connect(interfejs.actionRun, SIGNAL( triggered() ), this, SLOT( showNetRun() ));
+	
+	/// PASEK NARZEDZI i PASEK STATUSU dla PINGu
+	Singleton::use().adres_ip = "127.0.0.1";
+	Singleton::use().port = 8080;
+	
+	pasek_narzedzi = addToolBar ("Jedyny pasek narzędzi");
+	QAction *action_ping = new QAction(/* tu jako pierwszy argument można podac ikonę, */ "Ping", this);
+	// tak zdefiniowaną akcję możemy też podpinać pod pozycje menu głównego, menu kontekstowego czy przycisków
+	// jest to wygodne przy większych programach gdzie pozwalamy na konigurowanie menu i toolbarów
+	action_ping->setStatusTip ("Wykonuje ping");
+	pasek_narzedzi->addAction( action_ping );
+	connect(action_ping, SIGNAL( triggered() ), this, SLOT( doPing() ));
+	
+	pasek_statusu = statusBar();
+	szczegoly_pingu = new QToolButton();
+	szczegoly_pingu->setText("pokaż wynik pingu");
+	QFont czcionka;
+	czcionka.setPointSize(6);
+	szczegoly_pingu->setFont(czcionka);
+	connect(szczegoly_pingu, SIGNAL( clicked(bool) ), this, SLOT( showPing() ));
+	pasek_statusu->addPermanentWidget(szczegoly_pingu);
+	pasek_statusu->showMessage("Nie wykonano pingu");
+}
+
+// reinterpereyujemy funkcję mousePressEvent klasy QGraphicsView
+// wykorzystywanej do wyświetlania naszego "zaawansowanego" rysunku
+// dzieki temu jesteśmy w stanie przechwycić zdarzenia związane kliknięciem na nim myszą
+void QGraphicsView::mousePressEvent (QMouseEvent *event) {
+	// pozycja trafienia
+	QPoint pozycja = event->pos();
+	QPointF pozycja2 = this->mapToScene(pozycja);
+	printf( "Klikneliśmy w (%d, %d) czyli na obrazek na graphicsView w (%f, %f)\n",\
+		pozycja.x(), pozycja.y(), pozycja2.x(), pozycja2.y() );
+	
+	// w co trafilismy
+	QList<QGraphicsItem *> trafione = items(event->pos());
+		// uwaga używamy pozycji wględem okna a nie sceny !!!
+	for (int i = 0; i<trafione.size(); i++) {
+		if (trafione[i] == kolko)
+			puts("trafiliśmy w kółko");
+	}
+}
+
+// funkcja przerysowująca okienko gdy zachodzi taka potrzeba ...
+// w niej należy umieszczać rysowanie po okienku
+// ze względów wydajnościowych wartio korzystać z rysowania przygotowanych wcześniej rysunków
+void PaintWindow::paintEvent(QPaintEvent *) {
+	QPainter painter(this);
+	
+	//wyświetlamy napis
+	painter.setPen(*rysik);
+	painter.setFont(QFont("Times", 44));
+	painter.drawText(QPoint( 280, 80 ), "Ala ma kota");
+	
+	// rysujemy wczytany obrazek
+	painter.drawImage(QPoint( 320, 120 ), *obrazek);
+	
+	// rysujemy przygotowany wcześniej rysunek
+	painter.drawPicture(QPoint( 280, 160 ), *rysunek);
+}

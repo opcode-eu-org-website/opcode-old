@@ -1,0 +1,25 @@
+<?php
+header("Content-Type: application/xhtml+xml; charset=utf-8", 1);
+header("HTTP/1.0 404 Not Found", 1);
+header("Status: 404 Not Found", 1);
+echo "<?xml version=\"1.0\" encoding=\"utf-8\" ?>";
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl">
+<head>
+	<title>HTTP 404 error (www.dir.edu.pl)</title>
+</head><body>
+
+<h1>HTTP 404 error (Not Found)</h1>
+
+<p>Strona o podanym adresie URL nie istnieje</p>
+<p>Zapraszamy na <a href="/">stronę główną</a>.</p>
+<?php if ($debug) {
+	echo '<pre style="font-size:xx-small;">Informacje techniczne:' . "\n";
+	echo " FULL REQUEST_URI: " . $_SERVER['REQUEST_URI'] . "\n";
+	echo " MODE: " . $MODE . "\n";
+	echo " VOLUME_WHERE_CLAUSE: " .$VOLUME_WHERE_CLAUSE . "\n";
+	echo " SQL: " . $SQL . "\n";
+	echo '</pre>';
+} ?>
+</body></html>

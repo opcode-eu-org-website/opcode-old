@@ -1,0 +1,131 @@
+#include "timer_window.h"
+#include "config_window.h"
+
+// funkcja którą powiążemy z sygnałem generowanym przez upływ timera
+void TimerWindow::TimerTick() {
+	// aktualna data i czas
+	QDateTime teraz = QDateTime::currentDateTime();
+
+	// aktualizacja wypisanego czasu
+	interfejs.lab_sekundy->setText(QString::number(teraz.secsTo(deadline)));
+	
+	// obsługa paska postępu
+	if (wzrost)
+		progress += 4;
+	else
+		progress -= 4;
+	
+	if (progress >= 100) {
+		interfejs.progressBar->setInvertedAppearance(true);
+		wzrost=false;
+	} else if (progress <= 0) {
+		interfejs.progressBar->setInvertedAppearance(false);
+		wzrost=true;
+	}
+	
+	interfejs.progressBar->setValue(progress);
+	
+	
+	// ponowne wystartowanie timera (zadziała za 200ms)
+	timer->start( 100 );
+}
+
+// funkcja wyświetlająca okno konfiguracji
+void TimerWindow::ShowConfig() {
+	ConfigWindow okno_konfiguracji(0, 0);
+	okno_konfiguracji.show();
+	okno_konfiguracji.exec();
+}
+
+// funkcja (zdarzenie) reagująca na kliknięcie - wyświetla menu
+void TimerWindow::mousePressEvent(QMouseEvent *e) {
+	if (e->button() == Qt::RightButton) {
+		if (timer->isActive()) {
+			act_start->setEnabled(false);
+			act_stop->setEnabled(true);
+		} else {
+			act_start->setEnabled(true);
+			act_stop->setEnabled(false);
+		}
+		menu_podreczne->exec(e->globalPos());
+	}
+}
+
+// funkcja (zdarzenie) reagująca na próbę zamknięcia oknienka
+void TimerWindow::closeEvent(QCloseEvent *event) {
+	// jeżeli nie wyrażono zgody - brak potwierdzenia to nie zamykamy
+	if (can_close) {
+		event->accept();
+	} else {
+		if (QMessageBox::Yes == QMessageBox::question (this,
+			"Potwierdzenie", "Czy napewno zakończyć program ?",
+			QMessageBox::Yes | QMessageBox::No, QMessageBox::No)) {
+				StopApp(); // w zasadzie wystarczyłoby tu qApp->quit();
+				// użycie qApp->quit(); w tej funkcji jest konieczne aby zakończyć program
+				// uruchomiony przez .exec() na obiekcie typu QApplication
+				// jeżeli exec był na okienku to wystarcza standardowy close()
+				// który się wykona bez korzystania z tej funkcji jako reakcja
+				// na zamknięcie krzyżykiem (prawda dla Qt::WFlags = Qt::Tool)
+		} else {
+			event->ignore();
+		}
+	}
+}
+
+// funkcja zamykająca program z menu podręcznego
+void TimerWindow::StopApp() {
+	timer->stop();
+	can_close = true;
+	qApp->quit();
+}
+
+// konstruktor
+TimerWindow::TimerWindow(QWidget * parent, Qt::WFlags f):QDialog(parent, f | Qt::Tool) {
+	// skonfigurowanie interfeju w oparciu o obiekt klasy wygenerowanej na podstawie pliku .ui
+	interfejs.setupUi(this);
+	
+	// określenie czasu końca i jego wyświetlenie w Label
+	deadline = QDateTime(QDate(2007, 12, 14), QTime(23, 59, 59));
+	interfejs.lab_data->setText(deadline.toString("(d MMMM hh:mm)"));
+	
+	// inicjalizacja zmiennych dla paska postępu
+	progress=0;
+	wzrost=true;
+	
+	// obsługa startu timera + powiązanie sygnału emiotowanego przez timer z TimerTick()
+	timer = new QTimer(this);
+	connect( timer, SIGNAL(timeout()), this, SLOT(TimerTick()) );
+	timer->start( 100 );
+	/* w powyższym kodzie widzimy zastosowanie systemu sygnałów biblioteki Qt
+	   dokonane jest tutaj powiązanie sygnału timeout generowanego przez obiekt timer
+	   z slotem (funkcją) TimerTick bierzacego obiektu
+	
+	   jest to pewnego rodzaju implementacja wzorca obserwatora,
+	   inne tego typu rozwiązanie znaleźć można w bibliotece boost */
+	
+	// obsługa menu
+	menu_podreczne = new QMenu(this);
+	
+	act_start = new QAction ("Start", this);
+	menu_podreczne->addAction (act_start);
+	// sygnał przesyłany bezpośrednio do timera
+	connect( act_start, SIGNAL(triggered()), timer, SLOT(start()) );
+	
+	act_stop = new QAction ("Stop", this);
+	menu_podreczne->addAction (act_stop);
+	connect( act_stop, SIGNAL(triggered()), timer, SLOT(stop()) );
+	
+	menu_podreczne->addSeparator();
+	
+	act_config = new QAction ("Konfiguracja", this);
+	menu_podreczne->addAction (act_config);
+	connect( act_config, SIGNAL(triggered()), this, SLOT(ShowConfig()) );
+	
+	menu_podreczne->addSeparator();
+	act_exit = new QAction ("Wyjście", this);
+	menu_podreczne->addAction (act_exit);
+	connect( act_exit, SIGNAL(triggered()), this, SLOT(StopApp()) );
+	
+	// nie pozwalamy na zamykanie
+	can_close = false;
+}

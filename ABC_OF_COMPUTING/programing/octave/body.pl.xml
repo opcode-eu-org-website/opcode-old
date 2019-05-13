@@ -1,0 +1,187 @@
+<article>
+<title>GNU Octave</title>
+
+<p><wiki pl="GNU Octave">GNU Octave</wiki> jest środowiskiem obliczeń kompatybilnym z MatLabem. Poniżej kilka podstaw dotyczących analizy danych w tym środowisku (tworzenie histogramu):</p><pre>
+# ładujemy plik z danymi
+load wynik.dat
+
+# rysowanie zwykłego wykresu (x z kolumny 1, y z kolumny 3
+plot(wynik(:,1),wynik(:,3));
+title("tytul wykresu");
+
+# histogram w oparciu o próbki 1-25000 z kolumny 9
+# przedział histogramowania -400000 do 400000
+# pojedynczy słupek histogramu o szerokości 1000
+hist(wynik(1:25000,9),-400000:1000:400000);
+# opis osi 
+xlabel("czas trwania [ns]");
+ylabel("ilosc przypadkow");
+# zapis do pliku ps
+print("histogram1.ps", "-dps");
+</pre>
+
+
+<subtitle id="zmienne">Podstawy operowania na zmiennych:</subtitle><pre>
+% wszystko od znaku % do końca linii to komentarz
+
+% przypisanie wartości do zmiennej
+a=2*3+1
+
+% liczba zespolona (bez echo na ekran - zapewnia to średnik po komendzie)
+% uwaga: gdy 10*i to nie zadziała jako zespolone gdy zdefiniowaliśmy zmienna i
+z=a+10i;
+
+% część rzeczywista i urojona liczby zespolonej
+real (z)
+imag (z)
+
+% zmienna napisowa
+l='Ala ma kota'
+
+% wczytanie zmiennej z klawiatury
+x=input('napisz: ');
+
+% macierz losowa o wymiarach  2x3 (2 wiersze 3 kolumny)
+m=rand(2,3);
+
+% wyświetlenie
+disp(m)
+disp(sprintf('To %d', real (z)))
+
+% informacje o zmiennych
+who
+whos
+
+% kasowanie zmiennych
+clear m
+clear
+
+% czyszczenie ekranu ...
+clc
+</pre>
+
+<subtitle id="macierze">Podstawy operowania na macierzach:</subtitle><pre>
+% macierz z zerami o wymiarach 5x3
+m=zeros(5,3)
+
+% macierz wypełniona jedynkami
+m=ones(4);
+
+% macierz losowa o rozkładzie normalnym
+m=randn(4)
+
+% jawna deklaracja zawartości macierzy 
+m=[1,2,3;4 5 6]
+
+% macierz z elementami podniesionymi do kwadratu
+m .* m 
+m.^2
+
+% macierz transponowana
+m'
+
+% cala 2 kolumna
+m(:,2)
+% cały pierwszy wiersz
+m(1,:)
+% drugi wiersz, kolumny 2 i 3
+m(2,2:3)
+
+max(m) % wektor z maksymalnymi wartościami z kolumn
+max(max(m)) % == max(m(:))
+
+% podobnie min i sum
+
+% wybór w oparciu o warunek
+find(e&gt;3)
+
+% macierz logiczna na podstawie warunku i macierzy
+c = (e&gt;3)
+
+% macierz pustawa ...
+f = sparse ([4,5], [6,6], [2,3]) % w 6 kolumnie w wierszu 4 wartość 2 a w 5 wartość 3
+full(f) % pełne wypisanie macierzy f - z zerami
+</pre>
+
+<ul>
+	<li>tworzenie macierzy diagonalnej - <code>diag</code></li>
+	<li>górny/dolny trójkąt z macierzy - <code>tril</code> / <code>triu</code></li>
+	<li>ślad macierzy - <code>trace</code></li>
+	<li>wyznacznik macierzy - <code>det</code></li>
+	<li>odwrócenie macierzy - <code>inv</code></li>
+</ul>
+
+<subtitle id="petle">Pętle i instrukcje warunkowe:</subtitle><pre>
+x =0;
+% while
+while x&lt;5
+	x = x+1;
+end
+
+
+% for
+for x=-5:0.1:2
+	a=x^2
+end
+
+% mamy break i return ...
+
+% if
+if x&lt;5
+	a=1
+else if x&lt;8
+	a=2
+else
+	a=3
+end
+
+% switch
+switch x
+	case 1
+		a=2
+	case 3
+		a=1
+	otherwise
+		a=0
+end
+</pre>
+
+<p>Obsługa plików binarnych:</p><pre>
+plik = fopen("'nazwa', 'rb')
+autor =fread(plik,80,'char')
+char(autor)
+cahr(autor(1)) ...
+dzien=fread(plki,1,'int')
+
+% aby cofnąć / przejść do przodu (o 20):
+
+fseek(plik,20,0)
+
+pomiar=fread(plik,1000,'int')
+</pre>
+
+
+<subtitle id="inne">Inne przydatne informacje:</subtitle><ul>
+	<li>pomoc na temat funkcji <var>f</var> - <code>help <var>f</var></code></li>
+	<li>deklarowanie funkcji - funkcje stanowią pliki .m, wszystkie komentarze do pierwszej pustej linii stanowią dokumentację (treść pomocy), można dodatkowo skorzystać z konstrukcji <code>function [<var>suma</var>,<var>iloczyn</var>] = zad_30licz(<var>n1</var>, <var>n2</var>, <var>plik</var>)</code> aby zadeklarować wektor wyjściowy oraz argumenty funkcji</li>
+	<li>deklarowanie funkcji ("inline") - <code>suma = @(x,y) x+y;</code></li>
+</ul><ul>
+	<li>znajdowanie minimów funkcji <var>sin(x)</var> dla zakresu od <var>0</var> do <var>3</var> - <code>fminbnd(<var>'sin(x)'</var>, <var>0</var>, <var>3</var>)</code></li>
+	<li>znajdowanie miejsca zerowego funkcji, szukanie zaczynamy od <var>5</var>- <code>fzero(<var>'sin(x)'</var>, <var>5</var>)</code></li>
+	<li>znajdowanie miejsc zerowych wielomianu - <code>p=[-3,0,1,0,-1]; roots(p); % -3x^4 + x^2 - 1</code></li>
+</ul><ul>
+	<li>suma elementów wektora <var>w</var> - <code>sum(<var>w</var>)</code></li>
+	<li>iloczyn elementów wektora <var>w</var> - <code>prod(<var>w</var>)</code></li>
+	<li>średnia elementów wektora <var>w</var> - <code>mean(<var>w</var>)</code></li>
+	<li>odchylenie standardowe elementów wektora <var>w</var> - <code>std(<var>w</var>)</code></li>
+</ul><ul>
+	<li>interpolacja - <code>interp1</code></li>
+	<li>aproksymacja (wielomianowa) - <code>polyfit()</code> oraz <code>polyval()</code></li>
+	<li>eliminacja Gaussa - <code>lu()</code></li>
+</ul><ul>
+	<li>pomiar czasu - wyzerowanie i włączenie stopera - <code>tic</code></li>
+	<li>pomiar czasu - wypisanie wartości stopera - <code>toc</code></li>
+</ul>
+
+<p>Zobacz w Sieci: <doc url="http://www.igf.fuw.edu.pl/ZOI/Matlab/">Matlab @ FUW</doc></p>
+</article>

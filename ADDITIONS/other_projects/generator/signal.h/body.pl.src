@@ -1,0 +1,20 @@
+#ifndef _SIGNAL_H
+#define _SIGNAL_H
+
+#include <inttypes.h>
+
+#include "config.h"
+
+typedef struct signal_t {
+	int num_of_sample;
+	int16_t *data;
+} signal_t;
+#define SIGNAL_DATA_MAX 32767
+#define ALLOC_SIGNAL_DATA(a) malloc(a.num_of_sample*2)
+#define CONVERT_TO_SIGNAL(a) (int16_t)(a*SIGNAL_DATA_MAX)
+
+void run_calc(config_t *config, signal_t *signal);
+signal_t signal_prepare(config_t *config);
+void signal_free(signal_t *signal);
+
+#endif

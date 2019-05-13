@@ -1,0 +1,131 @@
+<?php
+	$HOST = strtr($_GET["id"], ";'\"$%", "_____");
+?>
+<html>
+<head>
+	<title>Odczyty z analizatora <?php echo $HOST; ?></title>
+	<style type="text/css">
+	/* <![CDATA[ */
+	body { background-color: #F5F5F5; }
+	table { background-color: #808080; margin-top:10pt; }
+	td { background-color: #E0E0E0; text-align:right; }
+	th { background-color: white; font-weight:bold; text-align:center; }
+	/* ]]> */
+	</style>
+</head>
+<body>
+<h1 style="text-align:center">Odczyty z analizatora <?php echo $HOST; ?></h1>
+<?php
+	$db_host = "localhost";
+	$db_database="zabbix";
+	$db_user="zabbix";
+	$db_pass="rmc490adKz0H";
+	
+	mysql_connect($db_host, $db_user, $db_pass);
+	mysql_select_db($db_database);
+	
+	$max_time = 0;
+	$min_time = 0xffffffff;
+	$cur_time=time();
+	
+	$values = array();
+	$item_cnt = 0;
+	$graph = 0;
+
+	// dane
+	$sql = "SELECT v.clock, i.itemid, i.key_, v.value FROM hosts h JOIN items i JOIN history v ON (i.hostid=h.hostid AND v.itemid = i.itemid AND v.clock = i.lastclock AND h.host='" . $HOST . "');";
+	$query = mysql_db_query($db_database, $sql) or die();
+	while ($item = mysql_fetch_array($query)) {
+		$item_cnt++;
+		if ($item["clock"] > $max_time)
+			$max_time = $item["clock"];
+		if ($item["clock"] < $min_time)
+			$min_time = $item["clock"];
+		
+		$values[ $item["key_"] ] = $item["value"];
+		if ($item["key_"] == "pm710.1006")
+			$graph = $item["itemid"];
+	}
+
+	// identyfikator wykresu
+	$sql = "SELECT DISTINCT g.graphid FROM graphs_items gi JOIN graphs g ON (gi.graphid=g.graphid) WHERE g.name='PM710 - moce calkowite' AND itemid=$graph;";
+	$query = mysql_db_query($db_database, $sql) or die();
+	while ($item = mysql_fetch_array($query)) {
+		$graph = $item["graphid"];
+	}
+	
+	if ($item_cnt < 99) {
+		echo '	<p style="text-align:center; color:red; font-weight:bold">W bazie znajduej się zbyt mała ilość wartości - niektóre z wartości wyświetlanych jako 0.000 mogą być związane z brakiem odczytu danej wartości</p>' . "\n";
+	}
+	if ($min_time + 60*6 < $cur_time || $max_time + 30 < $cur_time) {
+		echo '	<p style="text-align:center; color:red; font-weight:bold">Niektóre z odczytanych danych moga być nieaktualne !!!</p>' . "\n";
+	}
+?>
+	<p style="text-align:center"><a href="http://baszta.icm.edu.pl/zabbix/charts.php?graphid=<?php echo $graph; ?>">
+		<img src="http://baszta.icm.edu.pl/zabbix/chart2.php?graphid=<?php echo $graph; ?>&amp;width=550&amp;height=160&amp;period=43200" alt="moce calkowite" />
+	</a></p>
+	
+	<center><table width="80%">
+		<tr><th width="33%"></th><th width="22%">calkowitej [kWh]</th><th width="22%">pozornej [kVAh]</th><th width="22%">biernej [kVARh]</th></tr>
+		<?php printf("<tr><th>Zużycie energii</th><td>%.3f</td><td>%.3f</td><td>%.3f</td></tr>\n", $values["pm710.1000"]/1000, $values["pm710.1002"]/1000, $values["pm710.1004"]/1000); ?>
+	</table></center>
+	
+	<center><table width="80%">
+		<tr><th width="33%"></th><th width="22%">minimalne</th><th width="22%">aktualne</th><th width="22%">maksymalne</th></tr>
+<?php
+	printf("\t\t<tr><th>Moc rzeczywista [kW]         </th><td>%.3f</td><td>%.3f</td><td>%.3f</td></tr>\n", $values["pm710.1104"]/1000, $values["pm710.1006"]/1000, $values["pm710.1154"]/1000);
+	printf("\t\t<tr><th>Moc pozorna [kVA]            </th><td>%.3f</td><td>%.3f</td><td>%.3f</td></tr>\n", $values["pm710.1106"]/1000, $values["pm710.1008"]/1000, $values["pm710.1156"]/1000);
+	printf("\t\t<tr><th>Moc bierna [kVAR]            </th><td>%.3f</td><td>%.3f</td><td>%.3f</td></tr>\n", $values["pm710.1108"]/1000, $values["pm710.1010"]/1000, $values["pm710.1158"]/1000);
+	printf("\t\t<tr><th>Współczynnik mocy            </th><td>%.3f</td><td>%.3f</td><td>%.3f</td></tr>\n", $values["pm710.1110"], $values["pm710.1012"], $values["pm710.1160"]);
+	printf("\t\t<tr><th>Częstotliwość [Hz]           </th><td>%.3f</td><td>%.3f</td><td>%.3f</td></tr>\n", $values["pm710.1112"], $values["pm710.1020"], $values["pm710.1162"]);
+	printf("\t\t<tr><th>Napięcie miedzyfazowe A-B [V]</th><td>%.3f</td><td>%.3f</td><td>%.3f</td></tr>\n", $values["pm710.1128"], $values["pm710.1054"], $values["pm710.1178"]);
+	printf("\t\t<tr><th>Napięcie miedzyfazowe B-C [V]</th><td>%.3f</td><td>%.3f</td><td>%.3f</td></tr>\n", $values["pm710.1130"], $values["pm710.1056"], $values["pm710.1180"]);
+	printf("\t\t<tr><th>Napięcie miedzyfazowe C-A [V]</th><td>%.3f</td><td>%.3f</td><td>%.3f</td></tr>\n", $values["pm710.1132"], $values["pm710.1058"], $values["pm710.1182"]);
+?>
+	</table></center>
+
+	<center><table width="80%">
+	<tr><th width="33%"></th><th width="13%">faza A</th><th width="13%">faza B</th><th width="13%">faza C</th><th width="13%">neutralny</th><th width="13%">3 fazy</th></tr>
+<?php
+	printf("\t\t<tr><th>Moc rzeczywista [kW]         </th><td>%.3f</td><td>%.3f</td><td>%.3f</td><td></td><td>%.3f</td></tr>\n",
+	                                               $values["pm710.1066"]/1000, $values["pm710.1068"]/1000, $values["pm710.1070"]/1000, $values["pm710.1006"]/1000);
+	printf("\t\t<tr><th>Moc pozorna [kVA]            </th><td>%.3f</td><td>%.3f</td><td>%.3f</td><td></td><td>%.3f</td></tr>\n",
+	                                               $values["pm710.1072"]/1000, $values["pm710.1074"]/1000, $values["pm710.1076"]/1000, $values["pm710.1008"]/1000);
+	printf("\t\t<tr><th>Moc bierna [kVAR]            </th><td>%.3f</td><td>%.3f</td><td>%.3f</td><td></td><td>%.3f</td></tr>\n",
+	                                               $values["pm710.1078"]/1000, $values["pm710.1080"]/1000, $values["pm710.1082"]/1000, $values["pm710.1010"]/1000);
+	printf("\t\t<tr><th>Prąd [A]                     </th><td>%.3f</td><td>%.3f</td><td>%.3f</td><td>%.3f</td><td>%.3f</td></tr>\n",
+	                                               $values["pm710.1034"], $values["pm710.1036"], $values["pm710.1038"], $values["pm710.1040"], $values["pm710.1018"]);
+	printf("\t\t<tr><th>Napięcie [V]                 </th><td>%.3f</td><td>%.3f</td><td>%.3f</td><td></td><td>%.3f</td></tr>\n",
+	                                               $values["pm710.1060"], $values["pm710.1062"], $values["pm710.1064"], $values["pm710.1016"]);
+	
+	printf("\t\t<tr><th>Minimalny prąd [A]           </th><td>%.3f</td><td>%.3f</td><td>%.3f</td><td>%.3f</td><td></td></tr>\n",
+	                                               $values["pm710.1114"], $values["pm710.1116"], $values["pm710.1118"], $values["pm710.1120"]);
+	printf("\t\t<tr><th>Maksymalny prąd [A]          </hd><td>%.3f</td><td>%.3f</td><td>%.3f</td><td>%.3f</td><td></td></tr>\n",
+	                                               $values["pm710.1164"], $values["pm710.1166"], $values["pm710.1168"], $values["pm710.1170"]);
+	printf("\t\t<tr><th>Minimalne napięcie [V]       </th><td>%.3f</td><td>%.3f</td><td>%.3f</td><td></td><td></td></tr>\n",
+	                                               $values["pm710.1122"], $values["pm710.1124"], $values["pm710.1126"]);
+	printf("\t\t<tr><th>Maksymalne napięcie [V]      </hd><td>%.3f</td><td>%.3f</td><td>%.3f</td><td></td><td></td></tr>\n",
+	                                               $values["pm710.1172"], $values["pm710.1174"], $values["pm710.1176"]);
+	
+	printf("\t\t<tr><th>THD w prądzie [%%]            </th><td>%.3f</td><td>%.3f</td><td>%.3f</td><td></td><td></td></tr>\n",
+	                                               $values["pm710.1084"], $values["pm710.1086"], $values["pm710.1088"]);
+	printf("\t\t<tr><th>Minimalne THD w prądzie [%%]  </hd><td>%.3f</td><td>%.3f</td><td>%.3f</td><td></td><td></td></tr>\n",
+	                                               $values["pm710.1134"], $values["pm710.1136"], $values["pm710.1138"]);
+	printf("\t\t<tr><th>Maksymalne THD w prądzie [%%] </th><td>%.3f</td><td>%.3f</td><td>%.3f</td><td></td><td></td></tr>\n",
+	                                               $values["pm710.1184"], $values["pm710.1186"], $values["pm710.1188"]);
+	
+	printf("\t\t<tr><th>THD w napięciu [%%]           </th><td>%.3f</td><td>%.3f</td><td>%.3f</td><td></td><td></td></tr>\n",
+	                                               $values["pm710.1092"], $values["pm710.1094"], $values["pm710.1096"]);
+	printf("\t\t<tr><th>Minimalne THD w napięciu [%%] </th><td>%.3f</td><td>%.3f</td><td>%.3f</td><td></td><td></td></tr>\n",
+	                                               $values["pm710.1142"], $values["pm710.1144"], $values["pm710.1146"]);
+	printf("\t\t<tr><th>Maksymalne THD w napięciu [%%]</th><td>%.3f</td><td>%.3f</td><td>%.3f</td><td></td><td></td></tr>\n",
+	                                               $values["pm710.1192"], $values["pm710.1194"], $values["pm710.1196"]);
+?>	
+	</table></center>
+
+	<p style="text-align:center; color:grey; font-size:small">Aktualny czas: <?php echo strftime("%F %T UTC", $cur_time); ?>
+		&nbsp;&nbsp;&nbsp; Najnowsza wartość: <?php echo strftime("%F %T UTC", $max_time); ?>
+		&nbsp;&nbsp;&nbsp; Najstarsza wartość: <?php echo strftime("%F %T UTC", $min_time); ?>
+	</p>
+</body>
+</html>

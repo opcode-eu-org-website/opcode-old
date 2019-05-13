@@ -1,0 +1,1155 @@
+<dir pdf_base_level="-1" name="" title="OpCode" inmenu="0" art_menu="0">
+	<dir name="electronics" path="ABC_OF_COMPUTING/electronics" title="Elektronika">
+		<file level="1" path="ABC_OF_COMPUTING/electronics/impedancja" />
+		<file level="1" path="ABC_OF_COMPUTING/electronics/gwiazda_trojkat" />
+		<file level="1" path="ABC_OF_COMPUTING/electronics/dzielnik_napiecia" />
+		<file level="1" path="ABC_OF_COMPUTING/electronics/prad_zmienny" />
+		<file level="1" path="ABC_OF_COMPUTING/electronics/superpozycja" />
+		<file level="1" path="ABC_OF_COMPUTING/electronics/zasady" />
+		<file level="1" path="ABC_OF_COMPUTING/electronics/rezystancja_we_wy" />
+		
+		<file level="1" path="ABC_OF_COMPUTING/electronics/diody" />
+		<file level="1" path="ABC_OF_COMPUTING/electronics/tranzystory" />
+		<file level="2" path="ABC_OF_COMPUTING/electronics/tranzystory/fet" />
+		<file level="2" path="ABC_OF_COMPUTING/electronics/tranzystory/mosfet" />
+		<file level="2" path="ABC_OF_COMPUTING/electronics/tranzystory/klucz" />
+		<file level="1" path="ABC_OF_COMPUTING/electronics/tyrystory_i_triaki" />
+		<file level="1" path="ABC_OF_COMPUTING/electronics/inne_elementy" />
+		<file level="1" path="ABC_OF_COMPUTING/electronics/radiatory" />
+		<file level="1" path="ABC_OF_COMPUTING/electronics/kostki" />
+		<file level="1" path="ABC_OF_COMPUTING/electronics/linki" />
+		
+		<dir name="uklady_tranzystorowe" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe" inmenu="..">
+			<file level="1" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/wzmacniacz_we" />
+			<file level="2" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/wzmacniacz_we/obliczenia" />
+			<file level="1" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/wtornik" />
+			<file level="2" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/wtornik/obliczenia" />
+			<file level="1" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/efekt_millera" />
+			<file level="1" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/boot_strap" />
+			<file level="1" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/lustro" />
+			<file level="1" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/wzmacniacz_roznicowy" />
+			<file level="2" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/wzmacniacz_roznicowy/obliczenia" />
+			<file level="1" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/wzmacniacz_operacyjny" />
+			<file level="2" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/wzmacniacz_operacyjny/nadmiar_fazy" />
+			<file level="2" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/wzmacniacz_operacyjny/zasilanie_jednobiegunowe" />
+			<file level="1" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/zrodla_napiecia_i_pradu" />
+			<file level="2" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/zrodla_napiecia_i_pradu/tranzystorowe_zrodlo_pradu" />
+			<file level="2" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/zrodla_napiecia_i_pradu/precyzyjne_zrodlo_pradu" />
+			<file level="2" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/zrodla_napiecia_i_pradu/dioda_zenera" />
+			<file level="2" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/zrodla_napiecia_i_pradu/zrodlo_masy-wirtualnej" />
+			<file level="2" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/zrodla_napiecia_i_pradu/stabilizator_z_wzmacniaczem_bledu" />
+			<file level="2" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/zrodla_napiecia_i_pradu/ogranicznik_nadpradowy" />
+			<file level="2" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/zrodla_napiecia_i_pradu/przetwornica_up" />
+			<file level="2" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/zrodla_napiecia_i_pradu/przetwornica-down" />
+			<file level="1" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/przerzutniki" />
+			<file level="2" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/przerzutniki/bistabilny" />
+			<file level="2" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/przerzutniki/monostabilny" />
+			<file level="2" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/przerzutniki/astabilny" />
+			<file level="2" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/przerzutniki/shmitta" />
+			<file level="2" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/przerzutniki/zewnetrzna_petla" />
+			<file level="2" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/przerzutniki/vco" />
+			<file level="1" path="ABC_OF_COMPUTING/electronics/uklady_tranzystorowe/wzmacniacz_mocy" />
+		</dir>
+		
+		<dir name="programowalne" path="ABC_OF_COMPUTING/digital/programowalne" inmenu="..">
+			<file level="1" path="ABC_OF_COMPUTING/digital/programowalne/systemy_wbudowane" />
+			<file level="1" path="ABC_OF_COMPUTING/digital/programowalne/avr" />
+			<file level="2" path="ABC_OF_COMPUTING/digital/programowalne/avr/potrzebny_sprzet_i_oprogramowanie" />
+			<file level="2" path="ABC_OF_COMPUTING/digital/programowalne/avr/kompilacja" />
+			<file level="2" path="ABC_OF_COMPUTING/digital/programowalne/avr/debugowanie" />
+			<file level="2" path="ABC_OF_COMPUTING/digital/programowalne/avr/nutos" />
+			<dir pdf_base_level="+3" path="ABC_OF_COMPUTING/digital/programowalne/avr/nut_first.c" inmenu="0" />
+			<file level="1" path="ABC_OF_COMPUTING/digital/programowalne/arm_mips" />
+			<file level="1" path="ABC_OF_COMPUTING/digital/programowalne/dsp" />
+			<file level="1" path="ABC_OF_COMPUTING/digital/computers" />
+			<file level="1" path="ABC_OF_COMPUTING/digital/programowalne/linki" />
+			<file level="1" path="ABC_OF_COMPUTING/digital/magistrale" />
+			<file level="1" path="ABC_OF_COMPUTING/digital/interfejsy" />
+			<file level="2" path="ABC_OF_COMPUTING/digital/interfejsy/more" />
+			<file level="2" path="ABC_OF_COMPUTING/digital/interfejsy/konwersje" />
+		</dir>
+		
+		<dir name="theory_of_systems" path="ABC_OF_COMPUTING/digital/theory_of_systems" inmenu="..">
+			<file level="1" path="ABC_OF_COMPUTING/digital/theory_of_systems/minimalizacja" />
+			<file level="1" path="ABC_OF_COMPUTING/digital/theory_of_systems/ekspansja" />
+			<file level="1" path="ABC_OF_COMPUTING/digital/theory_of_systems/redukcja" />
+			<file level="1" path="ABC_OF_COMPUTING/digital/theory_of_systems/dekompozycja" />
+			<file level="1" path="ABC_OF_COMPUTING/digital/theory_of_systems/automaty" />
+			<file level="2" path="ABC_OF_COMPUTING/digital/theory_of_systems/automaty/moora" />
+			<file level="2" path="ABC_OF_COMPUTING/digital/theory_of_systems/automaty/mealyego" />
+			<file level="2" path="ABC_OF_COMPUTING/digital/theory_of_systems/automaty/synchroniczny" />
+			<file level="1" path="ABC_OF_COMPUTING/digital/theory_of_systems/synteza_automatow" />
+			<file level="2" path="ABC_OF_COMPUTING/digital/theory_of_systems/synteza_automatow/minimalizacja_synchroniczne" />
+			<file level="2" path="ABC_OF_COMPUTING/digital/theory_of_systems/synteza_automatow/minimalizacja_asynchroniczne" />
+		</dir>
+	</dir>
+	
+	<dir name="debian_and_posix" path="ABC_OF_COMPUTING/posix">
+		<file level="1" path="ABC_OF_COMPUTING/posix/bash" />
+		<dir path="ABC_OF_COMPUTING/posix/bash/bashrc" inmenu="0" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/bash/stdin_stdout_stderr_pipe" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/bash/laczenie_polecen" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/bash/sterowanie_procesami" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/bash/praca_w_tle" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/bash/znaki_specjalne" />
+		
+		<file level="1" path="ABC_OF_COMPUTING/posix/storage" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/storage/gpt" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/storage/raid_lvm" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/storage/network_file_system" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/storage/multipath" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/storage/scsi" />
+		
+		<file level="1" path="ABC_OF_COMPUTING/posix/ssh" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/ssh/generowanie_kluczy" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/ssh/sftp_mount" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/ssh/tunelowanie" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/ssh/restricted_sftp-ssh" />
+		
+		<file level="1" path="ABC_OF_COMPUTING/posix/podstawy_debiana" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/podstawy_debiana/instalacja_oprogramowania" />
+		
+		<file level="2" path="ABC_OF_COMPUTING/posix/podstawy_debiana/wifi" />
+		<dir pdf_base_level="+3" path="ABC_OF_COMPUTING/posix/podstawy_debiana/wifi/wpa_supplicant.conf" inmenu="0" />
+		<dir pdf_base_level="+3" path="ABC_OF_COMPUTING/posix/podstawy_debiana/wifi/hostapd.conf" inmenu="0" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/podstawy_debiana/mirroring" />
+		
+		<file level="2" path="ABC_OF_COMPUTING/posix/commands/hasla" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/commands/skroty" />
+		
+		<file level="1" path="ABC_OF_COMPUTING/posix/wycinki_z_debian_reference" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/wycinki_z_debian_reference/podstawy_unixa" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/wycinki_z_debian_reference/warto_wiedziec" />
+		<dir pdf_base_level="+3" path="ABC_OF_COMPUTING/posix/wycinki_z_debian_reference/warto_wiedziec/multiscreen.sh" inmenu="0" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/wycinki_z_debian_reference/dla_admina" />
+		
+		<file level="1" path="ABC_OF_COMPUTING/posix/other_os" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/other_os/bsd" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/other_os/solaris" />
+		<file level="2" path="ABC_OF_COMPUTING/posix/other_os/inne" />
+		
+		<file level="1" path="ABC_OF_COMPUTING/posix/linki" />
+	</dir>
+	
+	<menutext><li>Programowanie</li></menutext>
+	<dir name="programing" title="Programowanie" inmenu="0">
+		<dir name="c_cpp" path="ABC_OF_COMPUTING/programing/c_cpp" title="C/C++" inmenu="..">
+			
+			<file level="1" path="ABC_OF_COMPUTING/programing/c_cpp/base_of_C" />
+			<menutext><li class="group_head">podstawy C</li></menutext>
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/base_of_C/podstawy.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/base_of_C/in_out.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/base_of_C/petle.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/base_of_C/wskaznikologia.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/base_of_C/numeracja_ip.c" />
+			
+			<file level="1" path="ABC_OF_COMPUTING/programing/c_cpp/base_of_Cpp" />
+			<menutext><li class="group_head">podstawy C++</li></menutext>
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/base_of_Cpp/in_out.cpp" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/base_of_Cpp/klasy.cpp" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/base_of_Cpp/szablony.cpp" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/base_of_Cpp/napisy.cpp" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/base_of_Cpp/stl.cpp" />
+			
+			<file level="1" path="ABC_OF_COMPUTING/programing/c_cpp/posix" />
+			<menutext><li class="group_head">posix</li></menutext>
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/posix/katalogi.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/posix/unix.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/posix/opcje.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/posix/fork.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/posix/watki.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/posix/watki_clone.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/posix/semafory_posix.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/posix/semafory_ipc.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/posix/tty-listener.c" />
+			
+			<file level="1" path="ABC_OF_COMPUTING/programing/c_cpp/network" />
+			<menutext><li class="group_head">sieć</li></menutext>
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/network/numeracja_ipv6.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/network/nazwy_hostow.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/network/UDP_nadajnik.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/network/UDP_odbiornik.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/network/TCP_serwer.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/network/jabber.cpp" />
+			
+			<file level="1" path="ABC_OF_COMPUTING/programing/c_cpp/misc" />
+			<menutext><li class="group_head">różności</li></menutext>
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/misc/alokacja_pamieci.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/misc/openmp.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/misc/c_lua_api.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/misc/python_api_modul.cpp" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/misc/python_api_modul_test.py" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/misc/python_api_run_from_cpp.cpp" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/misc/python_api_run_from_cpp_script.py" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/misc/wyrazenia_regularne.cpp" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/misc/watki.cpp" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/misc/radiometeor.c" />
+			
+			<file level="1" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface" />
+			<menutext><li class="group_head">interfejs</li></menutext>
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/text_on_framebuffer.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/dsp_gui_gtk.c" />
+			<dir name="dsp_gui_qt">
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/dsp_gui_qt/Makefile" />
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/dsp_gui_qt/dsp_gui_qt.cpp" />
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/dsp_gui_qt/dsp_gui_qt.h" />
+			</dir>
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/Qt_okno_glowne.h" />
+			<dir name="Qt_timer_subwindow_xml">
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/Qt_timer_subwindow_xml/timer_window.h" />
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/Qt_timer_subwindow_xml/timer_window.cpp" />
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/Qt_timer_subwindow_xml/timer_subwindow_xml.cpp" />
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/Qt_timer_subwindow_xml/config_window.h" />
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/Qt_timer_subwindow_xml/config_window.cpp" />
+				<tar name="Qt_timer_subwindow_xml" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/Qt_timer_subwindow_xml/*" />
+			</dir>
+			<dir name="Qt_graphics_net_menu_toolbar">
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/Qt_graphics_net_menu_toolbar/singleton.h" />
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/Qt_graphics_net_menu_toolbar/paint_window.h" />
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/Qt_graphics_net_menu_toolbar/net_window.h" />
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/Qt_graphics_net_menu_toolbar/info_thread.h" />
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/Qt_graphics_net_menu_toolbar/paint_window.cpp" />
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/Qt_graphics_net_menu_toolbar/net_window.cpp" />
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/Qt_graphics_net_menu_toolbar/info_thread.cpp" />
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/Qt_graphics_net_menu_toolbar/graphics_net_menu_toolbar.cpp" />
+				<tar name="Qt_graphics_net_menu_toolbar" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/Qt_graphics_net_menu_toolbar/*" />
+			</dir>
+			<dir name="gui_beos_demo">
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/gui_beos_demo/MyWindow.cpp" />
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/gui_beos_demo/MyWindow.h" />
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/gui_beos_demo/main.cpp" />
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/gui_beos_demo/main.h" />
+			</dir>
+			<tar name="gui_beos_demo" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/gui_beos_demo/*" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/ncurses_1.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/ncurses_2.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/user_interface/ncurses_3.c" />
+			
+			<file level="1" path="ABC_OF_COMPUTING/programing/c_cpp/multimedia" />
+			<menutext><li class="group_head">multimedia</li></menutext>
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/multimedia/dsp.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/multimedia/alsa_copy.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/multimedia/openal.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/multimedia/pokaz_slajdow_sdl.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/multimedia/rysownik_sdl.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/multimedia/obraz_kontrolny.cpp" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/multimedia/read_png.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/multimedia/opengl-main-glut_sdl_glx.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/multimedia/opengl-main-glut.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/multimedia/opengl-init.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/multimedia/opengl-draw-vertex.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/multimedia/opengl-draw-simple.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/multimedia/opengl-draw-light.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/multimedia/opengl-load_shader.c" />
+			<dir pdf_base_level="+2" name="podstawa_silnika_3d">
+				<file path="ABC_OF_COMPUTING/programing/c_cpp/multimedia/podstawa_silnika_3d" />
+				<addtar name="podstawa_silnika_3d/include" path="ABC_OF_COMPUTING/programing/c_cpp/multimedia/podstawa_silnika_3d/include/*" />
+				<addtar name="podstawa_silnika_3d/misc" path="ABC_OF_COMPUTING/programing/c_cpp/multimedia/podstawa_silnika_3d/misc/*" />
+				<addtar name="podstawa_silnika_3d/scene_manager" path="ABC_OF_COMPUTING/programing/c_cpp/multimedia/podstawa_silnika_3d/scene_manager/*" />
+				<addtar name="podstawa_silnika_3d/scene_objects" path="ABC_OF_COMPUTING/programing/c_cpp/multimedia/podstawa_silnika_3d/scene_objects/*" />
+				<tar name="podstawa_silnika_3d" path="ABC_OF_COMPUTING/programing/c_cpp/multimedia/podstawa_silnika_3d/*" />
+			</dir>
+			
+			<file level="1" path="ABC_OF_COMPUTING/programing/c_cpp/hardware" />
+			<menutext><li class="group_head">system i sprzęt</li></menutext>
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/hardware/test_libusb.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/hardware/ups_off.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/hardware/zawieszacz.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/hardware/priorytety.c" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/hardware/czekanie.c" />
+			<dir name="modul">
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/hardware/modul/modul.c" />
+				<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/hardware/modul/Makefile" />
+			</dir>
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/hardware/zabawy_pamiecia.c" />
+			<dir pdf_base_level="+2" name="sterowanie_magnetowidem" title="Sterowanie magnetowidem">
+				<file path="ABC_OF_COMPUTING/programing/c_cpp/hardware/sterowanie_magnetowidem" pdf="no" />
+				<tar name="sterowanie_magnetowidem" path="ABC_OF_COMPUTING/programing/c_cpp/hardware/sterowanie_magnetowidem/*" />
+			</dir>
+			
+			<file level="1" path="ABC_OF_COMPUTING/programing/c_cpp/numerical_analysis" />
+			<menutext><li class="group_head">metody numeryczne</li></menutext>
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/numerical_analysis/wartosci_wlasne.cc" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/numerical_analysis/uklady_rownan.cc" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/numerical_analysis/transformata_fouriera.cc" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/numerical_analysis/sortowanie.cc" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/numerical_analysis/rozniczkowanie.cc" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/numerical_analysis/rownania_rozniczkowe_zwyczajne.cc" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/numerical_analysis/rownania_rozniczkowe_czastkowe.cc" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/numerical_analysis/miejsca_zerowe.cc" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/numerical_analysis/interpolacja.cc" />
+			<dir pdf_base_level="+2" path="ABC_OF_COMPUTING/programing/c_cpp/numerical_analysis/calkowanie.cc" />
+			
+			<file level="1" path="ABC_OF_COMPUTING/programing/c_cpp/links" />
+		</dir>
+		
+		<dir name="bash" path="ABC_OF_COMPUTING/programing/bash" title="Bash" inmenu="..">
+			<file level="1" path="ABC_OF_COMPUTING/programing/bash/zmienne" />
+			<file level="2" path="ABC_OF_COMPUTING/programing/bash/zmienne/zmienne.sh" download="no" />
+			<file level="1" path="ABC_OF_COMPUTING/programing/bash/petle" />
+			<file level="2" path="ABC_OF_COMPUTING/programing/bash/petle/for.sh" download="no" />
+			<file level="2" path="ABC_OF_COMPUTING/programing/bash/petle/masowa_edycja_pklikow" />
+			<file level="2" path="ABC_OF_COMPUTING/programing/bash/petle/case_if.sh" download="no" />
+			<file level="1" path="ABC_OF_COMPUTING/programing/bash/sterowanie_terminalem" />
+			<file level="1" path="ABC_OF_COMPUTING/programing/bash/funkcje" />
+			<file level="2" path="ABC_OF_COMPUTING/programing/bash/funkcje/function.sh" download="no" />
+			<file level="1" path="ABC_OF_COMPUTING/programing/bash/opcje" />
+			<file level="2" path="ABC_OF_COMPUTING/programing/bash/opcje/opcje.sh" download="no" />
+			<file level="1" path="ABC_OF_COMPUTING/programing/bash/linki" />
+			
+			<dir name="shell_script" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/" title="drobne skrypty shellowe" inmenu="../..">
+				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/progress_bar.sh" />
+				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/kamera.sh" />
+				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/add_md5_to_pdf.sh" />
+				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/arp_log.sh" />
+				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/fs_backup.sh" />
+				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/mysql_backup.sh" />
+				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/ntpdate_cron.sh" />
+				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/beos_mail2mbox.sh" />
+				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/net_stat.sh" />
+				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/install_dom0.sh" />
+				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/smtp.sh" />
+				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/send_sms.sh" />
+				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/sshfs-via-tunel-mount.sh" />
+				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/tunel_ssh_over_vlan.sh" />
+				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/alarm.sh" />
+				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/zegar.sh" />
+			</dir>
+		</dir>
+		<dir name="awk" path="ABC_OF_COMPUTING/programing/awk" title="(G)AWK" inmenu="..">
+			<file level="1" path="ABC_OF_COMPUTING/programing/awk/heloworld.awk" download="no" />
+			<file path="ABC_OF_COMPUTING/programing/awk/_1" />
+			<file level="1" path="ABC_OF_COMPUTING/programing/awk/heloworld2.awk" download="no" />
+			<file path="ABC_OF_COMPUTING/programing/awk/_2" />
+			<file level="1" path="ABC_OF_COMPUTING/programing/awk/zmienne_funkcje_i_tablice.awk" download="no" />
+			<file path="ABC_OF_COMPUTING/programing/awk/_3" />
+			<file level="1" path="ABC_OF_COMPUTING/programing/awk/linki" />
+		</dir>
+		
+		<dir name="php" path="ABC_OF_COMPUTING/programing/php" title="PHP" inmenu="..">
+			<file level="1" path="ABC_OF_COMPUTING/programing/php/tablica.php" download="no" />
+			<file path="ABC_OF_COMPUTING/programing/php/_koncowka" />
+			<file level="1" path="ABC_OF_COMPUTING/programing/php/linki" />
+		</dir>
+		<dir name="databases" path="ABC_OF_COMPUTING/programing/databases" title="Bazy danych" inmenu="..">
+			<file level="1" path="ABC_OF_COMPUTING/programing/databases/sql" />
+		</dir>
+		
+		<dir name="xml_xsl_itp" path="ABC_OF_COMPUTING/programing/xml_xsl_itp" title="XML, XSL itp" inmenu=".." />
+		<dir name="latex" path="ABC_OF_COMPUTING/programing/latex" title="TeX i LaTeX" inmenu="..">
+			<file level="1" path="ABC_OF_COMPUTING/programing/latex/office.cls" />
+			<file level="1" path="ABC_OF_COMPUTING/programing/latex/office-demo.tex" />
+			<file level="1" path="ABC_OF_COMPUTING/programing/latex/linki" />
+		</dir>
+			
+		<dir name="vhdl" path="ABC_OF_COMPUTING/programing/vhdl" title="VHDL" inmenu="..">
+			<dir path="ABC_OF_COMPUTING/programing/vhdl/vhdl-build.sh" />
+			<dir path="ABC_OF_COMPUTING/programing/vhdl/tester.vhdl" />
+			<dir path="ABC_OF_COMPUTING/programing/vhdl/rejestr_przesuwny.vhdl" />
+			<dir path="ABC_OF_COMPUTING/programing/vhdl/przerzutnik.vhdl" />
+			<dir path="ABC_OF_COMPUTING/programing/vhdl/nor.vhdl" />
+			<dir path="ABC_OF_COMPUTING/programing/vhdl/multiplexer.vhdl" />
+			<dir path="ABC_OF_COMPUTING/programing/vhdl/multiplexer_3to1.vhdl" />
+			<dir path="ABC_OF_COMPUTING/programing/vhdl/moj_pakiet.vhdl" />
+			<dir path="ABC_OF_COMPUTING/programing/vhdl/automat.vhdl" />
+		</dir>
+		
+		<dir name="theory_of_computer_science" path="ABC_OF_COMPUTING/programing/theory_of_computer_science" title="Teoria informatyki" inmenu="..">
+			<file level="1" path="ABC_OF_COMPUTING/programing/theory_of_computer_science/algorytmy_i_struktury_danych" />
+			<file level="2" path="ABC_OF_COMPUTING/programing/theory_of_computer_science/algorytmy_i_struktury_danych/sortowanie" />
+			<file level="2" path="ABC_OF_COMPUTING/programing/theory_of_computer_science/algorytmy_i_struktury_danych/grafy" />
+			<file level="2" path="ABC_OF_COMPUTING/programing/theory_of_computer_science/algorytmy_i_struktury_danych/drzewa" />
+			<file level="1" path="ABC_OF_COMPUTING/programing/theory_of_computer_science/neural_network" />
+		</dir>
+		
+		<dir name="debuging" title="Debugowanie" inmenu="..">
+			<file level="1" path="ABC_OF_COMPUTING/programing/tools4programmers/gdb" />
+			<file level="1" path="ABC_OF_COMPUTING/programing/tools4programmers/gprof" />
+			<file level="1" path="ABC_OF_COMPUTING/programing/tools4programmers/linking_libs" />
+		</dir>
+		
+		<dir name="more" title="więcej o programowaniu" path="ABC_OF_COMPUTING/programing" inmenu="..">
+			<soft_db level="1" name="programistyczne_i_skryptowe" />
+			
+			<dir name="perl" path="ABC_OF_COMPUTING/programing/perl" title="Perl" />
+			<dir name="lua" path="ABC_OF_COMPUTING/programing/lua" title="Lua">
+				<file level="1" path="ABC_OF_COMPUTING/programing/lua/skrypt.lua" download="no" />
+				<dir path="ABC_OF_COMPUTING/programing/lua/c_lua_api.lua" inmenu="0" />
+			</dir>
+			<dir name="ruby" path="ABC_OF_COMPUTING/programing/ruby" title="Ruby">
+				<file level="1" path="ABC_OF_COMPUTING/programing/ruby/przyklad.ruby" download="no" />
+			</dir>
+			<dir name="tcl_tk" path="ABC_OF_COMPUTING/programing/tcl_tk" title="Tcl/Tk">
+				<file level="1" path="ABC_OF_COMPUTING/programing/tcl_tk/przykład.tcl" download="no" />
+			</dir>
+			<dir name="erlang" path="ABC_OF_COMPUTING/programing/erlang" title="Erlang" />
+			<dir name="octave" path="ABC_OF_COMPUTING/programing/octave" title="Octave (matlab)" />
+			<dir name="gnuplot" path="ABC_OF_COMPUTING/programing/gnuplot" >
+				<file level="1" path="ABC_OF_COMPUTING/programing/gnuplot/moce.plot" download="no" />
+			</dir>
+			
+			<dir name="systemy_kontroli_wersji" path="ABC_OF_COMPUTING/programing/tools4programmers/systemy_kontroli_wersji" title="Systemy kontroli wersji">
+				<file level="1" path="ABC_OF_COMPUTING/programing/tools4programmers/systemy_kontroli_wersji/svn" />
+				<file level="1" path="ABC_OF_COMPUTING/programing/tools4programmers/systemy_kontroli_wersji/bzr" />
+				<file level="1" path="ABC_OF_COMPUTING/programing/tools4programmers/systemy_kontroli_wersji/git" />
+			</dir>
+		
+			<dir name="links" path="ABC_OF_COMPUTING/programing/linki" title="linki" />
+		</dir>
+		
+	</dir>
+
+	<!--
+	<dir name="installations" path="ABC_OF_COMPUTING/buildings_and_installations/" title="Instalacje i budynki">
+		<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/topology" />
+		<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/cable_ducts" />
+		<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/distribution_points" />
+		<file level="2" path="ABC_OF_COMPUTING/buildings_and_installations/distribution_points/19inch_rack" />
+		<file level="2" path="ABC_OF_COMPUTING/buildings_and_installations/distribution_points/electrical" />
+		<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/general_notes" />
+		
+		<dir name="electrical" path="ABC_OF_COMPUTING/buildings_and_installations/electrics" inmenu="..">
+			<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/electrics/odbiory_koncowe" />
+			<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/electrics/rozdzielnia_glowna" />
+			<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/electrics/uklady_sieci" />
+			<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/electrics/prad_zwarciowy" />
+			<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/electrics/obwody_pradu_zmiennego" />
+			<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/electrics/zabezpieczenia_przepieciowe" />
+			<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/electrics/linki" />
+		</dir>
+		
+		<dir name="monitoring_and_security" title="Monitoring i bezpieczeństwo" inmenu="..">
+			<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/control" />
+			<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/security" />
+		</dir>
+		
+		<dir name="projects_and_realization" path="ABC_OF_COMPUTING/buildings_and_installations/projects_and_realization" title="Projektowanie i wykonawstwo" inmenu="..">
+			<dir name="wytyczne-serwerownia" path="ABC_OF_COMPUTING/buildings_and_installations/projects_and_realization/wytyczne-serwerownia" inmenu="0" />
+		</dir>
+	</dir>
+	-->
+	
+	<dir name="usage_and_config" title="Użytkowanie i konfiguracja" >
+		<dir level="1" path="ABC_OF_COMPUTING/posix/commands" title="Podstawowe polecenia" >
+			<soft_db level="2" name="cmd-pomoc" />
+			<soft_db level="2" name="cmd-file_dir_info" />
+			<soft_db level="2" name="cmd-file_dir_modifity" />
+			<soft_db level="2" name="cmd-pakowanie_i_kompresja" />
+			<soft_db level="2" name="cmd-uprawnienia" />
+			<soft_db level="2" name="cmd-wyszukiwanie" />
+			<soft_db level="2" name="cmd-wyswietlanie_i_edycja_plikow" />
+			<soft_db level="2" name="cmd-planowanie_zadan" />
+			<soft_db level="2" name="cmd-procesy" />
+			<soft_db level="2" name="cmd-sys_user_info" />
+			<soft_db level="2" name="cmd-user_komunikacja" />
+			<soft_db level="2" name="cmd-narzedzia" />
+			<soft_db level="2" name="cmd-diagnostyczne_i_administracyjne" />
+			<soft_db level="2" name="cmd-konfiguracja_sieci" />
+			<soft_db level="2" name="cmd-shell" />
+			<file level="2" path="ABC_OF_COMPUTING/posix/commands/skroty" />
+		</dir>
+		<dir name="software_db" title="Oprogramowanie użytkowe">
+			<file level="0" path="USAGE/software_db" />
+			<soft_db level="1" name="system_operacyjny" />
+			<soft_db level="1" name="srodowisko_graficzne" />
+			<soft_db level="1" name="managery_plikow_terminale_itp" />
+			
+			<soft_db level="1" name="edytory_tekstu" />
+			<soft_db level="1" name="dtp" />
+			<soft_db level="1" name="pakiety_biurowe" />
+			
+			<soft_db level="1" name="grafika" />
+			<soft_db level="1" name="wideo" />
+			<soft_db level="1" name="audio" />
+			<soft_db level="1" name="przegladarki_i_odtwarzacze" />
+			
+			<soft_db level="1" name="komunikacja" />
+			<soft_db level="1" name="serwery" />
+			
+			<soft_db level="1" name="rtv" />
+			<soft_db level="1" name="inne" />
+		</dir>
+		
+		<dir name="network_services" title="Usługi sieciowe">
+			<file level="0" path="USAGE/network_services/" />
+			
+			<dir name="email" title="Poczta elektroniczna">
+				<file level="0" path="USAGE/network_services/email" />
+				<dir path="USAGE/network_services/email/exim4.conf" />
+				<dir path="USAGE/network_services/email/exim4-spy.conf" />
+				<dir path="USAGE/network_services/email/dovecot-local.conf" />
+				<dir path="USAGE/network_services/email/rotate_mail_backup.sh" />
+				<dir path="USAGE/network_services/email/procmail.sh" />
+				<dir path="USAGE/network_services/email/procmail.rc" />
+				
+				<file level="1" path="USAGE/network_services/email/procmail_etc" />
+				<dir pdf_base_level="+2" path="USAGE/network_services/email/procmail_etc/wirus.sh" />
+				<dir pdf_base_level="+2" path="USAGE/network_services/email/procmail_etc/wirus_check" />
+				<dir pdf_base_level="+2" path="USAGE/network_services/email/procmail_etc/notify_to_xmpp" />
+				
+				<file level="1" path="USAGE/network_services/email/mailman" />
+			</dir>
+			
+			<dir name="xmpp" title="XMPP / Jabber">
+				<file level="0" path="USAGE/network_services/xmpp" />
+				<file level="1" path="USAGE/network_services/xmpp/psi" />
+				<dir name="xmpp_smtp" art_menu="0" title="XMPP-SMTP">
+					<file level="0" path="USAGE/network_services/xmpp/xmpp_smtp" />
+					<dir path="USAGE/network_services/xmpp/xmpp_smtp/email2text.sh" />
+					<dir path="USAGE/network_services/xmpp/xmpp_smtp/smtp2xmpp.pl" />
+					<dir path="USAGE/network_services/xmpp/xmpp_smtp/xmpp2smtp.sh" />
+					<dir path="USAGE/network_services/xmpp/xmpp_smtp/xmpp2smtp.xsl" />
+					<dir path="USAGE/network_services/xmpp/xmpp_smtp/mail-bot.pl" />
+					<tar name="xmpp-smtp" path="USAGE/network_services/xmpp/xmpp_smtp/*" />
+				</dir>
+				<dir name="ejabberd_aliases" art_menu="0" title="Aliasy w ejabberd">
+					<file level="0" path="USAGE/network_services/xmpp/ejabberd_aliases" />
+					<dir path="USAGE/network_services/xmpp/ejabberd_aliases/ejabberd_alias_check.sh" />
+				</dir>
+			</dir>
+			
+			<dir name="voip" title="Voice over IP - SIP, ...">
+				<file level="0" path="USAGE/network_services/voip" />
+				<dir path="USAGE/network_services/voip/extensions.lua" />
+				<dir path="USAGE/network_services/voip/addresses.lua" />
+				<dir path="USAGE/network_services/voip/call.lua" />
+				<dir path="USAGE/network_services/voip/clients.lua" />
+				<dir path="USAGE/network_services/voip/conference.lua" />
+				<dir path="USAGE/network_services/voip/ivr.lua" />
+				<dir path="USAGE/network_services/voip/transfers.lua" />
+				<dir path="USAGE/network_services/voip/extensions.ael" />
+				<dir path="USAGE/network_services/voip/features.conf" />
+				<dir path="USAGE/network_services/voip/voicemail.conf" />
+				<dir path="USAGE/network_services/voip/sip.conf" />
+				<dir path="USAGE/network_services/voip/jabber.conf" />
+				<dir path="USAGE/network_services/voip/jingle.conf" />
+			</dir>
+			
+			<menutext></ul><hr style="width: 80%;" /><ul class="menu_link"></menutext>
+			
+			<dir name="dns" title="DNS">
+				<file level="0" path="USAGE/network_services/dns" />
+			</dir>
+			
+			<dir name="www" title="WWW">
+				<file level="0" path="USAGE/network_services/www" />
+				<file level="1" path="USAGE/network_services/www/https" />
+				<file level="1" path="USAGE/network_services/www/znaki_non-ascii" />
+				<file level="1" path="USAGE/network_services/www/znaki_non-ascii/unicode_i_kodowania" />
+				<file level="1" path="USAGE/network_services/www/php_cgi_suexec" />
+			</dir>
+			
+			<menutext></ul><hr style="width: 80%;" /><ul class="menu_link"></menutext>
+			
+			<dir name="cryptography" title="Kryptografia">
+				<file level="0" path="USAGE/network_services/cryptography" />
+				<file level="1" path="USAGE/network_services/cryptography/pgp" />
+				<file level="1" path="USAGE/network_services/cryptography/x509" />
+			</dir>
+			
+			<dir name="router" title="Router - przekazywanie pakietów, DHCP itp">
+				<file level="0" path="USAGE/network_services/router" />
+				
+				<dir name="routing" art_menu="0" title="skrypty routingu i podziału pasma">
+					<file level="0" path="USAGE/network_services/router/skrypty" />
+					
+					<dir path="USAGE/network_services/router/skrypty/routing.sh" inmenu=".." />
+					<dir path="USAGE/network_services/router/skrypty/routing_fun.sh" inmenu=".." />
+					<dir path="USAGE/network_services/router/skrypty/routing.conf" inmenu=".." />
+					<dir path="USAGE/network_services/router/skrypty/traffic_stats.sh" inmenu=".." />
+					<dir path="USAGE/network_services/router/skrypty/traffic_stats.init.sh" inmenu=".." />
+					<dir path="USAGE/network_services/router/skrypty/traffic_stats_show.sh" inmenu=".." />
+				</dir>
+				
+				<file level="1" path="USAGE/network_services/router/routing" />
+				<dir pdf_base_level="+2" path="USAGE/network_services/router/routing/redirect-xinetd" />
+				<file level="1" path="USAGE/network_services/router/dhcp" />
+				<file level="1" path="USAGE/network_services/router/nat-pt" />
+				<file level="1" path="USAGE/network_services/router/inne" />
+			</dir>
+			
+			<dir name="user_config" art_menu="0" title="Konfigutracja w ręce użytkowników">
+				<file level="0" path="USAGE/network_services/user_config" />
+				
+				<file level="1" path="USAGE/network_services/user_config/dhcp" />
+				<dir path="USAGE/network_services/user_config/dhcp/dhcp_user_conf.sh" />
+				<dir path="USAGE/network_services/user_config/dhcp/add_mac.php" />
+				<dir path="USAGE/network_services/user_config/dhcp/add_mac.sh" />
+				<dir path="USAGE/network_services/user_config/dhcp/install_in_usermin.sh" />
+				
+				<file level="1" path="USAGE/network_services/user_config/asterisk" />
+				<dir path="USAGE/network_services/user_config/asterisk/asterisk_user_conf.sh" />
+				<dir path="USAGE/network_services/user_config/asterisk/user-asterisk.sample.conf" />
+				<dir path="USAGE/network_services/user_config/asterisk/callme.c" />
+			</dir>
+		</dir>
+		
+		<dir name="operating_systems_config" title="Porady konfiguracyjne">
+			<file level="0" path="USAGE/operating_systems_config" />
+			
+			<dir name="linux" title="Linux">
+				<file level="0" path="USAGE/operating_systems_config/linux" />
+				<file level="1" path="USAGE/operating_systems_config/linux/klawiatura" />
+				<file level="1" path="USAGE/operating_systems_config/linux/framebuffer_i_gpm" />
+				<file level="1" path="USAGE/operating_systems_config/linux/sortowanie" />
+				
+				<file level="1" path="USAGE/operating_systems_config/linux/fstab" />
+				<file level="1" path="USAGE/operating_systems_config/linux/while_fork" />
+				<file level="1" path="USAGE/operating_systems_config/linux/wydajnosc" />
+				
+				<file level="1" path="USAGE/operating_systems_config/linux/xen" />
+				<file level="1" path="USAGE/operating_systems_config/linux/non-debian" />
+				
+				<dir pdf_base_level="2" name="debian" title="Debian" inmenu="..">
+					<file level="0" path="USAGE/operating_systems_config/debian/" />
+					<file level="1" path="USAGE/operating_systems_config/debian/przebudowywanie_pakietu" />
+					<file level="1" path="USAGE/operating_systems_config/debian/budowanie_modulow" />
+					<file level="1" path="USAGE/operating_systems_config/debian/budowanie_jadra" />
+					<file level="2" path="USAGE/operating_systems_config/debian/konfiguracja_sieci/pliki_konfiguracyjne" />
+					<dir path="USAGE/operating_systems_config/debian/konfiguracja_sieci/pliki_konfiguracyjne/interfaces" inmenu="0" />
+				</dir>
+				
+				<dir pdf_base_level="2" name="desktop" title="Desktop" inmenu="..">
+					<file level="0" path="USAGE/operating_systems_config/linux-desktop/" />
+					<file level="1" path="USAGE/operating_systems_config/linux-desktop/x_serwer" />
+					<file level="1" path="USAGE/operating_systems_config/linux-desktop/zdalny_pulpit" />
+					<file level="1" path="USAGE/operating_systems_config/linux-desktop/windows_manager" />
+					<file level="1" path="USAGE/operating_systems_config/linux-desktop/ekrany_dotykowe" />
+					<file level="1" path="USAGE/operating_systems_config/linux-desktop/czytniki_pamieci_usb" />
+					<file level="1" path="USAGE/operating_systems_config/linux-desktop/nagrywanie_cd" />
+					<file level="1" path="USAGE/operating_systems_config/linux-desktop/laptopy" />
+					<text><p>&nbsp;</p><hr /></text>
+					<file level="1" path="USAGE/operating_systems_config/linux-desktop/linki" />
+				</dir>
+			</dir>
+			
+			<dir pdf_base_level="2" name="servers" title="Zastosowania serwerowe">
+				<file level="0" path="USAGE/operating_systems_config/servers/" />
+				<file level="1" path="USAGE/operating_systems_config/servers/ldap" />
+				<file level="2" path="USAGE/operating_systems_config/servers/ldap/serwer_LDAP" />
+				<file level="3" path="USAGE/operating_systems_config/servers/ldap/serwer_LDAP/Ldap-Account-Manager" />
+				<file level="2" path="USAGE/operating_systems_config/servers/ldap/administration" />
+				<file level="2" path="USAGE/operating_systems_config/servers/ldap/klienci_LDAP" />
+				<file level="3" path="USAGE/operating_systems_config/servers/ldap/klienci_LDAP/pam_nss" />
+				<file level="3" path="USAGE/operating_systems_config/servers/ldap/klienci_LDAP/ssh" />
+				<file level="3" path="USAGE/operating_systems_config/servers/ldap/klienci_LDAP/apache" />
+				<file level="3" path="USAGE/operating_systems_config/servers/ldap/klienci_LDAP/mediawiki" />
+				<file level="3" path="USAGE/operating_systems_config/servers/ldap/klienci_LDAP/mantis" />
+				<file level="2" path="USAGE/operating_systems_config/servers/ldap/ldap_passwd" />
+				<dir pdf_base_level="+3" path="USAGE/operating_systems_config/servers/ldap/ldap_passwd/passwd.php" inmenu="0" />
+				<file level="1" path="USAGE/operating_systems_config/servers/postgres" />
+				
+				<file level="1" path="USAGE/operating_systems_config/servers/ipmi" />
+				<file level="2" path="USAGE/operating_systems_config/servers/ipmi/service_prosecors" />
+				
+				<file level="1" path="USAGE/operating_systems_config/servers/puppet" />
+				<file level="1" path="USAGE/operating_systems_config/servers/monit" />
+				<dir pdf_base_level="+2" path="USAGE/operating_systems_config/servers/monit/multimonit.php" inmenu="0" />
+				<file level="1" path="USAGE/operating_systems_config/servers/fail2ban" />
+
+				<file level="1" path="USAGE/operating_systems_config/servers/syslog" />
+				<dir pdf_base_level="+2" path="USAGE/operating_systems_config/servers/syslog/syslog-ng.conf" inmenu="0" />
+				<dir pdf_base_level="+2" path="USAGE/operating_systems_config/servers/syslog/syslog-ng" inmenu="0" />
+				<file level="1" path="USAGE/operating_systems_config/servers/wysoka_dostepnosc" />
+			</dir>
+
+			<dir name="bsd" title="*BSD">
+				<file level="0" path="USAGE/operating_systems_config/bsd" />
+				<file level="1" path="USAGE/operating_systems_config/bsd/konfiguracja" />
+				<file level="1" path="USAGE/operating_systems_config/bsd/instalacja_oprogramowania" />
+				<file level="1" path="USAGE/operating_systems_config/bsd/dyski" />
+				<file level="1" path="USAGE/operating_systems_config/bsd/debian" />
+				<file level="1" path="USAGE/operating_systems_config/bsd/wiecej_informacji" />
+			</dir>
+			
+			<dir name="solaris" title="Solaris">
+				<file level="0" path="USAGE/operating_systems_config/solaris" />
+				<file level="1" path="USAGE/operating_systems_config/solaris/administracja" />
+				<file level="1" path="USAGE/operating_systems_config/solaris/siec" />
+				<file level="1" path="USAGE/operating_systems_config/solaris/uzytkownicy" />
+				<file level="1" path="USAGE/operating_systems_config/solaris/konsola_zdalna" />
+				<file level="1" path="USAGE/operating_systems_config/solaris/dyski" />
+				<file level="1" path="USAGE/operating_systems_config/solaris/zasoby" />
+				<file level="1" path="USAGE/operating_systems_config/solaris/tricks" />
+				<file level="1" path="USAGE/operating_systems_config/solaris/linki" />
+			</dir>
+		</dir>
+		
+		<dir name="multimedia" title="Multimedia">
+			<file level="0" path="USAGE/multimedia" />
+			<file level="1" path="USAGE/multimedia/edycja_audio-wideo" />
+			<file level="2" path="USAGE/multimedia/edycja_audio-wideo/cinelerra" />
+			<file level="2" path="USAGE/multimedia/edycja_audio-wideo/transcode_itp" />
+			<file level="3" path="USAGE/multimedia/edycja_audio-wideo/transcode_itp/audio" />
+			<file level="3" path="USAGE/multimedia/edycja_audio-wideo/transcode_itp/wideo" />
+			<file level="3" path="USAGE/multimedia/edycja_audio-wideo/transcode_itp/audio_i_wideo" />
+			<file level="2" path="USAGE/multimedia/edycja_audio-wideo/linki" />
+			<file level="1" path="USAGE/multimedia/uwagi_konfiguracyjne" />
+			<file level="2" path="USAGE/multimedia/uwagi_konfiguracyjne/tuner_rtv" />
+			<file level="2" path="USAGE/multimedia/uwagi_konfiguracyjne/serwer_dzwieku" />
+			<file level="2" path="USAGE/multimedia/uwagi_konfiguracyjne/vlc" />
+			<file level="3" path="USAGE/multimedia/uwagi_konfiguracyjne/vlc/www_plugin" />
+			<file level="3" path="USAGE/multimedia/uwagi_konfiguracyjne/vlc/vlm" />
+			<dir pdf_base_level="+4" path="USAGE/multimedia/uwagi_konfiguracyjne/vlc/tv.vlc.sh" inmenu="0" />
+			<dir pdf_base_level="+4" path="USAGE/multimedia/uwagi_konfiguracyjne/vlc/set_station.sh" inmenu="0" />
+			<dir name="rtv_recorder_and_transmiter" art_menu="0" title="RTV.sh" inmenu="0" >
+				<file level="0" path="USAGE/multimedia/rtv_recorder_and_transmiter" />
+				<file path="USAGE/multimedia/rtv_recorder_and_transmiter/rtv.sh" />
+			</dir>
+			<file level="2" path="USAGE/multimedia/uwagi_konfiguracyjne/v4l2loopback" />
+			<dir name="enigma2_dvb_stb" path="USAGE/multimedia/enigma2_dvb_stb" inmenu="..">
+				<file level="1" path="USAGE/multimedia/enigma2_dvb_stb/mini-rootfs" />
+				<dir pdf_base_level="+2" path="USAGE/multimedia/enigma2_dvb_stb/config/boot.sh" inmenu="0" />
+				<dir pdf_base_level="+2" path="USAGE/multimedia/enigma2_dvb_stb/config/chroot.sh" inmenu="0" />
+				<dir pdf_base_level="+2" path="USAGE/multimedia/enigma2_dvb_stb/config/halt.sh" inmenu="0" />
+				<dir pdf_base_level="+2" path="USAGE/multimedia/enigma2_dvb_stb/config/init.common" inmenu="0" />
+				<dir pdf_base_level="+2" path="USAGE/multimedia/enigma2_dvb_stb/config/init.sh" inmenu="0" />
+				<dir pdf_base_level="+2" path="USAGE/multimedia/enigma2_dvb_stb/config/inittab" inmenu="0" />
+				<file level="1" path="USAGE/multimedia/enigma2_dvb_stb/build-enigma" />
+				<file level="1" path="USAGE/multimedia/enigma2_dvb_stb/build-enigma/build-cmd" />
+				<file level="1" path="USAGE/multimedia/enigma2_dvb_stb/build-enigma/install" />
+				<file level="1" path="USAGE/multimedia/enigma2_dvb_stb/tools" />
+				<dir pdf_base_level="+2" path="USAGE/multimedia/enigma2_dvb_stb/tools/FBclear.c" inmenu="0" />
+				<dir pdf_base_level="+2" path="USAGE/multimedia/enigma2_dvb_stb/tools/FBconsole.c" inmenu="0" />
+				<dir pdf_base_level="+2" path="USAGE/multimedia/enigma2_dvb_stb/tools/TelnetClient/plugin.py" inmenu="0" />
+				<dir pdf_base_level="+2" path="USAGE/multimedia/enigma2_dvb_stb/tools/userbouquet-names.sh" inmenu="0" />
+				<tar name="pluginTelnetClient" path="USAGE/multimedia/enigma2_dvb_stb/tools/TelnetClient/*" />
+				<file level="1" path="USAGE/multimedia/enigma2_dvb_stb/channels_lists" />
+				<file level="1" path="USAGE/multimedia/enigma2_dvb_stb/misc" />
+			</dir>
+		</dir>
+		
+		<dir name="monitoring" title="Monitoring systemów">
+			<file level="0" path="USAGE/monitoring" />
+			<dir name="zabbix" art_menu="0" title="Zabbix">
+				<file level="0" path="USAGE/monitoring/zabbix" />
+				<dir path="USAGE/monitoring/zabbix/get_http_code.sh" />
+				<dir path="USAGE/monitoring/zabbix/klimy.sh" />
+				<dir path="USAGE/monitoring/zabbix/klimy.xsl" />
+				<dir path="USAGE/monitoring/zabbix/zabbix_get_from_history.sh" />
+			</dir>
+			
+			<dir name="smtp2sms" art_menu="0" title="smtp2sms">
+				<file level="0" path="USAGE/monitoring/smtp2sms" />
+				<dir path="USAGE/monitoring/smtp2sms/install_and_run.sh" />
+				<dir path="USAGE/monitoring/smtp2sms/mail2sms.sh" />
+				<dir path="USAGE/monitoring/smtp2sms/sms_queue_add.c" />
+				<dir path="USAGE/monitoring/smtp2sms/sms_queued.c" />
+				<dir path="USAGE/monitoring/smtp2sms/smtp_listener.c" />
+				<dir path="USAGE/monitoring/smtp2sms/smtp_talk.c" />
+				<dir path="USAGE/monitoring/smtp2sms/smtp_talk.h" />
+				<tar name="smtp2sms" path="USAGE/monitoring/smtp2sms/*" />
+			</dir>
+			
+			<dir name="modbus" art_menu="0" title="modbus">
+				<file level="0" path="USAGE/monitoring/modbus_rtu" />
+				<dir path="USAGE/monitoring/modbus_rtu/modbus_reader.c" />
+				<dir path="USAGE/monitoring/modbus_rtu/modbus_rtu.c" />
+				<dir path="USAGE/monitoring/modbus_rtu/modbus_rtu.h" />
+				<dir path="USAGE/monitoring/modbus_rtu/modbus_reader.sql" />
+				<dir path="USAGE/monitoring/modbus_rtu/monitor_modbus.sh" />
+				<dir path="USAGE/monitoring/modbus_rtu/install_and_run.sh" />
+				<dir path="USAGE/monitoring/modbus_rtu/modbus_read_write.c" />
+				<dir path="USAGE/monitoring/modbus_rtu/modbus_listener.c" />
+				<dir path="USAGE/monitoring/modbus_rtu/utils4zabbix/analizatory.php" />
+				<dir path="USAGE/monitoring/modbus_rtu/utils4zabbix/zabbix_template/make.sh" inmenu="0" />
+				<dir path="USAGE/monitoring/modbus_rtu/utils4zabbix/zabbix_template/item.template.xml" inmenu="0" />
+				<dir path="USAGE/monitoring/modbus_rtu/utils4zabbix/zabbix_template/footer.xml" inmenu="0" />
+				<dir path="USAGE/monitoring/modbus_rtu/utils4zabbix/zabbix_template/header.xml" inmenu="0" />
+				<addtar name="modbus_rtu/zabbix_template" path="USAGE/monitoring/modbus_rtu/utils4zabbix/zabbix_template/*" />
+				<tar name="modbus_rtu" path="USAGE/monitoring/modbus_rtu/* USAGE/monitoring/modbus_rtu/utils4zabbix/analizatory.php" />
+			</dir>
+			
+			<dir name="one_wire" art_menu="0" title="one wire">
+				<file level="0" path="USAGE/monitoring/one-wire" />
+				<dir path="USAGE/monitoring/one-wire/1wire_temperatura.c" />
+				<dir path="USAGE/monitoring/one-wire/1wire_temperatura-zabbix.c" />
+				<dir path="USAGE/monitoring/one-wire/1wire_rom.c" />
+				<dir path="USAGE/monitoring/one-wire/i2c-1wire.h" />
+				<tar name="one_wire" path="USAGE/monitoring/one-wire/*" />
+			</dir>
+			
+			<dir name="monitor_di.sh" path="USAGE/monitoring/di/monitor_di.sh" />
+			<dir name="ps_on_npe.sh" path="USAGE/monitoring/ps_on_npe.sh" />
+			<dir name="kontrola_dostepu.c" path="USAGE/monitoring/kontrola_dostepu.c" />
+			
+			<dir name="cctv" path="USAGE/monitoring/cctv">
+				<file level="1" path="USAGE/monitoring/cctv/bosh_dinion.sh" />
+			</dir>
+			
+			<dir name="snmp-bacnet_gateway" path="USAGE/monitoring/snmp-bacnet_gateway" />
+			
+			<dir name="sysmon" art_menu="0" title="SYStem MONitoring">
+				<file level="0" path="USAGE/monitoring/sysmon" />
+				<dir path="USAGE/monitoring/sysmon/sysmon_server.sh" />
+				<dir path="USAGE/monitoring/sysmon/sysmon_client.sh" />
+				<dir path="USAGE/monitoring/sysmon/sysmon_server.conf" />
+			</dir>
+			
+			<dir path="USAGE/monitoring/services_checker.sh" />
+		</dir>
+		
+		<dir name="smart_home" title="Inteligentny Dom">
+			<file level="0" path="USAGE/smart_home" />
+			<dir name="centralka_alarmowa" title="Centralka alarmowa">
+				<file level="0" path="USAGE/smart_home/centralka_nie_tylko_alarmowa" />
+				<dir path="USAGE/smart_home/centralka_nie_tylko_alarmowa/atmega8_i2c-slave.c" inmenu="0" />
+				<dir path="USAGE/smart_home/centralka_nie_tylko_alarmowa/run.sh" inmenu="0" />
+				<dir path="USAGE/smart_home/centralka_nie_tylko_alarmowa/output.sh" inmenu="0" />
+				<dir path="USAGE/smart_home/centralka_nie_tylko_alarmowa/input.sh" inmenu="0" />
+				<tar name="centralka_alarmowa" path="USAGE/smart_home/centralka_nie_tylko_alarmowa/*" />
+			</dir>
+			
+			<dir name="manipulator_alarmowy" title="Manipulator do sys. alarmowego">
+				<file level="0" path="USAGE/smart_home/manipulator_alarmowy" />
+				
+				<dir path="USAGE/smart_home/manipulator_alarmowy/manipulator.c" inmenu="0" />
+				<tar name="manipulator_alarmowy" path="USAGE/smart_home/manipulator_alarmowy/*
+					 USAGE/toolbox4electronic/libs4avr/atmega8_uart_spi.*
+					 USAGE/toolbox4electronic/libs4avr/lcd.c
+					 USAGE/toolbox4electronic/libs4avr/modbus/*" />
+			</dir>
+			
+			<dir name="sterownik_oswietlenia" title="Sterownik oświetlenia">
+				<file level="0" path="USAGE/smart_home/sterownik_oswietlenia" />
+				<file level="1" path="USAGE/smart_home/sterownik_oswietlenia/gasiki" />
+				
+				<dir path="USAGE/smart_home/sterownik_oswietlenia/sterownik_oswietlenia.c" inmenu="0" />
+				<tar name="sterownik_oswietlenia" path="USAGE/smart_home/sterownik_oswietlenia/*
+					USAGE/toolbox4electronic/libs4avr/atmega8_uart_spi.*
+					USAGE/toolbox4electronic/libs4avr/modbus/*" />
+			</dir>
+			
+			<dir name="sterownik_LED_RGB" title="Sterownik LED RGB">
+				<file level="0" path="USAGE/smart_home/sterownik_LED_RGB" />
+				<dir path="USAGE/smart_home/sterownik_LED_RGB/wyswietlacz.c" inmenu="0" />
+				<tar name="sterownik_LED_RGB" path="USAGE/smart_home/sterownik_LED_RGB/*" />
+			</dir>
+			
+			<dir name="audio_switch" path="USAGE/smart_home/audio_switch" />
+			
+			<dir name="niestabilizowany_zasilacz_buforowy" title="Niestabilizowany zasilacz buforowy">
+				<file level="0" path="USAGE/smart_home/niestabilizowany_zasilacz_buforowy" />
+				<file level="1" path="USAGE/smart_home/niestabilizowany_zasilacz_buforowy/dobor_trafo_i_kondensatorow" />
+			</dir>
+			
+			<dir name="smart_home_story" path="USAGE/smart_home/ewolucja_koncepcji/">
+				<file level="1" path="USAGE/smart_home/ewolucja_koncepcji/mala_skala_integracji" />
+				<file level="1" path="USAGE/smart_home/ewolucja_koncepcji/mikrokontroler" />
+				<file level="1" path="USAGE/smart_home/ewolucja_koncepcji/rs485" />
+				<dir pdf_base_level="+2" path="USAGE/smart_home/ewolucja_koncepcji/rs485/my_rs485_binary.c" inmenu="0" />
+				<dir pdf_base_level="+2" path="USAGE/smart_home/ewolucja_koncepcji/rs485/my_rs485_ascii.c" inmenu="0" />
+				<dir pdf_base_level="+2" path="USAGE/smart_home/ewolucja_koncepcji/rs485/sterownik_oswietlenia_v3.1.c" inmenu="0" />
+				<dir pdf_base_level="+2" path="USAGE/smart_home/ewolucja_koncepcji/rs485/sterownik_oswietlenia_v2.0.c" inmenu="0" />
+			</dir>
+		</dir>
+		
+		<menutext><li>Narzędzia elektronika</li></menutext>
+		<dir name="toolbox4electronic" title="Narzędzia elektronika" inmenu="0">
+			<dir name="soft4electronic" title="Oprogramowanie inżynieryjne" inmenu=".." menu="../../menu.xhtml">
+				<file level="0" path="USAGE/toolbox4electronic/software" />
+				
+				<soft_db level="1" name="inzynierskie" />
+				
+				<file level="1" path="USAGE/toolbox4electronic/software/symulacje" />
+				<dir pdf_base_level="+2" path="USAGE/toolbox4electronic/software/symulacje/expr2pla.sh" inmenu="0" />
+				
+				<file level="1" path="USAGE/toolbox4electronic/software/geda_i_pcb" />
+				
+				<file level="1" path="USAGE/toolbox4electronic/software/qcad" />
+				<tar show_dir="1" name="qcad-elektryczne" path="USAGE/toolbox4electronic/software/qcad/elektryczne/*" />
+				
+				<file level="1" path="USAGE/toolbox4electronic/software/dia" />
+				<dir pdf_base_level="+2" path="USAGE/toolbox4electronic/software/dia/dia2pdf.sh" inmenu="0" />
+			</dir>
+			
+			<dir name="libs4avr" title="Biblioteczki dla uC" inmenu=".." menu="../../menu.xhtml">
+				<file level="0" path="USAGE/toolbox4electronic/libs4avr" />
+				<file level="0" path="USAGE/toolbox4electronic/libs4avr/modbus" />
+				<dir path="USAGE/toolbox4electronic/libs4avr/onewire.c" inmenu="0" />
+				<dir path="USAGE/toolbox4electronic/libs4avr/lcd.c" inmenu="0" />
+				<dir path="USAGE/toolbox4electronic/libs4avr/opoznienia.c" inmenu="0" />
+			</dir>
+		</dir>
+		
+		<menutext><li>Narzędzia informatyka</li></menutext>
+		<dir name="toolbox4computer" title="Narzędzia informatyka" inmenu="0">
+			<dir name="libs4c" title="Biblioteczki dla C" inmenu="..">
+				<dir path="USAGE/toolbox4computer/my_libs/error_reporting.h" />
+				<dir path="USAGE/toolbox4computer/my_libs/zabbix.c" />
+				<dir path="USAGE/toolbox4computer/my_libs/zabbix.h" />
+			</dir>
+			
+			<dir name="www_engine" title="Silnik WWW" art_menu="0" inmenu=".." >
+				<file level="0" path="USAGE/toolbox4computer/www_engine" />
+				<dir path="USAGE/toolbox4computer/www_engine/engine-base.sh" />
+				
+				<dir path="USAGE/toolbox4computer/www_engine/engine-generate.sh" />
+				<dir path="USAGE/toolbox4computer/www_engine/engine-parse_menu.awk" />
+				<dir path="USAGE/toolbox4computer/www_engine/engine-parse_in.sh" />
+				<dir path="USAGE/toolbox4computer/www_engine/engine-parse_out.sh" />
+				
+				<dir path="USAGE/toolbox4computer/www_engine/engine-edit_help.sh" />
+				<dir path="USAGE/toolbox4computer/www_engine/engine-config.sh" />
+				<dir path="USAGE/toolbox4computer/www_engine/system.php" />
+				<dir path="USAGE/toolbox4computer/www_engine/base.css" />
+				<dir path="USAGE/toolbox4computer/www_engine/layout_dynamic.css" />
+				<dir path="USAGE/toolbox4computer/www_engine/generate_google_sitemap.sh" />
+				<dir path="USAGE/toolbox4computer/www_engine/softdb.xsl" />
+				<dir path="USAGE/toolbox4computer/www_engine/base.xsl" />
+			</dir>
+		</dir>
+		
+		<dir name="other_projects" title="Inne moje projekty">
+			<file level="0" path="ADDITIONS/other_projects" />
+			
+			<dir path="ADDITIONS/other_projects/Avtech_KPD674_DVR_firmware" />
+			
+			<dir name="icm-dirop" title="ICM dirop" art_menu="0">
+				<file level="0" path="ADDITIONS/other_projects/icm-dirop" />
+				<dir path="ADDITIONS/other_projects/icm-dirop/web/img_css_and_js/layout.css" />
+				<dir path="ADDITIONS/other_projects/icm-dirop/web/img_css_and_js/tree.css" />
+				<dir path="ADDITIONS/other_projects/icm-dirop/web/img_css_and_js/tree.js" />
+				<dir path="ADDITIONS/other_projects/icm-dirop/generate-oai-pmh-dc.php" />
+				
+				<addtar name="icm-dirop-web/sub_pages" path="ADDITIONS/other_projects/icm-dirop/web/sub_pages/*" />
+				<addtar name="icm-dirop-web/img_css_and_js" path="ADDITIONS/other_projects/icm-dirop/web/img_css_and_js/*" />
+				<tar show_dir="1" name="icm-dirop-web" path="ADDITIONS/other_projects/icm-dirop/web/*" />
+				
+				<tar show_dir="1" name="icm-dirop-prepare-book" path="ADDITIONS/other_projects/icm-dirop/prepare-book/*" />
+			</dir>
+			
+			<dir name="shell_phpmyadmin" title="shell login for phpMyAdmin" art_menu="0">
+				<file level="0" path="ADDITIONS/other_projects/shell_phpmyadmin" />
+				<dir path="ADDITIONS/other_projects/shell_phpmyadmin/index.php" inmenu="0" />
+			</dir>
+			<dir path="ADDITIONS/other_projects/game_serwer_info.php" />
+			<dir path="ADDITIONS/other_projects/news.php" />
+			
+			<dir name="NutOS_IM_notify" title="NutOS Jabber Notify Pack">
+				<file level="0" path="ADDITIONS/other_projects/nutos_IM_notify" />
+				<dir path="ADDITIONS/other_projects/nutos_IM_notify/jabber_info_server.c" />
+				<dir path="ADDITIONS/other_projects/nutos_IM_notify/jabber_info.c" />
+				<addtar name="nutos_jabber/mikrokontroler" path="ADDITIONS/other_projects/nutos_IM_notify/jabber_info.c ADDITIONS/other_projects/nutos_IM_notify/Makefile" />
+				<tar name="nutos_jabber"  path="ADDITIONS/other_projects/nutos_IM_notify/jabber_info_server.c" />
+			</dir>
+			
+			<dir name="stroboskop_LED" title="Sroboskop LED">
+				<file level="0" path="ADDITIONS/other_projects/stroboskop_LED" />
+				
+				<dir path="ADDITIONS/other_projects/stroboskop_LED/stroboskop-sterownik.c" />
+				<tar name="stroboskop_LED" path="ADDITIONS/other_projects/stroboskop_LED/*
+					 USAGE/smart_home/ewolucja_koncepcji/rs485/my_rs485_ascii.c" />
+			</dir>
+			
+			<dir name="sterownik_ogrzewania" title="Sterownik ogrzewania akwariowego">
+				<file level="0" path="ADDITIONS/other_projects/sterownik_ogrzewania" />
+				
+				<dir path="ADDITIONS/other_projects/sterownik_ogrzewania/mikro.c" />
+				<dir path="ADDITIONS/other_projects/sterownik_ogrzewania/onewire_get_rom.c" />
+				<addtar name="sterownik_ogrzewania/PC" path="ADDITIONS/other_projects/sterownik_ogrzewania/PC/*" />
+				<tar name="sterownik_ogrzewania" path="
+					 ADDITIONS/other_projects/sterownik_ogrzewania/*.h
+					 ADDITIONS/other_projects/sterownik_ogrzewania/*.c
+					 ADDITIONS/other_projects/sterownik_ogrzewania/*.pcb*
+					 ADDITIONS/other_projects/sterownik_ogrzewania/*.sch
+					 ADDITIONS/other_projects/sterownik_ogrzewania/*.png
+					 ADDITIONS/other_projects/biblioteczki/lcd.c
+					 ADDITIONS/other_projects/biblioteczki/onewire.c
+					 ADDITIONS/other_projects/biblioteczki/opoznienia.c
+					 " />
+			</dir>
+			<dir name="uart2lcd" title="Sterownik LCD z komunikacją RS232">
+				<file level="0" path="ADDITIONS/other_projects/uart2lcd/" />
+				<file level="1" path="ADDITIONS/other_projects/uart2lcd/uart_rxd" />
+				<dir pdf_base_level="+2" path="ADDITIONS/other_projects/uart2lcd/uart_rxd/uart_rxd.vhdl" />
+				<file level="1" path="ADDITIONS/other_projects/uart2lcd/lcd" />
+				<dir pdf_base_level="+2" path="ADDITIONS/other_projects/uart2lcd/lcd/lcd.vhdl" />
+				<file level="1" path="ADDITIONS/other_projects/uart2lcd/sterownik" />
+				<dir pdf_base_level="+2" path="ADDITIONS/other_projects/uart2lcd/sterownik/sterownik.vhdl" />
+				<dir pdf_base_level="+2" path="ADDITIONS/other_projects/uart2lcd/polaczenie.vhdl" />
+				<dir pdf_base_level="+2" path="ADDITIONS/other_projects/uart2lcd/testbench.vhdl" />
+			</dir>
+			
+			<dir name="generator" title="Programowy generator sygnałów">
+				<file level="0" path="ADDITIONS/other_projects/generator" />
+				<file level="1" path="ADDITIONS/other_projects/generator/doc/opcje_linii_polecen" />
+				<file level="1" path="ADDITIONS/other_projects/generator/doc/definiowanie_sygnalu" />
+				<file level="1" path="ADDITIONS/other_projects/generator/doc/zrodla" />
+				<file level="1" path="ADDITIONS/other_projects/generator/doc/generowanie" />
+				<file level="1" path="ADDITIONS/other_projects/generator/doc/konwersja" />
+				<dir path="ADDITIONS/other_projects/generator/signal.h" inmenu="0" />
+				<dir path="ADDITIONS/other_projects/generator/output_uC.h" inmenu="0" />
+				<dir path="ADDITIONS/other_projects/generator/output_dsp.h" inmenu="0" />
+				<dir path="ADDITIONS/other_projects/generator/output_alsa.h" inmenu="0" />
+				<dir path="ADDITIONS/other_projects/generator/help.h" inmenu="0" />
+				<dir path="ADDITIONS/other_projects/generator/config.h" inmenu="0" />
+				<dir path="ADDITIONS/other_projects/generator/signal.c" inmenu="0" />
+				<dir path="ADDITIONS/other_projects/generator/output_uC.c" inmenu="0" />
+				<dir path="ADDITIONS/other_projects/generator/output_dsp.c" inmenu="0" />
+				<dir path="ADDITIONS/other_projects/generator/output_alsa.c" inmenu="0" />
+				<dir path="ADDITIONS/other_projects/generator/main.c" inmenu="0" />
+				<dir path="ADDITIONS/other_projects/generator/help.c" inmenu="0" />
+				<dir path="ADDITIONS/other_projects/generator/config.c" inmenu="0" />
+				
+				<tar name="generator" path="ADDITIONS/other_projects/generator/*.c ADDITIONS/other_projects/generator/*.h ADDITIONS/other_projects/generator/Makefile" />
+			</dir>
+			
+			<dir name="softstart" title="SoftStart Trafo">
+				<file level="0" path="ADDITIONS/other_projects/ograniczenie_pradu_rozruchowego" />
+			</dir>
+			
+			<dir name="commons_config_system" art_menu="0" title="Commons Config System">
+				<file level="0" path="ADDITIONS/other_projects/commons_config_system" />
+				<dir path="ADDITIONS/other_projects/commons_config_system/CommonsConfig-base.sh" />
+				<dir path="ADDITIONS/other_projects/commons_config_system/CommonsConfig.conf" />
+				<dir path="ADDITIONS/other_projects/commons_config_system/CommonsConfig-addionals.sh" />
+			</dir>
+		</dir>
+	</dir>
+	
+	<dir name="inne" title="Inne" >
+		<text><only_pdf><head0>Inne</head0></only_pdf></text>
+		
+		<!-- <dir name="photo" title="Galerie zdjęć" >
+			<gallery path="PHOTO" pdf="no" />
+		</dir> -->
+		
+		<dir name="licenses" title="Licencje">
+			<file level="0" path="ADDITIONS/licenses" />
+			<file level="1" path="ADDITIONS/licenses/pd" />
+			<file level="1" path="ADDITIONS/licenses/liberalne" />
+			<file level="1" path="ADDITIONS/licenses/copyleft" />
+			<file level="1" path="ADDITIONS/licenses/inne_free" />
+			<file level="1" path="ADDITIONS/licenses/semifree" />
+			<file level="1" path="ADDITIONS/licenses/darmowe" />
+			<file level="1" path="ADDITIONS/licenses/komercyjne" />
+			<file level="1" path="ADDITIONS/licenses/podsumowanie" />
+		</dir>
+		
+		<dir name="rfc" title="Standardy (RFC, ...)">
+			<file level="0" path="ADDITIONS/rfc" />
+		</dir>
+		
+		<dir name="rozwiazania_sprzetowe_i_firmware" title="Urządzenia i ich systemy wbudowane">
+			<file level="0" path="ADDITIONS/concepts/rozwiazania_sprzetowe_i_firmware" />
+		</dir>
+		
+		<dir name="dvb" title="DVB - czy to ma przyszłość?">
+			<file level="0" path="ADDITIONS/concepts/dvb" />
+		</dir>
+		
+		<!--<dir name="abc_komputerologii" title="ABC komputerologii">
+			<file level="0" path="ADDITIONS/concepts/abc_komputerologii" />
+		</dir>-->
+		
+		<dir name="bugs" title="BUGi">
+			<file level="0" path="ADDITIONS/concepts/bugs" />
+		</dir>
+		
+		<dir name="wlasnosc_intelektualna" title="Kilka słów o systemie ochrony własności intelektualnej">
+			<file level="0" path="ADDITIONS/concepts/wlasnosc_intelektualna" />
+		</dir>
+		
+		<!--
+		<dir name="polecane" title="Polecane" inmenu="0">
+			<file level="0" path="ADDITIONS/polecane" pdf="no" />
+			<dir name="filmy_i_seriale" title="Filmy i seriale">
+				<file level="1" path="ADDITIONS/polecane/filmy_i_seriale" pdf="no" />
+			</dir>
+			<dir name="gry" title="Gry">
+				<file level="1" path="ADDITIONS/polecane/gry" pdf="no" />
+			</dir>
+			<dir name="cytaty" title="Cytaty">
+				<file level="1" path="ADDITIONS/polecane/cytaty" pdf="no" />
+			</dir>
+			<dir name="dowcipy" title="Dowcipy">
+				<file level="1" path="ADDITIONS/polecane/dowcipy" pdf="no" />
+			</dir>
+			<dir name="inne" title="Inne">
+				<file level="1" path="ADDITIONS/polecane/fotki" pdf="no" />
+				<file level="1" path="ADDITIONS/polecane/muzyka" pdf="no" />
+				<file level="1" path="ADDITIONS/polecane/filmiki_wideo" pdf="no" />
+			</dir>
+		</dir>
+		-->
+		
+		<!-- <menutext><li><a class="int" href="[[!URLPREFIX!]]/archiwum/">Archiwum</a></li></menutext>
+		<cmd name="ln -s &quot;$SRC_DIR/ARCHIVE&quot; &quot;$PAGE_DIR/archiwum&quot;" pdf="no" />
+		<cmd name="echo '&lt;li&gt;&lt;a class=&quot;int&quot; href=&quot;[[!URLPREFIX!]]/archiwum/&quot;&gt;Archiwum&lt;/a&gt;&lt;/li&gt;' &gt;&gt; $PAGE_DIR/$SITE_MAP_DIR/body.xml" pdf="no"/> -->
+		
+		<!-- <menutext><li><a class="int" href="[[!URLPREFIX!]]/~DOWNLOAD/">Download</a></li></menutext>
+		<cmd name="echo '&lt;li&gt;&lt;a class=&quot;int&quot; href=&quot;[[!URLPREFIX!]]/~DOWNLOAD/&quot;&gt;Download&lt;/a&gt;&lt;/li&gt;' &gt;&gt; $PAGE_DIR/$SITE_MAP_DIR/body.xml" pdf="no"/> -->
+		
+		<menutext></ul><hr style="width: 80%;" /><ul class="menu_link"></menutext>
+		
+		<menutext><li><a class="int" href="[[!URLPREFIX!]]/bercik/">O autorze</a></li></menutext>
+		
+		<dir name="site" title="O stronie" art_menu="0">
+			<file level="0" path="ADDITIONS/about_site"  pdf="no" />
+			<file path="ADDITIONS/about_site/_wstepniak"  pdf="no" />
+			<file path="ADDITIONS/about_site/_wstepniak_cd" pdf="no" />
+			<file level="1" path="ADDITIONS/about_site/_tematyka" pdf="no" />
+			<file level="1" path="ADDITIONS/about_site/history" pdf="no" />
+			<dir name="map" title="Mapa serwisu" inmap="0" inmenu="0" />
+		</dir>
+		
+		<!--<dir name="links" path="ADDITIONS/links/" />-->
+	</dir>
+	
+<!--	<dir name="bercik" inmenu="0">
+		<file level="0" path="ADDITIONS/bercik" />
+		<dir name="cv.tex" inmenu="0">
+			<file level="0" path="ADDITIONS/bercik/cv.tex" pdf="no" />
+		</dir>
+		<dir name="wizytowka.tex" inmenu="0">
+			<file level="0" path="ADDITIONS/bercik/wizytowka.tex" pdf="no" />
+		</dir>
+		
+		<dir name="wiecej" title="Więcej o mnie" inmenu="0">
+			<file level="0" path="ADDITIONS/bercik/wiecej" />
+			<file level="1" path="ADDITIONS/bercik/wiecej/wczesniej" />
+			<file level="1" path="ADDITIONS/bercik/wiecej/computers_time_line" />
+			<file level="1" path="ADDITIONS/bercik/wiecej/fuw" />
+			<file level="1" path="ADDITIONS/bercik/wiecej/kim_jestem" />
+		</dir>
+	</dir>-->
+	
+	<!-- dodatkowe pliki silnika -->
+	
+	<file path="USAGE/toolbox4computer/www_engine/_engine_files" pdf="no" />
+	<file path="USAGE/toolbox4computer/www_engine/_google/img" pdf="no" />
+	<cmd name="cp &quot;$SRC_DIR/ADDITIONS/about_site/404/&quot;* &quot;$PAGE_DIR&quot;" pdf="no" />
+	<cmd name="cp &quot;$PAGE_DIR/usage_and_config/toolbox4computer/www_engine/&quot;*.css/*.css &quot;$PAGE_DIR&quot;" pdf="no" />
+	<!--<cmd name="cp &quot;$PAGE_DIR/usage_and_config/toolbox4computer/www_engine/system.php/system.php&quot; &quot;$PAGE_DIR/system.system&quot;" pdf="no" />-->
+	<cmd name="cp &quot;$SRC_DIR/redirect.conf&quot; &quot;$PAGE_DIR&quot;" pdf="no" />
+
+	<!-- <cmd name="ln -rs &quot;$SRC_DIR/MIRRORS&quot; &quot;$PAGE_DIR&quot;" pdf="no" /> -->
+	
+	<!-- finalizacja spisu list todo -->
+	<dir name="inne" inmenu="0"><dir name="bugs" inmenu="0">
+		<file level="1" path="ADDITIONS/concepts/bugs/my" pdf="no" />
+		<cmd name="cat &quot;$TMP_DIR/todo_links.xml&quot; &gt;&gt; &quot;body.xml&quot;" pdf="no" />
+		<file level="1" path="ADDITIONS/concepts/bugs/my/webpage" pdf="no" />
+	</dir></dir>
+	
+	<!-- menu strony głównej - wtedy w glownym tagu dir atrybut menu="no"
+	<text pdf="no"><div id="menu"><ul></text>
+		<cmd name="mkdir -p &quot;$TMP_DIR/menu&quot;" pdf="no" />
+		<cmd name="sed &quot;s%[[!URLPREFIX!]]%.%g&quot; &quot;$PAGE_DIR/menu.xhtml&quot; &gt; &quot;$TMP_DIR/menu/body.xml&quot;" pdf="no" />
+		<file path="$TMP_DIR/menu" pdf="no" />
+	<text pdf="no"></ul></div></text>
+	-->
+
+	<!-- treść strony głównej -->
+	<file path="ADDITIONS/about_site/old_opcode" />
+	<!--
+	<file path="ADDITIONS/about_site/_baner" pdf="no" />
+	<file path="ADDITIONS/about_site/_wstepniak" pdf="no" />
+	<text pdf="no"><p style="text-align: right"><a class="int" href="./site/">więcej ...</a></p><hr /></text>
+	<file path="ADDITIONS/about_site/_vip" pdf="no" />
+	<text pdf="no"><hr /><head1>Ostatnie zmiany na stronie:</head1></text>
+	<file path="ADDITIONS/about_site/_news" pdf="no" />
+	<text pdf="no"><p style="text-align: right"><a class="int" href="./site/#ADDITIONS:about_site:history">więcej ...</a></p></text>
+	-->
+</dir>

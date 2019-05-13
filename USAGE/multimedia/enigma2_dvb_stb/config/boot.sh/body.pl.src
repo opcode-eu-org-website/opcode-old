@@ -1,0 +1,74 @@
+#!/bin/sh
+
+. /etc/init.d/init.common
+
+
+print "Mount kernel filesystems ..."
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+test -c /dev/ptmx || mknod -m 666 /dev/ptmx c 5 2
+mkdir -p /dev/pts
+mount -t devpts devpts /dev/pts -o gid=$TTY_GRP -o mode=$TTY_MODE
+
+
+print "Set hostname to $HOSTNAME ..."
+hostname $HOSTNAME
+
+
+print "Prepare chroot ..."
+prepareChroot $CHROOT
+mkdir -p $CHROOT/run/media/root/logs/
+
+
+print "Start mdev and mout HDD ..."
+# for detail config about auto-mount see /etc/mdev/mdev-mount.sh
+echo > /dev/mdev.seq
+echo > /dev/.udev
+echo "/sbin/mdev" >/proc/sys/kernel/hotplug
+mdev -s
+
+
+print "Start network and telnet ..."
+ifconfig lo up
+if [ "$USE_DHCP" = "yes" ]; then
+	print "  start DHCP client ..."
+	udhcpc -i eth0 -b -s /etc/udhcpc.script
+fi
+print "  set IP: $NET_IP and GW: $NET_GW"
+ip address add $NET_IP dev eth0
+ip route add default via $NET_GW dev eth0
+print "  configure firewall"
+sh /etc/iptables.sh
+print "  start telnet"
+inetd /etc/inetd.conf
+
+
+print "Load video and frame buffer modules ..."
+modprobe dvb
+
+
+print "Set splash ..."
+echo "$VIDEOMODE" > /proc/stb/video/videomode
+chroot $CHROOT /usr/local/bin/showiframe /usr/local/share/bootlogo.mvi
+sleep 1
+
+
+print "Set fan control ..."
+echo 2   > /proc/stb/fp/fan      # ON
+echo 255 > /proc/stb/fp/fan_vlt  # FULL SPEED
+echo 50  > /proc/stb/fp/fan_pwm  # FULL SPEED
+
+
+print "Init framebuffer ..."
+chroot $CHROOT  /usr/local/bin/FBinit
+#chroot $CHROOT fbset -fb /dev/fb0 -xres 1280 -yres 720
+#for i in `seq 1 9`; do
+#	chroot $CHROOT  /usr/local/bin/con2fb /dev/fb0 /dev/tty$i;
+#done
+
+
+print "Load kernel modules ..."
+# config define modules
+load_kernel_modules
+# hotplug modules
+/etc/init.d/loadHotPlugModules.sh

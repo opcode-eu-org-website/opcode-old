@@ -1,0 +1,19 @@
+#include "main.h"
+#include "MyWindow.h"
+
+int main(void)
+{
+	moja_aplikacja application("application/moja_aplikacja");
+	application.Run();
+
+	return 0;
+}
+
+moja_aplikacja::moja_aplikacja(const char *signature)	: BApplication(signature)
+{
+	// lokuje i wyświetlam okno programu
+	_mywindow = new MyWindow(BRect(232,148,569,294),"Tytuł okna",
+		B_DOCUMENT_WINDOW_LOOK, B_NORMAL_WINDOW_FEEL,B_NOT_ZOOMABLE,0);
+	_mywindow->Show();
+}
+

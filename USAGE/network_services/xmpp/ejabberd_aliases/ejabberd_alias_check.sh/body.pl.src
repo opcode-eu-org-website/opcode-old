@@ -1,0 +1,63 @@
+#!/bin/bash
+
+ALIAS_FILE='/etc/ejabberd/aliases'
+
+# FILE format:
+# aliasname aliasdomain realname realdomain aliasflag
+#
+# aliasname == * => any user in this domain
+# aliasdomain == * => this user in any domain
+# realname OR realdomain == % use orginal aliasname OR aliasdomain
+# aliasflag == real (OR not set for exist alias) => move msg to real user
+# aliasflag == copy => copy msg to real user
+# aliasflag == alias => save message only for alias user
+
+read tmp
+read user serwer;
+
+real_user=`awk -v name=$user -v host=$serwer '
+	BEGIN {
+		ctrl=0
+		real_user=name
+		real_host=host
+		flag=""
+	}
+	$1==name && $2==host {
+		real_user=$3
+		real_host=$4
+		flag=$5
+		ctrl=3
+		nextfile # end of parsing file
+	}
+	$1=="*" && $2==host && ctrl<1 {
+		real_user=$3
+		real_host=$4
+		flag=$5
+		ctrl=1
+	}
+	$1==name && $2=="*" && ctrl<2 {
+		real_user=$3
+		real_host=$4
+		flag=$5
+		ctrl=2
+	}
+	END {
+		if (real_user == "%")
+			real_user=name
+		if (real_host == "%")
+			real_host=host
+		if (flag == "") {
+			if (ctrl == 0)
+				flag="alias"
+			else
+				flag="real"
+		}
+		printf("%s %s %s", real_user, real_host, flag)
+	}' $ALIAS_FILE`
+
+#echo "name=$user host=$serwer" >&2
+#echo "$real_user $ALIAS_FILE" >&2
+
+printf "\x0\x"$(printf "%X" $(( `echo ${real_user} | wc -c` - 1 )) )
+# wc a nie ${#ala} bo wc liczy bajty a nie znaki (UTF-8)
+echo "${real_user}"

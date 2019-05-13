@@ -1,0 +1,64 @@
+#ifndef CZAS_CPP
+#define CZAS_CPP
+
+#include <stdio.h>
+#include <sys/io.h>
+#include <unistd.h>
+#include <sys/time.h>
+
+#ifdef USE_RDTSC
+	// pomiar czasu w poarciu o liczbe taktow procesora
+	unsigned long long czas(void) {
+		volatile unsigned long long t;
+		asm volatile("rdtsc":"=r"(t));
+		return t;
+	}
+
+  #ifndef PROCESOR
+	double zmierz_procesor() {
+
+		iopl(3); // funkcja ta inicjalizyujemy zmienna static
+
+		struct timeval tv_1, tv_2;
+		unsigned long long time, cykli, czas_1, czas_2;
+		double speed_MHz;
+
+
+		asm("cli"); // wylacza przerwania - poniże instrukcjie muszą wykonać się zaraz po sobie
+			czas_1 = czas();
+			gettimeofday ( &tv_1, NULL );
+		asm("sti"); // wlacza przerwania
+
+		sleep(1);
+
+		asm("cli"); // wylacza przerwania - poniże instrukcjie muszą wykonać się zaraz po sobie
+			gettimeofday ( &tv_2, NULL );
+			czas_2 = czas();
+		asm("sti"); // wlacza przerwania
+
+		time = (unsigned long long)((tv_2.tv_sec - tv_1.tv_sec) * 1000000 + (tv_2.tv_usec - tv_1.tv_usec));
+		cykli = czas_2 - czas_1;
+
+		speed_MHz = (double)cykli/(double)time;
+
+		return speed_MHz;
+
+		//printf("%ld | %ld | %f\n", time, cykli, speed_MHz); - to nie wiem dlaczego nie dziala ????
+//		printf("%ld | ", time );
+//		printf("%ld | ", cykli );
+//		printf("%f \n", speed_MHz );
+	}
+	static double PROCESOR = zmierz_procesor();
+  #endif
+#else
+	unsigned long long czas(void) {
+		struct timeval tv_1;
+
+		gettimeofday ( &tv_1, NULL );
+
+		return (unsigned long long)( tv_1.tv_sec * 1000000 + tv_1.tv_usec ); // zmiesci sie to nam gdyz 10^6 * 2^32 < 2^64
+	}
+	#define PROCESOR 1.0
+#endif
+
+#endif

@@ -1,0 +1,120 @@
+<?php
+/**
+	System prezentacji zasobów DIROP na WWW
+	
+	plik odpowiedzialny za przeprowadzenie wyszukiwania w treści książek
+	
+	na podstawie bazy danych ustawia wartość
+		$BOOK_INFO - informacje o książce
+		$SEARCH_RESULTS - wyniki wyszukiwania
+	na podstawie informacji przekazanych przez formularz wyszukiwania ustawia wartość
+		$SEARCH_INFO - informacje o wyszukiwaniu
+**/
+
+
+
+/// uzyskanie $BOOK_INFO
+if ($_GET['volume_id'] != "all") {
+	$SQL = 'SELECT '. BOOK_INFO_SELECT .' FROM '. BOOK_INFO_SELECT_FROM ." WHERE v.volume_id='". protect_sql($_GET['volume_id']) ."';";
+	$result = pg_query($baza_danych, $SQL) or error('db_query', $SQL);
+	$int_tmp = pg_num_rows($result);
+	$BOOK_INFO = pg_fetch_array($result, null, PGSQL_ASSOC);
+	$SEARCH_INFO['one_book'] = true;
+} else {
+	$SEARCH_INFO['one_book'] = false;
+}
+
+/// ustawienie zmiennych dotyczących wyszukiwania
+$SEARCH_INFO['text'] = strtr(strtolower(protect_sql($_GET['find_text'])), "ŁŚĆŻŃĄĘÓ", "łśćżńąęó");
+
+/// TODO szukanie napisu, operatory logiczne
+$single_word=" ";
+$operator = "AND";
+
+
+/// generowanie zapytania SQL
+$SQL  = 'SELECT b.title AS "b.title", b.url AS "b.url", b.single_vid, v.title AS "v.title", v.url AS "v.url" , p.title AS "p.title", fulltext_s AS text, type FROM (fulltext  AS f';
+$SQL .= " JOIN (page AS p JOIN (volume AS v JOIN book AS b ON v.book_id=b.book_id";
+if( $SEARCH_INFO['one_book'] && ($BOOK_INFO['single_vid'] >= -1 || $_GET['search_volume'] != "all") ) {
+	$SQL .= " AND v.volume_id='". $BOOK_INFO['volume_id'] ."'";
+}
+if( $SEARCH_INFO['one_book'] ) {
+	$SQL .= " AND b.book_id='". $BOOK_INFO['book_id'] ."'";
+}
+$SQL .= ") ON p.volume_id=v.volume_id) ON f.page_id=p.page_id) WHERE";
+$SQL .= " f.page_id=p.page_id AND p.volume_id=v.volume_id AND v.book_id=b.book_id AND (";
+// paradoksalnie dodanie tych warunków w tym miejscu RADYKALNIE (kolo 100 razy) przyspiesza wyszukiwanie !!!
+// dzieje sie tak dzieki temu iz powoduja one wybranie lepszego EXPLAINu
+
+$int_tmp = 0;
+$arr_search_text = explode(" ", protect_sql($SEARCH_INFO['text']));
+
+for ($i=0; $i<count($arr_search_text); $i++) {
+	if (strlen($arr_search_text[$i]) >= 3) {
+		if ($int_tmp == 0) {
+			$SQL .= " fulltext_s LIKE '%" . $single_word . $arr_search_text[$i] . $single_word . "%'";
+			$j=0;
+		} else {
+			$SQL .= " $operator fulltext_s LIKE '%" . $single_word . $arr_search_text[$i] . $single_word . "%'";
+		}
+		$int_tmp = 1;
+		$arr_search_text_reg[$j++] = str_replace("%", "[^ ]*", str_replace("_", ".?", $arr_search_text[$i]));
+	}
+}
+$SQL .= ") ORDER BY b.book_id,v.volume_id,page_no;";
+
+if ($int_tmp == 0) {
+	/// brak poprawnych kryteriów wyszukiwania
+	$SEARCH_INFO['error']="no_search";
+	echo "ttt";
+} else {
+	/// zapytanie do DB
+	$result = pg_query($baza_danych, $SQL) or error('db_query', $SQL);
+	if (pg_num_rows($result) > 0) {
+		$SEARCH_RESULTS = pg_fetch_all($result);
+		
+		/// przygotowanie tabeli z wynikami - zamiast pełnego tekstu sktrót
+		for ($j=0; $j<count($SEARCH_RESULTS); $j++) {
+			if ($SEARCH_RESULTS[$j]['type'] != 1) {
+				$arr_tmp = explode(" ", $SEARCH_RESULTS[$j]['text']);
+				$int_tmp = count($arr_tmp);
+				$pozycja=-1;
+				for ($slowo=0; $slowo<$int_tmp; $slowo++) {
+					/// sprawdzenie czy wynik z indeksu
+					if ( $SEARCH_RESULTS[$j]['type'] != 1 && strpos($SEARCH_RESULTS[$j]['text'], "[[[$slowo") ) {
+						$SEARCH_RESULTS[$j]['type'] = 1;
+						$pozycja=-1;
+						break;
+					}
+					/// wyszukujemy pozycję pierwszego wystąpienia któregokolwiek z szukanych słów
+					if ($pozycja < 0) {
+						for ($i=0; $i<count($arr_search_text_reg); $i++) {
+							if (ereg($arr_search_text_reg[$i], $arr_tmp[$slowo])) {
+								$pozycja=$slowo;
+								break;
+							}
+						}
+					}
+				}
+				/// generujemy skrót
+				if ($pozycja >= 0) {
+					/// TODO wyświetlanie z pełnego tekstu, obsługa użycia % i _, może lepiej użyć jakiejś funkcji wyrażeń regularnych zamiast tej zabawy ...
+					$SEARCH_RESULTS[$j]['text']  = "...";
+					for ($i=$pozycja-5; $i<$pozycja; $i++)
+						$SEARCH_RESULTS[$j]['text'] .= " " . $arr_tmp[$i];
+					$SEARCH_RESULTS[$j]['text'] .= " <strong>" . $arr_tmp[$pozycja] . "</strong>";
+					for ($i=$pozycja+1; $i<=$pozycja+5; $i++)
+						$SEARCH_RESULTS[$j]['text'] .= " " . $arr_tmp[$i];
+					$SEARCH_RESULTS[$j]['text'] .= " ...";
+				}
+			}
+		}
+	} else {
+		$SEARCH_RESULTS = NULL;
+	}
+}
+
+/// ustawiamy tryb prezentacji
+$MODE = MODE_SEARCH;
+
+?>

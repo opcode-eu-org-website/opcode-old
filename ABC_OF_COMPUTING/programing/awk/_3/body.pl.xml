@@ -1,0 +1,24 @@
+<article>
+<p>Warto zaznaczyć że dość często wykorzystuje się tablice w których interesuje nas tylko index - jest tak dlatego że gwarantuje to unikalność (nie może być dwóch takich samych indeksów), zatem gdy zbieramy napisy i chcemy wyeliminować powtórzenia przyjemnym rozwiązaniem jest <code>nasza_tablica[napis]=0</code>. Oczywiście mogą być też tablice dwu lub więcej wymiarowe: <code>nasza_tablica[indeks1,index2]=wartosc</code>. Na koniec warto zaznaczyć że oprócz powyższego wywołania for mamy też zupełnie standardowe pętle for, while znane z C.</p>
+
+<p>Innym częstym zagadnieniem jest wypisanie wszystkich pól od wskazanego do końca rekordu. Możemy do tego celu użyć funkcji uzytkownika jak w poniższym przykładzie:</p>
+<pre>
+function to_end(i,  tmp) {tmp=$i; for (++i; i&lt;=NF; i++) tmp = tmp OFS $i; return tmp;}
+{
+	print to_end(3)
+}
+</pre>
+
+<p>Więcej (w szczególności jak budować wyrażenia regularne oraz wykaz predefiniowanych funkcji) - patrz <man section="1">gawk</man> oraz:</p>
+<ul>
+	<li><doc url="http://gnu.univ.gda.pl/~tomasz/prog/awk/refcard/awkrefcard-pl.pdf" mirror="programowanie/AWK/refcard">Ściąga do AWK</doc>  - kilkustronicowa broszurka z najważniejszymi komendami</li>
+	<li><doc url="http://gnu.univ.gda.pl/~tomasz/prog/awk/awk-intro/awk-man-b5.pdf" mirror="programowanie/AWK/awk-man">Opis języka AWK</doc> - kilkudziesięciostronnicowy podręcznik do AWK</li>
+	<li><doc url="http://www.gnu.org/software/gawk/manual/" mirror="programowanie/AWK/gawk">Effective AWK Programming</doc> - podręcznik rozprowadzany wraz z pakietem GAWK</li>
+	<li><wiki en="b:AWK">AWK @ Wikibooks</wiki></li>
+	<li><wiki en="b:An Awk Primer">An Awk Primer</wiki></li>
+</ul>
+
+<p>Skrypty AWK'owe często wykorzystywane są w skryptach powłoki (bash, ...), nie stoi też nic na przeszkodzie aby wykorzystywać je w C - np. przez system() lub exec(); . Warto tutaj zwrócić uwage na przekazywanie zmiennych bashowych do awk - mozna to zrobić (w przypadku prostych skryptów poprzez umieszczenie skryptu w podwójnych cudzysłowiach i zabezpieczniu tych znaków specjalnych których bash nie powinien dotykać poprze \ - np. <code>awk "(\$1==$bash) {print \$0}"</code> (zmienną bashową którą przekazujemy awk jest <code>$bash</code>) albo poprzez przekazanie zmiennej opcją -v - np. <code>awk -v temp=$temp '($1==temp) {print $0}'</code>.</p>
+
+<p>AWK jest także przydatnym narzędziem do wykonywania obliczeń (obliczania średnich, odchyleń, różnic, etc) na danych będących wynikami jakiś symulacji lub pomiarów.</p>
+</article>

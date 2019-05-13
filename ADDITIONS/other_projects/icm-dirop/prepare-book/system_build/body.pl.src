@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# system dodawania i modyfikacji pozycji DIROPu
+#
+# plik zawierający podstawową konfigurację i wywołujący system,
+# plik przeznaczony do umieszczania w katalogu określonym ścieżką wyszukiwania PATH
+
+export DIROP_SYSTEM_DIR="/pelna/siezka/do/systemu/skryptow/UWAGA:/wymaga/zakonczenia/ukosnikiem/"
+
+chmod +x $DIROP_SYSTEM_DIR/MAKE.sh 2> /dev/null > /dev/null
+
+print_info() {
+	echo "SYSTEM_DIR=$SYSTEM_DIR"
+	echo "SERVER_NAME=$SERVER_NAME"
+	echo ""
+	SERVER_NAME="serwer"
+	DB_ACCESS_STR="-h localhost -p port -U user database"
+	
+	echo "tu wpisac dodatkowe informacje dotyczące użytkowania systemu, np. takie jak:
+	* komenda służaca do zrobienia zrzutu opisu strukturybazy danych:
+		echo -e '\d+ book\n\d+ volume\n\d+ page\n\d+ fulltext\n\d+ content' | psql $DB_ACCESS_STR > DB.txt
+	* komenda tworząca kopie zapasową bazy danych:
+		pg_dump -cif kopia_db.sql $DB_ACCESS_STR
+	* alisay i komendy przydatne do ładowania wygenerowanych wpisów na serwer (zakładające domyślne nazwy katalogów itp):
+		function upload() {
+			if [ \$# = 0 ]; then
+				echo \"USAGE: upload base_direcrory_for_volume\"
+				return
+			fi
+			DIR=\$1
+			scp \$DIR/out/all.sql $SERVER_NAME:.
+			scp -r \$DIR/out/png $SERVER_NAME:./skany/\$DIR
+			export DIR;
+			echo \"ON REMOTE:   psql $DB_ACCESS_STR < all.sql\"
+			echo \"ON REMOTE:   mv skany/\$DIR skany/VID\"
+			echo \"             (zastąpić VID poprzez volume_id zwrocony przez pierwszą komendę)\"
+		}
+		function upload_big() {
+			if [ \$# = 0 ]; then
+				echo \"USAGE: upload base_direcrory_for_volume VOLUME_ID\"
+				return
+			fi
+			scp -r \$1/out/tif/* $SERVER_NAME:./skany/\$2
+		}
+		function correct() {
+			if [ \$# = 0 ]; then
+				echo \"USAGE: correct START_NORMAL,START_ROMAN,INFO_PAGE VOLUME_ID\"
+				echo \"if set \$DIR function run in this directory\"
+				return
+			fi
+			if [ \"\$DIR\" = \"\" ]; then
+				DIR=\".\"
+			fi
+			dirop_build --make-sql-page_title_update=\"\$1\" -v \$2 -d \"\$DIR\"
+			scp \$DIR/out/update.sql $SERVER_NAME:.
+			echo \"ON REMOTE:   psql $DB_ACCESS_STR < update.sql\"
+		}
+	"
+	echo ""
+	echo "for script option and arguments see --help"
+} 
+
+if [ -d ${DIROP_SYSTEM_DIR} ]; then
+	. ${DIROP_SYSTEM_DIR}MAKE.sh
+else
+	print_info
+fi

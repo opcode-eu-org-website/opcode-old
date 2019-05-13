@@ -1,0 +1,7 @@
+proxy_set_header  X-Proxy-Host   $http_host;
+proxy_set_header  X-Proxy-Addr   $server_addr;
+proxy_set_header  X-Proxy-Name   $server_name;
+proxy_set_header  X-Proxy-Port   $server_port;
+
+proxy_set_header  X-Real-IP      $remote_addr;
+proxy_set_header  X-Real-Port    $remote_port;

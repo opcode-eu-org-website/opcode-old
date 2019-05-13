@@ -1,0 +1,62 @@
+#!/usr/bin/ruby
+
+ilosc_kotow=1
+ilosc_kotow=ilosc_kotow+1
+print "Ala ma #{ilosc_kotow} kotow:\n"
+print "KOTY: " + " mial" * ilosc_kotow + "\n"
+print "A gdy znajdzie nasteopnego bedzie miala #{ilosc_kotow+1} kotow\n"
+
+# jak powyżej widać napisy możemy dodawać a nawt mnożyć przez liczbę
+# w ramach napisu możemy wypisywać zmienną a także wynik operacji matematycznej na zmiennej
+
+# deklaracja funkcji, pierwszy argument umieszczony będzie w zmiennej napis,
+# drugi i wszystkie kolejne w elementach tablicy ile
+# można także przypisać domyślne wartości poprzez podanie =wartosc
+def wypisywanie(napis, *ile)
+	# pętla for po liczbach z zakresu
+	for i in (2..ile[0])
+		print i
+	end
+	print "\n"
+	
+	# sprawdzamy czy tablica ile ma więcej niż 1 element
+	if ile.size > 1
+		# pętla while
+		while (ile[1] > 0)
+			ile[1]=ile[1]-2
+			print napis + "\n"
+		end
+	end
+end
+
+# wykorzystanie funkcji - 3 argumenty
+wypisywanie("Witaj świecie", 5, 6)
+
+# wypisanie odzielacza - warto zauważyć że pierwszy \n będzie przytoczony dosłownie
+# gdyż użyte zostały pojedyńcze sudzysłowia
+print '==========\n==========' + "\n"
+
+# kolejne wykorzystanie funkcji - 2 argumenty
+wypisywanie("Helo World", 5)
+
+# tablica - deklarowanie, łączenie, zamiana na napis
+tablica = [2, "4", 6]
+print "Elemnt -2 to: " + tablica[-2] + "\n"
+	# uwaga: takie łączenie działa dlatego że ten element jest napisem ;-)
+tablica = tablica + ["abc", "def"]
+tablica = tablica * 2
+print tablica.join(" - ") + "\n"
+
+# zakres tablicy (można go używać np. w pętli for po in)
+print tablica[0..2]
+print "\n"
+
+# przy pomocy zmienna_napisowa.split("podzial") możemy podzielić zmienną napisową
+# na elementy tablicowe względem zadanego napisu
+napis="Ala , ma , kota, albo , dwa"
+tablica=napis.split(" , ")
+print tablica.join("/") + "\n"
+
+# tablice asocjacyjne
+tablica_asocjacyjna = {1 => 2, "drugi" => 4, 2 => "kot"}
+print "-==-#{tablica_asocjacyjna["drugi"]}-==-#{tablica_asocjacyjna[5]}-==-\n"

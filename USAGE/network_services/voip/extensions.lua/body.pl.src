@@ -1,0 +1,121 @@
+---------------------------------------
+--                                   --
+--         USTAWIENIA OGÓLNE         --
+--                                   --
+---------------------------------------
+
+-- każemy szukać włączanych plików (funkcje fragmenty dialplanu itd)
+-- w /etc/asterisk/extensions.lua.d/ w postaci plików .lua
+package.path = package.path .. ";/etc/asterisk/extensions.lua.d/?.lua"
+
+-- definiujemy (na razie) pustą tablicę z dialplanem
+extensions = {}
+-- oraz pomocnicze zmienne dla dialplanu ...
+any_ext = "_[0-9a-zA-Z.*#+-]."
+
+--  poziom na którym wypisywane są komunikaty
+verb=2
+--  lista sprawdzanych sieci ENUM
+enum_networks = { "e164.arpa", "e164.org", "e164.info", "freenum.org" }
+
+
+---------------------------------------
+--                                   --
+--    BIBLIOTEKI FUNCJI DIALPLANU    --
+--                                   --
+---------------------------------------
+
+-- standardowa aplikacja "demo" - kontekst "demo_lua" i odpowiednie funkcje
+require("demo")
+
+-- funcje "call_local_address", "call_address" oraz "call_record"
+require("call")
+
+-- funkcje "conference_create" i "conference_enter"
+require("conference")
+
+-- funcje "ivr_play_and_read" oraz "ivr_play_and_goto"
+require("ivr")
+
+-- obsługa transferów
+require("transfers")
+
+---------------------------------------
+--                                   --
+--            NASZE ADRESY           --
+--                                   --
+---------------------------------------
+
+-- spis obsługiwanych domen
+-- wpisy dodawane jako elementy tablicy postaci:
+--     local_domains["DOMENA"] =1
+local_domains = {}
+
+-- połączenia przychodzące na poszczególne adresy
+-- każdy adres definiowany w postaci kontekstu:
+--   * dla połączeń wewnętrznych (od zautoryzwoanych klientów)
+--        extensions["local_input_for/USER@DOMENA"] = { ... }
+--   * dla połączeń zewnętrznych i wewnętrznych (jeżeli nie ma local_input_for/USER@DOMENA)
+--        extensions["input_for/USER@DOMENA"] = { ... }
+
+-- definiujemy kontekst "addresses" do którego będą trafiały rozmowy
+-- przychodzące na adresy nie posiadające własnych kontekstów
+extensions.addresses = {}
+-- UWAGA: w ramach każdego z extentions w tym kontekscie:
+--  1. trzeba zadbać o włączenie nagrywania poprzez wywołanie:
+--        call_record(exten, "incoming")
+--  2. można sprawdzać skąd przychodzi połączenie poprzez:
+--        channel["CALL_TYPE"]:get()
+--     zmienna CALL_TYPE jest ustawiona na:
+--     * local  - dla połączeń od zautoryzowanych klientów
+--     * public - dla połączeńprzychodzących z zewnątrz
+
+require("addresses")
+
+-- ustawiamy obsługę błędnych adresów w kontekscie addresses
+extensions.addresses.i = function(context, exten)
+	app.Verbose(verb, "extention \"".. channel["INVALID_EXTEN"]:get()
+		.."\" not found in context \"addresses\"")
+	app.Hangup(1)
+end
+
+
+---------------------------------------
+--                                   --
+--            NASI KLIENCI           --
+--                                   --
+---------------------------------------
+
+
+-- połączenia od klientów zewnętrznych (niezautoryzowanych)
+-- mają prawo:
+--  * kontaktu z naszymi użytkownikami
+--  * korzystania z usług publicznych
+extensions.incoming_from_external = {
+	[any_ext] = call_local_address;
+};
+
+-- połaczenia od klientów zautoryzowanych
+-- identyfikujemy typ adresu (lokalny, zdalny sip, zdalny ENUM, zdalny PSTN, ..)
+-- wykonujemy połączenie na stosowny numer
+extensions.incoming_from_auth_user = {
+	[any_ext] = call_addres;
+};
+
+-- konteksty połączeń przychodzących poszczególnych klientów sip
+-- (do nich prowadzą wpisy w sip.conf) postaci:
+--    extensions["input/LOGIN"] = { include = {"incoming_from_auth_user"}; }
+-- typowo inkludujące "incoming_from_auth_user",
+-- ale mogące także definiować prefixy itp
+
+
+-- konteksty połączeń wychodzących poszczególnych klientów sip postaci:
+--    extensions["output/LOGIN"] = { [any_ext] = call_local_address; }
+-- typowo oprócz obsługi lokalnych adresów (patrz sekcja "nasze adresy")
+-- realizowanej poprzez funkcję call_local_address zawierają definicje
+-- wyjść przez operatorów SIP i indywidualną listę adresową
+-- gdy korzystamy z funkcji "call_addres" to
+-- każdy kontekst "input/LOGIN" musi mieć odpowiedni "output/LOGIN"
+
+require("clients")
+

@@ -1,0 +1,252 @@
+[global]
+ratio = 4:3
+freqtab = europe-west
+pixsize = 128 x 96
+pixcols = 1
+jpeg-quality = 85
+keypad-ntsc = no
+keypad-partial = yes
+osd = yes
+osd-position = 30 , 20
+use-wm-fullscreen = yes
+
+# [Station name]
+# capture = overlay | grabdisplay | on | off
+# input = Television | Composite1 | S-Video | ...
+# norm = PAL | NTSC | SECAM | ... 
+# channel = #
+# fine = # (-128..+127)
+# key = keysym | modifier+keysym
+# color = #
+# bright = #
+# hue = #
+# contrast = #
+
+[defaults]
+group = main
+norm = PAL
+input = Television
+capture = grab
+color = 48%
+bright = 49%
+hue = 49%
+contrast = 41%
+
+#[RMF]
+#freq = 100,375000  
+#capture = off
+
+[Multi PIP]
+freq = 207,250000
+
+[MAGNETOWID]
+#freq = 726,950000
+freq = 727,250000
+#norm = NTSC
+# teoretyczna: 727,250000
+
+
+# NAUKA
+
+
+[Discovery]
+freq = 279,250000
+
+[SciTrek]
+freq = 679,250000
+
+[Civilization]
+freq = 623,250000
+
+[TravelAdvent]
+freq = 447,250000
+
+[AnimalPlanet]
+freq = 319,250000
+
+[RealityTV]
+freq = 655,250000
+
+[EduSat]
+freq = 303,250000
+
+
+# FILM 1
+
+
+[TVN]
+freq = 119,250000
+
+[TVN7]
+freq = 255,250000
+
+[Polsat]
+freq = 183,250000
+
+[TV4]
+freq = 167,250000
+
+[TVP1]
+freq = 191,250000
+
+[TVP2]
+freq = 199,250000
+
+[WOT]
+freq = 175,250000
+
+[Tele5]
+freq = 287,250000
+
+[AleKino]
+freq = 231,250000
+
+[Cinema]
+freq = 239,250000
+
+[TCM]
+freq = 271,250000
+
+
+# FILM 2
+
+
+[TVPolonia]
+freq = 151,250000
+
+[Polsat2]
+freq = 639,250000
+
+[Puls]
+freq = 127,250000
+
+
+# KRESKÓWKI
+
+
+[CartonNetwork]
+freq = 271,250000
+
+[MiniMax]
+freq = 423,250000
+
+[FOXKids]
+freq = 295,250000
+
+
+# INFORMACJE
+
+
+[TVN24]
+freq = 247,250000
+
+[BBCWorld]
+freq = 351,250000
+
+[CNBC]
+freq = 327,250000
+
+[SkyNews]
+freq = 551,250000
+
+[EuroNews]
+freq = 631,250000
+
+
+# MUZYCZNE
+
+
+[MTV Clasic]
+freq = 367,250000
+
+[VIVA]
+freq = 543,250000
+
+[VIVA PL]
+freq = 431,250000
+
+[MTV]
+freq = 263,250000
+
+[MTV2]
+freq = 383,250000
+
+
+# INNE - TV
+
+
+[3Sat]
+freq = 503,250000
+
+[Arte/Cinquime]
+freq = 511,250000
+
+[AsterINFO]
+freq = 159,250000
+
+[Bloomberg]
+freq = 687,250000
+
+[CANAL+]
+freq = 135,250000
+
+[Channel5]
+freq = 495,250000
+
+[DSF]
+freq = 399,250000
+
+[EurosportNews]
+freq = 407,250000
+
+[FashionTV]
+freq = 487,250000
+
+[France2]
+freq = 599,250000
+
+[M6]
+freq = 615,250000
+
+[NTW]
+freq = 359,250000
+
+[ONYX]
+freq = 663,250000
+
+[PorionINFO]
+freq = 111,250000
+
+[RTL]
+freq = 455,250000
+
+[RTL2]
+freq = 647,250000
+
+[RTLSuper]
+freq = 639,250000
+
+[RaiDue]
+freq = 391,250000
+
+[Romantica]
+freq = 375,250000
+
+[Sat1]
+freq = 439,250000
+
+[TV4se]
+freq = 671,250000
+
+[TV5]
+freq = 415,250000
+
+[TVE]
+freq = 335,250000
+
+[VIVAII]
+freq = 343,250000
+
+[VOX]
+freq = 527,250000
+

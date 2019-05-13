@@ -1,0 +1,7 @@
+<article>
+<title>Network File System</title>
+
+<p><wiki pl="Network file system">NFS</wiki> jest opartym o protokół IP (UDP lub TCP) protokołem do udostępniania systemów plików poprzez sieć. Udostępnianie zasobów dyskowych po nfs wymaga zainstalowanego serwera NFS (dla linuxów występuje on w dwóch wersjach - działającej w przestrzeni jądra oraz działającej jako normalny daemon). Konfiguracja udostępnianych zasobów ustawiana jest w <kbd class="path">/etc/exports</kbd> (dla linuxa) i zatwierdzana (przeładowywana) przy pomocy komendy exportfs (opcja -r dla ponownego eksportu - przeładowania configu, -v dla pokazania co jest obecnie wyeksportowane). Plik składa się z dwóch kolumn - w pierwszej podawana jest ścieżka do udostępnianego systemu plików, w drugiej podawane są adresy uprawnionych hostów i opcje exportu dla każdego z hostów. Konfiguracja montowania odbywa się standardowo w <kbd class="path">/etc/fstab</kbd> i wymaga podania jako typu systemu plików <code>nfs</code>.</p>
+
+<p>Możliwe jest także eksportowanie drzewa katalogów po nfs-ie bez umieszczania wpisów w plikach konfiguracyjnych - <code>exportfs -o <var>rw lub ro</var> <var>host-klienta:/eksportowana/sciezka</var></code> (w niektórych -nie linuxowych - systemach <code>share -o <var>rw=host-klienta-z-prawem-zapisu,ro=host-klienta-tylko-do-odczytu</var> <var>/eksportowana/sciezka</var></code>) oraz montowanie - <code>mount -t nfs <var>serwer:/eksportowana/sciezka</var> <var>/punkt/montowania</var></code></p>
+</article>

@@ -1,0 +1,9 @@
+<article>
+<title>Środowiska symulacyjne</title>
+
+<p>Do najpopularniejszych środowisk symulacji układów elektronicznych należy SPCICE. Niejako jego klonem jest GnuCAP, które w dużym stopniu jest zgodny na poziomie składni plików opisujących układ i symulację, jednak występują tu pewne rozbieżności. Zamieszczam <a class="int" href="./demo.cir">demonstracyjny plik z opisem symulacji</a> zgodny z obydwoma tymi symulatorami.</p>
+
+<p>Środowiska symulacyjne/obliczeniowe są używane także w technice cyfrowej. Zamieszam także skrypt do plików PLA (z liczbą wyjść równą 1) dla podanej formuły boolowskiej - <id_link id="expr2pla.sh">expr2pla.sh</id_link></p>
+
+<p>Innym, aczkolwiek dopiero raczkującym (za to dość przyjemnym) środowiskiem jest Ktechlab, tutaj także zamieszczam <a class="int" href="./demo.circuit">przykładowy plik</a> dla tego środowiska.</p>
+</article>

@@ -1,0 +1,281 @@
+#define SOFTNAME "SMTP server by RRP"
+#define MY_EMAIL_ADDRESS "alert@sms-sender"
+
+// uruchomienie polecenia do ktorego zostanie przekazana tresc wiadomosci jako STDIN
+// adres nadawcy jako $1 adres odbiorcy jako $2 
+#define ACTION "/opt/smtp2sms/mail2sms.sh %s %s"
+
+// kolejka dla nullmailer'a ... ten soft powinien chodzic jako ten sam user co nullmailer
+#define QUEUE_DIR "/var/spool/nullmailer/queue/"
+#define QUEUE_PUSH "/var/spool/nullmailer/trigger"
+
+#define BUF_LINE_SIZE 255
+#define BUF_DATA_SIZE 255
+
+#define _LEN_(s)   ((sizeof(s) - 1) / sizeof(char))
+#define _LOG_ stderr
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+#include <string.h>
+#include <ctype.h>
+
+#include <sys/socket.h>
+#include <arpa/inet.h>
+
+#include <time.h>
+
+#include "error_reporting.h"
+//#include "timeout_exec.h"
+
+void copy_and_clear(char * out, char * in, int len) {
+	char *tmp;
+
+	tmp = in;
+	while (isspace(tmp[0])) tmp++;
+
+	strncpy(out, tmp, len);
+
+	tmp = strpbrk(out, "\r\n");
+	if (tmp) {
+		*tmp='\0';
+	}
+}
+
+char* clear_email(char* in) {
+	int len;
+	
+	len = strlen(in);
+	if (in[len-1] == '>')
+		in[len-1] = 0;
+	
+	if (in[0] == '<')
+		return in+1;
+	
+	return in;
+}
+
+int read_line(int fd, char *buf, int len) {
+	int i, ret;
+	
+	len = len-1;
+	for (i=0; i<len; i++) {
+		ret = read(fd, buf+i, 1);
+		if (ret < 1) {
+			buf[i] = 0;
+			return i;
+		}
+		if (buf[i] == '\n') {
+			if (buf[i-1] == '\r') {
+				buf[i-1]='\n';
+				buf[i] = 0;
+				return i;
+			}
+			buf[++i] = 0;
+			return i;
+		}
+	}
+	
+	buf[len] = 0;
+	return len;
+}
+
+int smtp_talk(int sh2, char *hostname, struct sockaddr *ipfrom) {
+	char time_str[64];
+	char buf[BUF_LINE_SIZE];
+	char ip[42], hello[BUF_DATA_SIZE], from[BUF_DATA_SIZE], to[BUF_DATA_SIZE];
+	char *from2, *to2;
+	
+	FILE *cmd_pipe = NULL, *queue = NULL;
+	int queue_d = -1;
+	int state = 0;
+	int msq_num = 0;
+	pid_t pid;
+	int ret, len;
+
+	pid=getpid();
+	
+#ifndef IPv4ONLY
+	if ( ! inet_ntop(AF_INET6, &(((struct sockaddr_in6*)ipfrom)->sin6_addr), ip, 42) )
+#else
+	if ( ! inet_ntop(AF_INET, &(((struct sockaddr_in*)ipfrom)->sin_addr), ip, 42) )
+#endif
+		strcpy(ip, "????");
+	
+	time_t time_unix = time(0);
+	struct tm time_info;
+	gmtime_r( &time_unix, &time_info);
+	strftime(time_str, 64, "%F %T", &time_info);
+	LOG_PRINT_INFO("[%d] connection from: %s at %s", pid, ip, time_str);
+	
+	strftime(time_str, 64, "%a, %d %b %Y %H:%M:%S %z", &time_info);
+	len = snprintf(buf, BUF_LINE_SIZE, "220 %s %s %s\r\n", hostname, SOFTNAME, time_str);
+	write(sh2, buf, len);
+	
+	struct timeval net_timeout;
+	fd_set net_fd_set;
+	
+	while( 1 ) {
+		net_timeout.tv_sec = 60;
+		net_timeout.tv_usec = 0;
+		
+		FD_ZERO(&net_fd_set);
+		FD_SET(sh2, &net_fd_set);
+		
+		ret = select(sh2+1, &net_fd_set, NULL, NULL, &net_timeout);
+		if (ret > 0) {
+			if ( read_line(sh2, buf, BUF_LINE_SIZE) == 0 ) {
+				break;
+			}
+		} else {
+			break;
+		}
+		
+		/// transmited data
+		if (state == 4) {
+			if (buf[0]=='.' && (buf[1]=='\r' || buf[1]=='\n')) {
+				state = 0;
+#ifdef ACTION
+				if (cmd_pipe) {
+					int tmp;
+					if ( (tmp = pclose(cmd_pipe)) )
+						LOG_PRINT_WARN("[%d.%d] delivered to command ERROR (%d)", pid, msq_num, tmp);
+					else
+						LOG_PRINT_INFO("[%d.%d] delivered to command OK", pid, msq_num);
+					cmd_pipe = NULL;
+				}
+#endif
+#ifdef QUEUE_DIR
+				if (queue) {
+					int tmp;
+					if ( (tmp = fclose(queue)) )
+						LOG_PRINT_WARN("[%d.%d] delivered to queue ERROR (%d)", pid, msq_num, tmp);
+					else
+						LOG_PRINT_INFO("[%d.%d] delivered to queue OK", pid, msq_num);
+					queue = NULL;
+					queue_d = -1;
+# ifdef QUEUE_PUSH
+					queue_d = open(QUEUE_PUSH, O_WRONLY | O_NONBLOCK);
+					write(queue_d, " ", 1);
+					close(queue_d);
+					queue_d = -1;
+//					wait_for_timeouted_child_exec(2, 0, "exec echo > /var/spool/nullmailer/trigger");
+# endif
+				}
+#endif
+				LOG_PRINT_INFO("[%d.%d] end mail", pid, msq_num);
+				write(sh2, "250 OK\r\n", _LEN_("250 OK\r\n"));
+				msq_num ++;
+			} else {
+				if (cmd_pipe)
+					fputs(buf, cmd_pipe);
+				if (queue)
+					fputs(buf, queue);
+				continue;
+			}
+		
+		/// start data
+		} else if ( strncasecmp(buf, "DATA", _LEN_("DATA")) == 0 ) {
+			if (state != 3) {
+				write(sh2, "503 valid RCPT command must precede DATA\r\n",
+					_LEN_("503 valid RCPT command must precede DATA\r\n"));
+			} else {
+				from2 = clear_email(from);
+				to2 = clear_email(to);
+#ifdef ACTION
+				char cmd[BUF_DATA_SIZE*2 + _LEN_(ACTION) + 2];
+				sprintf(cmd, ACTION, from2, to2);
+				cmd_pipe =  popen( cmd, "w" );
+#endif
+#ifdef QUEUE_DIR
+				if ( strcmp(to2, MY_EMAIL_ADDRESS) != 0 ) {
+					strncpy(buf, QUEUE_DIR "/XXXXXX", BUF_LINE_SIZE);
+					queue_d = mkstemp(buf);
+					if (queue_d < 0) {
+						write(sh2, "451 Requested action delayed – Local problem\r\n",
+							_LEN_("451 Requested action delayed – Local problem\r\n"));
+						continue;
+					}
+					queue = fdopen(queue_d, "w+");
+					if (!queue) {
+						write(sh2, "451 Requested action delayed – Local problem\r\n",
+							_LEN_("451 Requested action delayed – Local problem\r\n"));
+						continue;
+					}
+					
+					
+					fprintf(queue, "%s\n%s\n\n", from2, to2);
+	
+					// "Received:" header
+					fprintf(queue, "Received: from [%s] (helo=%s)\n", ip, hello);
+					fprintf(queue, "\tby %s with %s\n", hostname, SOFTNAME);
+					fprintf(queue, "\t(envelope-from <%s>)\n", from2);
+					fprintf(queue, "\tfor %s; %s\n", to2, time_str);
+				}
+#endif
+				write(sh2, "354 Enter message, ending with \".\" on a line by itself\r\n",
+					_LEN_("354 Enter message, ending with \".\" on a line by itself\r\n"));
+				state = 4;
+			}
+		
+		/// helo
+		} else if ( strncasecmp(buf, "HELO", _LEN_("HELO")) == 0 || strncasecmp(buf, "EHLO", _LEN_("EHLO")) == 0 ) {
+			copy_and_clear(hello, buf + _LEN_("HELO") + 1, BUF_DATA_SIZE);
+			LOG_PRINT_INFO("[%d.%d] hello: %s", pid, msq_num, hello);
+			len = snprintf(buf, BUF_LINE_SIZE, "250 %s Hello %s, pleased to meet you\r\n", hostname, hello);
+			write(sh2, buf, len);
+			state = 1;
+		
+		/// mail form:
+		} else if ( strncasecmp(buf, "MAIL FROM:", _LEN_("MAIL FROM:")) == 0 ) {
+			copy_and_clear(from, buf + _LEN_("MAIL FROM:"), BUF_DATA_SIZE);
+			LOG_PRINT_INFO("[%d.%d] mail from: %s", pid, msq_num, from);
+			write(sh2, "250 OK\r\n", _LEN_("250 OK\r\n"));
+			state = 2;
+		
+		/// rcpt to:
+		} else if ( strncasecmp(buf, "RCPT TO:", _LEN_("RCPT TO:")) == 0 ) {
+			if (state == 3) {
+				write(sh2, "451 Deferred - please try this recipient again later\r\n",
+				      _LEN_("451 Deferred - please try this recipient again later\r\n"));
+			} else if (state < 2) {
+				write(sh2, "503 sender not yet given\r\n", _LEN_("503 sender not yet given\r\n"));
+			} else {
+				copy_and_clear(to, buf + _LEN_("RCPT TO:"), BUF_DATA_SIZE);
+				LOG_PRINT_INFO("[%d.%d] mail to: %s", pid, msq_num, to);
+				write(sh2, "250 OK\r\n", _LEN_("250 OK\r\n"));
+				state = 3;
+			}
+		
+		/// quit
+		} else if ( strncasecmp(buf, "QUIT", _LEN_("QUIT")) == 0 ) {
+			len = snprintf(buf, BUF_LINE_SIZE, "221 %s closing connection\r\n", hostname);
+			write(sh2, buf, len);
+			break;
+		
+		/// reset
+		} else if ( strncasecmp(buf, "RSET", _LEN_("RSET")) == 0 ) {
+			to[0]=0;
+			from[0]=0;
+			LOG_PRINT_INFO("[%d.%d] reset", pid, msq_num);
+			write(sh2, "250 OK\r\n", _LEN_("250 OK\r\n"));
+			state = 0;
+		
+		} else {
+			write(sh2, "500 unrecognized command\r\n",
+				_LEN_("500 unrecognized command\r\n"));
+		}
+	}
+	
+	if (ret == 0) {
+		LOG_PRINT_WARN("[%d.%d] timeout", pid, msq_num);
+		len = snprintf(buf, BUF_LINE_SIZE, "421 %s SMTP command timeout - closing connection\r\n", hostname);
+		write(sh2, buf, len);
+	}
+	
+	close(sh2);
+	return 0;
+}

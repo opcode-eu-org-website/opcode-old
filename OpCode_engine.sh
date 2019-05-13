@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# KATALOG W KTÓRYM ZNAJDUJE SIĘ DRZEWO STRONY
+SRC_DIR="/01-SRC"
+WORK_DIR="/02-OUT"
+
+# INCLUDOWANIE WZORCOWEJ KONFIGURACJI SILNIKA
+. $SRC_DIR/USAGE/toolbox4computer/www_engine/engine-config.sh/body.pl.src

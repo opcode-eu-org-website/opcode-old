@@ -1,0 +1,158 @@
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <math.h>
+
+#include "camera.h"
+#include "global.h"
+
+Camera::Camera() {
+	x = -67.0f;
+	y = -2.0f;
+	z = -50.0f;
+	rot_xz = 0.0f;
+	rot_yz = 0.0f;
+	rot_xy = 0.0f;
+	zoom = 40.0f;
+	ratio = 1.33f;
+	
+	is_new = true;
+	set();
+}
+
+void Camera::set() {
+	if (!is_new)
+		return;
+	else
+		is_new = false;
+	
+	// ustawiamy jako bierzącą macierz rzutowania (gdzie i z kąd patrzy kamera)
+	glMatrixMode(GL_PROJECTION);
+	// ustawiamy _ją_ na identyczność
+	glLoadIdentity();
+	
+	// ustawiamy perspektywę rzutowania:
+	//  * kąt widzenia w Y
+	//  * proporcje ekranu
+	//  * Z przedniej płaszczyzny ocinania
+	//  * Z tylniej płaszczyzny obcinania
+	gluPerspective(zoom, ratio, config->getf(Config::FRONT_CUT), config->getf(Config::BACK_CUT));
+	// warto wspomnieć o gluOrtho2D() która sprawia że wyświetlane na ekranie
+	// są obiekty o współrzędnych x,y odpowiadajęce podanemu do niej prostokątowi
+	
+	// obrót kamery w płaszyźnie yz (względem osi x)
+	glRotatef(rot_yz, 1, 0, 0);
+	// obrót kamery w płaszyźnie xz (względem osi y)
+	glRotatef(rot_xz, 0, 1, 0);
+	// obrót kamery w płaszyźnie xy (względem osi z)
+	glRotatef(rot_xy, 0, 0, 1);
+	
+	// ustawiamy położenie kamery (w DX jest to osobna macierz - VIEW)
+	// przesunięcie w prawo, w górę i w głąb ekranu
+	glTranslatef(x, y, z);
+	
+	// przełączamy bierzącą macierz na macierz świata (domyślna wartość)
+	glMatrixMode(GL_MODELVIEW);
+	
+	// Eye point
+	point.x = x;
+	point.z = z;
+	point.y = y;
+	
+	// View trapezium
+	float sinV = sinf(-rot_xz);
+	float cosV = cosf(-rot_xz);
+	float sinZ = sinf(zoom/2.0);
+	
+	float xx = sinZ * config->getf(Config::FRONT_CUT);
+	float zz = config->getf(Config::FRONT_CUT);
+	// front left
+	trapezium[0].x = -(x + xx * cosV - zz * sinV);
+	trapezium[0].z = -(z + xx * sinV + zz * cosV);
+	
+	// front right
+	trapezium[1].x = -(x - xx * cosV - zz * sinV);
+	trapezium[1].z = -(z - xx * sinV + zz * cosV);
+	
+	xx = sinZ * config->getf(Config::BACK_CUT);
+	zz = config->getf(Config::BACK_CUT);
+	
+	// back right
+	trapezium[2].x = -(x - xx * cosV - zz * sinV);
+	trapezium[2].z = -(z - xx * sinV + zz * cosV);
+	
+	// back left
+	trapezium[3].x = -(x + xx * cosV - zz * sinV);
+	trapezium[3].z = -(z + xx * sinV + zz * cosV);
+}
+
+void Camera::change() {
+	is_new = true;
+}
+
+void Camera::move_forward(float move) { /// negative value = backward
+	float part_x = sinf(-rot_xz * 2.0*M_PI/360.0);
+	float part_z = cosf(-rot_xz * 2.0*M_PI/360.0);
+	
+	make_move(move, part_x, part_z);
+}
+
+void Camera::move_laterally(float move) { /// negative value = left
+	float part_x = sinf(-rot_xz * 2.0*M_PI/360.0 + M_PI_2);
+	float part_z = cosf(-rot_xz * 2.0*M_PI/360.0 + M_PI_2);
+	
+	make_move(move, part_x, part_z);
+}
+
+void Camera::make_move(float move, float part_x, float part_z) {
+	float new_x = x + move * part_x;
+	float new_z = z + move * part_z;
+	float new_y = calcuate_y(new_x, new_z);
+	
+	float delta_y = new_y - y;
+	if (delta_y >0) {
+		if (delta_y > 1.5) {
+#ifdef DEBUG
+			cout << "D: " << delta_y <<endl;
+#endif
+			return;
+		}
+#ifdef DEBUG
+		cout << "S: " << delta_y << " " << move;
+#endif
+		new_y = (move<0)?-1:1;
+		move = move*move;
+		move = new_y * move / sqrt(move+delta_y*delta_y);
+#ifdef DEBUG
+		cout << " " << move <<endl;
+#endif
+		
+		new_x = x + move * part_x;
+		new_z = z + move * part_z;
+		new_y = calcuate_y(new_x, new_z);
+	}
+	
+	if ( objects_space->check_collisions(-new_x, -new_y, -new_z) ) {
+#ifdef DEBUG
+		cout << "K: " <<endl;
+#endif
+		return;
+	}
+	x = new_x;
+	z = new_z;
+	y = new_y;
+	is_new = true;
+}
+
+float Camera::calcuate_y(float x, float z) {
+	// ustalamy wysokosc
+	int iz = (uint)-z;
+	int ix = (uint)-x;
+	float dx = (-x - ix);
+	float dz = (-z - iz);
+	float new_y = 
+		( objects_space->get_from_space(iz,ix)->height * (1-dz) + objects_space->get_from_space(iz+1,ix)->height * (dz) ) * (1-dx) +
+		( objects_space->get_from_space(iz,ix+1)->height * (1-dz) + objects_space->get_from_space(iz+1,ix+1)->height * (dz) ) * (dx);
+	
+	new_y = -new_y - 2.0; // kamera 2.5 powyzej wysiokosci podoza
+	return new_y;
+}

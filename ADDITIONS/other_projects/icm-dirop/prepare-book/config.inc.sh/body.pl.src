@@ -1,0 +1,92 @@
+# tryb działania
+MAKE_IMG=true
+MAKE_TXT=true
+MAKE_SQL=true
+
+# określenie czy zaczynamy nową książkę i czy zaczynamy nowy volumen
+START_NEW_BOOK=true
+START_NEW_VOLUME=true
+
+
+
+# katalog wyjściowy
+OUTPUT_DIR="./out"
+# numer pierwszego pliku dla wyjścia
+# liczba (numer pierszego pliku outputu) lub NEXT
+#  (numer zostanie automatycznie pobrany na podstawie ostatniego pliku w katalogu)
+OUTPUT_FIRST_NUM="NEXT"
+
+# katalog wejściowy
+INPUT_DIR="./in"
+# plik wejściowy z spisem treści
+INPUT_CONTENTTABLE_FILE="./in/spis.txt"
+
+# format (rozszerzenie) plików graficznych
+IMG_EXT="tif"
+
+# wejściowy RTF składa się z wielu stron
+RTF_MULTIPAGE=false
+# czy na jednym scanie jedna (1) czy dwie strony (2)
+# uwaga: inne wartości niż 1 lub 2 NIE są obsługiwane
+PAGES_PER_SCAN=1
+# tablica nazw plików skanów
+# które nie spełniają powyższego założenia o ilości stron na scan
+OPEC=-1; # one page exception counter
+# let OPEC++; ONE_PAGE_EXCEPTION[$OPEC]=""
+# let OPEC++; ONE_PAGE_EXCEPTION[$OPEC]=""
+
+# numery pierwszych stron numerowanych w sposób normalny (START_NORMAL) i rzymski (START_ROMAN)
+# START_NORMAL > START_ROMAN, uwaga numery muszą odpowiadać numerom kolejnym plików - numerujemy od zera
+# dla numerów przd START_ROMAN (może być ujemne i działa tak jak tego oczekujemy)
+# wywoływana jest funkcja special_num z jednym argumentem będącym numerem kolejnym pliku
+# UWAGA: kazda strona powinna miec nadany numer w ten sposob
+START_NORMAL=0
+START_ROMAN=0
+special_num() { echo -n "_$1"; }
+
+# strona o wskazanym numerze będzie miała ustawiony tytuł na info
+INFO_PAGE=0
+
+
+# dane o książce (jeżeli nie zaczynamy nowej wystarczy BOOK_ID,
+#  jezeli zaczynamy trzeba podac nietechniczne - patrz nizej)
+BOOK_ID=""
+# dane o voluminie (jezeli nie zaczynamy nowego wystarczy VOLUME_ID,
+#  jezeli zaczynamy trzeba podac nietechniczne - patrz nizej)
+VOLUME_ID=""
+
+
+
+
+
+# informacje o książce (wymagane tylko gdy zaczynamy nową lub nie podano BOOK_ID)
+# tytuł (tytuł pełny podawany w DC_Title)
+BOOK_TITLE=""
+# tytuł skrócony (dla potrzeb URL, nie może zawierać znaku "/")
+BOOK_URL=""
+# tylko jeden volumin w tej książce (true albo false)
+BOOK_ONE_VOLUME=false
+# czy domyślnie szukać tylko w pojedyńczym woluminie
+# (false = domyślnie zaznaczona opcja szukania w wszystkich woluminach)
+BOOK_SEARCH_VOLUME_DEFAULT=true
+
+# informacje o voluminie (wymagane tylko gdy zaczynamy nową lub nie podano VOLUME_ID)
+# tytuł (tylko woluminu, tytuł pełny podawany w DC_Title)
+VOLUME_TITLE=""
+# tytuł skrócony (dla potrzeb URL, ale tylko woluminu, nie może zawierać znaku "/")
+VOLUME_URL=""
+
+
+
+# dodatkowe informacje o pozycji, w tym metadane Dublin Core ()
+DC_Title=""
+DC_Creator=""
+DC_Subject_and_Keywords=""
+DC_Description=""
+DC_Contributor=""
+DC_Publisher=""
+DC_Date=""
+# kategorie - lista rozdzielana średnikami
+# prosze stosowac: Ekonomia Filozofia Geografia Historia Prawo Socjologia
+# (w takiej pisowni - z wielkich liter)
+INFO_Category=""

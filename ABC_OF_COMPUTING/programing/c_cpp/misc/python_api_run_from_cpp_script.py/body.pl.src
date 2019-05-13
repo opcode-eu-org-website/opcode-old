@@ -1,0 +1,5 @@
+def foo(ott):
+	ott.run(4)
+	CPPobject.run(0)
+	CPPobject.value = 1587
+	return 2193

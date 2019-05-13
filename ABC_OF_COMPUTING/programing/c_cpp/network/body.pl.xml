@@ -1,0 +1,9 @@
+<article>
+<title>Sieci TCP/IP</title>
+<ul>
+	<li><id_link id="c_cpp:network:numeracja_ipv6.c">numeracja_ipv6.c</id_link> - prosty program demonstrujący adresację IPv6 (wraz z konwersja postaci napisowej na numeryczną) obliczający adres sieci na podstawie maski i adresu hosta</li>
+	<li><id_link id="c_cpp:network:nazwy_hostow.c">nazwy_hostow.c</id_link> - prosty program demonstrujący przekształcanie nazwy hosta na adres IP</li>
+	<li><id_link id="c_cpp:network:UDP_nadajnik.c">UDP_nadajnik.c</id_link>, <id_link id="c_cpp:network:UDP_odbiornik.c">UDP_odbiornik.c</id_link>, <id_link id="c_cpp:network:TCP_serwer.c">TCP_serwer.c</id_link> - zestaw programów pokazujących komunikację przez UDP i TCP</li>
+	<li><id_link id="c_cpp:network:jabber.cpp">jabber.cpp</id_link> - prosta komunikacja przez sieć, z wykorzystaniem protokołu Jabber i napisów języka C++</li>
+</ul>
+</article>

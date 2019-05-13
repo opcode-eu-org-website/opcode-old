@@ -1,0 +1,220 @@
+#include "sceneobject.h"
+
+#include <fstream>
+#include <GL/glut.h>
+
+PointXZY<float> SceneObject::eye;
+map<const int, GeometryObject*> SceneObject::geometry_id;
+map<const int, TextureObject*> SceneObject::texture_id;
+map<const int, LightObject*> SceneObject::light_id;
+
+SceneObject::SceneObject(float z, float x, float y, string filename){
+	this->z = z;
+	this->x = x;
+	this->y = y;
+	this->filename = filename;
+	this->flags = NOT_LOAD;
+	this->geometry = NULL;
+	for (int i=0; i<8; i++) this->texture[i] = NULL;
+	this->light = NULL;
+}
+
+void SceneObject::load(SceneObject *obj) {
+#ifdef DEBUG
+	cout << "Loading: " << obj->filename << " at (" << obj->x << ", " << obj->y << ", " << obj->z << ")\n";
+#endif
+	obj->flags |= LOAD;
+	
+	ifstream object_config;
+	string filepath;
+	
+	filepath = "data/";
+	filepath.append(obj->filename);
+	object_config.open(filepath.c_str());
+	if(!object_config.is_open()) {
+		cerr << "Couldn't read object config file - " << filepath << " ... ignoring" << endl;
+		return;
+	}
+	
+	/// FORMAT PLIKU:
+	//  T id tex_num text_filename
+	//  L id specyfikacja formatu swiatla
+	//  C (r+e)^2 x y z
+	//  G id rot_xz rot_yz rot_xy tryb_rysowania
+	//   cala reszta pliku - specyfikacja geomerii obiektu:
+	//   P -> punkt
+	//   I -> seria indeksow
+	
+	int pos_start, pos_end;
+	string line;
+	bool is_header = true;
+	bool read_next = true;
+	int tmp_int, id;
+	float read_f[16];
+	while(!object_config.eof() && read_next) {
+		getline(object_config, line, '\n');
+		if (line[0] == '#') {
+			// nic nie robimy to komentarz
+		} else if (line[0] == 'C') {
+			pos_end = 1;
+			for (int i=0; i<4; i++) {
+				pos_start = pos_end+1;
+				pos_end = line.find(" ", pos_start);
+				read_f[i] = atoi(line.substr(pos_start, pos_end).c_str());
+			}
+			obj->colision_balls.push_back(Ball<float>(
+				read_f[0], read_f[1] + obj->x, read_f[2] + obj->y, read_f[3] + obj->z
+			));
+		} else if (is_header) {
+				/// odczytujemy drugie pole - id
+				pos_start = 2;
+				pos_end = line.find(" ", pos_start);
+				id = atoi(line.substr(pos_start, pos_end).c_str());
+				pos_start = pos_end+1;
+				
+				/// w zalezności od wartości 3 pola czytamy tresztę rekordu
+				switch(line[0]) {
+					case 'T':
+					pos_end = line.find(" ", pos_start);
+					tmp_int = atoi(line.substr(pos_start, pos_end).c_str());
+					
+					// jeżeli tekstura o zadanym id nie była utworzona to ją tworzymy
+					if (texture_id[id] == NULL) {
+						pos_start = pos_end+1;
+						line.erase(0, pos_start);
+						texture_id[id] = new TextureObject(line);
+#ifdef DEBUG
+						cout << "  load texture for " << obj->filename << " ID=" << id << endl;
+#endif
+					}
+					
+					if (tmp_int <8)
+						obj->texture[tmp_int] = texture_id[id];
+					else
+						cerr << "Texture number is too big ... ignoring" << endl;
+					break;
+				case 'L':
+					// jeżeli światło o zadanym id nie było utworzone to je tworzymy
+					if (light_id[id] == NULL) {
+						// 0,1,2 -> kierunek [x,y,z]
+						// 3 - kat swiecenia GL_SPOT_CUTOFF
+						// 4 - skupienie GL_SPOT_EXPONENT
+						// 5 - zanikanie GL_*_ATTENUATION
+						// 6,7,8 - kolor AMBIENT [r,g,b]
+						// 9,10,11 - kolor DIFFUSE [r,g,b]
+						// 12,13,14 - kolor SPECULAR [r,g,b]
+						// 15 - typ zanikania i inne ..
+						for (int i=0; i<16; i++) {
+							pos_start = pos_end+1;
+							pos_end = line.find(" ", pos_start);
+							read_f[i] = atoi(line.substr(pos_start, pos_end).c_str());
+						}
+						light_id[id] = new LightObject(read_f);
+					}
+					
+					obj->light = light_id[id];
+					break;
+				case 'G':
+					// zapamiętujemy obroty
+					pos_end = line.find(" ", pos_start);
+					obj->rot_xz = atof(line.substr(pos_start, pos_end).c_str());
+					pos_start = pos_end+1;
+					
+					pos_end = line.find(" ", pos_start);
+					obj->rot_yz = atof(line.substr(pos_start, pos_end).c_str());
+					pos_start = pos_end+1;
+					
+					pos_end = line.find(" ", pos_start);
+					obj->rot_xy = atof(line.substr(pos_start, pos_end).c_str());
+					pos_start = pos_end+1;
+					
+					pos_end = line.find(" ", pos_start);
+					tmp_int = atoi(line.substr(pos_start, pos_end).c_str());
+					pos_start = pos_end+1;
+					
+					// jeżeli gemetria o zadanym id nie była utworzona to ja tworzymy
+					if (geometry_id[id] == NULL) {
+						geometry_id[id] = new GeometryObject(tmp_int);
+						is_header = false;
+#ifdef DEBUG
+						cout << "  load geometry for " << obj->filename << " ID=" << id << endl;
+#endif
+					// w przeciwnym wypadku kończymy czytanie tego pliku
+					} else {
+						read_next = false;
+					}
+					
+					obj->geometry = geometry_id[id];
+					break;
+			}
+		} else {
+			if (line[0] == 'I') {
+				// linia zawiera indeksy
+				pos_end = 1;
+				while (pos_end != -1) {
+					pos_start = pos_end+1;
+					pos_end = line.find(" ", pos_start);
+					obj->geometry->push_index( atoi(line.substr(pos_start, pos_end).c_str()) );
+				}
+			} else if (line[0] == 'P') {
+				// linia zawiera definicje punktu werteksa
+				pos_start = 2;
+				for (int i=0; i<5; i++, pos_start = pos_end+1) {
+					pos_end = line.find(" ", pos_start);
+					read_f[i] = atof(line.substr(pos_start, pos_end).c_str());
+				}
+				obj->geometry->push_point(read_f);
+			}
+		}
+	}
+	object_config.close();
+}
+
+void SceneObject::render(SceneObject *obj) {
+	if (! obj->flags & LOAD)
+		load(obj);
+	// ustawiamy bierzącą macierz (GL_MODELVIEW) na identyczność
+	glLoadIdentity();
+	// mnożymy bierzącą macierz przez macierz przesunięcia (x, y, z)
+	glTranslatef(obj->x,obj->y,obj->z);
+	// a takzę obroty
+	glRotatef(obj->rot_yz, 1, 0, 0);
+	glRotatef(obj->rot_xz, 0, 1, 0);
+	glRotatef(obj->rot_xy, 0, 0, 1);
+	
+	// ustawiamy tekstury	// FIXME
+	TextureObject* tex = obj->texture[0];
+	if (tex != NULL) {
+		glBindTexture(GL_TEXTURE_2D, tex->texture); // ustawiamy teksture
+		glEnable(GL_TEXTURE_2D); // właczamy teksturowanie 2d
+	}
+	
+	// ustawiamy swiatla	// FIXME
+	
+	// rysujemy obiekt
+	if (obj->geometry != NULL)
+		obj->geometry->render();
+}
+
+bool SceneObject::check_collisions(SceneObject *obj, float x, float y, float z) {
+	for(list< Ball<float> >::iterator iter = obj->colision_balls.begin(); iter != obj->colision_balls.end(); ++iter) {
+		float dist_xz =((*iter).z - z)*((*iter).z - z) + ((*iter).x - x)*((*iter).x - x) - (*iter).r;
+		// FIXME docelowo powinien to być zestaw kólek opisujący poruszający się obiekt
+		if ( dist_xz + ((*iter).y - y)*((*iter).y - y) < 0 )
+			return true;
+		if ( dist_xz + ((*iter).y - y+1.6)*((*iter).y - y+1.6) < 0 )
+			return true;
+		if ( dist_xz + ((*iter).y - y+0.8)*((*iter).y - y+0.8) < 0 )
+			return true;
+	}
+	return false;
+}
+
+float SceneObject::distans_to_eye(SceneObject *obj) {
+	return (obj->z - eye.z)*(obj->z - eye.z) + (obj->x - eye.x)*(obj->x - eye.x);
+}
+
+bool SceneObject::compare(SceneObject *arg1, SceneObject *arg2) {
+	return  distans_to_eye(arg1) > distans_to_eye(arg2);
+	// FIXME zagadnienie przezroczystosci i sortowania
+}

@@ -1,0 +1,46 @@
+/**
+ *
+ * program umożliwiający obsługę wyświetlacza HD44780 z komputera PC
+ *
+ *
+**/
+
+#include <stdio.h>
+#include <sys/io.h>
+
+void opoznienie (long l) {
+	l = l * 500; // prędkość procesora w MHz / 6
+	for (; l; --l ) asm volatile( "" );
+}
+
+#define lcd_send(byte) outb(byte, 0x378);
+
+#include "lcd.h"
+
+
+int main() {
+
+	iopl (3);
+
+	lcd_send_comand2 (0x2); lcd_send_comand (0x28); // Function Set (2 linie 4 bit) = 0010, 0010 10**
+	lcd_send_comand (0xc); // On-Off Control (bez pokazywania kursora) = 0000 1100
+	lcd_send_comand (0x6); // Entry Mode Set = 0000 0110
+
+
+	lcd_first_line();
+	int i;
+	//lcd_send_data (24);
+	//lcd_send_data (21);
+	//lcd_send_data (22);
+	lcd_send_data (26);
+	lcd_send_data (27);
+	//lcd_send_data (171);
+	lcd_send_data (185);
+	lcd_send_data (186);
+	lcd_send_data (205);
+	
+	//lcd_send_string ("Ala ma kota. Kot ma Ale.    Czyzby miec bylo    ", 48); // 2 pierwsze linie po 24 znaki
+	//lcd_second_line();
+	//lcd_send_string ("relacja rownowaznosci ? ", 24); // jeden wiersz po 24 znaki
+	// "                                                " "                        "
+}

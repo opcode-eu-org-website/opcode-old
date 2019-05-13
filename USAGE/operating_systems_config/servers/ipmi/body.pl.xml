@@ -1,0 +1,62 @@
+<article>
+<title>IPMI</title>
+
+<p><wiki en="Intelligent Platform Management Interface">IPMI</wiki> jest specyfikacją komunikacji systemu zarządzającego sprzętem z interfejsem administracyjnym. Aby korzystać z pod Linuxa z dobrodziejstw tego wynalazku należy posiadać płytę główną (ew. inne urządzenie) wspierające ten protokół oraz zainstalować OpenIPMI i ipmitool. IPMI umożliwia m.in. (zdalny) podgląd informacji z sensorów, wyłączenie, włączenie czy też reset zasilania, a także zdalny dostęp do konsoli.</p>
+
+<p>Lokalne używanie ipmi wymaga załadowania modułów ipmi_devintf i ipmi_si, zainstalowania wspomnianego openipmi oraz połączenia się przy pomocy komendy <code>ipmitool -I open -H 192.168.0.102 shell</code>. Możemy wtedy dokonać konfiguracji dostępu sieciowego:</p>
+<pre>
+# w testowanej płycie były dwie karty sieciowe z których mógł korzystać IPMI
+# - identyfikowane w nim jako interfejsy 6 i 7
+lan set 6 ipaddr <var>192.168.0.100</var>
+lan set 6 netmask <var>255.255.0.0</var>
+lan set 6 ipsrc static
+lan set 6 auth ADMIN PASSWORD
+lan set 6 auth OPERATOR PASSWORD
+lan set 6 auth USER PASSWORD
+lan set 6 auth CALLBACK PASSWORD
+lan set 6 user
+lan set 6 password <var>NASZE_TAJNE_HASLO</var>
+lan set 6 access on
+lan set 6 vlan id off
+lan set 6 macaddr <var>MAC:adres:karty:z:IPMI</var>
+isol set enabled true
+isol set bit-rate 115.2
+# u mnie poniższa opcja nie chciała zadziałać, ale da się to obejść
+lan set 6 arp respond on
+</pre>
+
+<p>Następnie możemy połączyć się zdalnie do IPMI przy pomocy <code>ipmitool -I lan -H <var>192.168.0.100</var> shell</code> lub do konsoli wystawionej na port szeregowy (w wypadku testowanego sprzętu był to /dev/ttyS1, ponadto wymagał użycia starszego trybu isol zamiast sol) - <code>ipmitool -I lan -H <var>192.168.0.100</var> isol activate</code>. Testowana płyta (SE7501WV2) posiadała także w biosie opcje przekierowania konsoli na port szeregowy (w odróżnieniu od innej testowanej płyty bez IPMI) ta przekierowywała też gruba więc wystarczyło wystawić jądro i getty. Zobacz w Sieci: <doc url="http://buttersideup.com/docs/howto/IPMI_on_Debian.html">Howto setup IPMI under Linux (Debian / Sarge) on the Intel SR2300 Server Chassis (Intel Server Board SE7501WV2)</doc> (uwaga od czasu powstania tamtego artykułu trochę się zmieniło - ipmitool obsługuje isol, inne nazwy modułów).</p>
+
+<p>IPMI możemy wykorzystać także lokalnie - np. do monitoringu temperatury (niekiedy daje lepsze wyniki niż lmsensors czy tez mbmon). Prezentuje przykład prostego skryptu który w przypadku wykrycia zbyt wysokiej temperatury wysyła powiadomnienie i dokonuje (dość brutalnego) wyłączenia maszyny:</p>
+
+<pre>
+IPMI_INFO=`ipmitool -I open sdr`
+
+date +%T >> /var/log/temperature_`date +%F`
+echo "$IPMI_INFO" | grep Temp >> /var/log/temperature_`date +%F`
+
+echo "$IPMI_INFO" | awk '
+	BEGIN {
+		ret_code=0
+	}
+	$1=="CPU" &amp;&amp; $3=="Temp" &amp;&amp; $5 &gt; 68 {
+		if ($5 &lt; 200) {ret_code=12; exit 12} else {ret_code=11}
+	}
+	END {
+		exit ret_code
+	}
+'
+SHUTDOWN=$?
+
+if [ $SHUTDOWN -ge 11  ]; then
+	sendEmail -f "root@$HOSTNAME" -t admin@email.adress \
+		-u "SHUTDOWN INFO from `hostname`" -m "$IPMI_INFO" \
+		-s nasz.serwer.smt.puszczajacy.beze.autoryzacji.i.greylist
+	if [ $SHUTDOWN -ge 12  ]; then
+		ipmitool -I open power off
+	fi
+fi
+</pre>
+
+<p>Warto także zwrócić uwagę na alternatywną implementację protokołu IPMI - <homepage url="http://www.gnu.org/software/freeipmi/">freeipmi</homepage>.</p>
+</article>

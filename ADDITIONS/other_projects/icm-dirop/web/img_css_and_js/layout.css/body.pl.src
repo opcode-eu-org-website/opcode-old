@@ -1,0 +1,58 @@
+/****************************
+ ** GLOWNY UKLAD DOKUMENTU **
+ ****************************/
+
+/** STRONA **/
+body {
+	padding: 0;
+	margin: 1em;
+	min-width: 81em; /* = div.left_menu:min-width / div.left_menu:width */
+	
+	background-color: #eaead4;
+	color: #333;
+	font-family: Verdana, sans-serif;
+}
+
+/** NAGLOWKI **/
+div.header {
+	padding: 0;
+	margin: 0;
+}
+div.system_message {
+	padding: 0.5em;
+	margin: 0.5em;
+	border: 2px dotted red;
+	text-align: center;
+	color: #000000;
+}
+
+/** ZAWARTOSC STRONY (w tym menu) **/
+div.page {
+	position: relative;
+	padding: 0;
+	margin: 0;
+}
+div.left_menu {
+	position: relative;
+	padding: 0;
+	margin: 0;
+	float: left;
+	width: 24.5%;
+	min-width: 20em;
+}
+div.content {
+	position: relative;
+	padding: 0;
+	margin: 0;
+	float: right;
+	width: 74.5%;
+	min-width: 60em; /* = body:min-width * div.content:width */
+}
+
+/** STOPKA **/
+div.footer {
+	clear: both;
+	padding: 0.5em;
+	margin: 0;
+	text-align: left;
+}

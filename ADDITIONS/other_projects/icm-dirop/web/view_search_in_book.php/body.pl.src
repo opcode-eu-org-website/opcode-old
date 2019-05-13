@@ -1,0 +1,115 @@
+<?php
+/**
+	System prezentacji zasobów DIROP na WWW
+	
+	plik odpowiedzialny za wyświetlanie (w oparciu o szablony xhtml'owe) strony
+	wyników wyszukiwania w książce
+	
+	korzysta z informacji zawartych w utworzonych wcześniej tablicach
+		$BOOK_INFO - informacje o książce
+		$SEARCH_INFO - informacje o wyszukiwaniu
+		$SEARCH_RESULTS - wyniki wyszukiwania
+	ustawia wartość $PAGE_SHOWED
+**/
+
+
+
+$PAGE_SHOWED=true;
+
+/// nagłówek dokumentu
+if ($SEARCH_INFO['one_book']) {
+	xhtml_print_file_head($BOOK_INFO['b.title'] . SEARCH_IN_BOOK_TITLE_SURFIX );
+	xhtml_print_header($BOOK_INFO['b.title'], "", $BOOK_INFO['b.title'], "", "/". $BOOK_INFO['b.url'] . "/", "");
+} else {
+	xhtml_print_file_head( BOOK_LIST_TITLE );
+	xhtml_print_header( BOOK_LIST_TITLE , "", "", "", "", "");
+}
+
+if ($SEARCH_INFO['error'] != "") {
+	/// błąd wyszukiwania
+	xhtml_print_search_error($SEARCH_INFO['error']);
+} else {
+	/// wyniki wyszukiwania
+	xhtml_print_volumes_list_head(WYNIK_WYSZUKIWANIA . $SEARCH_INFO['text']);
+	if($SEARCH_RESULTS == NULL) {
+		xhtml_print_list_entry( NIESTETY_NIC_NIE_ZNALEZIONO );
+	} else {
+		$int_tmp = 0;
+		/// wyniki znalezione w indeksie
+		foreach ($SEARCH_RESULTS as $arr_tmp) {
+			if ($arr_tmp['type'] == 1) {
+				if ($int_tmp == 0) {
+					xhtml_print_volumes_list_subhead( FIND_IN_INDEX );
+					$int_tmp = 1;
+				}
+				
+				if ($arr_tmp['single_vid'] < -1)
+					$url = $arr_tmp['b.url'] . '/' . $arr_tmp['v.url'];
+				else
+					$url = $arr_tmp['v.url'];
+					
+				if ($SEARCH_INFO['one_book'])
+					$title = $arr_tmp['v.title'];
+				else
+					$title = $arr_tmp['b.title'] . ", " . $arr_tmp['v.title'];
+				
+				xhtml_print_list_entry(
+					$title . ', ' . $arr_tmp['p.title'],
+					DIROP_SCRIPT_PATH . '/' . $url . '/' . $arr_tmp['p.title']
+				);
+			}
+		}
+		/// wyniki znalezione w tekscie
+		foreach ($SEARCH_RESULTS as $arr_tmp) {
+			if ($arr_tmp['type'] != 1) {
+				if ($int_tmp == 1) {
+					xhtml_print_volumes_list_subhead( FIND_IN_TEXT );
+					$int_tmp = 2;
+				}
+				
+				if ($arr_tmp['single_vid'] < -1)
+					$url = $arr_tmp['b.url'] . '/' . $arr_tmp['v.url'];
+				else
+					$url = $arr_tmp['v.url'];
+				
+				if ($SEARCH_INFO['one_book'])
+					$title = $arr_tmp['v.title'];
+				else
+					$title = $arr_tmp['b.title'] . ", " . $arr_tmp['v.title'];
+				
+				xhtml_print_list_entry(
+					$title . ', ' . $arr_tmp['p.title'],
+					DIROP_SCRIPT_PATH . '/' . $url . '/' . $arr_tmp['p.title'],
+					$arr_tmp['text']
+				);
+			}
+		}
+	}
+	xhtml_print_list_foot();
+}
+
+if ($SEARCH_INFO['one_book']) {
+	/// wyświetlanie okienka wyszukiwarki
+	xhtml_print_search_box($BOOK_INFO['volume_id'], $BOOK_INFO['single_vid'], $BOOK_INFO['b.extra']);
+	
+	/// pobieranie listy voluminów dla "idź do"
+	if ($BOOK_INFO['single_vid'] < -1) {
+		$SQL  = 'SELECT volume_id, url AS "v.url", title AS "v.title" FROM volume WHERE book_id='. $BOOK_INFO['book_id'] .' ORDER BY volume_id;';
+		$result = pg_query($baza_danych, $SQL) or error('db_query', $SQL);
+		$lista_tomow = pg_fetch_all($result);
+	} else {
+		$lista_tomow = NULL;
+	}
+	
+	/// wyświetlanie nawigacji - "idź do" oraz fragmentu spuisu treści (tylko nazwa serii)
+	xhtml_print_navigation_head("", $BOOK_INFO['b.title'], "", "/". $BOOK_INFO['b.url'] ."/", $lista_tomow, "", "");
+	xhtml_print_navigation_foot($BOOK_INFO['b.title'], "");
+} else {
+	/// wyświetlanie wyszukiwarki i nawigacji globalnej
+	xhtml_print_library_search();
+	xhtml_print_category_navigation();
+}
+
+xhtml_print_footer();
+
+?>

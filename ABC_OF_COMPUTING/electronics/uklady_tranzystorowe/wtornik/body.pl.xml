@@ -1,0 +1,10 @@
+<article>
+<title>Wtórnik emiteorowy</title>
+<p class="center"><img_from_src name="wtornik" type="sch" alt="schemat ideoy wtórnika emiterowego" /></p>
+
+<p>Każdy wtórnik jest układem typu "wspólny kolektor" (ale na odwrót nie zawsze). Układ taki (w odróżnieniu od wspólnego emitera czy też wspólnej bazy) jest w stanie wzmacniać nie tylko małe ale także duże sygnały. Jednak potrafi on wzmacniać tylko prąd - napięcie wyjściowe jest niemalże równe napięciu wejściowemu (dokładniej jest pomniejszone o spadek na aktywnym złączu PN).</p>
+
+<p>Często wykorzystywany jest układ wtórnika z tzw. "sprzężeniem stałoprądowym" (bez odcinania składowej stałej na wejściu) i podwójnym (dodatnim i ujemnym) zasilaniem (służącym do ustalenia punktu pracy zamiast dzielnika podłączanego do bazy) przedstawiony na poniższej ilustracji.</p>
+
+<p>Można spotkać się także z połączeniem dwóch tranzystorów pracujących w układzie w wtórnika. W szczególności może być to J-FET z bipolarnym (aby uzyskać dużą rezystancję wejściową i małą wyjściową), lub tranzystory tego samego typu aby uzyskać większą wypadkową wartość <eq_latex>\beta</eq_latex> (jest ona wtedy iloczynem wartości dla poszczególnych tranzystorów).</p>
+</article>

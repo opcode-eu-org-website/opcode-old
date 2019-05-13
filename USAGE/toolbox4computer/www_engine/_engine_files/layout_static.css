@@ -1,0 +1,54 @@
+/**
+ * Copyright (c) , Robert Paciorek (http://www.opcode.eu.org/), BSD-type license
+ * 
+ *
+ * Redystrybucja wersji źródłowych i wynikowych, po lub bez dokonywania
+ * modyfikacji JEST DOZWOLONA, pod warunkiem zachowania niniejszej informacji o
+ * prawach autorskich. Autor NIE ponosi JAKIEJKOLWIEK odpowiedzialności za skutki
+ * użytkowania tego dokumentu/programu oraz za wykorzystanie zawartych tu informacji.
+ *
+ * This program is free software. Redistribution and use in source and binary
+ * forms, with or without modification, ARE PERMITTED provided save this copyright
+ * notice. This document/program is distributed WITHOUT any warranty, use at YOUR
+ * own risk.
+ * 
+**/
+
+div.tresc {
+	margin-left: 200pt;
+	min-width: 250pt;
+}
+
+div.menu {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 200pt;
+	height: 100%;
+	
+	overflow: auto;
+	background: #f0f8ff;
+}
+div.menu * {
+	visibility: visible;
+}
+div.menu p.menu_info {
+	display: none;
+	visibility: hidden;
+}
+
+@media screen and (max-width: 842px) {
+	div.tresc {
+		margin-left: 135pt;
+	}
+	div.menu {
+		width: 135pt;
+	}
+}
+
+@media print {
+	div.menu {
+		display: none ;
+		visibility: hidden ;
+	}
+}

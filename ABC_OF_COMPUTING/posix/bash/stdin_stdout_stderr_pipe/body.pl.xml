@@ -1,0 +1,11 @@
+<article>
+<title>Standardowe wejście wyjście i przekierowania</title>
+
+<p>Do przekierowywania wejść i wyjść poleceń służą znaki:<br />
+	<code>|</code> - przekierowanie wyjścia (polecenia z lewej strony) do programu (polecenia po prawej stronie)<br />
+	<code>&gt;</code> - przekierowanie wyjścia do pliku<br />
+	<code>&lt;</code> - pobieranie wejścia z pliku.<br />
+	możliwe jest też przekierowanie stdout dwóch poleceń jako wejść plikowych - np. <code>diff &lt;(cat plik1) &lt;(cat plik2)</code>.
+Dzięki konstrukcji <code>exec 1> plik.txt</code> można przekierować całe standardowe wyjście do pliku, natomiast <code>zmienna=`cat`</code> umożliwi wczystanie standardowego wejścia do pliku. Warto w tym miejscu wspomnieć także o programie <code>tee</code>, który wypisuje swoje standardowe wejście do pliku i na standardowe wyjście jednocześnie.</p>
+
+</article>

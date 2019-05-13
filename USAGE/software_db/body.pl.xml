@@ -1,0 +1,11 @@
+<article>
+<title>Baza przydatnych programów</title>
+
+<p>W artykule tym postaram się omówić najważniejsze grupy programów komputerowych, będę również odwoływał się do konkretnych ich przedstawicieli. Przy wyborze przedstawicieli podstawowymi kryteriami były: wolność danego programu (musi być Free Software), popularność (musiałem mieć z nim doczynienia) oraz to czy mi przypadł do gustu (nie mogę go nie lubić; programy które szczególnie przypadły mi do gustu wyróżnione są <strong>pogrubieniem</strong>). Zachęcam też do odwiedzenia <a class="ext" href="http://directory.fsf.org/">Katalogu Wolnego Oprogramowania</a> na stronach FSF, <wiki pl="Kategoria:Wolne i Otwarte Oprogramowanie">Kategoria:Wolne i Otwarte Oprogramowanie</wiki> na stronach Wikipedii oraz <a class="ext" href="http://www.linuxsoft.cz/pl/">Linux Software</a>, a także zbioru programów i skryptów dla KDE: <a class="ext" href="http://www.kde-apps.org/">kde-apps.org</a>.</p>
+
+<p>W poniższym spisie nie są ujęte informacje o:</p><ul>
+	<li>standardowych (i trochę mniej standardowych) <id_link id="ABC_OF_COMPUTING:posix">narzędziach shellowych</id_link></li>
+	<li>programach do komunikacji z wykorzystaniem sieci komputerowych (zarówno po stronie <id_link id="softdb:serwery">serwera</id_link> jak i <id_link id="softdb:komunikacja">klienta</id_link>)</li>
+	<li><id_link id="softdb:cmd-konfiguracja_sieci">konfiguracji sieci</id_link></li><li><id_link id="USAGE:toolbox4electronic:software">oprogramowaniu inżynieryjnym</id_link></li>
+</ul>
+</article>

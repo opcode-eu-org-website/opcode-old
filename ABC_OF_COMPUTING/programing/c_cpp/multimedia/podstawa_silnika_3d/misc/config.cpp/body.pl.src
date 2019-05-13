@@ -1,0 +1,34 @@
+#include "config.h"
+
+float Config::getf(float_conf_val_index index) {
+	return float_conf_val[index];
+}
+
+int Config::geti(int_conf_val_index index) {
+	return int_conf_val[index];
+}
+
+bool Config::getb(bool_conf_val_index index) {
+	return bool_conf_val[index];
+}
+
+void Config::load(){
+	// FIXME to powinno byc czytane z pliku konfiguracyjnego
+	float_conf_val[ STEP_MOVE_Z ] = 0.08f;
+	float_conf_val[ STEP_MOVE_X ] = 0.05f;
+	float_conf_val[ STEP_MOVE_Y ] = 0.05f;
+	float_conf_val[ STEP_ROTATE ] = 0.05f;
+	float_conf_val[ STEP_ZOOM ] = 0.05f;
+	float_conf_val[ MAX_ZOOM ] = 80.0f;
+	float_conf_val[ MIN_ZOOM ] = 20.0f;
+	float_conf_val[ BACK_CUT ] = 50.0f;
+	float_conf_val[ FRONT_CUT ] = 0.1f;
+	
+	int_conf_val[ KEY_FORWARD ] = 'w';
+	int_conf_val[ KEY_BACKWARD ] = 's';
+	int_conf_val[ KEY_LEFT ] = 'a';
+	int_conf_val[ KEY_RIGHT ] = 'd';
+	int_conf_val[ KEY_EXIT ] = 'q';
+	
+	bool_conf_val[ USE_FULLSCREEN ] = true;
+}

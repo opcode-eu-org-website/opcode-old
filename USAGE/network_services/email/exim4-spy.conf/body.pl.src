@@ -1,0 +1,197 @@
+###
+### KONFIGURACJA OGÓLNA
+###
+
+# w tej konfiguracji serwer sporządza i przesyła na podany adres kopię wysyłanego listu
+# wszystkie listy przesyłane są przez zewnętrzny SMTP wymagający autoryzacji
+# (my nie jesteśmy serwerem pocztowym, nie mamy wpisów MX)
+
+exim_path = /usr/sbin/exim4
+
+# domeny dla których jesteśmy podstawowym MX
+# @[] odpowiada za przyjmowanie "literałów domenowych" na wszystkie nasze IP
+# kolejne nazwy domenowe w kolejnych liniach pliku,
+# warto podać także nazwę podstawowa bierzącego systemu (@ może nienajlepiej działać)
+# oraz nazwy skrucone hosta
+domainlist local_domains = @ : @[] : localhost : localhost.localdomain 
+
+# domeny dla których jesteśmy zapasowym MX
+# będziemy próbować dostarczyć do serwera o najniższym MX
+# kolejne nazwy domenowe w kolejnych liniach pliku
+#domainlist relay_to_domains = /etc/mail/relay_to_domains
+
+# podstawowa nazwa serwera pocztowego
+# gdyby wczytanie z innych źródeł dawalo błędy ...
+primary_hostname = example.com 
+
+# hosty z których przyjmujemy pocztę
+hostlist   relay_from_hosts = <; 127.0.0.1 ; ::1 ; /etc/mail/relay_from_hosts
+
+# pozwalamy na przyjmowanie "literałów domenowych" czyli np. postamaster@[127.0.0.1]
+allow_domain_literals
+
+# ponawianie wysyłania
+ignore_bounce_errors_after = 2d
+timeout_frozen_after = 7d
+
+# listy kontroli dostępu, akceptacji i filtrowania
+acl_smtp_rcpt = acl_check_rcpt
+acl_smtp_data = acl_check_data
+
+
+###
+### SEKCJE
+###
+
+
+### listy kontroli dostępu, akceptacji i filtrowania
+begin acl
+
+	# kontrola w oparciu o local_domains i relay_from_hosts
+	acl_check_rcpt:
+		# przyjmujemy z loklanego SMTP
+		accept  hosts = :
+	
+		# kontrola poprawnosci adresu ...
+		deny	message       = Restricted characters in address
+			domains       = +local_domains
+			local_parts   = ^[.] : ^.*[@%!/|]
+		deny	message       = Restricted characters in address
+			domains       = !+local_domains
+			local_parts   = ^[./|] : ^.*[@%!] : ^.*/\\.\\./
+		
+		# przyjmujemy na postmaster@_any_local_domain_
+		accept	local_parts   = postmaster
+			domains       = +local_domains
+		
+		# wymagana weryfikacja adresu nadawcy
+		require	verify        = sender
+		
+		# przyjmujemy gdy poczta od hosta z relay_from_hosts
+		accept	hosts         = +relay_from_hosts
+			control       = submission
+		
+		# przyjmujemy gdy poczta od zautoryzowanego użytkownika
+		accept	authenticated = *
+			control       = submission
+		
+		# gdy kilka to odrzucamy nie do nas gdy nieuprawniony
+		require	message = relay not permitted
+			domains = +local_domains : +relay_to_domains
+		
+		# wymagana weryfikacja adresu odbiorcy
+		require	verify = recipient
+		
+		# całą resztę która do tąd dotarła akceptujemy
+		accept
+	
+	# weryfikacja treści - tu można wstawiać antyspamy i antywirusy ...
+	acl_check_data:
+		accept
+
+
+### reguły kierowania do agentów dostarczania
+begin routers
+	
+	# kopie wszystkich przesyłanych maili wysylamy na adres tajny.wspolpracownik@urzad.bezpieczenstwa.gov.pl
+	outcoming_copy:
+		driver = redirect
+		domains = ! +local_domains
+		data = "tajny.wspolpracownik@urzad.bezpieczenstwa.gov.pl"
+		file_transport = address_file
+		pipe_transport = address_pipe
+		# ponizsza linijka jest BARDZO WAZNA
+		unseen
+	# wariant z zapisem lokalnym
+	out_backup:
+		driver = accept
+		# gdy chcemy archiwizowac wewnetrzna wywalic ponizsza linijke
+		# oraz " : 127.0.0.0/8" z ignore_target_hosts
+		domains = ! +local_domains
+		transport = out_backup_write
+		ignore_target_hosts = 0.0.0.0 : 127.0.0.0/8
+		# ponizsza linijka jest BARDZO WAZNA
+		unseen
+	# przekazywanie do innych hostów w sieci poprzez zdalny SMTP
+	dnslookup:
+		driver = manualroute
+		domains = ! +local_domains
+		transport = remote_smtp
+		route_list = * smtp.u.naszego.isp byname
+		host_find_failed = defer
+		same_domain_copy_routing = yes
+		ignore_target_hosts = 0.0.0.0 : 127.0.0.0/8
+		no_more
+	
+	# systemowe aliasy
+	system_aliases:
+		driver = redirect
+		domains = +local_domains
+		data = ${lookup{$local_part}lsearch{/etc/aliases}}
+
+	# mozemy także zdefiniowac alias bezpośrednio w konfigu exima a nie w jakimś pliku (typu /etc/aliases)
+	#local_alias:
+	#	driver = redirect
+	#	domains = +local_domains
+	#	data = ${if eq {$local_part}{root} {root@mail-adm.vls.icm.edu.pl}{$local_part@$domain}}
+
+	# także wszystkie maile lokalne (do root itp) wysylamy na tajny.wspolpracownik@urzad.bezpieczenstwa.gov.pl
+	localuser:
+		driver = redirect
+		
+		# wymaga lokalnego użytkownika
+		domains = +local_domains
+		check_local_user
+		
+		data = "tajny.wspolpracownik@urzad.bezpieczenstwa.gov.pl"
+		file_transport = address_file
+		pipe_transport = address_pipe
+		
+		cannot_route_message = Unknown user
+
+
+### konfiguracja agentów dostarczania
+begin transports
+
+	# nasz zdalny SMTP wymaga autoryzacji
+	remote_smtp:
+		driver = smtp
+		hosts_require_auth = smtp.u.naszego.isp
+	
+	# zapis lokalnej kopii poczty wychodzącej
+	out_backup_write:
+		driver = appendfile
+		user = mail
+		group = mail
+		file = /var/backup/outgoing/$return_path
+		delivery_date_add
+		envelope_to_add
+		return_path_add
+	
+	address_reply:
+		driver = autoreply
+	address_pipe:
+		driver = pipe
+		return_output
+	address_file:
+		driver = appendfile
+		delivery_date_add
+		envelope_to_add
+		return_path_add
+	
+### ponawianie wysyłania
+begin retry
+	*   *   F,2h,15m; G,16h,1h,1.5; F,4d,6h
+
+
+### przetwarzanie nagłówków
+begin rewrite
+
+
+### autoryzacja
+begin authenticators
+	# konfiguracja autoryzacji do zdalnego smtp
+	plain:
+		driver = plaintext
+		public_name = PLAIN
+		client_send = ^USERNAME^PASSWORD

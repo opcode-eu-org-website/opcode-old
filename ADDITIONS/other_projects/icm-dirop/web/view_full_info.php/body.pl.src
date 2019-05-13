@@ -1,0 +1,86 @@
+<?php
+/**
+	System prezentacji zasobów DIROP na WWW
+	
+	plik odpowiedzialny za wyświetlanie (w oparciu o szablony xhtml'owe) strony
+	z pełną informacją o pozycji oraz generowanie RDF
+	
+	korzysta z informacji zawartych w utworzonych wcześniej tablicach
+		$BOOK_INFO - informacje o książce
+	ustawia wartość $PAGE_SHOWED
+**/
+
+
+
+/// ustawienie zmiennych zależnych od wielovolumowości
+if ($BOOK_INFO['single_vid'] >= -1) {
+	$title = $BOOK_INFO['v.title'];
+	$url_full = "/" . $BOOK_INFO['v.url'] . "/";
+	$url_book = "";
+	$url = DIROP_FULL_URL_PREFIX . DIROP_SCRIPT_PATH . "/" . $BOOK_INFO['v.url'];
+} else {
+	$title = $BOOK_INFO['b.title'] . ", " . $BOOK_INFO['v.title'];
+	$url_full = "/" . $BOOK_INFO['b.url'] . "/" . $BOOK_INFO['v.url'] . "/";
+	$url_book = "/" . $BOOK_INFO['b.url'] . "/";
+	$url = DIROP_FULL_URL_PREFIX . DIROP_SCRIPT_PATH . "/" . $BOOK_INFO['b.url'] . "/" . $BOOK_INFO['v.url'];
+}
+
+if (isset($_GET["rdf"])) {
+	header("Content-Type: text/xml; charset=utf-8", 1);
+	echo '<?xml version="1.0"?>
+<rdf:RDF
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:dc="http://purl.org/dc/elements/1.1/">
+	<rdf:Description rdf:about="' . $url . '">
+		<dc:title xml:lang="pl">' . str_replace ("&", "&amp;", $BOOK_INFO['dc_title']) . '</dc:title>
+		<dc:creator xml:lang="pl">' . str_replace ("&", "&amp;", $BOOK_INFO['dc_creator']) . '</dc:creator>
+		<dc:subject xml:lang="pl">' . str_replace ("&", "&amp;", $BOOK_INFO['dc_subject_and_keywords']) . '</dc:subject>
+		<dc:description xml:lang="pl">' . str_replace ("&", "&amp;", $BOOK_INFO['dc_description']) . '</dc:description>
+		<dc:publisher xml:lang="pl">' . str_replace ("&", "&amp;", $BOOK_INFO['dc_publisher']) . '</dc:publisher>
+		<dc:contributor xml:lang="pl">' . str_replace ("&", "&amp;", $BOOK_INFO['dc_contributor']) . '</dc:contributor>
+		<dc:date xml:lang="pl">' . str_replace ("&", "&amp;", $BOOK_INFO['dc_date']) . '</dc:date>
+	</rdf:Description>
+</rdf:RDF>';
+	/*
+	<dc:type xml:lang="pl">książka</dc:type>
+	<dc:language xml:lang="pl">pol</dc:language>
+	<dc:format xml:lang="pl">image/tiff</dc:format>
+	<dc:rights xml:lang="pl"></dc:rights>
+	<dc:source xml:lang="pl"></dc:source>
+	*/
+} else {
+	/// wyświetlanie nagłówka strony
+	$PAGE_SHOWED=true;
+	xhtml_print_file_head($title . TITLE_SURFIX);
+	
+	/// wyświetlanie ciała strony - nagłówek strony, zawartość strony
+	xhtml_print_header($title, $BOOK_INFO['b.title'], $BOOK_INFO['v.title'], $url_book, $url_full, $line['title']);
+	
+	xhtml_print_volumes_list_head( OPIS_BIBLIOGRAFICZNY );
+	$full_info = "";
+	if ($BOOK_INFO['dc_creator'] != "")
+		$full_info .= $BOOK_INFO['dc_creator'] . ", ";
+	$full_info .= $BOOK_INFO['dc_title'] . ", ";
+	if ($BOOK_INFO['dc_publisher'] != "")
+		$full_info .= $BOOK_INFO['dc_publisher'] . ", " . $BOOK_INFO['dc_date'];
+	xhtml_print_list_entry("", "", $full_info);
+
+	xhtml_print_volumes_list_subhead( DANE_DUBLIN_CORE );
+	if ($BOOK_INFO['dc_title'] != "") xhtml_print_list_entry(DC_TITLE, "", $BOOK_INFO['dc_title']);
+	if ($BOOK_INFO['dc_creator'] != "") xhtml_print_list_entry(DC_CREATOR, "", $BOOK_INFO['dc_creator']);
+	if ($BOOK_INFO['dc_subject_and_keywords'] != "") xhtml_print_list_entry(DC_SUBJECT_AND_KEYWORDS, "", $BOOK_INFO['dc_subject_and_keywords']);
+	if ($BOOK_INFO['dc_description'] != "") xhtml_print_list_entry(DC_DESCRIPTION, "", $BOOK_INFO['dc_description']);
+	if ($BOOK_INFO['dc_publisher'] != "") xhtml_print_list_entry(DC_PUBLISHER, "", $BOOK_INFO['dc_publisher']);
+	if ($BOOK_INFO['dc_contributor'] != "") xhtml_print_list_entry(DC_CONTRIBUTOR, "", $BOOK_INFO['dc_contributor']);
+	if ($BOOK_INFO['dc_date'] != "") xhtml_print_list_entry(DC_DATE, "", $BOOK_INFO['dc_date']);
+		
+	xhtml_print_volumes_list_subhead(INNE_INFORMACJE);
+	xhtml_print_list_entry(URL, "", $url);
+	xhtml_print_list_foot();
+	
+	xhtml_print_leftside_box(xhtml_return_link(DOWNLOAD_RDF, "?rdf"));
+	xhtml_print_footer();
+}
+$PAGE_SHOWED=true;
+
+?>

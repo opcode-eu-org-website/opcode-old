@@ -1,0 +1,123 @@
+#include "objectsspace.h"
+
+#include <GL/glpng.h>
+#include <fstream>
+#include <string>
+using namespace std;
+
+void ObjectsSpace::create_space(int z, int x) {
+	pngRawInfo height_info;
+	if (! pngLoadRaw("data/height.png", &height_info)){
+		cerr << "Couldn't read scene heigh config file - data/height.png" << endl;;
+		exit(-2);
+	}
+	char offset=(height_info.Alpha>0)?4:3;
+	
+	space = new Space<ObjectsList*>::Space(z, x);
+	for (int i=0; i<z; i++)
+		for (int j=0; j<x; j++) {
+			space->data->set_cell(i, j, new ObjectsList());
+			int index = (i+j*z)*offset;
+			(*space->data->get_cell(i, j))->height = (height_info.Data[index] + 256*height_info.Data[1+index] + 256*256*height_info.Data[2+index])/100000.0 - 83.9;
+		}
+	if (height_info.Palette != NULL) free(height_info.Palette);
+	free(height_info.Data);
+	
+	/// wypełniamy listy obiektów w poszczególnych komórkach przestrzeni
+	/// na podstawie pliku konfiguracyjnego o stróktórze "z x y z_min z_max x_min x_max obj_file_name"
+	ifstream scene_config;
+	
+	scene_config.open("data/scene.conf");
+	if(!scene_config.is_open()) {
+		cerr << "Couldn't read scene config file - data/scene.conf" << endl;;
+		exit(-1);
+	}
+	
+	int pos_start, pos_end;
+	float read_f[3];
+	int read_i[4];
+	string line;
+	SceneObject *scene_object;
+	while(!scene_config.eof()) {
+		getline(scene_config, line, '\n');
+		
+		// zabezpieczenie przed komentarzami
+		if (line[0] == '#')
+			continue;
+		
+		// pierwsze 3 pola
+		pos_start = 0;
+		for (int i=0; i<3; i++, pos_start = pos_end+1) {
+			pos_end = line.find(" ", pos_start);
+			read_f[i] = atof(line.substr(pos_start, pos_end).c_str());
+		}
+		
+		// kolejne 4 pola
+		for (int i=0; i<4; i++) {
+			pos_start = pos_end+1;
+			pos_end = line.find(" ", pos_start);
+			read_i[i] = atoi(line.substr(pos_start, pos_end).c_str());
+		}
+		
+		// ostatnie pole
+		pos_start = pos_end+1;
+		line.erase(0, pos_start);
+		// ciekawe czy line=line.substr(pos_start); nie byłoby wydajniejsze
+		
+		// zabezpieczenie przed liniami z za małą liczbą pól
+		if (line.length() == 0)
+			continue;
+		
+		// utworzenie (niezaladowanego) obiektu sceny
+		scene_object = new SceneObject(read_f[0], read_f[1], read_f[2], line);
+		
+		// dodanie obiektu sceny do list w wskazanych w konfigu komorek przestrzeni
+		for (int i=read_i[0]; i<=read_i[1]; i++)
+			for (int j=read_i[2]; j<=read_i[3]; j++)
+				get_from_space(i, j)->content.push_back( scene_object );
+	}
+	
+	scene_config.close();
+}
+
+void ObjectsSpace::delete_space() {
+	int count = space->data->count();
+	ObjectsList all_obj;
+	for (int i=0; i<count; i++) {
+		ObjectsList *obj = *(space->data->base() + i);
+		// zmieramy wzystkie listy w jedna
+		all_obj.content.splice(all_obj.content.begin(), obj->content);
+		delete obj;
+	}
+	// sortujemy ja i usuwamy duplikaty
+	all_obj.content.sort();
+	all_obj.content.unique();
+	// a nastepnie wywolujemy delete na jej elementach
+	all_obj.delete_content(&all_obj);
+	// musimy zrobic to w taki sposob a nie wywolywac delete_content() na orginalnych listach
+	// gdyz wskaznik do tego samego obiektu moze byc na listach w kilku roznych ObjectsList
+	delete space;
+}
+
+ObjectsList* ObjectsSpace::get_from_space(int z, int x) {
+	return *space->data->get_cell(z, x);
+}
+
+void ObjectsSpace::find(PointXZ<float> p[4], PointXZY<float> eye) {
+	/// jeżeli warto robić ładowanie dla większego obszaru niż wyświetlanie to
+	/// druga zmienna to_load typu ObjectsList i wyszukiwanie po wiekszym p
+	/// to wyszukiwanie / wyszukiwania powinny być inteligentnie zrobione
+	///
+	/// wtedy należy także skorzystać z to_load.loadcontent(&to_load);
+	/// i nie wywoływać load() w render() obiektów podstawowych
+	space->find_and_copy(p, &to_render);
+	to_render.set_eye(eye);
+}
+
+void ObjectsSpace::render() {
+	to_render.render_content(&to_render);
+}
+
+bool ObjectsSpace::check_collisions(float x, float y, float z) {
+	return to_render.check_collisions_with_content(&to_render, x, y, z);
+}

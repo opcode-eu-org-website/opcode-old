@@ -1,0 +1,6 @@
+<article>
+<title>licencje typu BSD (MIT/X11)</title>
+<p>Są to krótkie, bardzo liberalne licencje pozwalające na modyfikacje i redystrybucję programu zarówno w źródłowej jak i binarnej, wymaga tylko wymienienia oryginalnego autora w redystrybuowanej kopii programu. Tego typu licencja jest także (oprócz wspomnianych w tytule BSD i MIT/X11) licencja Creative Commons - uznanie autorstwa (CC-BY). Licencje te są kompatybilne między sobą a także z dowolną mniej liberalną licencją (kod dystrybuowany na takiej licencji może być użyty (lub włączony do jakiegoś większego projektu) np. na warunkach licencji copyleft czy też komercyjnej. Warto zaznaczyć że pisząc tu o licencji BSD mam na myśli jej zmodyfikowaną wersję - bez klauzuli ogłoszeniowej. Zobacz w Wikipedii: <wiki pl="Licencja BSD">Licencja BSD</wiki>, <wiki pl="Licencja X11">Licencja X11</wiki>.</p>
+
+<p>Zbilżoną do tej grupy licencją jest <wiki pl="Licencja Artystyczna">Licencja Artystyczna</wiki>, jednak w przypadku nieudostępnienia kodu społeczności lub autorom orginału wymagana jest zmiana nazwy projektu oraz nazw plików wykonywalnych. Najczęściej jest ona stosowana duzalnie z GNU GPL.</p>
+</article>

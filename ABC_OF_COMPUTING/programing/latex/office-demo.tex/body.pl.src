@@ -1,0 +1,1119 @@
+% określamy klasę dokumentu (może być jakaś standardowa lub nasza własna jak w tym wypadku)
+% i przekazujemy jej parametry
+\documentclass[%
+ useMdSum=true,lmargin=3cm,twoside=false,noSectionNumbering=true,%
+ authorName={Robert Paciorek},authorMail={robert@opcode.eu.org},title={demo},%
+ parindent=10pt,usePygments=true,%
+ %stretch=raw,baselineskip=22pt%
+]{office}
+
+% możemy podać także inne ustawienia pakietu geometry służącego do określania układu strony
+% więcej szczegółów: http://mirrors.ctan.org/macros/latex/contrib/geometry/geometry.pdf
+\geometry{verbose} % showframe - pozwala na pokazanie obramowań strony, marginesów, etc
+
+% możemy podać inne / dodatkowe ustawienia pakietu hyperref służącego do konfiguracji interaktywnych odnośników, usatwień pdf, itd
+% więcej szczegółów: http://mirrors.ctan.org/macros/latex/contrib/hyperref/doc/manual.pdf
+\hypersetup{linkcolor=red}
+
+% przydatne pakiety
+\usepackage{fancypar} % indywidualne formatowanie linii w akapicie
+  \newcommand*\fancyparDemoStyle[1]{%
+    \bgroup
+    \textwidth=0.5\textwidth
+    \hsize=\textwidth
+    \linewidth=\textwidth
+    
+    \renewcommand\FancyPreFormat{
+      \setcounter{fancycount}{0}
+    }
+    \renewcommand\FancyFormat{%
+      \stepcounter{fancycount}
+      \ifnum\value{fancycount}=1%
+        \textcolor{red}{\box\linebox}%
+      \else%
+        \box\linebox%
+      \fi%
+    }
+    \par\medskip%
+    \hspace{2cm}\vbox{\noindent#1\par\AddFancyFormat}%
+    \par\medskip%
+    \egroup
+  }
+\usepackage{fancytabs} % zakładki na marginesie
+\usepackage{spreadtab} % arkusz kalkulacyjny
+\usepackage{pgfplots} % wykresy
+\usepackage{pdfcomment,attachfile,marginnote} % komentarze pdf-owe
+
+
+% skrót na uzyskiwanie backslasha
+\newcommand{\bs}[1]{\textbackslash#1}
+
+% definiujemy środowisko InlineVerbatim, będące środowiskiem Verbatim z zmniejszonymi ostępami przed i po
+\newenvironment{InlineVerbatim}{
+	\VerbatimEnvironment
+	\vspace{-\partopsep}\vspace{-\parskip}
+	\begin{Verbatim}
+}{
+	\end{Verbatim}
+	\vspace{-\parskip}
+}
+% oraz InlineVerbatim*, będące środowiskiem Verbatim z zmniejszonymi ostępami przed
+\newenvironment{InlineVerbatim*}{
+	\VerbatimEnvironment
+	\vspace{-\partopsep}\vspace{-\parskip}
+	\begin{Verbatim}
+}{
+	\end{Verbatim}
+}
+
+% definiujemy komendy do wypisywania przykładu (po prawej) z kodem (po lewej)
+\newcommand{\PrintCode}[2]{
+	\colorbox[rgb]{.9,.9,.9}{\parbox[c]{#1}{%
+		\vspace{-\topsep}\vspace{-\partopsep}\vspace{-\parskip}%
+		\VerbatimInput[numbers=left,numbersep=4pt,fontsize=\footnotesize]{#2}%
+		\vspace{-\topsep}\vspace{-\partopsep}%
+	}}%
+}
+\newcommand{\PrintExample}[2]{
+	\parbox[c]{#1}{\centering%
+		\input{#2}%
+	}%
+}
+\newcommand{\PrintCodeAndExampleA}[1]{
+	\nopagebreak
+
+	\hspace{0.015\textwidth}\PrintCode{0.6\textwidth}{#1}%
+	\hspace{0.03\textwidth}\fbox{\PrintExample{0.3\textwidth}{#1}}%
+}
+\newcommand{\PrintCodeAndExampleB}[1]{
+	\begin{adjustwidth}{.05\textwidth}{.05\textwidth}
+		\let\FancyVerbFormatLineOrg\FancyVerbFormatLine
+		\def\FancyVerbFormatLine##1{%
+			\colorbox[rgb]{.9,.9,.9}{\hbox to .975\linewidth {##1}}%
+		}%
+		\VerbatimInput[numbers=left,numbersep=4pt,fontsize=\footnotesize]{#1}
+		\let\FancyVerbFormatLine\FancyVerbFormatLineOrg%
+	\end{adjustwidth}\vspace{-0.5cm}%
+	\begin{center}%
+		\input{#1}
+	\end{center}
+}
+
+% definiujemy środowiska Example i ExampleVertical
+\makeatletter % powoduje że możemy używać @ w nazwach makr
+ \@namedef{Example}{\FV@Environment{}{VerbatimOut}{\jobname.tmp}}
+ \@namedef{endExample}{\@nameuse{FVE@VerbatimOut}\PrintCodeAndExampleA{\jobname.tmp}}
+ \@namedef{ExampleVertical}{\FV@Environment{}{VerbatimOut}{\jobname.tmp}}
+ \@namedef{endExampleVertical}{\@nameuse{FVE@VerbatimOut}\PrintCodeAndExampleB{\jobname.tmp}}
+\makeatother % przywracamy standardowe znaczenie @
+
+% lipsum służy do wypisywania zapychającego tekstu ...
+\usepackage{lipsum}
+
+
+%% Modyfikujemy parametry wpływajce na skład i łamanie *** TP ***
+%\overfullrule = 3mm % zaznacz linijki z~nadmiarami czarn sztabk *** TP
+\exhyphenpenalty = 999999 % słowa złożone nie przeno na łczniku *** TP
+\righthyphenmin = 3 % nie dziel xx-, ale xxx- *** TP
+\widowpenalty = 999999 % ostatnia linia akapitu nie zacznie strony *** TP
+\clubpenalty = 9950 %% pierwsza linia akapitu wyjtkowo może kończyć stronę
+\hfuzz = 3pt %% znaki mog sterczeć na margines do wielkoci 3pt *** TP
+\tolerance 600 %% zwiększamy tolerację ***
+\pretolerance 300 %% oraz pretolerancję ***
+\doublehyphendemerits = 99999 %% zniechęcamy TeX-a do dzielenia wyrazów *** TP
+
+\definecolor{hl_yellow}{rgb}{1,1,0}
+\newcommand{\hlcb}[2][hl_yellow]{\sethlcolor{#1}\hl{\textbf{#2}}}
+
+\begin{document}
+
+
+
+% spis treści
+% możemy go dawać od przodu - LaTeX radzi sobie z offsetem w numeracji przez niego wprowadzanym
+% jeżeli jest dłuższy niż 1 strona (wymaga to tylko dodatkowej generacji dokumentu)
+\addcontentsline{toc}{section}{Spis treści} % cheby aby spis tereści był w spisie treści jako sekcja
+\def\contentsname{Spis treści} % chemy aby spis treści nosił nagłówek "Spis treści"
+                               % (nagłówek ten będzie formatowany jako nagłówk 1go poziomu - sekcji)
+\setcounter{tocdepth}{2} % chemy aby w spisie treści były dwa najwyższe poziomy (section i subsection)
+{
+\parskip=0pt
+\tableofcontents
+}
+\clearpage
+
+
+% czasowo włączamy numerację ...
+\setcounter{secnumdepth}{3}
+\section{Formatowanie nagłówków}
+
+Standardowo w article na którym bazujemy dostępne są 3 poziomy nagłówków typowo z włączoną ich numeracją:
+\subsection{poziom 2 - subsection}
+\subsubsection{poziom 3 - subsubsection}
+
+
+Na fakt ich numerowania lub nie możemy wpływać np. poprzez ustawienie:\\ \verb#\setcounter{secnumdepth}{2}# włączamy numerację do 2go poziomu włącznie. Do bardziej zaawansowanego manipulowania numeracją można użyć redefiniowania komend \verb#\thesection# \verb#\thesubsection# itd. np.:
+
+\begin{Example}
+\renewcommand{\thesubsection}{
+  \thesection-\arabic{subsection})
+}
+\renewcommand{\thesubsubsection}{
+  \thesection-\arabic{subsection}-\arabic{subsubsection})
+}
+\subsection{subsection}
+\subsubsection{subsubsection}
+\end{Example}
+
+% wracamy do domyślnego ustawienia dokumentu uzyskanego przez noSectionNumbering=true
+\setcounter{secnumdepth}{0}
+
+
+Możemy także szczegułowo wpływać na formatowanie poszczególnych nagłówków, jak również odstępy występujące przed i za nagłówkami z użyciem komend:
+\begin{InlineVerbatim}
+ \titleformat{ modyfikowany nagłówek }
+    { formatowanie }{ numeracja }{ odległość między numeracją a tekstem }
+    { kod do dodania przed }{ kod do dodania po }
+\end{InlineVerbatim}
+oraz \verb#\titlespacing# z pakietu \href{http://mirrors.ctan.org/macros/latex/contrib/titlesec/titlesec.pdf}{titlesec}.
+Dzięki temu teraz nagłówki 1-go poziomu są wyśrodkowane i używają trochę większej czcionki, a nagłówki pozimu 2 mają zmniejszone odstępy.
+
+% ustawiamy aby nagłówki sekcji były wyśrodkowywane
+\titleformat{\section}{\LARGE\bfseries\centering}{\thesection}{1em}{\pagebreak[3]}{\nopagebreak}
+% jeżeli chemy zmieniać samo formatowanie możemy użyć uproszczonej wersji:
+%  \titleformat*{\section}{\LARGE\bfseries\centering}
+%
+% podobny efekt można uzyskać stosując:
+%  \renewcommand*\section{\@startsection{section}{1}{-3.0ex}{3.5ex}{3.5ex}{\centering\LARGE\bfseries}}
+% lub:
+%  \DeclareSectioningCommand{section}{1} {24pt} {\centering\LARGE\bfseries\HeadingText} {10pt}
+%
+% zmniejszamy odległości wokół nagłówków sub-sekcji
+\titlespacing{\subsection}{0pt}{-0.2cm}{-0.5cm}
+
+
+
+\section{Listy numerowane i wypunktowywane}
+
+\begin{easylist}\initTechList
+& są różne sposoby wyliczania \label{AA}
+&& pakiet enumerate
+&&& pakiet ten umożliwia m.in.:
+&&&& defionwanie sposobu wyliczania (liczby, litery, ...)
+&&&& defionwanie separatora występującego po liczniku
+&& pakiet enumitem
+&&& umożliwia on m.in. definiowanie odstępów, margnesów itp
+&&& nie ejst stosowany w tym dokumencie
+&& pakiet easylist
+&&& ta lista jest utworzona właśnie z jego użyciem\\oraz zdefiniowanych w office.cls\\formatowań list i przydatnych udogodnień \\ \\ (jak widać możemy łamać linie)
+&&& i nie tylko ...
+
+&& obecny punkt to: \arabic{List1}.\arabic{List2}.\arabic{List3}.\arabic{List4}.\alph{List5}.
+\isHead{3} &&& naglowek na poziomie 3 \isNotHead{3}
+&&&& $2 \over x$ - matematyka też działa &&&&& obecny punkt to:
+	% to czy piszemy w nowych liniach czy nie jest bez znaczenia
+	\arabic{List1}.\arabic{List2}.\arabic{List3}.\arabic{List4}.\alph{List5}.
+&&& podpunkt poziomu 3 nie będący nagłówkiem
+\headItem{i kolejny nagłówek, ale inaczej uzyskany}
+&&& jesteśmy w \ref{AA}
+&&&& podpunkt poziomu 4 \itemLabel{BB}
+&&&&&  i następny w \ref{BB}
+&&&&&& i jeszcze następny \itemLabel{CC}
+&&&&&&& i jeszcze następny w podpodpunkcie \ref{CC}
+&&&&& wracamy \label{D1} \itemLabel{D2} do literek  \ref{D1} vs \ref{D2}
+\ListProperties(Start5=25)
+&&&&& przeskoczyliśmy parę numerków do \ref{E2} w \ref{E3} (\ref{E1})
+      \itemLabel{E1} \itemLabel{E2}[4] \itemLabel{E3}[0][1]
+&&&&& aby pokazać że dzięki użyciu alphalph
+&&&&& możemy numerować powyżej "z" (26ciu)
+& wracamy do poziomu 1
+\skipLevel{2}
+&&& przeskakujemy jeden
+&&&&&& i od razu punktujemy \itemLabel{F2} referencja to \ref{F2}
+\end{easylist}
+
+
+
+\section{Formatowanie tekstu}
+
+% jest to lista wyliczana z trochę innym formatowaniem niż powyższa
+% - drugi poziom nie jest "nagłówkowy"
+% - mamy też do dyspozycji trzeci
+% - literki są tak naprawdę na piątym poziomie, ale na to nie wyglądają
+\begin{easylist}\initTechTinyList
+& Możemy kożystać z komend ustawijących:
+&& dla aktualnego bloku ujętego w \{ \}
+&&&&& wielkość:
+	{\tiny \bs{tiny}}
+	{\scriptsize \bs{scriptsize}}
+	{\footnotesize \bs{footnotesize}}
+	{\small \bs{small}}
+	{\normalsize \bs{normalsize}}
+	{\large \bs{large}}
+	{\Large \bs{Large}}
+	{\LARGE \bs{LARGE}}
+	{\huge \bs{huge}}
+	{\Huge \bs{Huge}}
+&&&&& formatowanie:
+	{\bfseries \bs{bfseries}}
+	{\itshape \bs{itshape}}
+	{\normalfont \bs{normalfont}}
+	{\scshape \bs{scshape}}
+	...
+&&&&& krój / typ czcionki:
+	{\ttfamily \bs{rmfamily}}
+	{\sffamily \bs{sffamily}}
+	{\rmfamily \bs{rmfamily}}
+&&&&& kolor:
+	{\color[rgb]{0,1,0} \bs color[rgb]\{0,1,0\}}
+&& dla swojego argumentu:
+&&&&& formatowanie:
+	\textbf{\bs textbf}
+	\textit{\bs textit}
+	\textnormal{\bs textnormal}
+	\textsc{\bs textsc} ...
+&&&&& krój / typ czcionki:
+	\texttt{\bs texttt}
+	\textsf{\bs textsf}
+	\textrm{\bs textrm}
+&&&&& kolor:
+	\textcolor[rgb]{0,1,1}{ \bs textcolor[rgb]\{0,1,1\}}
+&&&&& efekty - pakiet soul (kolory można swobodnie zmieniać):
+	\so{rozrzedzony}
+	\caps{Samll and BIG Capitals}
+	\setstcolor{red} \st{przekreslony na czerwono}
+	\setulcolor{green} \ul{podkreślony na zielono}
+	\sethlcolor{yellow} \hl{podswietlony na żółto}
+&&&&& efekty - pakiet ulem:
+	\sout{\bs sout}
+	\xout{\bs xout}
+	\uline{\bs uline}
+	\uuline{\bs uuline}
+	\uwave{\bs uwave}
+	\dashuline{\bs dashuline}
+ 	\dotuline{\bs dotuline}
+\end{easylist}
+
+Krój maszynowy możemy też uzyskać przez komendę \bs verb, środowisko "verbatim" i im podobne. W odróżnieniu od wyżej prezentowanych poleceń wprowadzających krój maszynowy wyłączają one interpretowanie jakichkolwiek poleceń Tex poza znacznikiem kończącym:
+\vspace{-0.6cm} % zmiejszamy odległość poprzedzającą środowisko verbatim
+                % może nie jest to najbardziej eleganckie rozwiązanie,
+                % ale dobrze demonstruje użycie \vspace którym możemy regulować
+                % (wstawiać dodatkowe dodatnie lub ujemne) odstępy pionowe
+\begin{Verbatim}[formatcom=\color{red}]
+teskt maszynowy
+ z  dziwnymi $&_#&    znaczkami, układem   spacji itd
+
+ analogicznie działa inline-owy \verb#tekst#
+ gdzie # może być zastapiony dowlolnym znaczkiem
+ (ale nie wolno mu występować w tekście)
+\end{Verbatim}
+\noindent % zaczynamy bez wcięcia
+Zastosowane środowisko Verbatim z pakietu \href{http://www.ctan.org/pkg/fancyvrb}{fancyvrb} oprócz zaprezentowanej zmiany kolororu, umożliwia także m.in. zmianę czcionki (fontfamily, fontshape, fontsize, ...), numerowanie linii, konfigurację etykiet, obramowania. W odróżnieniu od klasycznego verbatim nie można zaczynać tekstu w linii w której jest \verb#\begin{Verbatim}#.
+
+Możliwe też jest wstawianie formatowanego kodu:
+Pakiet \href{http://mirrors.ctan.org/macros/latex/contrib/minted/minted.pdf}{minted} (używający wewnętrznie fancyvrb) umożliwia wstawianie fragmentu kodu "inline" (\mintinline{tex}{\mintinline{tex}{kod}}), wstawianie formatowanego bloku kodu poprzez środowisko minted oraz wstawianie kodu z pliku źródłowego (z możliwością określenia np. zakresu linii które mają być użyte) poprzez \mintinline{tex}{\inputminted}. Pakiet posiada także bogate opcje konfiguracyjne związane z wyświetlaniem kodu. Potrafi m.in. łamać linię w środowisku wypisywanym czcionką maszynową oraz kolorować kod w oparciu o \href{http://pygments.org/}{pygments}.
+\begin{minted}{c}
+int main() {
+	int a=5;
+	printf("%d\n", a);
+}
+\end{minted}
+
+Jeżeli potrzebujemy dużej czcionki możemy użyć skalowania:
+\begin{Example}
+{\scalefont{2.5} wiekszy 2.5 raza} normalny
+{\relsize{2.5} o 2.5 stopnia wiekszy}
+\end{Example}
+
+Ponaddto możemy także definiować czcionki z wykożystaniem polecania font:
+\begin{Example}
+ \font\duzypochyly=plbxti10 scaled 3300
+ {\duzypochyly DEMO demo}
+\end{Example}
+
+Inną metodą na swobodne określanie kroju czcionki jest użycie niskopoziomowych komend określających poszczególne parametry czcionki np:
+\begin{Example}
+{
+ \fontencoding{T1}      % kodowanie
+ \fontfamily{antt}      % kroj
+ \fontseries{b}         % formatowanie
+ \fontshape{it}         % formatowanie
+ \fontsize{32pt}{1.7em} % rozmiar
+ % ustawiamy okreslona wczesniej czionke:
+ \selectfont DEMO demo
+}
+\end{Example}
+
+Kolejne sposoby deklarowania kroju czcionku daje nam pakiet fontspec, który w połączeniu z Lua\LaTeX{} pozwala na używanie czcionek OpenType. Podstawowymi poleceniami używanymi do określania czcionki z użyciem tego pakietu są \bs fontspec określający krój czcionki (poprzez jego nazwę lub plik) oraz \bs addfontfeatures określajacy jej atrybuty (mozemy je także podawać w opcjonalnym argumencie \bs fontspec.
+
+\begin{Example}
+{ \fontspec{Latin Modern Roman}
+  In 1842, 999 pe sailed 97 miles
+  \addfontfeatures{
+     Numbers={Proportional,OldStyle},Color=888888}
+  In 1842, 999 pe sailed 97 miles
+}
+\end{Example}
+
+% zmieniamy formatowanie linii dla środowiska Verbatim (używanego przez Example)
+% komenda ta może posłużyć do bardziej zaawansowanych operacji formatowania nawet każdej z linii z osobna
+\let\FancyVerbFormatLineOrg\FancyVerbFormatLine
+\def\FancyVerbFormatLine#1{%
+\fontspec{DejaVu Sans Mono}\scriptsize% zmieniamy czcionkę na obsługującą dzwine znaczki
+\ifnum\value{FancyVerbLine}=3% oraz jako bonus dla 3ciej linii ustawiamy kolor tła na czerwony
+ \colorbox[rgb]{1,0,0}{\hbox to .975\linewidth {#1}}%
+\else#1\fi%
+}
+\begin{Example}
+{ \fontspec{DejaVu Sans} \small
+  Możemy także używać różnych znaczków Unicode
+  ⚛☤♲♻♺⚝ wprost w pliku ☠☢☣⚡↯⚠☡❢ ale to my
+  odpowiadamy za wybór czcionki która je obsługuje
+}
+\end{Example}
+% przywracamy domyślne
+\let\FancyVerbFormatLine\FancyVerbFormatLineOrg
+
+
+%deklarowanie kroju - przypisywanie komendy typu \mojKroj do czcionki - \newfontfamily (pozwala na stosowanie modyfikatorów typu \textbf) \newfontface (nie pozwala na zmienianie wariantu czcionki)
+
+
+%\setmainfont{TeX Gyre Pagella}
+%\setsansfont{TeX Gyre Heros}%[Scale=MatchLowercase]
+%\setmonofont{Inconsolata}%[Scale=MatchLowercase]
+
+% wcięty na 1cm od lewej i 4cm od prawej blok
+\begin{adjustwidth}{1cm}{4cm}
+	\textbf{poczatek wciętego akapitu}\\
+	Ten wcięty (z obu stron) akapit został uzyskany z użyciem środowiska adjustwidth,
+	pozwalającego na tworzenie takich fragmentów tekstu z zachowaniem podziału na strony.
+	Poniżej w ramach Verbatim wypisane są informacje o szerokości tekstu
+	(jak widać w ramach Verbatim) da się używać komend \TeX{}'owych)
+	% \the powoduje wypisanie występującego po nim licznika, odległości itp
+	% jeżeli chemy ich używać jak wartości numerycznych to nie korzystamy z \the
+	% jeżeli wypisujemy w tekście a by nie stracić spacji po takim wypisaniu należy użyć {} - np. tekst \the\hsize{} teskt
+	Poniżej mamy wypełniacz stworzony z użyciem lipsum
+	i wymuszania nowego akapitu poprzez \verb#\par# (a nie pustej linii).
+	
+	\lipsum*[4] \par \lipsum*[5]
+	\\ \textbf{koniec wciętego akapitu}
+\end{adjustwidth}
+
+% akapit z niezaleznie formatowanymi liniami - patrz definicja \fancyparDemoStyle w nagłówku
+\fancyparDemoStyle{Pakiet \href{http://mirrors.ctan.org/macros/latex/contrib/fancypar/fancypar.pdf}{fancypar}
+jest wygodnym interfejsem do modyfikowania formatowania akapitu z niezależnym formatowaniem każdej linii
+(np. tutaj ustawiliśmy że pierwsza ma być w kolorze czerwonym). Pozwala też na uzyskanie podobnego efektu jak adjustwidth}
+
+Z kolei pakiet \href{http://mirrors.ctan.org/macros/latex/contrib/contour/contour.pdf}{contour} pozwala na uzyskanie \contourlength{0.04em}\contour[1]{red}{konturowego} \contourlength{0.07em}\contour[3]{red}{kolorowego} \contourlength{0.03em}\contour[10]{red}{tła liter}
+
+W ramach listy wypunktowywanej kilka informacji o formatowaniu akapitu (odstępach międzyliniowych itp):
+\vspace{-0.66\parskip}\begin{easylist}\initPointsList
+& odstępy międzyliniowe:
+&& baselineskip: \the\baselineskip
+&& baselinestretch: \baselinestretch
+& dodatkowy odstęp między akapitowy
+&& parskip: \the\parskip
+& inne: parindent=\the\parindent{} lineskip: \the\lineskip{}
+\end{easylist}
+
+
+
+\section{Pudełka, grafika i geometria strony}
+
+\hspace{\stretch{2}}
+	% możemy wstawić obrazek skalując go (względem jego rozmiaru wynikającego z jego rozdzielczości)
+	\parbox[c]{0.4\textwidth}{\centering
+		\includegraphics[scale=0.44]{/usr/share/texlive/texmf-dist/tex/latex/mwe/example-image}
+		% gdy nie podajemy rozszerzenia latex sam wybierze optymalny format zgodnie z sugestią podaną w \DeclareGraphicsExtensions{}
+		% możemy nie podawać ścieżki (dla plików w aktualnym katalogu) lub podawać ścieżkę relatywną
+		\\ Rys. 1: podpis rysunku
+	}
+\hspace{\stretch{1}}
+	\parbox[c]{0.4\textwidth}{\centering
+		% możemy też zrobić to samo nakładając na niego dodatkowy tekst
+		\begin{overpic}[scale=0.44]{/usr/share/texlive/texmf-dist/tex/latex/mwe/example-image}
+			\put(0,0) {\raisebox{3pt}{\colorbox[rgb]{0,.5,0}{\bf Fot. 1}}}
+		\end{overpic}
+		\\ Fot. 1: podpis rysunku
+		\\ dwulinijkowy ;-)
+	}
+\hspace{\stretch{2}}
+
+
+\DefineShortVerb{\#} % zamiast \verb# używamy skróconej notacji ustawianej przy pomocy komendy \DefineShortVerb z pakietu fancyvrb
+
+Powyższe rozmieszczenie obrazków uzyskane zostało z zastosowaniem dwóch #\parbox# pomiędzy trzema #\hspace{\stretch{x}}#
+zapewnia to umieszczenie dwóch obrazków (wraz z ich podpisami) obok siebie.
+
+#\stretch{x}# podaje wartość rozciągliwego odstępu poziomego w proporcjach odpowiadających podanym argumentom
+(#\hspace{\stretch{x}}# jest podobne do kilkukrotnego zastosowania #\hfill# i #\hfil#).
+\textbf{Uwaga:} Działają one w ramach akapitu a nie wiersza w akapicie, czyli użycie łamania linii (#\\#) może mieć na nie zły wpływ.
+
+#\parbox# wstawia pionowe pudełko (elementy w nim są ukłądane jeden nad drugim) o zadanej szerokości. Podobnie działa środowisko "minipage".
+Jeżeli potrzebujemy pudełka o automatycznie dobranej szerokości możemy użyć #\pbox# i środowiska "varwidth".
+
+\begin{Example}
+ \newsavebox{\fmbox}
+ \begin{lrbox}{\fmbox}
+  \begin{varwidth}{0.4\textwidth}
+   \hspace{\stretch{2}} aaa \hspace{\stretch{2}} \par
+   bbb \par
+   bbb ccc ddd
+  \end{varwidth}
+ \end{lrbox}
+ \fbox{\usebox{\fmbox}}
+\end{Example}
+
+
+\subsection{Zapamiętywanie pudełek i manipulowanie nimi}
+
+W przykładzie zostało użyte środowisko lrbox, które jest jedną z możliwości zapamiętania pudełka do użycia w przyszłości (poprzez komendę #\usebox{PUDELKO}#).
+W tym wypadku zostało to robione aby użyć #\fbox# na zawrtości "varwidth", celem objęcia go ramką.
+Innym zastosowaniem zapamiętanych pudełek jest ich wielokrotne użycie lub zamiana ich rozmiarów post factum.
+Nie wpływa ona w żaden sposób na zawartość pudełka, ale ma bardzo duży wpływ na rozpychanie lub nie przez pudełko sąsaidujących elementów.
+
+\begin{Example}
+ \begin{lrbox}{\fmbox} \fbox{\hbox{QWERTY}} \end{lrbox}
+ aaa \usebox{\fmbox} bbb \par
+ \wd\fmbox=0pt aaa \usebox{\fmbox} bbb \par
+ \wd\fmbox=70pt aaa \usebox{\fmbox} bbb
+\end{Example}
+
+Podobnie możemy postępować z wysokością pudełek (#\ht\PUDELKO# i #\dp\PUDELKO#). Pakiety takie jak \href{http://www.ctan.org/pkg/calc}{calc}, \href{http://www.ctan.org/pkg/etoolbox}{etoolbox} ułatwiają bardziej zaawansowane operacje na wymiarach elementów.
+
+
+\subsection{Przycinanie i poszerzanie}
+
+Podobne operacje przycinania pudełek możemy wykonać także dzięki trimbox z \href{https://www.ctan.org/tex-archive/macros/latex/contrib/adjustbox}{adjustbox}.
+\begin{Example}
+BBBB\trimbox{0.25cm 0pt 0.5cm 0pt}{
+  \colorbox[rgb]{0,1,1}{AAAA}}CCCC \\
+BBBB\clipbox{0.25cm 0pt 0.5cm 0pt}{
+  \colorbox[rgb]{0,1,1}{AAAA}}CCCC \\
+BBBB\marginbox{0.25cm 0pt 0.5cm 0pt}{
+  \colorbox[rgb]{0,1,1}{AAAA}}CCCC
+\end{Example}
+
+Jak widać w powyższym przykładzie dostępny jest też clipbox powodujący obcięcie zawartości pudełka oraz marginbox o działaniu odwrotnym - powiększa pudełko dodając do niego marginesy.
+
+
+\subsection{Obroty, odbicia i skalowanie}
+
+Pakiet \href{https://www.ctan.org/pkg/graphics}{graphics} oprócz możliwości wstawiania obrazków udostępnia kilka przydatnych pudełek:
+\vspace{-0.66\parskip}\begin{easylist}\initPointsList
+& #\rotatebox# (obraca podaną zawartość względem wskazanego punktu o wskazany kąt),
+& #\scalebox# (skaluje n-krotnie w szerokości i m-krotnie w wysokości)
+& #\resizebox# (skaluje do zadanego rozmiaru w szerokości i/lub wysokości, użycie zamaist któregoś z rozmiarów ! pozwala na skalowanie proporcjonalne)
+\end{easylist}\vspace{-0.66\parskip}\noindent
+Większość tych operacji może być także wykonana bezpośrednio na wstawianej grafice poprzez opcje #\includegraphics#.
+
+tekst \rotatebox{45}{obrócony napis} tekst \rotatebox[x=1cm,y=2mm]{-45}{\pbox{4cm}{obrócony napis\\ w drugą stronę\\i względem\\innego punktu}} tekst \rotatebox{180}{oraz do góry norami}
+
+tekst \scalebox{3}[1]{rozciągnięty} tekst \scalebox{-1}[1]{odbity} tekst \scalebox{1}[-1]{inaczej odbity}
+
+
+\subsection{Kolorowe pudełka}
+W jednym z powyższych przykładów jako obiektu przycinanego użyto pudełka #\colorbox# z pakietu \href{https://www.ctan.org/pkg/color}{color} powodującego wyświetlenie jego zawartości na tle o zadanym kolorze (kolor można określać m.in. przez nazwę, czy też składowe rgb). Pakiet ten pozwala także na pokolorowanie tekstu (co było już pokazywane), tła całej strony (co za chwilę zostanie zademonstrowane) oraz m.in. wstawianie pudełek z kolorową ramką \fcolorbox{red}{green}{TEKST} poprzez #\fcolorbox{kolor ramki}{kolor tła}{ZAWARTOŚĆ}#.
+
+
+\subsection{Jeszcze więcej pudełek}
+
+Bardzo wszechstronnym pudełkiem jest #\adjustbox# z pakietu \href{https://www.ctan.org/tex-archive/macros/latex/contrib/adjustbox}{adjustbox} który łączy przedstawione wyżej możliwości takie jak skalowanie, obcinanie itp w jednym pudełku. Pozwala także na określanie grubości obramowania
+
+tekst tekst \adjustbox{cfbox=red 3pt 0pt 5mm}{\pbox{10cm}{grube czerwone obramowanie\\ bez wewnętrznego marginesu,\\ ale za to z dużym zewnętrznym}} tekst \adjustbox{raise=2ex}{uniesiony} tekst
+
+wyrównania w pionie ...\adjustbox{valign=T}{\pbox{1cm}{T\\b\\c}}.\adjustbox{valign=M}{\pbox{1cm}{M\\b\\c}}.\adjustbox{valign=B}{\pbox{1cm}{B\\b\\c}}...
+...\adjustbox{valign=t}{\pbox{1cm}{t\\b\\c}}.\adjustbox{valign=m}{\pbox{1cm}{m\\b\\c}}.\adjustbox{valign=b}{\pbox{1cm}{b\\b\\c}}...
+ pionie i poziomie ...\adjustbox{stack=cm, bgcolor={rgb}{0 1 0}}{stack\\b\\c}... wraz z kolorkiem tła
+
+Pakiet ten pozwala także na tworzenie pudełek będących uniwersalnym odstępem pionowym i/lub poziomym poprzez:\\
+#\phantombox{szerokość}{wysokość - od linii w górę}{głębokość - od linii w dół}#.
+Jako tła dla pudełka możemy używać pliku graficznego:
+
+\adjustbox{cfbox=black 1pt 4mm, bgimage=/usr/share/texlive/texmf-dist/tex/latex/mwe/example-image-16x10.png, minipage=10cm}{\color{white}\lipsum[2]}
+
+Możemy także wykorzystać adjustbox do zdefiniowania własnych typów pudełek - np. cieniowanych czy z podwójnym obramowaniem:
+
+\UndefineShortVerb{\#} % gdy już nie potrzebujemy skróconej notacji \verb wyłączamy ją, aby uniknąć potencjalnych problemów z innymi instrukcjami
+
+\begin{ExampleVertical}
+% pudełko z podwójną niebiesko-czerwoną ramką
+\def\dframeBox#1{\adjustbox{cfbox=blue 0.5pt 1pt}{\adjustbox{cfbox=red 0.3pt}{#1}}}
+% pudełko z zielonym cieniem
+\def\shadowBox#1{%
+  \newlength{\boxWidth}%
+  \hbox{%
+    \hspace{4pt}%
+    \adjustbox{cfbox=green, bgcolor=green, raise=-4pt, gstore width=\boxWidth}
+      {\color{green}#1}%
+    \setlength{\boxWidth}{\boxWidth + 4pt}\hspace{-\boxWidth}%
+    \adjustbox{cfbox=red 0.3pt, bgcolor=white}{#1}%
+    \hspace{4pt}%
+  }%
+  \undef{\boxWidth}%
+}
+xx \dframeBox{AAAA} xx \shadowBox{AAAA} xx
+\end{ExampleVertical}
+
+
+\subsection{Linie poziome}
+Dosyć gruba, wyśrodkowana linia o szerokości 50\% tekstu:\par
+\hfil\rule{0.5\linewidth}{1pt}\hfill
+
+Jeszcze grubsza, przerywana w układzie 4mm linii, 5mm przerwy, 2 mm linii, 1mm przerwy o szerokości całego tekstu:\par
+\hdashrule{\linewidth}{2pt}{4mm 5mm 2mm 1mm}
+
+
+\subsection{Włączanie wielostronicowych plików PDF}
+
+Pakiet \href{https://www.ctan.org/pkg/pdfpages}{pdfpages} umożliwia włączanie plików PDF lub ich części do generowanego dokumentu. Pozwala na wybór stron z włączanego pliku, umieszczanie kilku stron na jednej stronie, dodawanie stron z włączanych plików do spisu treści, automatyczne skalowanie dodawanych stron lub dostosowywanie rozmiarów stron do dodawanych stron i wiele więcej.
+
+W office.cls zdeklarowane zostały także makra ułatwiające dodawania załączników przy pomocy pdfpages do dokumentu w tym celu wystarczy dodać:
+\begin{minted}{tex}
+% wstawienie spisu załączników
+\spisZalacznikow
+
+% deklaracje kolejnych załączników
+\zalacznik{nazwa}[opcje]{opis}
+% gdzie:
+%   nazwa - którtki identyfikator załącznika a jednocześnie nazwa pliku bez rozszerzenia
+%   opcje - opcje \includepdf np. fitpaper=false lub angle=90
+%   opis  - opis załącznika nadrukowywany na nim i występujący w spisie załączników
+\end{minted}
+
+\includepdf[fitpaper=true]{/usr/share/texlive/texmf-dist/tex/latex/mwe/example-image-a5-landscape.pdf}
+
+
+% wymuszamy podział strony i modyfikujemy ustawienia geometrii - zmieniamy orientację (moglibyśmy także np. wielkość) strony
+\forceNewPageGeometry{landscape,a4paper}
+%
+\subsection{Geometria strony}
+%
+% na tej stronie nie umieszczamy nagłówka i stopki
+\thispagestyle{empty}
+%
+% dodajemy na tej stronie zakładki "fancytabs"
+% więcej info: http://mirrors.ctan.org/macros/latex/contrib/fancytabs/fancytabs.pdf
+\fancytab{Tab A}{1} \fancytab{Tab B}{3}
+%
+% kolor tła całej strony
+\pagecolor[rgb]{0.9,1,0.9}
+
+Ta strona celowo jest zielonkawa dzięki \verb#\pagecolor#.
+Wysokości: textheight=\the\textheight{} vsize=\the\vsize{}
+Szerokości: textwidth=\the\textwidth{} headwidth=\the\headwidth{} hsize=\the\hsize{} linewidth=\the\linewidth{}
+
+\namedLabel{test1}{etykieta na obróconej stronie}
+
+% środowisko obrazka opływanego tekstem,
+%  jego położenie (r - do prawej, l - do lewej, ...) i rozmiar
+%  jest też kilka opcjonalnych argumentów
+\begin{wrapfigure}{r}{8cm}
+	% wyśrodkowanie zawartości pola obrazka
+	\begin{center}
+		% okienko skalujące:
+		%  pierwszy argument szerokość, drugi wysokość,
+		%  jeden z nich może być zastąpiony ! - zachowanie proporcji obrazka
+		%  w taki sposób możemy skalować także inne obiekty np. tekst
+		% alternatywnie możemy też użyć \scalebox{0.3}{ ... } określającego skalowanie względne
+		\resizebox{4cm}{!}{
+			% wstawienie obrazka
+			\includegraphics{/usr/share/texlive/texmf-dist/tex/latex/mwe/example-grid-100x100bp.png}
+		}
+		% opis obrazka
+		\caption[Opcjonalny skrócony opis do spisu obrazków]{Podpis do obrazka}
+		% etykieta
+		\label{etykietka_obrazka}
+	\end{center}
+\end{wrapfigure}
+
+\begin{spacing}{1.7}
+\textbf{To są akapity z zwiększonymi odstępami międzyliniowymi.}
+\lipsum[1]
+\namedLabel{test2}{inna etykieta na obróconej stronie}
+\lipsum[2]
+\end{spacing}
+
+% wymuszamy podział strony i modyfikujemy ustawienia geometrii - zmieniamy orientację i przechodzimy na tryb dwustronny
+\forceNewPageGeometry{portrait,a4paper,twoside=true}
+% wyłączamy kolor tła strony
+\nopagecolor
+
+
+\section{Tabele}
+\begin{ExampleVertical}
+ \begin{tabular}{ p{2cm} | l r c r@{.}l }
+  % spacje w kodzie tabelki tylko dla czytelnego pokazania kolumn
+  AAAA &                BBB BBBB & CC      & ddd dd        & 0&12356      \\ \hline
+  aaaa aa bbb ddd eee & bbb      & \multicolumn{2}{c}{DDD} & 112&57       \\
+  QQQQ &                WWW W    & EEE     & RRRR          & 98765&12356  \\
+ \end{tabular}
+\end{ExampleVertical}
+
+Powyżej pokazana jest prosta \LaTeX'owa tabelka. Wiele pakietów rozszerza możliwości konfiguracyjne tabel np. pozwalają używać komórek wielowierszowych, pozwalają na formatowanie liczb (w szczególności pozwala na prawdziwe, a nie uzyskane pokazaną wyżej sztuczką, wyrównanie liczb względem separatora dziesiętnego). Poniższa tabelka korzysta z pakietów:
+	\href{http://mirrors.ctan.org/macros/latex/required/tools/array.pdf}{array},
+	\href{http://mirrors.ctan.org/macros/latex/contrib/colortbl/colortbl.pdf}{colortbl},
+	\href{http://mirrors.ctan.org/macros/latex/required/tools/hhline.pdf}{hhline},
+	\href{http://mirrors.ctan.org/macros/latex/contrib/diagbox/diagbox.pdf}{diagbox},
+	\href{http://mirrors.ctan.org/macros/latex/contrib/siunitx/siunitx.pdf}{siunitx} (dla wyrównania względem separatora dziesiętnego)
+	oraz multirow.
+
+\begin{ExampleVertical}
+ \begin{tabular}{
+    || >{\raggedleft}p{3cm} || r
+    || >{\color{yellow}\columncolor[gray]{.2}[.5\tabcolsep]}c
+     | S !{\color{blue}\vrule width 3pt} 
+ }
+  \hhline{|t:==:t:==|}
+    \diagbox[width=3.4cm]{AA}{BB}{CC} &
+    BBB &
+    \multicolumn{1}{c}{ddd dd} & % komórka bez obramowania z prawej
+    0.12356 \tabularnewline % działa jak \\ ale bywa bezpieczniejszy dla formatowania
+  \hhline{|:=||=>{\arrayrulecolor{red}}=>{\arrayrulecolor{black}}=|}
+    \textcolor{red}{aaaa \textbf{aa bbb ddd} eee} &
+    \multirow{2}{2.5cm}[-0.75cm]{bbb aaaa aa bbb ddd} &
+    ccc ccc &
+    112.57 \tabularnewline
+  \hhline{#=#~||~|->{\color{blue}\vrule width 3pt}}
+    % sztuczka z >{...} zapewnia zgodną z definicją w nagłówku linię po prawej
+    QQQQ \newline od nowej linii &
+    & % ta komórka powinna być putsta bo wyżej użyliśmy \multirow
+    \diagbox[dir=SE]{AA}{CC} &
+    \cellcolor[rgb]{0,1,1} 98765.12356 \tabularnewline
+  \hhline{% !{...} jest rozszerzeniem \hhline zdefiniowanym w office.cls
+     !{\leaders\hrule height 1pt\hfil}%    pozwala na tworzenie dowolnych
+     !{\leaders\hbox{\tiny$\star$}\hfil}%  poziomych linii rozdzielających
+     !{\hfil...\hfil...\hfil}%
+     !{\leaders\hbox{\hdashrule{1.5mm}{1pt}{0.5mm 0.5mm 0.5mm 0mm}}\hfil}%
+  }
+ \end{tabular}
+\end{ExampleVertical}
+
+
+Jeżeli chcemy korzystać w ramach tabu z komórek rozciągniętych równocześnie na kilka kolumn i wierszy możemy deklarować je w sposób następujący:
+\begin{InlineVerbatim*}
+\multicolumn{2}{c|}{
+	\multirow{3}{2\tabucolX}{\centering
+		zawartość komórki
+	}
+}
+% nawet przy zwykłym multirow w kolumnach deklarowanych jako X
+% należy jako drugi argument podawać \tabucolX ... tutaj mamy
+% 2\tabucolX bo zajmujemy miejsce dwóch kolumnt typu X z powodu \multicolumn
+\end{InlineVerbatim*}
+
+
+\newpage
+
+\subsection{Wyrównanie w pionie i poziomie}
+
+Poniższa tabelka bazuje na zdefiniowanych w office.cls typach kolumn i komórek (wielowierszowych, wielokolumnowych, niezależnie formatowanych) - umożliwiają one poprawne wyrównywanie wysokości elementów w tabeli. Użyty longtable pozwala na dzielenie tej tabelki pomiędzy strony.
+
+\begin{ExampleVertical}
+\begin{longtable}{
+    b | C{2cm}{}{t} | C{2cm}{1.5cm}{m} | C{2cm}{}{b} | L{2cm}{}{m} |
+    R{2cm}{}{t} | J{2cm}{}{t} I{\color{red}}{1pt}{0.5mm 0.5mm 0.5mm 0mm} e
+  }
+    top &
+    middle &
+    bottom &
+    middle left &
+    top right &
+    top justify
+  \\ \hline
+    A \lb xxx \lb X &
+    B &
+    C &
+    \setmultirow{3}{
+      ala ma kota \lb kot ma ale la la \lb kot ma ale la la \lb kot } &
+    q &
+    q
+  \\ \hhline{---~--}
+    D \lb d &
+    E \lb xxx xx \lb X \lb X &
+    F \lb f &
+    &
+    q &
+    q
+  \\ \hhline{---~--}
+    G &
+    H &
+    I \lb xxx \lb Xj &
+    &
+    q &
+    q
+  \\ \hline
+    G &
+    \mymulticolumn{2}{4cm}{3cm}{c}{t}{|}
+      {top, center: I I \lb ala ma kota, kot ma ale ala ma kota, kot} &
+    xx &
+    q &
+    q
+  \\ \hline
+    G &
+    \multicolumn{2}{Z{4cm}{3cm}{l}{2}{t}{1}|}
+      {top, left: I I \lb xxxxxxx \lb a a Xj} &
+    LL LL\lb xxx\lb X\lb X &
+    RR RR\lb xxx\lb X\lb X &
+    BB BB\lb xxx\lb X\lb X
+  \\ \hline
+    G &
+    \tableFormatedCell{3.5cm}[3cm]{r}{b}I I \lb xxxxxxx \lb a a Xj &
+    y &
+    ala ma kota, kot ma ale &
+    ala ma kota, kot ma ale &
+    ala ma kota, kot ma ale
+  \\ \hline
+\end{longtable}
+\end{ExampleVertical}
+\vspace{-1.5cm}
+
+
+\subsection{Jeszcze więcej tabelek}
+
+Istnieje także wiele innych pakietów bardziej gruntownie modyfikujących składanie tabel (jak choćby mdwtab, longtable czy tabularx). Najbardziej wszechstronnym i elastycznym wydaje się \href{http://mirrors.ctan.org/macros/latex/contrib/tabu/tabu.pdf}{tabu}. Powyższe tabelki są z nim kompatybilne (to znaczy pokazane efekty obramowań, wyrównań, rozciągniętych komórek itd możemy uzyskać w ten sam sposób).
+
+\begin{ExampleVertical}
+ \taburowcolors 2{gray!15 .. gray!50}
+ \begin{tabu} {|[1pt blue]|[1pt green] m{2cm} || r || c | S }
+  \tabucline[3pt on 1.5pt blue off 2pt red]{1-2}
+  \tabucline[2pt white]{1-2}
+  \tabucline[3pt on 1.5pt blue off 2pt red]{1-2}
+    \diagbox[width=2.4cm]{AA}{BB}{CC} &
+    BBB &
+    ddd dd &
+    0.12356 \\
+  \hhline{|:=||=>{\arrayrulecolor{red}}=>{\arrayrulecolor{black}}=}
+     aaaa aa bbb ddd eee &
+     bbb aaaa aa  &
+    ccc ccc &
+    112.57 \\
+  \tabucline[2pt red]{1-1}
+  \tabucline[\hbox{\textcolor{blue}{x}}]{1-1}
+  \tabucline[2pt red]{1-1}
+    QQQQ &
+    bbb ddd eee &
+    \diagbox[dir=SE]{AA}{CC} &
+    98765.12356 \\
+ \end{tabu}
+\end{ExampleVertical}
+
+Dzięki pakietowi \href{http://www.ctan.org/pkg/spreadtab}{spreadtab} można nawet używać prostych arkuszy kalkulacyjnych.
+\begin{Example}
+ \begin{spreadtab}{{tabular}{ccc}}
+  @A/1 & @B                  & @C       \\
+  2    & 11                  & 23       \\
+  3    & @ b2 + c2 =   & b2 + c2  \\
+  4    & 54                  & 10       \\
+  5    & :={c4} * c3 =       & c4 * c3
+ \end{spreadtab}
+\end{Example}
+
+Tabele możemy umieszczać także poza głównym tekstem (analogicznie jak obrazki) poprzez wstawienie ich w środowisko "table". Dzięki użyciu \href{http://mirrors.ctan.org/macros/latex/contrib/threeparttable/threeparttable.pdf}{threeparttable} możliwe jest umieszczanie w takich tabelech niezależnych przypisów.
+
+
+\section{Podziały}
+\DefineShortVerb{\#}
+Oprócz wymuszania podziału linii (#\\# lub #\newline#), paragrafu (#\par#), strony (#\newpage# lub #\clearpage# możliwe jest także zniechęcanie/zachęcanie do podziału linii lub strony w danym miejscu poprzez: #\linebreak[x]#, #\nolinebreak[x]#, #\pagebreak[x]# oraz #\nopagebreak[x]#, gdzie x jest liczbą z zakresu od 0 do 4 i oznacza stopień zachęcania/zniechęcania (4 jest wartością domyślną i oznacza wymuszenie). #\linebreak[4]# w odróżnieniu od #\\# powoduje rozciągnięcie ostatniego wiersza.
+
+Możemy także zapobiegać łamaniu linii na spacji poprzez użycie zamiast spacji #~#. oraz zapobiegać łamaniu całych wyrażeń umieszczając je w #\hbox#.
+\UndefineShortVerb{\#}
+
+
+
+\section{Odnośniki}
+\DefineShortVerb{\#}
+Możemy tworzyć odnośniki wewnętrzne z wykożystaniem #\label{ID}# (lub zdefiniowanego w office.cls  #\namedLabel{ID}{nazwa}#) w miejscu na które wskazujemy i #\ref{ID}# lub #\hyperref[ID]{tekst}# w miejscu gdzie chemy umieścić odnośnik.
+Możliwe jest także tworzenie odnośników zewnętrznych poprzez #\url{URL}# (\url{http://www.opcode.eu.org/}) lub #\href{URL}{tekst}# (zademonstrowane kilkakrotnie w tym dokumencie).\\
+Link do: \ref{test1} oraz \hyperref[test2]{inny link do tej samej strony w hyperref}. Warto także wspomnieć o przypisach\footnote{to jest przypis}, które możemy dodawać w tekście. Są one umieszczane na dole strony.
+
+Z pomocą pakietu \urllink[border=1, color=1 1 0, dash=3 2]{http://www.ctan.org/tex-archive/macros/generic/navigator}{navigator} możliwe jest także tworzenie bardziej surowych linków PDFowych poprzez #\anchor{ID}#, odwoływać się do nich można poprzez: #\jumplink{ID}{tekst linku}#. W odróżnieniu od #\label{ID}# prowadzą one do konkretnego miejsca na stronie - \jumplink[border=1]{test1}{link na górę obróconej strony} oraz \jumplink[pre=\bgroup\itshape,post=\egroup,linkcolor=1 0.5 0]{test2}{link na dół obróconej strony}. \bs anchor pozwala także wskazanie ofsetu od miejsca umieszczenia identyfikatora oraz wymaganego powiększenia dokumentu.
+
+Możliwe jest także dodawanie pozycji do zakładek poprzez #\outline{x}[outlineID]{tekst}# (definiuje etykietę ID w miejscu wstawienia) lub #\outline[anchor=ID]{x}{tekst}# (zakładka wskazuje na etykietę ID), gdzie x określa poziom w menu zakładek. Zakładki te zostaną umieszczone po zakładkach związanych z automatycznym spisem sekcji.\\
+\outline[anchor=NON,open=true]{1}{zakładki navigator}\outline[anchor=test2]{2}{dół obróconej strony}
+Możliwe jest osadzanie plików w dokumencie pdf poprzez:
+\begin{InlineVerbatim}
+ \embeddedfile
+   [opis]{identyfikator}
+   [nazwa_widoczna.w.pliku.pdf]{nazwa_pliku-do.osadzenia}
+\end{InlineVerbatim}
+ \embeddedfile[definicja klasy dokumentu]{office.cls}{office.cls}
+Ponaddto pakiet ten umożliwia również wstawianie odnośników zewnętrznych poprzez #\urllink#.
+\UndefineShortVerb{\#}
+
+
+\newpage
+
+\section{Spisy treści}
+\DefineShortVerb{\#}
+Spis treści umieszczamy poprzez wstawienie #\tableofcontents# aby nadać mu nazwę "Spis treści" korzystamy wcześniej z #\def\contentsname{Spis treści}#. Pozycję do spisu wprowadzają automatycznie polecenia takie jak: chapter, section, subsection, ..., możemy też wstawić ją ręcznie:
+\begin{InlineVerbatim}
+  \addcontentsline{toc}
+    {nazwa_poziomu_np_section}
+    {tekst który ma zostać podany w spisie}
+\end{InlineVerbatim}
+Aby decydować które poziomy są pokazywane w spisie treści można użyć #\setcounter{tocdepth}{x}#, gdzie x określa maksymalny numer poziomu pokazywanego w spisie.
+Podobnie możemy też dodawać informacje dodatkowe np. dodatkowy odstęp:\linebreak[3]
+	#\addtocontents{toc}{\protect\vspace{1ex}}#\linebreak[3]
+Jeżeli chcielibyśmy mieć kropki (....) w spisie treści między tytułem sekcji a numerem strony możemy je uzyskać przy pomocy:
+\begin{InlineVerbatim}
+ \makeatletter
+  \renewcommand*\l@section{\@dottedtocline{1}{0cm}{0cm}}
+ \makeatother
+\end{InlineVerbatim}
+Jeżeli chcielibyśmy pozbyć się numeracji w spisie treści możemy użyć:
+\begin{InlineVerbatim*}
+ \makeatletter
+ \renewcommand*\mw@markandtoc{
+   \addcontentsline{toc}{\mw@HeadingType}{\HeadingTOCText}
+ }
+ \makeatother
+\end{InlineVerbatim*}
+\UndefineShortVerb{\#}
+
+
+
+\section{Informacje dodatkowe}
+
+\subsection{Komentarze}
+Oprócz klasycznych komentarzy (od \verb@%@ do końca linii) możemy też użyć komentarza blokowego:
+\begin{InlineVerbatim}
+  \begin{comment}
+    komentarz wieloliniowy
+    ALA MA KOTA
+  \end{comment}
+\end{InlineVerbatim}
+Także tekst za \verb@\end{document}\verb@ jest ignorowany będąc swego rodzaju komentarzem.
+
+
+\subsection{Matematyka}
+Przedstawie tu tylko wybrane elementy związane z składem wyrażeń matematycznych - po pełwn opis (w tym listę różnych symboli) odsyłam do rozdziału trzeciego \href{ftp://ftp.gust.org.pl/TeX/info/lshort/polish/lshort2e.pdf}{Nie za krótkie wprowadzenia do systemu LaTeX 2e} oraz innych źródeł.\\
+dwumiany bez nawiasów / z nawiasami  - ${a \atop b}$ / ${a \choose b}$\\
+ułamiki - ${a \over b}$ lub $\frac{a}{b}$\\
+ułamki ukośne (zdefiniowane w office.cls) - $\minifrac{a}{b}$\\
+kreska "w punkcie" np. do pochodnej (zdefiniowane w office.cls) - $\inpoint{2x}$\\
+linia nad / pod jakimś wyrażeniem - $\overline{a+b}$ / $\underline{a+b}$\\
+napis nad strzałką $\stackrel{a}{\rightarrow}$\\
+klamra pod / nad wyrażeniem (z podpisem pod / nad klamrą) - $\underbrace{2+3}_{5}$ / $\overbrace{2+3}^{5}$
+
+Interesujący jest też pakiet \href{http://mirrors.ctan.org/macros/latex/contrib/siunitx/siunitx.pdf}{siunitx} pozwalający na formatowanie liczb i jednostek
+\begin{Example}
+\sisetup{group-minimum-digits=4,negative-color=red}
+\num[group-separator={\,}]{1245.34}\\
+\num[output-decimal-marker={~}]{1245.34}\\
+\num{-12.8} \num[negative-color=]{-12.8}\\
+\SI[mode=text]{1.23}{J.mol^{-1}.K^{-1}}
+\end{Example}
+
+
+\subsection{Bibliografia i bibtex}
+Odnośniki do bibliografii wstawiamy poprzez \verb#\cite{ID_pozycji_bibliograficznej}#. Samą bibliografię możemy utworzyć:
+\begin{InlineVerbatim}
+ \begin{thebibliography}{99}
+  \addcontentsline{toc}{chapter}{Bibliografia}
+  \bibitem[identyfikatorWidoczny]{ID_pozycji_bibliograficznej}%
+          Autor, \textit{Tytuł}, Miejsce publikacji i rok.
+ \end{thebibliography}
+\end{InlineVerbatim}
+Przy większych pracach warto skorzystać z systemu do tworzenia bibliografii bibtex, odwołania do pozycji tworzy się w identyczny sposób, a sam spis umieszcza się poprzez:
+\begin{InlineVerbatim}
+ \cleardoublepage\phantomsection%
+   \addcontentsline{toc}{chapter}{Bibliografia}
+ \bibliographystyle{plunsrt}\nocite{*}%
+   \bibliography{nazwa_pliku_z_bibliografia}
+\end{InlineVerbatim}
+Budowanie latex'a z zastosowaniem bibtexa wymaga wydania dodatkowo komendy bibtex nazwa\_bez\_rozszerzenia przed budowaniem właściwego pliku latex'a. Sam plik bibliograficzny składa się z rekordów postaci (więcej na ten temat w Bibliografia w LaTeXu - program bibtex):
+\begin{InlineVerbatim*}
+@misc{ID_pozycji_bibliograficznej,
+	author        = "",
+	title         = "",
+	journal       = "",
+	year          = "",
+	volume        = "",
+	school        = "",
+	url           = "",
+	institution   = "",
+	howpublished  = "",
+	type          = ""
+}
+\end{InlineVerbatim*}
+
+
+\subsection{Liczniki}
+\DefineShortVerb{\#}
+Liczniki przydają się do automatycznej numeracji rozdziałów, paragrafów itp. Liczniki tworzymy poleceniem #\newcounter{nazwa_licznika}#, wartość nadajemy mu poprzez #\setcounter{nazwa_licznika}{wartosc}#, zwiększać możemy ją o jeden poprzez instrukcję #\stepcounter{nazwa_licznika}#, natomiast wstawiać przez instrukcje typu #\Roman{nazwa_licznika}# (duże liczby rzymskie), #\Alph{nazwa_licznika}# (duże litery), #\alphalph{nazwa_licznika}# (małe litery  - wersja obsługująca numerację powyżej z jako aa, ab, ac, ...), #\arabic{nazwa_licznika}# (liczby arabskie), ... .
+Poniższy przykład ilustruje sposób umieszczania automatycznych odwołań do zadanych fragmentów pliku (np. paragrafów jakiegoś regulaminu).
+\UndefineShortVerb{\#}
+\begin{InlineVerbatim*}
+% wlaczam plik z definicjami liczników
+\IfFileExists{\jobname.cou}{\input{\jobname.cou}}{}
+
+% otwieram do zapisu plik z baza odnośników i zapisuje nagłówek
+\newwrite\licznfile
+\openout\licznfile=\jobname.cou
+\write\licznfile{\string\def\string\liczniki{}}
+
+% ustawiamy zamknięcie plik z licznikami w /end{document}
+\AtEndDocument{\closeout\licznfile} 
+
+% instrukcja zapamiętuje licznik w pliku (jako licznik o zadanej nazwie)
+% \zapamietajlicznik{nazwa_licznika_do_zapamietania}{nazwa_nowego_licznika}
+% przy czym dla środowiska enumerate są to dla kolejnych poziomów:
+%  enumi enumii enumiii enumiv ...
+\newcommand{\zapamietajlicznik}[2] {
+  \immediate\write\licznfile{
+    \string\newcounter{#2}\string\setcounter{#2}{\arabic{#1}}
+  } % \string - zabezpiecza backslesh (\)
+}
+
+% nie tworze liczników przy pierwszym obiegu - zamiast nich będę wpisywał XXX
+% dopiero po wczytaniu ich z pliku wstawię odpowiednie numerki
+\newcommand{\alphf}[1]{\ifx \liczniki \undefined XXX \else\alph{#1}\fi}
+\newcommand{\arabicf}[1]{\ifx \liczniki \undefined XXX \else\arabic{#1}\fi}
+
+% W miejscu do którego chcemy się odwołać
+% umieszczamy instrukcję zapamiętania licznika:
+%  \zapamietajlicznik
+%     {nazwa_zapamietywanego_licznika}
+%     {nazwa_pod_ktora_chemy_go_zapamietac}.
+%
+% W miejscu w którym chcemy wstawić odwołanie umieszczamy np:
+%  \arabicf{nazwa_pod_ktora_zapamietalismy_licznik}
+\end{InlineVerbatim*}
+
+
+\subsection{Zaawansowana grafika z użyciem Ti\textit{k}Z / PGF}
+
+Jest to system do tworzenia zaawansowanych rysunków z użyciem \LaTeX'a. Oprócz głównej biblioteki - \href{http://www.ctan.org/pkg/pgf}{Ti\textit{k}Z / PGF} istnieje wiele specjalistycznych \href{http://www.ctan.org/tex-archive/graphics/pgf/contrib}{pakietów z niej korzystających} - np:
+\vspace{-0.66\parskip}\begin{easylist}\initPointsList
+& \href{http://www.ctan.org/tex-archive/graphics/pgf/contrib/pgfplots}{pgfplots} - umożliwia generowanie wykresów 2D (w tym histogramów) i 3D
+& \href{http://www.ctan.org/tex-archive/graphics/pgf/contrib/pgf-pie}{pgf-pie} - umozliwia generowanie wykresów kołowych
+\end{easylist}
+Poniżej tylko kilka prostych przykładów zaczerpniętych z dokumentacji pakietów używających pgf (oficjalna dokumentacja samego Ti\textit{k}Z / PGF liczy ponad 1000~stron).
+
+\begin{Example}
+  \begin{tikzpicture}
+    \node [minimum size=3.13cm,
+    decorate, decoration=zigzag,
+    fill=blue!20,draw,thick,circle] {Hello!};
+  \end{tikzpicture}
+\end{Example}
+
+\begin{Example}
+  \begin{tikzpicture}
+    \node [circle,draw] (A)
+    {A};
+    \node [circle,draw] (B) [right=of A] {B};
+    \draw [draw = blue, thick]
+    (A) edge [bend left=45] (B)
+    (B) edge [in=-110, out=-70,looseness=8] (B);
+  \end{tikzpicture}
+\end{Example}
+
+\begin{Example}
+  \begin{tikzpicture}
+    \usetikzlibrary{graphs}
+    \graph {
+      4 -- {
+      3 -- 0 -- 1,
+      10 -- {
+      8 -- {
+      6 -- {5,7},
+      9
+      } } }
+    };
+  \end{tikzpicture}
+\end{Example}
+
+\begin{center}
+\begin{tikzpicture}
+\begin{loglogaxis}
+	\addplot coordinates {
+		(1,1)
+		(16,16)
+		(32,64)
+	};
+\end{loglogaxis}
+\end{tikzpicture}
+\end{center}
+
+
+\clearpage\section{Zaawansowane funkcje PDFów itp}
+
+\subsection{Interaktywne formularze}
+Pakiet hyperref zapewnia wsparcie dla tworzenia interaktywnych formularzy w PDFach. Dodatkowe funkcjonalności związane z ich obsługą dostarcza \href{http://ctan.org/pkg/acrotex}{Acro\TeX}. Poniżej pokazany jest przykład formularza stworzonego z użyciem hyperref.
+\begin{Example}
+ \renewcommand{\DefaultHeightofText}{10pt}
+ \renewcommand{\DefaultHeightofChoiceMenu}{10pt}
+ \begin{Form}
+  \TextField[default=kota]{Ala ma: }\\
+  \TextField[multiline=true,height=20pt]{Pies ma: }\\
+  \ChoiceMenu[combo]{Wybierz: }%
+    {a1, b5, j8, wdfed}\\
+  \CheckBox{Akceptacja}
+ \end{Form}
+\end{Example}
+
+\subsection{Notatki PDF}
+\begin{pdfsidelinecomment}[color=red,author={Inny Autor},linewidth=4mm,linesep=1cm]{ PDF note }
+Pakiet \href{http://www.ctan.org/pkg/pdfcomment}{pdfcomment} jest chyba najbardziej rozbudowanym z pakietów umożliwiających dodawanie do plików pdf różnego rodzaju notatek. Oprócz niego warto zwrócić uwagę na pakiety attachfile i marginnote, pozwalające odpowiednio na: dodanie notatki zawierającej załącznik plikowy i umieszczenie takiej notatki na marginesie (poprzez umieszczenie komendy ją wstawiającej w argumencie \verb#\marginnote{}#.
+
+\begin{Example}
+\attachfile[%
+ author={Autor Notatki}, subject={Tytul notatki},%
+ description={Treść notatki}, icon={Tag},%
+ mimetype={text/plain}]{\jobname.tmp}
+\end{Example}
+\end{pdfsidelinecomment}
+
+Z użyciem pdfcomment możemy komentować bloki tekstu (tak jak powyżej po bokach), wstawiać notatki na marginesach oraz w \pdfcomment[icon=Note,color=yellow,author={Inny Autor}]{Notatka umieszczona w tekście} tekście.
+\pdfmargincomment[icon=Insert,color=red,author={Jeszcze Inny Autor}]{Notatka umieszczona na marginesie}
+Możliwe jest też oznaczanie i komentowanie fragmentów tekstu poprzez
+\pdfmarkupcomment[color=blue,markup=Highlight,author={Inny Autor 2}]{podświetlenia}{notatka do oznaczonego fragmentu nr 1},
+\pdfmarkupcomment[color=blue,markup=Underline,author={Inny Autor 2}]{podkreślenia}{notatka do oznaczonego fragmentu nr 2} i
+\pdfmarkupcomment[color=blue,markup=StrikeOut,author={Inny Autor 2}]{przekreślenia}{notatka do oznaczonego fragmentu nr 3} - niestety wydaje się że działa tylko w pdflatex (a nie działa w xelatex i lualatex).
+Pakiet pozwala \pdftooltip{także na dodawanie "tooltips"}{to jest właśnie dymek związany z tamtym tekstem.}
+
+\pdffreetextcomment[subject={free text comment},height=1cm,width=3cm,voffset=7cm,hoffset=10cm,opacity=0.5,color=yellow,author={Jeszcze Inny Autor}]{Notatka w prostokącie}\vspace{-1.2cm}
+
+
+\subsection{Postscript}
+LaTeX umożliwia także zaawansowane zabawy z włączanymi plikami postscriptowymi. Przy użyciu pakietu "psfrag" możemy dokonywać podmiany napisów w EPS:
+\begin{InlineVerbatim}
+  \psfrag{tekst_do_zastapienia}{
+  tekst zastępujący \small{może} zawierać np. $wzory$
+  }
+  \psfragscanon
+  \nopagebreak\newline\centerline{
+    \includegraphics[scale=0.7]{plot.eps}
+  }
+  \psfragscanoff
+\end{InlineVerbatim}
+
+Możliwe jest także mieszanie PS i Latex (umieszczanie komend PS wewnątrz pliku latexowego):
+\begin{InlineVerbatim}
+  \psset{linewidth=1mm}
+  \begin{pspicture}(3,2)
+    \pscurve[arrows=<->](0,1.3)(0.7,1.8)
+    (3.5,0.7)(4,1.9)(0.4,0.4)
+  \end{pspicture}
+\end{InlineVerbatim}
+
+
+
+\forceNewPageGeometry{lmargin=1.5cm,rmargin=1.5cm}
+\appendix
+\section{Kod źródłowy}
+
+Kod źródłowy w postaci plików tekstowych jest załączony do tego dokumentu PDF w postaci "Embedded File".
+Poniżej zaprezentowany jest kolorowany kod źródłowy wygenerowany z użyciem minted+pygments i highlight.
+
+\subsection{office.cls}\vspace{0.5\parskip}
+\inputminted[fontsize=\tiny,linenos=false]{tex}{office.cls}
+
+\subsection{office-demo.tex}\vspace{0.5\parskip}
+\begin{spacing}{0.75}
+ {\tiny\highlight{office-demo.tex}}
+\end{spacing}
+
+\end{document}

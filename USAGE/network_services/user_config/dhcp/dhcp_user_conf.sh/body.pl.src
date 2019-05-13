@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# skrypt generujący sumaryczna konfiguracja DHCP w oparciu o MAC'adresy podane przez użytkownika
+# plik wejściowy składa się z wpisów postaci: ADRES:MAC koncowkaIP
+# linie rozpoczynające się od # są ignorowane
+
+PATH="/usr/local/bin:/usr/bin:/bin"
+
+USER_DHCP='/var/user_config/dhcpd.conf'
+MIN_GID=1000
+BASE_IP="192.168"
+DHCP_IP_START=100
+
+echo "# plik generowany automatycznie - proszę nie edytować" > $USER_DHCP
+for f in /home/*/.dhcp_mac; do
+	# uzyskujemy identyfikator grupy do IP ktorej przypisane mają być podane MAC' adresy
+	HOME_DIR=`dirname "$f"`
+	MAC_GID=$(( $(id -g `ls -ld "$HOME_DIR" | cut -f3 -d' '`) - $MIN_GID ))
+	
+	# czytamy plik z MAC adresami i generujemy konfig DHCP
+	grep -v '^#' < "$f" | while read MAC ITER; do
+		if [ "${ITER}" != "" ]; then
+			if [ ${ITER} -lt 255 ]; then
+				echo "" >> $USER_DHCP
+				echo "host l${MAC_GID}h${ITER}" >> $USER_DHCP
+				echo "	{ hardware ethernet $MAC; fixed-address ${BASE_IP}.${MAC_GID}.${ITER}; }" >> $USER_DHCP
+			fi
+		fi
+	done
+done
+
+# w głównym pliku należy użyć
+#  include sciezka do pliku generowanego przez skrypt
+
+/etc/init.d/dhcp3-server restart

@@ -1,0 +1,48 @@
+\section{System zarządzania sceną}
+
+System oparty na jest na koncepcji umieszczania list obiektów sceny w komórkach dwu wymiarowej siatki. Wyszukanie list obiektów, które powinny być renderowane polega na wyszukaniu komórek będących we wnętrzu lub mające część wspólną z czworobokiem powstałym w skutek zrzutowania storzka widzenia na płaszczyznę XZ.
+
+Implementacja siatki i wyszukiwania zrealizowana jest w \verb#space.h# oraz \verb#spacetypes.h# (klasy pomocnicze). W źródłach pozostawiony został także \verb#quadtree.h# (ze względów archiwalnych jak i możliwości przyszłego wykorzystania), implementujący scenę w postaci drzewa czwórkowego a nie tablicy 2D. Implementacja list obiektów znajduje się w \verb#objectslist.*#, a samych obiektów sceny w \verb#object.*#.
+
+\begin{figure}[h]
+\hspace{2cm}\begindc{\commdiag}[50]
+  \obj(0,0)[A]{ObjectsSpace}[\pcent]
+  \obj(-1,-1)[B]{ObjectsList}[\pcent]
+  \obj(1,-1)[C]{Space}[\pcent]
+  \obj(-2,-2)[D]{SceneObject}[\pcent]
+  \obj(3,-2)[F]{SpaceTypes::BoolArray2D}[\pcent]
+  \obj(1,-3)[E]{SpaceTypes::Array2D}[\pcent]
+  \mor{B}{A}{}
+  \mor{C}{A}{}
+  \mor{D}{B}{}
+  \mor{F}{C}[20,20]{}
+  \mor{E}{C}{}
+  \mor{E}{F}[20,20]{}[\atright,\dasharrow]
+\enddc
+\vspace{0.5cm}
+\caption[Zależności klas w systemie zarządzania sceną]{Zależności klas w systemie zarządzania sceną, linią przerywaną oznaczono dziedziczenie.}
+\label{staly_prad}
+\end{figure}
+
+Zaznaczyć tu należy iż obiekt sceny jest pojęciem szerszym od samego obiektu geometrycznego - zawiera on informację o położeniu na siatce, a także dane umożliwiające dynamiczne ładowanie jego składowych, którymi mogą być geometria, tekstury, bryły ograniczające, światła itp. Oprócz tego obiekty te zawierać mogą listę potomków, wskaźnik na rodzica oraz macierz obrotów. Pozwala to na implementację w oparciu o nie zbioru grafów sceny.
+
+\subsection{Pliki konfiguracyjne}
+System zarządzania scen w trakcie tworzenia "ObjectSpace" czyta plik konfiguracyjny \verb#data/scene.conf# zawierający podstawowe informacje o obiektach występujących na scenie. Plik ten składa się z dowolnej ilości wierszy stanowiących rekordy o postaci: \verb#z x y z_min z_max x_min x_max obj_file_name#. Każdy taki rekord odpowiada informacji iż w punkcie \verb#(x,y,z)# należy umieścić obiekt określony w pliku o nazwie \verb#obj_file_name# oraz iż obiekt ten oddziałuje na komórki przestrzeni określone przez prostokąt o bokach równoległych do krawędzi siatki określony przez punkty \verb#(x_min,z_min)# i \verb#(x_max,z_max)#.
+
+Wymieniony w tamtym pliku plik określający obiekt sceny, również jest plikiem tekstowym o kilku typach rekordów. O typie rekordu decyduje litera znajdująca się w pierwszym polu pliku:
+\begin{itemize}
+	\item C - opis sfery kolizji, kolejne pola oznaczają \verb#(r+e)^2 x y z#, gdzie \verb#(r-e)^2# jest kwadratem promienia sfery powiększonego o promień sfery gracza i odpowiada za zasięg oddziaływania, a pozostałe liczby stanowią współrzędne środka sfery.
+	\item T - opis tekstury, kolejne pola oznaczają \verb#unikalny_identyfikator numer_tekstury_w_obiekcie plik_z_tekstura#
+	\item L - opis światła (aktualnie niezaimplementowane)
+	\item G - nagłówek geometrii, zawiera informację o unikalnym identyfikatorze geometrii, obrotach w płaszczyznach xz yz xy oraz trybie rysowania (wartość numeryczna przekazywana do funkcji rysującej określająca sposób rysowania punktów - np. trójkąty, prostokąty, ...)
+	\item P - opis punktu geometrii kolejno x, y, z i 2 współrzędne tekstury
+	\item I - lista indeksów punktów
+\end{itemize}
+
+Wszystkie rekordy za wyjątkiem "G" mogą występować wielokrotnie. Rekordy "P" i "I" mogą występować wyłącznie po rekordzie "G", natomiast rekordy "T" i "L" wyłącznie przed rekordem "G". W toku dalszego rozwoju należy rozważyć wydzielenie opisu geometrii obiektu (rekordy "P", "I" a także być może "C" do osobnych plików) - umożliwiłoby to stosowanie tej samej geometrii z różnym i teksturami oraz różnymi obrotami zadawanymi w rekordzie "G". Nalezy także wzbogaćić opcje dotyczące teksturowania.
+
+\subsection{Dynamiczne ładowanie obiektów}
+System obsługuje dynamiczne ładowanie obiektów w oparciu o unikalne id obiektu. Obiekt (geometrii, światła lub tekstury) określony w pliku konfiguracyjnym obiektu sceny jest ładowany gdy jakakolwiek komórka na którą oddziałuje podlega renderingowi, pod warunkiem że obiekt o takim id nie jest obecnie załadowany. Ustalenie czy komórka podlega renderingowi oparte jest na wyszukiwaniu komórek przecinających się lub leżących wewnątrz zrzutowanego na płaszczyznę stożka widzenia - odpowiedzialna za to jest funkcja \verb#find_and_copy()# z \verb#space.h#.
+
+\subsection{Dynamiczne usuwanie obiektów}
+System przewiduje wsparcie dla dynamicznego usuwania obiektów - przewidziane są stosowne wartości flag służące do tego, jednak funkcjonalność ta nie została obecnie zaimplementowana.

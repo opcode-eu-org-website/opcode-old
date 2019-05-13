@@ -1,0 +1,132 @@
+<article>
+<title>Warte uwagi układy scalone</title>
+
+<subtitle id="74hc">Wybrane układy serii 74HC:</subtitle>
+<ul>
+	<li>bramki<ul>
+		<li>NOT<ul>
+			<li><datasheet id="hc04">04</datasheet></li>
+		</ul></li>
+		
+		<li>AND<ul>
+			<li>2 wejściowa - <datasheet id="hc08">08</datasheet></li>
+		</ul></li>
+		<li>OR<ul>
+			<li>2 wejściowa - <datasheet id="hc32">32</datasheet></li>
+		</ul></li>
+		<li>XOR<ul>
+			<li>2 wejściowa - <datasheet id="hc86">86</datasheet></li>
+		</ul></li>
+		
+		<li>NAND<ul>
+			<li>2 wejściowy - <datasheet id="hc00">00</datasheet></li>
+			<li>4 wejściowy - <datasheet id="hc20">20</datasheet></li>
+			<li>8 wejściowy - <datasheet id="hc30">30</datasheet></li>
+			<li>2 wejściowy (otwarty kolektor) - <datasheet id="hc03">03</datasheet></li>
+			<li>2 wejściowy (Shmitt) - <datasheet id="hc132">132</datasheet></li>
+		</ul></li>
+		<li>NOR<ul>
+			<li>2 wejściowa - <datasheet id="hc02">02</datasheet></li>
+		</ul></li>
+		<li>XNOR<ul>
+			<li>2 wejściowa - <datasheet id="hc266">266</datasheet></li>
+		</ul></li>
+	</ul></li>
+	
+	<li>przerzutniki (FF)<ul>
+		<li>2x JK - <datasheet id="hc112">112</datasheet></li>
+		<li>4x D - <datasheet id="hc175">175</datasheet></li>
+		<li>8x D - <datasheet id="hc273">273</datasheet></li>
+		<li>8x D clock enable - <datasheet id="hc377">377</datasheet></li>
+		<li><strong>8x D 3-state out</strong> - <datasheet id="hc574">574</datasheet></li>
+		<li>8x D inv 3-state out - <datasheet id="hc564">564</datasheet></li>
+	</ul></li>
+	<li>bufory (BUF)<ul>
+		<li>4x 3-state buffer - <datasheet id="hc125">125</datasheet>, <datasheet id="hc126">126</datasheet></li>
+		<li>6x Schmitt Trigger Buffer - <datasheet id="hc14">14</datasheet></li>
+		<li><strong>8x 3-state buffer bi-directional</strong> - <datasheet id="hc245">245</datasheet></li>
+	</ul></li>
+	<li>dekodery, demultiplexery (DECODER, DEMUX)<ul>
+		<li>2 na 4 - <datasheet id="hc139">139</datasheet></li>
+		<li><strong>3 na 8</strong> - <datasheet id="hc138">138</datasheet></li>
+		<li>4 na 10 (BCD) - <datasheet id="hc42">42</datasheet></li>
+	</ul></li>
+	
+	<li>multipleksery (MUX)<ul>
+		<li>2 wejściowy - <datasheet id="hc257">257</datasheet></li>
+		<li>4 wejściowy - <datasheet id="hc153">153</datasheet></li>
+		<li>8 wejściowy - <datasheet id="hc251">251</datasheet></li>
+	</ul></li>
+	<li>ENCODERy<ul>
+		<li>8 na 3 - <datasheet id="hc148">148</datasheet></li>
+		<li>10 (BCD) na 4 - <datasheet id="hc149">149</datasheet></li>
+	</ul></li>
+	<li>rejestry przesówne (SHIFT_REG)<ul>
+		<li>PISO - <datasheet id="hc165">165</datasheet></li>
+		<li>SIPO - <datasheet id="hc164">164</datasheet></li>
+		<li>left-right - <datasheet id="hc194">194</datasheet></li>
+	</ul></li>
+	
+	<li>liczniki (COUNTER)<ul>
+		<li>2x 4bit - <datasheet id="hc393">393</datasheet></li>
+		<li>14bit - <datasheet id="hc4020">4020</datasheet></li>
+		<li>12bit - <datasheet id="hc4040">4040</datasheet></li>
+		<li>4bit z presetem - <datasheet id="hc193">193</datasheet></li>
+	</ul></li>
+	<li>inne<ul>
+		<li>4x analog switch - <datasheet id="hc4066">4066</datasheet></li>
+		<li>analog (de)mux - <datasheet id="hc4051">4051</datasheet>, <datasheet id="hc4052">4052</datasheet>, <datasheet id="hc4053">4053</datasheet></li>
+		<li>8x latch 3-state out - <datasheet id="hc373">373</datasheet>, <datasheet id="hc573">573</datasheet></li>
+		<li>komparator liczb 4 bit - <datasheet id="hc85">85</datasheet></li>
+		<li>monostable multivibrator - <datasheet id="hc123">123</datasheet></li>
+	</ul></li>
+</ul>
+
+<p>Zobacz więcej: <wiki pl="Seria 7400">Seria 7400</wiki>, <wiki en="List of 4000 series integrated circuits">wykaz układów serii 4000</wiki>, <wiki en="List of 7400 series integrated circuits">wykaz układów serii 7400</wiki>.</p>
+
+<subtitle id="inne">Inne układy:</subtitle>
+<ul>
+	<li>mikrokontrolery AVR<ul>
+		<li>Atmega8</li>
+		<li>Atmega16</li>
+		<li>Atmega164, Atmega324, Atmega644</li>
+	</ul></li>
+	<li>drivery interfejsów<ul>
+		<li>USB to 8bit - FT245</li>
+		<li>USB to UART - FT232</li>
+		<li>USB to 4xUART (w tym dwa uniwersalne - mogące działać jako I2C, SPI, JTAG - FT4232</li>
+		<li>RS485 - <datasheet id="MAX485">MAX485</datasheet>/SN75176B</li>
+		<li>RS232 - <datasheet id="MAX232">MAX232</datasheet>/ST232</li>
+		<li>Ethernet na SPI - ENC28J60</li>
+	</ul></li>
+	<li>układy na szynę I2C<ul>
+		<li>8bit IO z zaawansowanym kontrolerem przerwań (niestety INTF zdaje się nie działać tak jak opisano w dokumentacji - łapie tylko pierwsze przerwanie) - <datasheet id="MCP23008">MCP23008</datasheet></li>
+		<li>open-drain 8bit IO z kontrolerem przerwań - <datasheet id="MCP23009">MCP23009</datasheet></li>
+		<li>8bit IO z prostym odczytem (mniejsze obciążenie magistrali, dzięki dwóm dostępnym wariantom adresu zaszytego w krzemie do 16 układów na szynie) - <datasheet id="PCF8574A">PCF8574A(P)</datasheet></li>
+		<li>4 analog input, 1 analog output - <datasheet id="PCF8591">PCF8591</datasheet></li>
+		<li>multipleksery magistrali I2C - <datasheet id="PCA9540">PCA9540</datasheet>, <datasheet id="PCA9542">PCA9542</datasheet>, <datasheet id="PCA9544">PCA9544</datasheet>, <datasheet id="PCA9548">PCA9548</datasheet></li>
+	</ul></li>
+	<li>transoptory<ul>
+		<li>cyfrowe - <datasheet id="6N136">6N136</datasheet>,  <datasheet id="6N137">6N137</datasheet></li>
+		<li>analogowe - <datasheet id="4N25">4N25</datasheet>,  <datasheet id="4N35">4N35</datasheet></li>
+		<li>optotriaki - <datasheet id="MOC3023">MOC3023</datasheet>,  <datasheet id="MOC3063">MOC3063</datasheet>, itp</li>
+	</ul></li>
+	<li>elementy załączające<ul>
+		<li>tranzystory NPN - <datasheet id="BC337">BC337</datasheet></li>
+		<li>tranzystory PNP - <datasheet id="BC327">BC327</datasheet></li>
+		<li>tranzystory N-MOSFET - <datasheet id="IRFZ44N">IRFZ44N</datasheet>, <datasheet id="BS170">BS170</datasheet></li>
+		<li>tranzystory P-MOSFET - <datasheet id="IRF9Z34N">IRF9Z34N</datasheet></li>
+		<li>tranzystory JFET - <datasheet id="BF245">BF245</datasheet></li>
+		<li>triaki - <datasheet id="BTA16">BTA16</datasheet></li>
+	</ul></li>
+	<li>inne<ul>
+		<li>wyświetlacze LCD z sterownikiem <datasheet id="HD44780">HD44780</datasheet></li>
+		<li>termometr 1-wire - <datasheet id="DS18B20">DS18B20</datasheet></li>
+		<li>układ czasowy - <datasheet id="NE555">NE555</datasheet></li>
+		<li>wzmacniaz operacyjny - <datasheet id="LM358">LM358</datasheet>, <datasheet id="TL081">TL081</datasheet></li>
+		<li>komparator - <datasheet id="LM239N">LM239N</datasheet></li>
+	</ul></li>
+</ul>
+
+<p>Warte zainteresowania mogą być także klasyczne kości architektury PC takie jak <wiki en="Intel 8255">8255</wiki>, <wiki en="Intel 8259">8259</wiki>, itp, a także popularne współczesne mikrokontrolery z rodzin takich jak AVR, PIC, ...</p>
+</article>

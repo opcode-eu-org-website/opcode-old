@@ -1,0 +1,13 @@
+<article>
+<title>DHCP</title>
+
+<p>Inną usługą gdzie możemy chcieć aby użytkownik mógł samemu mógł wprowadzać dane konfiguracyjne jest DHCP - zamieszczam skrypt <id_link id="dhcp_user_conf.sh">generujący w oparciu o listę mac-adresów</id_link> w pliku użytkownika konfigurację dla serwera dhcp. Założenie działania skryptu jest takie iż identyfikator numeryczny grupy podstawowej użytkownika (dokładniej grupy będącej właścicielem pliku konfiguracyjnego) przekłada się w prosty sposób na system numeracji IP.  Zobacz także prototypy skryptów umożliwiających dodawanie MAC adresów przez WWW - <id_link id="add_mac.php">add_mac.php</id_link> <id_link id="add_mac.sh">add_mac.sh</id_link>.</p>
+
+<p>System wymaga aby dodać do <kbd class="path">/etc/sudoers</kbd> następujące linie:</p>
+<pre>www-data ALL =NOPASSWD: /usr/local/bin/add_mac.sh
+ALL ALL =NOPASSWD: /usr/local/bin/dhcp_user_conf.sh</pre>
+
+<p>W przypadku gdy zainstalowany jest usermin możliwe jest stworzenie modułu do edycji listy mac-adresów. Prezentowany <id_link id="install_in_usermin.sh">skrypt</id_link> przygotowany został do utworzenia takiego modułu (bazującego na module "plan") dla usermin'a w wrsji 1.340.</p>
+
+<p><tmp>Uwaga: prezentowane powyżej programy mają status beta - przechodzą one dopiero testy i mogą pojawić się jakieś błędy.</tmp></p>
+</article>

@@ -1,0 +1,11 @@
+<article>
+<title>Inne ustawienia i uwagi</title>
+<p>Mogłoby się wydawać iż oprócz logowania ruchu przechodzącego (omawianego w części dotyczącej routingu) warto rozważyć logowanie tablicy arp (odpowiedniości numerów sprzętowych i IP) - realizuje to np. następujący skrypcik - <id_link id="arp_log.sh">arp_log.sh</id_link>, jednak po bliższym przyjżeniu się logom ruchu zauważyć w nich można oprócz adresów IP MAC adresy kart, więc jest to zbędne. Na koniec proponuję dodanie do /etc/cron.daily/ skryptu wywołującego <code>ntpdate</code>  (uwaga: aby skrypt był wykonywany przez crona konieczne może okazać się zrezygnowanie z niektórych znaków w jego nazwie np. kropki).</p>
+
+<p>Przydatne może być też zmienienie portu na którym słucha SSH ze względu na boty próbujące się logować i zaśmiecające nam logi. Niekiedy warto także logować połączenia SSH w lastlogu, aby to uczynić należy do <kbd class="path">/etc/pam.d/sshd</kbd> dodać <code>session    optional   pam_lastlog.so</code>.</p>
+
+
+<p>W przypadku problemów z wstaniem mysql po przenoszeniu syustemu pomocne moze byc jego odinstalowanie i ponowne zainstalowanie oraz zaimportowanie sql (przy usuwaniu kasujemy takze pliki z bazai danych). W przypadku problemów z logowaniem do phpmyadmin należy usunąć ciasteczka.</p>
+
+<p>Zachęcam także do zapoznania się z moimi artykułami o: <id_link id="ABC_OF_COMPUTING:networks:IP:konfiguracja_sieci">konfiguracji sieci</id_link> i <id_link id="USAGE:operating_systems_config">konfiguracji systemów operacyjnych</id_link> (w szczególności o <id_link id="USAGE:operating_systems_config:servers:syslog:syslog-ng">konfiguracji logów systemowych</id_link>).</p>
+</article>

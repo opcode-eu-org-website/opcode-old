@@ -1,0 +1,9 @@
+<article>
+<title>Dobór transformatora i kondensatorów filtrującyh</title>
+
+<p>Pierwszą kwestią jest charakterystyka transformatora czyli jak wygląda funkcja napięcia od pobieranego prądu. W przypadku transformatorów sztywnych (np. transformatory troidalne) jest to funkcja niemal stała (przy zerowym obciążeniu napięcie wynosi około 110% napięcia nominalnego), w przypadku transformatorów miękkich napięcie bez obciązenia może być nawet ponad 160% napięcia nominalnego. Praktycznie zawsze trzbea wybrać transformator o większej mocy niż wynikałoby to z nominalnego obciążenia (chociażby ze względu na warunki chłodzenia czy też prądy rozruchowe).</p>
+
+<p>Napięcie nominalne transformatora to tzw. napięcie skuteczne przy obciążeniu 100%. Amplituda jest pierwiastek z 2 razy większa od wartości skutecznej. Po wyprostowaniu na podłączonym kondensatorze będziemy mieli napięcie odpowiadające amplitudzie pomniejszonej o spadki napięcia na dwuch diodach (w przypadku prostownika dwupołówkowego - mostka prostowniczego) - zależą one od płynącego prądu oraz diody i są zazwyczaj od 0.6V do 1.5V.</p>
+
+<p>Pojemność kondensatora dobiera się w zależności od pobieranego prądu iżądanej wartości tętnień i wynosi ona dla prostownika dwupołówkowego prąd * 10ms / wartość tętnień.</p>
+</article>

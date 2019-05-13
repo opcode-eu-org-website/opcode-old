@@ -1,0 +1,38 @@
+<article>
+<title>VoIP, SIP i Asterisk</title>
+
+<p>Kolejną przydatną usługą są połączenia głosowe realizowane przez protokół IP. Jest to chyba najbardziej wymagająca dla tego protokołu usługa, gdyż wymaga ona bardzo małych opóźnień (dane spóźnione są bezużyteczne, a nie możemy też sobie pozwolić na duży bufor, gdyż usługa realizowana jest w czasie rzeczywistym). Jednak pomimo tych problemów telefonia IP (<wiki pl="Voice over Internet Protocol">VoIP</wiki>) ma liczne zalety - takie jak elastyczność, wysoka konfigurowalność i niskie koszta połączeń (nie jest potrzebny fizyczny kanał a tylko pasmo transmisji danych). Chyba najpopularniejszą softwarową centralką telefoniczną, obsługującą nie tylko VoIP ale także klasyczną telefonię jest <wiki pl="Asterisk">Asterisk</wiki>. Oprogramowanie to jest ponadto, w stanie rozwiązać problemy protokołu <wiki pl="Session Initiation Protocol">SIP</wiki> z <wiki pl="Network Address Translation">NAT</wiki>em (wystarczy żeby serwer asteriska miał IP z za NATu i publiczne).</p>
+
+<p>Prezentuję tutaj zestaw najistotniejszych plików konfiguracji Asteriska obejmujący:</p>
+<ul>
+	<li>konfigurację dialplanu czyli systemu numeracyjnego i sposobów zestawiania połączeń:<ul>
+		<li><id_link id="extensions.lua">extensions.lua</id_link> - podstawoiwe definicje dialplanu stworzonego w lua (w tym inkludowanie elementów z <kbd class="path">extensions.lua.d</kbd>) - ta metoda konfiguracji wydaje się najprzyjemniejsza (dość dobra metodą jest też AEL, natomiast najbardziej standardowe definiowanie dilplanu w extensions.conf jest upiorne ze względu na problematyczność / nieczytelnośc konstrukcji takich jak pętle, warunki, itd)</li>
+		<li><id_link id="extensions.ael">extensions.ael</id_link> - kontekst <code>after_dial</code>, który jest wywoływany poprzez G() z komendy Dial() i ze względu na specyfikę tego wywołania (skok do priorytetu 2) nie może być zdefiniowany w lua która nie wspiera priorytetów w dialplanie</li>
+		<li><id_link id="call.lua">extensions.lua.d/call.lua</id_link> - podstawowe funkcje związane z realizacją połączeń (dzwonienie na zwenątrz, dzonienie do zarejestrowanych użytkowników z wsparciem dla vhostów, nagrywanie rozmów, wyszukiwanie <wiki pl="ENUM">ENUM</wiki>)</li>
+		<li><id_link id="conference.lua">extensions.lua.d/conference.lua</id_link> - funkcje związane z tworzeniem i przyłączaniem się do konferencji</li>
+		<li><id_link id="ivr.lua">extensions.lua.d/ivr.lua</id_link> - funkcje pomocnicze związane z realizacją systemów IVR</li>
+		<li><id_link id="transfers.lua">extensions.lua.d/transfers.lua</id_link> - kontekst <code>input_from_transfers</code> do którego trafiają z <code>after_dial</code> realizowane transfery (zajmuje się on identyfikacją wykonującego transfer i przeniesieniem do jego kontekstu wychodzącego) oraz funkcje pomocnicze związane z realizacją transferów</li>
+		
+		<li><id_link id="addresses.lua">extensions.lua.d/addresses.lua</id_link> - specyfikacja adresów dla połączeń przychodzących (m.in. przykładowe IVR, definicja dzwonienia na numery konferencyjne, numer do parkowania rozmów, powiadomienia jabberowe o przychodzącej rozmowie)</li>
+		<li><id_link id="clients.lua">extensions.lua.d/clients.lua</id_link> - specyfikacja realizacji połączeń od zautoryzwoanych klientów (peerów)</li>
+	</ul></li>
+	<li>konfigurację akcji podejmowanych w trakcie rozmowy - <id_link id="features.conf">features.conf</id_link></li>
+	<li>konfigurację kont sip - <id_link id="sip.conf">sip.conf</id_link> (plik ten dodatkowo inkluduje <kbd class="path">sip-register.conf</kbd>, <kbd class="path">sip-phone.conf</kbd> oraz <kbd class="path">sip-provider.conf</kbd> zawierające lokalną konfigurację kont)</li>
+	<li>konfigurację poczty głosowej - <id_link id="voicemail.conf">voicemail.conf</id_link> (plik ten dodatkowo inkluduje <kbd class="path">voicemail-local.conf</kbd> zawierający lokalną konfigurację kont)</li>
+	<li>konfigurację <wiki pl="Extensible Messaging and Presence Protocol">XMPP</wiki> oraz <wiki pl="Jingle (protokół)">jingle</wiki> (gtalk):<ul>
+		<li><id_link id="jabber.conf">jabber.conf</id_link> - ogólna konfiguracja xmpp, adres do wysyłania powiadomień, adresy do odbierajnia rozmów jingle (plik ten dodatkowo inkluduje <kbd class="path">jabber-users.conf</kbd> zawierające lokalną konfigurację kont)</li>
+		<li><id_link id="jingle.conf">jingle.conf</id_link> - ogólna konfiguracja jingle, konfiguracja połączeń wychodzących jingle (plik ten dodatkowo inkluduje <kbd class="path">jingle-outcoming.conf</kbd> zawierające lokalną konfigurację kont)</li>
+		<li>gtalk.conf powinien być dowiązaniem do tego pliku</li>
+	</ul></li>
+</ul>
+
+<p>Warto włączyć rejestrowanie w logu CDR (<kbd class="path">/var/log/asterisk/cdr-csv/Master.csv</kbd>) nieudanych prob dzwonienia poprzez opcję <code>unanswered = yes</code> w <kbd class="path">/etc/asterisk/cdr.conf</kbd> oraz rejestrowanie przebiegu dzwonienia w <kbd class="path">/var/log/asterisk/verbose</kbd> poprzez następujące wpisy w <kbd class="path">/etc/asterisk/logger.conf</kbd>:</p>
+<pre>[logfiles]
+	verbose => verbose
+	debug => debug
+messages => notice,warning,error</pre>
+
+<p>Sporym wyzwaniem bywa nie rzadko także odpowiednia konfiguracja kodeków. Podstawowym kodekiem jest <wiki pl="G.711">G.711</wiki> (w dwóch odmianach ulaw / alaw) - zapewnia dobrą jakość, ale wymaga dużego pasma, oprócz niego godnymi zainteresowania jest kilka wolnych kodeków takich jak: <wiki pl="G.726">G.726</wiki>, <wiki pl="Speex">Speex</wiki>, <wiki pl="Kodek GSM">gsm</wiki>, <wiki pl="Internet Low Bit Rate Codec">iLBC</wiki>, <wiki en="G722">G.722</wiki>. Ponadto standardowy Asterisk w chwili obecnej nie wspiera integracji z kontami shellowymi użytkowników, ale można to uzyskać z wykorzystaniem bazy LDAP.</p>
+
+<p>Zobacz w Sieci: <doc url="http://www.voip-info.org/wiki/index.php?page=Asterisk">voip-info</doc>.</p>
+</article>

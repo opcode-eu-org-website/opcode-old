@@ -1,0 +1,57 @@
+#!/bin/bash
+
+#
+# skrypt generujący statystyki ruchu
+# (zaklada sie ze udostepnianie lacza odbywa sie poprzez skrypt router.sh mojego autorstwa)
+#
+
+okres_probkowania=30
+identyfikator="predkosci"
+
+if [ ! -f /tmp/${identyfikator}_out.txt ]; then
+	:> /tmp/${identyfikator}_out.txt
+fi
+
+while true; do
+	# dane o przeslanych bajtach na IP z iptables -L
+	# uwaga: ruch bedacy FORWARD nie jest zaliczany do INPUT/OUTPUT
+	#  - przy wylaczonym INPUT/OUTPUT FORWARD dziala ...
+	iptables -L FORWARD -n -v -x > /tmp/${identyfikator}_in.txt
+	iptables -L INPUT -n -v -x >> /tmp/${identyfikator}_in.txt
+	iptables -L OUTPUT -n -v -x >> /tmp/${identyfikator}_in.txt
+	# AWK ...
+	env TZ=UTC awk -v plik_out="/tmp/${identyfikator}_out.txt" '
+		# dane z iptables
+		$3=="ACCEPT" && $8!="0.0.0.0/0" && $9=="0.0.0.0/0" { wysylane[$8]=$2 }
+		$3=="ACCEPT" && $8=="0.0.0.0/0" && $9!="0.0.0.0/0" { odebrane[$9]=$2 }
+		# dane z poprzedniego wywolania skryptu
+		$3!="ACCEPT" { wysylane_OLD[$1]=$2; odebrane_OLD[$1]=$3 }
+		# zapisywanie wynikow
+		END {
+			#zapis nowych danych (do plik_out)
+			czas=systime()
+			for(INDEX in wysylane) {
+				if (! INDEX in odebrane)
+					odebrane[INDEX]=0
+			}
+			for(INDEX in odebrane) {
+				if (! INDEX in wysylane)
+					wysylane[INDEX]=0
+				printf("%s\t%s\t%s\n", INDEX, wysylane[INDEX], odebrane[INDEX]) > plik_out
+			}
+			printf("TIME\t%s\n", czas) > plik_out
+		
+			#zapis statystyki - roznica (na stdout)
+			czas=czas-wysylane_OLD["TIME"]
+			#printf "IP\t\twysylane\todbierane (z Internetu)\n"
+			for(INDEX in wysylane)
+				printf("%s\t%9.2f\t%9.2f\n", INDEX, (wysylane[INDEX]-wysylane_OLD[INDEX])/czas, \
+					(odebrane[INDEX]-odebrane_OLD[INDEX])/czas)
+
+			printf("OKRES PROBKOWANIA:\t%d s\n", czas)
+			printf("DATA:\t%s\n", strftime("%Y-%m-%d %H:%M:%S %Z (%s)"))
+		}
+	' /tmp/${identyfikator}_in.txt /tmp/${identyfikator}_out.txt > /var/log/${identyfikator}.log
+	# spimy ...
+	sleep $okres_probkowania
+done

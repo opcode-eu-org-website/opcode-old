@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#/usr/bin/psql "select xml from spool where username=\"$1\""
+
+
+if [ -f /var/lib/ejabberd/xmpp2smtp.seq.txt ]; then
+	MIN_SEQ=`cat /var/lib/ejabberd/xmpp2smtp.seq.txt`
+fi
+MIN_SEQ=${MIN_SEQ:-0}
+
+MAX_SEQ=`echo "select MAX(seq) from spool" | /usr/bin/psql -t | tr -d ' '`
+MAX_SEQ=${MAX_SEQ:-0}
+
+for user in $1; do
+	SQL="select xml from spool where seq > $MIN_SEQ and seq <= $MAX_SEQ and username='$user'"
+	( echo "<offline_message>"
+	  echo "$SQL" | /usr/bin/psql -t
+	  echo "</offline_message>"
+	) | xalan -xsl `dirname $0`/xmpp2smtp.xsl 2> /dev/null | mail -E -s "XMPP Notify" $user
+done
+
+echo $MAX_SEQ > /var/lib/ejabberd/xmpp2smtp.seq.txt

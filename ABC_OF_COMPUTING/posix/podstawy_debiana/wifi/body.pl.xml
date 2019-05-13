@@ -1,0 +1,14 @@
+<article>
+<title>Konfiguracja sieci bezprzewodowej</title>
+
+<p>W trybie klienta podstawowym narzędziem konfiguracji dostępu sieci bezprzewodowej są narzędzia z pakietu <code>iwconfig</code> (umożliwiające włączanie interfejsów, skanowanie, etc) oraz <code>wpa_supplicant</code> (umożliwijący dostęp do sieci zabezpieczonych WPA - <id_link id="wpa_supplicant.conf">Przykładowy plik konfiguracyjny</id_link>).</p>
+
+<p>Możliwe jest także zastosowanie systemu linux (z odpowiednią kartą sieciową) jako access-pointa - służy temu <code>hostapd</code> (<id_link id="hostapd.conf">Przykładowy plik konfiguracyjny</id_link>) wraz z serwerem DHCP (i ew. DNS) - np. <code>dnsmasq</code>.</p>
+
+<p>Przykładowa konfiguracja <code>dnsmasq</code>:</p>
+<pre>
+interface=wlan0
+dhcp-range=wlan0,192.168.22.193,192.168.22.222,255.255.255.0,1h
+log-dhcp
+</pre>
+</article>

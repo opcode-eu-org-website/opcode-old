@@ -1,0 +1,79 @@
+<article>
+	
+<title>Komputery</title>
+
+<p><wiki pl="Komputer" en="Computer">Komputer</wiki> jest elektronicznym urządzeniem służącym do przetwarzania informacji. Działanie jego opiera się na przetwarzaniu ciągu rozkazów (wraz z argumentami którymi są przetwarzane dane). W przypadku dominującej obecnie <wiki pl="Architektura procesora" en="Computer architecture">architektury</wiki> <wiki pl="Architektura von Neumanna">von Neumanna</wiki> (w odróżnieniu od <wiki pl="Architektura harwardzka">harwardzkiej</wiki> stosowanej bardzo często w <wiki pl="Mikrokontroler">mikrokontrolerach</wiki>) zarówno ciąg instrukcji (program) jak i dane przechowywane są w wspólnej pamięci.</p>
+
+<p>Głównym parametrem klasyfikującym systemy komputerowe jest <wiki pl="Model programowy procesora" en="Instruction set">architektura procesora</wiki>. Determinuje ona m.in. zestaw obsługiwanych instrukcji i wielkość przestrzeni adresowej, w związku z tym programy kompilowane do kodu maszynowego w celu uruchomienia na innej, niekompatybilnej architekturze wymagają rekompilacji. Do najistotniejszych obecnie grup architektur należy zaliczyć:</p><ul>
+	<li><wiki pl="X86" en="X86">x86</wiki> (<wiki pl="IA-32" en="IA-32">IA-32</wiki> / <wiki pl="AMD64" en="X86-64">AMD64</wiki>) - aktualnie najpopularniejsza w komputerach domowych / biurowych, konsolach do gier (<wiki pl="Historia gier komputerowych (ósma generacja)">ósma generacja</wiki>) i serwerach</li>
+	<li><wiki pl="Architektura ARM" en="ARM architecture">ARM</wiki> - aktualnie najpopularniejsza w telefonach komórkowych, często spotykana w różnych systemach wbudowanych</li>
+	<li><wiki pl="Architektura MIPS" en="MIPS instruction set">MIPS</wiki> - często spotykana w routerach, tunerach DVB, rejestratorach, itp:</li>
+	<li><wiki pl="Power Architecture" en="Power Architecture">Power</wiki> (<wiki pl="PowerPC" en="PowerPC">PowerPC</wiki>, <wiki en="POWER8">POWER8</wiki>, <wiki pl="Cell (procesor)" en="Cell (microprocessor)">Cell</wiki>, <wiki en="OpenPOWER Foundation">OpenPOWER</wiki>) - często spotykana w systemach serwerowych i konsolach do gier (głównie <wiki pl="Historia gier komputerowych (siódma generacja)">siódma generacja</wiki>)</li>
+	<li><wiki pl="SPARC" en="SPARC">SPARC</wiki> (<wiki en="OpenSPARC">OpenSPARC</wiki>, <wiki pl="LEON" en="LEON">LEON</wiki>) - często spotykana w systemach serwerowych</li>
+</ul>
+
+<p>W ramach poszczególnych grup często zachowywana jest zgodność wsteczna (jest tak np. w przypadku rodziny x86), ale nie zawsze musi tak być. Należy zwrócić uwagę na różnice pomiędzy poszczególnymi wersjami architektury w ramach rodziny (rozszerzenia zestawu instrukcji), bitowość (32 lub 64 bity), warianty <wiki pl="Kolejność bajtów#Big_endian">big-endian</wiki>/<wiki pl="Kolejność bajtów#Little_endian">little-endian</wiki> (szczególnie dla MIPS i ARM), stosowanie koprocesorów (np. <wiki en="Floating-point unit">jednostką zmiennoprzecinkową</wiki> VFP w ARM). Zobacz także: <doc url="https://wiki.debian.org/Multiarch/Tuples">Debian Multiarch Tuples</doc></p>
+
+<subtitle>Budowa - płyta główna, procesor, pamięć, karty, ...</subtitle>
+
+<p><wiki pl="Płyta główna" en="Motherboard">Płyta główna</wiki> zawiera podstawowe elementy urządzenia (w tym wypadku komputera), umożliwia też komunikację wszystkim pozostałym podzespołom i modułom. Klasyczny, ogólny (generyczny) <wiki pl="Plik:Motherboard diagram pl.svg" en="File:Motherboard_diagram.svg">schemat blokowy płytywy głównej</wiki> zawiera 4 główne elementy:</p><ul>
+	<li><wiki pl="Procesor" en="entral processing unit">procesor</wiki> (CPU)</li>
+	<li><wiki pl="Mostek północny" en="Northbridge (computing)">mostek północny</wiki> połączony bezpośrednio z procesorem</li>
+	<li><wiki pl="Pamięć operacyjna" en="Primary storage">pamięć</wiki> (<wiki pl="RAM" en="Random-access memory">RAM</wiki>) podłączona do <wiki en="Memory controller">kontrolera pamięci</wiki> (klasycznie umieszczanego w mostku północnym, współczośnie najczęściej bezpośrednio w procesorze)</li>
+	<li><wiki pl="Mostek południowy" en="Southbridge (computing)">mostek południowy</wiki> połączony z mostkiem północym</li>
+</ul>
+
+<p>Z kolejnymi generacjami procesorów zmianie ulegały technologie wykonywania poszczególnych połączeń a także sam schemat (w wielu współczesnych konstrukcjach mostek północny nie występuje - pamięć podłączana jest bezpośrednio do procesora, a szybkie szyny systemewe do mostka południowego lub także bezpośrednio do procesora). Ogólnie zauważalne jest także odchodzenie od klasycznych magistral na rzecz łączy typu punkt-punkt (ew. magistral hub-owanych) oraz odchodznie od interfejsów równoległych na rzecz szeregowych. Aktualnie najistotniejszymi interfejsami są:</p><ul>
+	<li><wiki pl="HyperTransport" en="HyperTransport">HyperTransport</wiki>, <wiki pl="Intel QuickPath Interconnect" en="Intel QuickPath Interconnect">QPI</wiki> - łącza punkt-punkt pomiędzy procesorem a mostkiemi (następcy <wiki pl="Front side bus" en="Front-side bus">FSB</wiki>) oraz pomiędzy procesorami w systemach <wiki pl="Wieloprocesorowość" en="Multiprocessing">wieloprocesorowych</wiki></li>
+	<li><wiki pl="Direct Media Interface" en="Direct Media Interface">DMI</wiki> - łacze pomiędzy mostkiem północnym a południowym lub (wraz z <wiki en="Flexible Display Interface">FDI</wiki>) procesorem a mostkiem południowym</li>
+	<li><wiki pl="PCI Express" en="PCI Express">PCIe</wiki> - szeregowe łącze typu punkt-punkt przeznaczone głównie do komunikacji z kartami rozszerzeń</li>
+	<li><wiki pl="Serial ATA" en="Serial ATA">SATA</wiki>, <wiki pl="Serial Attached SCSI" en="Serial attached SCSI">SAS</wiki> - szeregowe łącza punkt-punkt przeznaczone do komunikacji z urządzeniami pamięci masowej, SATA stosowane są powszechnie w rozwiązaniach domowych i biurowych, SAS niemal wyłącznie w rozwiązaniach serwerowych, interfejsy są ze sobą częściowo kompatybilne (kontroler SAS obsługuje dyski SATA)</li>
+	<li><wiki pl="Universal Serial Bus" en="USB">USB</wiki> - magistrala szeregowa, budowana w oparciu o <wiki pl="Hub USB" en="USB hub">hub-y</wiki>, przeznaczona głównie do podłączania peryferiów zewnętrznych</li>
+	<li><wiki pl="Digital Visual Interface" en="Digital Visual Interface">DVI</wiki>, <wiki pl="HDMI" en="HDMI">HDMI</wiki>, <wiki pl="DisplayPort" en="DisplayPort">DisplayPort</wiki> - interfejsy cyfrowego audio-wideo, pod względem cyfrowego sygnału wideo jest zgodne z DVI-D / DVI-I jest zgodne z HDMI (HDMI posiada dodatkowo kanał audio, obsługuje inne przestrzenie kolorów niż RGB, od wersji 1.4 może posiadać także kanał Ethernet; DVI w wariantach DVI-I i DVI-A posiada analogowy sygnał video zgodny z <wiki en="VGA connector">VGA</wiki>)</li>
+</ul>
+
+<p>Nadal można spotkać się z (wymierającymi już) interfejsami takimi jak:
+	<wiki pl="Peripheral Component Interconnect" en="Conventional PCI">PCI</wiki>
+	<wiki pl="IEEE 1394" en="IEEE 1394">IEEE 1394</wiki> (FireWire),
+	<wiki pl="RS-232" en="RS-232">RS232</wiki> (<wiki pl="Port szeregowy" en="Serial port">port szeregowy</wiki> COM),
+	<wiki pl="PS/2 (port komunikacyjny)" en="PS/2 port">PS/2</wiki>,
+	<wiki pl="IEEE 1284">LPT</wiki> (<wiki pl="Port równoległy">port równoległy</wiki>),
+	<wiki pl="ATA (technologia)" en="Parallel ATA">ATA</wiki> (IDE, PATA, <wiki en="ATA Packet Interface" pl="ATAPI">ATAPI</wiki>, EIDE).
+Natomiast wśród historycznych interfejsów należy wspomnieć o:
+	<wiki pl="Industry Standard Architecture" en="Industry Standard Architecture">ISA</wiki> (<wiki pl="Extended Industry Standard Architecture" en="Extended Industry Standard Architecture">EISA</wiki>, <wiki en="VESA Local Bus" pl="VESA Local Bus">VESA Local Bus</wiki>),
+	<wiki pl="PCI-X" en="PCI-X">PCI-X</wiki> (poprawiona, szybsza, 64 bitowa, kompatybilna wstecz wersja PCI),
+	<wiki pl="PCMCIA">PCMCIA</wiki> (pierwotnie "PC Card 16" - magistrala ISA, później "CardBus" - magistrala PCI),
+	<wiki pl="Accelerated Graphics Port">AGP</wiki>,
+	<wiki pl="SCSI" en="Parallel SCSI">SCSI</wiki>.
+Zobacz także: <wiki en="List of device bit rates">porównanie prędkości różnych interfejsów</wiki>.</p>
+
+<p>Wiele z współczesnych (podobnnie jak i historycznych) interfejsów posiada różne warianty zarówno pod względem generacji / prędkości (typowo kompatybilnych wstecznie) jak i pod względem wykonania mechanicznego (zewnętrzne/wewnętrze, o różnym stopniu miniaturyzacji - w wielu wypadkach jest ich aż za wiele). Istnieją także złącza obsługujące kilka różnych interfejsów w ramach jednego gniazda - np. <wiki pl="M.2" en="M.2">M.2</wiki> (w zależności od wariantu różne zestawy: PCIe, SATA, USB, DisplayPort, PCM/<wiki pl="I²S" en="I²S">I²S</wiki>, <wiki pl="I²C" en="I²C">I²C</wiki>/<wiki en="System Management Bus">SMBus</wiki>, <wiki pl="Karta SIM" en="Subscriber identity module">SIM</wiki>), <wiki en="SATA Express">SATA Express</wiki> (SATA + PCIe), <wiki en="ESATAp">eSATAp</wiki> (SATA + USB), <wiki pl="ExpressCard" en="ExpressCard">ExpressCard</wiki> (PCIe + USB), <wiki pl="Thunderbolt (złącze komputerowe)" en="Thunderbolt (interface)">Thunderbolt</wiki> (PCIe / DisplayPort).</p>
+
+
+<p>Kontrolery poszczególnych interfejsów pamięci masowych, interfejsów zewnętrznych, a także inne układy (kontrolery macierzy dyskowych <wiki en="RAID" pl="RAID">RAID</wiki>, <wiki pl="Karta dźwiękowa" en="Sound card">dźwiękowe</wiki>, <wiki pl="Karta sieciowa" en="Network interface controller">karty sieciowe</wiki>, <wiki pl="Karta graficzna" en="Video card">karty graficzne</wiki>,&nbsp;...) mogą być w postaci osobnych modułów (kart rozszerzeń) lub mogą być zintegrowane z płytą główną. W tym drugim przypadku często przynajmniej część ich funkcjonalności zawarta jest w mostku południowym, jednak mogą też być umieszczone w postaci osobnych układów podłączonych do jakiejś szyny obsługiwanej przez któryś z mostków lub procesor, albo nawet zintegrowane z procesorem (jak ma to niekiedy miejsce w przypadku <wiki pl="Procesor graficzny" en="Graphics processing unit">GPU</wiki>).
+	Praktycznie wszystkie współczesne płyty główne posiadają zintegrowane karty sieciowe <wiki pl="Ethernet">Ethernet</wiki> oraz układy dźwiękowe HD (obsługujące wysokiej jakości dźwięk przestrzenny 7.1). Płyta też zawsze zawiera m.in. podstarzały już Basic Input/Output System (<wiki pl="BIOS">BIOS</wiki>) lub nowszy jego zamiennik <wiki pl="Unified Extensible Firmware Interface" en="Unified Extensible Firmware Interface">UEFI</wiki> odpowiedzialny za start urządzenia, zegar czasu rzeczywistego, kontroler przerwań (informuje w rozsądny sposób - bez konieczności ciągłego odpytywania procesor o wydarzeniach w systemie - naciśnięcie klawisza, sygnały z urządzeń - np. koniec jakiejś operacji ...)</p>
+
+<p>Zobacz w Sieci: <doc url="https://web.archive.org/web/20070221114622/http://www.fuw.edu.pl/~rwys/kis/kis.pdf">Komputer i Sieci na Wydziale Fizyki UW (archive.org)</doc>, <doc url="http://www.hardwarebook.net/" mirror="elektronika/HardwareBook">Hardware Book</doc>, <doc url="http://www.av-info.eu/">AV info</doc>, <wiki pl="b:Podstawowe komponenty komputera">Podstawowe komponenty komputera</wiki>.</p>
+
+
+<subtitle>Inne elementy systemu komputerowego</subtitle>
+<p>Oprócz opisanych powyżej fundamentalnych składników systemu komputerowego oraz najistotniejszych interfejsów w skład systemu wchodzą inne urządzenia takie jak:</p><ul>
+	<li><wiki en="Human interface device">Human interface device</wiki> - <wiki en="Input device">Input device</wiki>: <wiki pl="Mysz komputerowa">mysz</wiki>, <wiki pl="Klawiatura">klawiatura</wiki>, niekiedy także: <wiki pl="Trackball">Trackball</wiki> / <wiki pl="TrackPoint">TrackPoint</wiki> / <wiki pl="Tablet graficzny">tablet</wiki>, <wiki pl="Dżojstik">dżojstik</wiki> / <wiki pl="Gamepad">GamePad</wiki>, itp</li>
+	<li>Human interface device - <wiki en="Output device">Output device</wiki>: <wiki pl="Monitor">monitor</wiki> (dominuje technologia <wiki pl="Wyświetlacz ciekłokrystaliczny" en="Liquid-crystal display">LCD coraz częściej z podświetlaniem LEDowym</wiki>), projektor, <wiki pl="Drukarka">drukarka</wiki> (niekiedy z wbudowanym <wiki pl="Skaner">skanerem</wiki>), <wiki pl="Ploter">ploter</wiki></li>
+	<li>multimedialne: kamery, aparaty cyfrowe, <wiki pl="Głośnik">głośniki</wiki>, <wiki pl="Słuchawki">słuchawki</wiki> (z <wiki pl="Mikrofon">mikrofonem</wiki> lub bez), <wiki pl="Karta telewizyjna">tunery</wiki> <wiki pl="Radio">radiowo</wiki>-<wiki pl="Telewizja cyfrowa">telewizyjne</wiki> (DVB)</li>
+	<li><wiki pl="Napęd optyczny">napędy dysków optycznych</wiki> (<wiki pl="DVD">DVD</wiki>), <wiki pl="Nagrywarka">nagrywarki</wiki> (<wiki pl="CD-R">CD-R</wiki>, <wiki pl="CD-RW">CD-RW</wiki>, <wiki pl="DVD+R">DVD+</wiki>/<wiki pl="DVD-R">-R</wiki>, <wiki pl="DVD+RW">DVD+</wiki>/<wiki pl="DVD-RW">-RW</wiki>), czytniki kart pamięci <wiki pl="Pamięć flash">flash</wiki> (dominującym standardem jest <wiki pl="Secure Digital">Secure Digital</wiki> / <wiki pl="MicroSD">microSD</wiki> (TransFlash))</li>
+	<li><wiki pl="Modem">modemy</wiki></li>
+</ul>
+
+
+<subtitle>Więcej o komputerach</subtitle>
+<p>Osiągnięto chyba już osiągnięto kres podnoszenia zegara na rzecz tworzenia systemów wielordzeniowych. Standardem stała się także zgodna z x86 64-bitowa architektura procesorów opracowana przez AMD (<wiki pl="AMD64">AMD64</wiki>). Istotny jest też wzrost pamięci podręcznej, która będąc znacznie szybsza od <wiki pl="Pamięć operacyjna">RAMu</wiki> (i tak dużo szybszego od dysków twardych) przechowuje najbardziej obecnie potrzebne dane i rozkazy (do ustalenia które używane są różne rodzaje kolejek - idealnie byłoby usuwać to co najdłużej będzie niepotrzebne, ale tak się nie da - nie znamy przyszłości), tym samym przyspieszając przetwarzanie. Na rynku komputerowym jakoś nie mogą przebić się napędy <wiki pl="Blue-Ray">blue-ray</wiki>. Należy niestety stwierdzić iż obecnie brakuje naprawdę wielkopojemnych (rzędu 40% wilkości przeciętnego współczesnego dysku twardego) naśników wymiennych, co rodzi spore problemy/niedogodności przy archiwizacji danych.</p>
+
+<p>Więcej bardziej konkretnych (prędkości, etc.) informacji o poszczególnych interfejsach znaleźć można np. w <wiki pl="Interfejs (urządzenie)">Wikipedii</wiki>. Warto zapoznać się także m.in. z dokumentacją układu umożliwiającego konwersję sygnału VGA (składowe RGB) na sygnał <wiki pl="Composite video">Composite video</wiki> lub <wiki pl="S-Video">S-Video</wiki> - <datasheet id="ad725">AD725</datasheet>. Zobacz także: 
+	<wiki en="Phone connector (audio)">Jack plug</wiki>, <wiki en="Registered jack">Registered jack</wiki>, <wiki en="Modular connector">Modular connector</wiki>,
+	<wiki pl="Bluetooth">Bluetooth</wiki>, <wiki pl="Infrared Data Association">IrDA</wiki>, <wiki pl="S/PDIF" en="S/PDIF">S/PDIF</wiki> / <wiki pl="TOSLINK" en="TOSLINK">TOSLINK</wiki>;
+	<wiki pl="Systemy emisji sygnału telewizyjnego">systemy emisji sygnału telewizyjnego</wiki>, <wiki en="TV aerial plug">IEC_169-2</wiki>;
+	<wiki pl="Kategoria:Sprzęt komputerowy">Kategoria:Sprzęt_komputerowy</wiki>, <wiki pl="Kategoria:Komputery">Kategoria:Komputery</wiki>, <wiki pl="Kategoria:Magistrale">Kategoria:Magistrale</wiki>, <wiki pl="Kategoria:Pamięci komputerowe">Kategoria:Pamięci_komputerowe</wiki>, <wiki pl="Kategoria:Nośniki danych">Kategoria:Nośniki_danych</wiki> (<wiki pl="Kategoria:Dyski optyczne">Kategoria:Dyski_optyczne</wiki>, <wiki pl="Kategoria:Dyski magnetyczne">Kategoria:Dyski_magnetyczne</wiki>).
+</p>
+
+</article>

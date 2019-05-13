@@ -1,0 +1,11 @@
+<article>
+<title>Odbiór danych z UART</title>
+<p>Jest to bardzo prosta implementacja odbiornika UART zrealizowana w formie automatu o 11 stanach. Stany numerowane są od 0 do 10, wyróżnić można następujące grupy stanów:</p>
+<ul>
+	<li>stan 0 - idle, automat oczekuje na bit startu</li>
+	<li>stan 1 - automat oczekuje potwierdzenia że jest to bit startu (możliwe przejście do stanu 2 lub 0)</li>
+	<li>stany 2-9 - odpowiadają odbiorowi kolejnych bitów</li>
+	<li>stan 10 - automat sprawdza czy jest bit stopu, jeżeli tak wystawia informacje że odebrał bajt (sygnał <code>data_ready</code>) oraz odebrany bajt (szyna <code>data_out</code>)</li>
+</ul>
+<p>Za wyjątkiem stanu 1 możliwe jest przejście tylko do stanu następnego (dla stanu 10 stanem następnym jest 0). Przejścia do kolejnych stanów odbywają się w momencie gdy licznik <code>RX_CLK_CNT</code> osiągnie połowę wartości maksymalnej (<code>RX_CLK_DIV - 1</code>) - wtedy jest wystawiany sygnał zezwolenia dla układu czytającego dane i wybierającego stan następny. Wyjątkiem jest przejście ze stanu 0 do stanu 1 które odbywa się na skutek detekcji zera na linii <code>rxd</code>, z przejściem tym związane jest także wyzerowanie i wystartowanie licznika <code>RX_CLK_CNT</code>.</p>
+</article>

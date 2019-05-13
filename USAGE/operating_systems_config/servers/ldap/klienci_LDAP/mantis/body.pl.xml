@@ -1,0 +1,25 @@
+<article>
+<title>Autoryzacja użytkowników Mantis'a w oparciu o LDAP</title>
+
+<p>w Konfiguracji Mantisa w pliku <kbd class="path">config_local.php</kbd>:</p><pre>
+$g_send_reset_password = OFF;
+$g_allow_signup = OFF;
+	
+$g_login_method = LDAP;
+$g_ldap_protocol_version = 3;
+$g_ldap_server = 'ldap://adres.naszego.serwera.ldap';
+$g_ldap_port = '389';
+#$g_ldap_bind_dn = 'cn=admin,<var>dc=subdomena,dc=example,dc=net</var>';
+#$g_ldap_bind_passwd = 'root';
+	
+$g_ldap_root_dn = 'ou=People,<var>dc=subdomena,dc=example,dc=net</var>';
+$g_ldap_group_dn = 'cn=<var>mantisACL</var>,ou=group,<var>dc=subdomena,dc=example,dc=net</var>';
+#$t_ldap_memberuid_field
+#$g_ldap_organization = '';
+#$g_ldap_uid_field = 'uid';
+</pre>
+
+<p>Aby mantis automatycznie tworzył (swoje) konta dla użytkowników autoryzowanych w oparciu o LDAP konieczne jest zaaplikowanie łaty mojego autorstwa dostępnej jako załącznik do stosownego zgłoszenia - <a class="ext" href="http://www.mantisbt.org/bugs/view.php?id=11470">0011470: auto-create mantis account for LDAP users - MantisBT</a>. Jest to niezbędne aby użytkownicy LDAPowi mieli dostęp do mantisa bez ręcznego zakładania dla nich kont w Mantisie.</p>
+
+<p>Aby działała autoryzacja w oparciu o grupie konieczne jest zaaplikowanie łaty mojego autorstwa dostępnej jako załącznik do stosownego zgłoszenia - <a class="ext" href="http://www.mantisbt.org/bugs/view.php?id=11488">0011488: LDAP group based autentication - MantisBT</a>. Alternatywnym rozwiązaniem jest <a class="ext" href="http://www.mantisbt.org/bugs/view.php?id=8471">0008471: Add feature to check required LDAP attribute for authentication - MantisBT</a>.</p>
+</article>

@@ -1,0 +1,19 @@
+<article>
+<title>Redukcja argumentów</title>
+
+<subtitle id="podzialy">podział</subtitle>
+<p>Podziałem nazywamy system zbiorów o rozłącznych blokach, których suma daje cały zbiór. Podział A jest nie większy od B gdy każdy blok A zawiera się w jakimś bloku B.</p>
+
+<p>Iloczyn podziałów (największy podział nie większy od każdego z wchodzących w skład iloczynu) obliczamy grupując elementy w bloki tak aby każdy z bloków zawierał się w jakimś bloku każdego z składników oraz aby były to bloki możliwie największe.<br />
+<eq_latex>A=\{\overline{1,2,3}, \overline{4}\}</eq_latex><br />
+<eq_latex>B=\{\overline{1,2}, \overline{3,4}\}</eq_latex><br />
+<eq_latex>A \cdot B = \{\overline{1,2}, \overline{3}, \overline{4}\}</eq_latex></p>
+
+<p>Ilorazem podziałów nazywamy podział (dzielony) z blokami złożonymi z powiększonych elementów (stanowiących bloki podziału przez który dzielimy).<br />
+<eq_latex>A=\{\overline{1,2,3}, \overline{4}\}</eq_latex><br />
+<eq_latex>B=\{\overline{1,2}, \overline{3}, \overline{4}\}</eq_latex><br />
+<eq_latex>A / B = \{\overline{(1,2),(3)}, \overline{(4)}\}</eq_latex></p>
+
+<subtitle id="procedura">procedura redukcji</subtitle>
+<p>Obliczamy iloczyn podziałów względem <strong>zmiennych niezbędnych</strong> (zmiennych na których różnią się dwa wektory dla których funkcja ma różne wartości i nie mają one innych różnych pozycji) i dzielimy go przez podział względem wyniku zwracanego przez funkcję. Następnie znajdujemy pozycje na których różnią się wektory o numerach należących do różnych elementów składających się na obliczony podział. (dla powyższego przykładu będą to różnice pomiędzy wektorem 3 a 1 i 3 a 2). Ostatecznie obliczamy iloczyn sum tych zmiennych (na którym różnią się wektory). Po przekształceniu go na sumę iloczynów każdy składnik tej sumy wraz z zmiennymi niezbędnymi stanowi zestaw argumentów, oczywiście wybieramy ten najmniejszy&nbsp;...&nbsp;.</p>
+</article>

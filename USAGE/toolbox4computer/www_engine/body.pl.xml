@@ -1,0 +1,71 @@
+<article>
+<title>Silnik WWW</title>
+
+<p>Głównym elementem systemu obsługującego stronę jest zestaw plików składających się na rozbudowany skrypt bashowo-awkowy. Podstawowymi jego elementami są: <id_link id="engine-base.sh">engine-base.sh</id_link>, <id_link id="engine-generate.sh">engine-generate.sh</id_link>, <id_link id="engine-parse_menu.awk">engine-parse_menu.awk</id_link>, <id_link id="engine-parse_in.sh">engine-parse_in.sh</id_link>, <id_link id="engine-parse_out.sh">engine-parse_out.sh</id_link>, <id_link id="engine-config.sh">engine-config.sh</id_link>. Funkcje zawarte w tych plikach odpowiedzialne są za budowanie wynikowego drzewa katalogowego strony wraz z konwersją i generacja plików wchodzących w skład strony. Na poniższym schemacie przedstawione są zależności (przebieg wywołań) najważniejszych z tych funkcji:<br /><img_from_src name="diagram_wywolan_funkcji" type="dia" alt="diagram wywołań funkcji przy generowaniu strony" /></p>
+
+<p>Dodatkowo w skład tego zestawu wchodzi pliki z funkcjami pomocniczymi: <id_link id="engine-edit_help.sh">engine-edit_help.sh</id_link>. Wspomagającą wobec tego zestawu skryptów funkcje pełni skrypt PHP (<id_link id="system.php">system.php</id_link>) odpowiedzialny za konwersję niektórych z elementów strony w locie (w trakcie realizacji odpowiedzi na zapytanie HTTP przez serwer WWW) wraz z plikiem konfiguracyjnym serwera WWW ("httpd.conf") odpowiedzialnym m.in. za przekierowania po zmianach organizacji strony.</p>
+
+<p>Plik silnika jest skryptem bashowym stanowiącym zbiór funkcji odpowiedzialnych za generowanie nagłówków, stopek, informacji o prawach autorskich, konwersje dokumentów, budowanie drzewa katalogowego strony wraz z zawartością oraz archiwizację. Działanie poszczególnych funkcji oraz ich parametry opisane są w komentarzu poprzedzającym deklarację tej funkcji. Istotne elementy funkcji oparte są na wywołaniach sed'a oraz awk'a (m.in. analiza pliku "menu.xml" oraz wywoływanie odpowiednich funkcji generujących). Argumenty skryptu analizowane są w oparciu o skrypt awk i basho'wą konstrukcję <code>switch</code>. Skrypt umożliwia wywołanie dowolnej z funkcji składającej się na niego (parametr -f) oraz wywołanie zbiorów funkcji odpowiedzialnych za generowanie, archiwizację czy też upload strony (np. parametr -b). Zbiory takie wraz z parametrami je wywołującymi deklarowane są w pliku konfiguracyjnym w funkcji <code>run_conf</code>.</p>
+
+<p>Silnik umożliwia także budowanie wersji pdf. Konwersją XML'a na XHTML lub LaTeX oraz obsługą bazy oprogramowania zajmują się arkusze XSL - <id_link id="base.xsl">base.xsl</id_link>, <id_link id="softdb.xsl">softdb.xsl</id_link>.</p>
+
+<p>Wspomagający plik system.php (na serwerze umieszczany jako system.system) odpowiedzialny jest za:</p>
+<ul>
+	<li>obsługę wersji nie korzystającej z vhostów (głównie modyfikacja linków globalnych)</li>
+	<li>generowanie wersji w kodowaniu ASCII (opcja URL: <code>?no_pl</code> lub <code>?no_pl&amp;page=<var>/page/dir</var></code>)</li>
+	<li>obsługę linkowania po ID z przekierowaniem na odpowiednią zakładkę (opcja URL: <code>?id_link=<var>page:id</var></code>)</li>
+	<li>obsługę linkowania po ID bez przekierowania (opcja URL: <code>?no_redirect&amp;id_link=<var>page:id</var></code>)</li>
+</ul>
+
+<p>Głównymi plikami konfiguracyjnymi silnika są: "menu.xml" oraz "OpCode.conf". Dodatkowo niektóre ustawienia umieszczone są także bezpośrednio w "engine.sh" oraz "silnik.php" i "httpd.conf". Plik "OpCode.conf" zawiera zmienne konfiguracyjne silnika strony i musi on być podawany jako pierwszy parametr wywołania skryptu (określa także położenie pliku "menu.xml"). Plik "menu.xml" jest plikiem XML'owym opisującym strukturę generowanej strony (przy pomocy różnych plików menu.xml z tych samych źródeł - w tym celu wywołujemy silnik z alternatywnym plikiem konfiguracyjnym lub tylko plikiem menu `./engine.sh -f build_out_tree "pelna/sciezka/do/alternatywnego/menu.xml"`). Składnia pliku "menu.xml" (w [] podano argumenty opcjonalne):</p>
+<ul>
+	<li><code>&lt;dir name="nazwa_katalogu_out" [title ="Tytuł strony"] [path="sciezka do dokumentu"] [inmenu="0"] [inmap="0"] [menu="..."] [pdf_base_level="x"] ...&gt; ... &lt;/dir&gt;</code><ul>
+		<li>wszystkie pozostałe znacznik muszą być wewnątrz jakiś <code>&lt;dir&gt;...&lt;/dir&gt;</code></li>
+		<li>znacznik powoduje utworzenie katalogu o podanej nazwie w katalogu określonym nadrzędnym <code>&lt;dir /&gt;</code></li>
+		<li>znacznik (jeżeli nie podano <code>inmenu="0"</code> / <code>inmap="0"</code>) powoduje wstawienie pozycji w menu / mapie strony</li>
+		<li>atrybut <code>title</code> okresla tutuł strony który będzie użyty w menu i mapie strony</li>
+		<li>jeżeli podano <code>path</code> to tytuł zostanie pobrany z pierwszego znacznika <code>&lt;title&gt;</code> wskazanego dokumentu, ponaddto system zachowa się tak jakby wystapil znacznik <code>&lt;file&gt;</code> z tym dokumentem (mozliwe jest podanie atrybutów charakterystycznych dla tego znacznika)</li>
+		<li>atrybut <code>menu</code> umozliwia wyłączenie wyświetlania menu na stronie danego katalogu (wartość "no"), tego katalogu i wszystkich jego podkatalogów (wartość "never"), a także wskaznie menu z innego katalogu które ma zostać umieszczone (ścieżka względna względem bierzącego katalogu)</li>
+		<li>atrybut <code>pdf_base_level</code> określa poziom głównego tytułu (w xhtml &lt;h1&gt;) danego artykułu w PDFie, może przyjmować wartości bezwzględne lub postaci +x, domyślnie +1</li>
+	</ul></li>
+	<li><code>&lt;gallery name="nazwa_katalogu_out" path="siezka/do/katalogu/zrodlowego" /&gt;</code> - utworzenie wskazanego katalogu, zawierającego galerii zdjęć utworzoną z podanego katalogu źródłowego</li>
+
+	<li><code>&lt;file path="sciezka/do/wlaczanego/fragmentu/strony/glownej/aktualnego/katalogu" [level="x"] [title="tytuł używany w menu artykułu"] [name="id_uzywane_w_linkowaniu"/&gt;]</code>, path może zawierać zmienne środowiskowe w postaci $ZMIENNA (ale nie ${ZMIENNA}), path może wskazywać ścieżkę bezwzględną, id powinno być unikalne w skali strony, gdy nie zostanie podane utworzone zostanie na podstawie <code>path=""</code>, atrybut <code>level</code> określa poziom tytułu włączanego pliku w pliku wynikowym, zaleca się nie stosowanie manualnego ustawiania id ze względu na problemy z konwencją systemu id_link</li>
+	<li><code>&lt;soft_db name="kategoria" [level="x"] /&gt;</code> - wstawienie spisu oprogramowania z podanej kategorii, atrybut <code>level</code> tak samo jak w <code>&lt;file&gt;</code></li>
+
+	<li><code>&lt;text&gt;</code>dowolny tekst włącznie z znacznikami HTML (mogą być zmiany w spacjach przy znacznikach &lt;&gt; i ") zostanie włączony do strony aktualnego katalogu&lt;/text&gt;</li>
+
+	<li><code>&lt;addtar name="katalog/tarowania" path="lista/sciezek do/tarowanych/plikow rozdzielana spacjami" /&gt;</code></li>
+	<li><code>&lt;tar [show_dir="1"] name="katalog/tarowania=nazwa_archiwum" path="lista/sciezek do/tarowanych/plikow rozdzielana spacjami" /&gt;</code><br />
+		powoduje utworzenie archiwum z podanego katalogu (nazwa archiwum to nazwa_katalogu.tgz,<br />
+		tarowane są też pliki/podkatalogi dodane do tego katalogu wcześniejszymi &lt;addtar /&gt;<br />
+		po tarowaniu katalog jest usuwany, chyba że podano show_dir="1" (wtedy jest przenoszony do katalogu o nazwie określonej przez atrybut name z dodanym na końcu ".notar" umieszczonego w aktualnie budowanym katalogu strony)</li>
+
+	<li><code>&lt;cmd name="polecenie" /></code><br />powoduje wykonanie polecenia w trakcie przetwarzania pliku menu, znaki specjalne (&lt; &gt; &quot;) wchodzące w skład polecenia należy kodować jako encje (odpowiednio: &amp;lt; &amp;gt; &amp;quot;)</li>
+	<li><code>&lt;menutext&gt;jak znacznik text tyle ze tekst zostanie dodany do treści menu&lt;/menutext&gt;</code></li>
+
+	<li><code>&lt;comments [type="TREND|TODO"] text="komentarz znacznikowy, nie może zawierać innych znaczników, zaleca się komentarz umieszczać jako zawartość atrybutu, nie jest to jednak wymagane" /&gt;</code></li>
+	<li><code>&lt;!-- komentarz blokowy, może zawierać znaczniki, nie może zwierać innych komentarzy tego typu --&gt;</code></li>
+</ul>
+
+<p>Pliki konfiguracyjne danego zasobu ("body.info") zrealizowane są w składni shellowej i mogą zawierać następujące deklaracje zmiennych:</p>
+<pre>
+	inhead="${inhead}DODATKOWE INFORMACJE DO NAGLOWKA XHTML"
+	ext="TYP PLIKU ZRODLOWEGO"
+	years="LATA DO NOTY COPYRIGHT"
+	coauthors="LISTA DODATKOWYCH AUTORÓW"
+	copyright_add="${copyright_add} DODATKOWY TEKST COPYRIGHT"
+	copyright_mode="special" # powoduje że nota ustawiona w copyright_add pojawi się zamiast standardowej, coauthors jest wtedy ignorowane
+</pre>
+
+<TODO title="Rozwój silnika strony WWW" intro="Plany rozwojowe silnika:">
+	<li>system słów kluczowych i jakiegoś (hierarchicznego) indeksu</li>
+	<li>tag en="" w znacznikach &lt;wiki /&gt; powodujący dodanie w formie indeksu gornego (en) linku do wikipedii en</li>
+	<li>nowy system generacji paczek deb i udoskonaleniem systemu tar'owania:<ul>
+		<li>w menu.xml tag &lt;deb base="(katalog zawierajacy podstawowy dla generowanej paczki - przedewszystkim podkatalog debian i src)" files="(pliki kopiowane do src)"&gt;, albo stosowne atrybuty w tagu &lt;tar /&gt;</li>
+		<li>być może atrybut add_to_tar w tagu &lt;dir /&gt; aby ograniczyc podwojne generowanie</li>
+		<li>być może generowanie tar'ów w TMP i twarde linkownie w PAGE_DIR</li>
+		<li>przygotowywanie na etapie build_out_tree, a wykańczanie na etapie build_download_dir</li>
+	</ul></li>
+</TODO>
+</article>

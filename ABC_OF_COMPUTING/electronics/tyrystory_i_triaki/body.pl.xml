@@ -1,0 +1,6 @@
+<article>
+<title>Tyrystor, triak</title>
+<p><wiki pl="Tyrystor">tyrystor</wiki> - jest to element o regulowanym elektrycznie stanie przewodzenia, przewodzić on może od anody do katody (tylko w tą stronę), pod warunkiem że zostanie wyzwolony impulsem bramki (dodatnie napięcie względem katody) bądź wzrostem napięcia przyłożonego. W odróżnieniu od tranzystora tyrystor przewodzi również po zaniku napięcia przyłożonego do bramki (przerywa dopiero gdy zostanie przerwane przewodzenie). <wiki pl="Triak">Triak</wiki> jest w zasadzie dwukierunkową wersją tyrystora odpowiadającą funkcjonalnie połączonym antyrównolegle dwóm tyrystorm. W zrozumieniu jak to działa przydany może być schemat zastępczy tyrystora na tranzystorach bipolarnych:</p>
+<p  class="center"><img src="./tyrystor_ozn.png" alt="symbol tyrystora; grafika nie objęta prawami autorskimi - public domain z zasobów Wikipedii PL" /> &nbsp; <img src="./tyrystor.png" alt="struktura warstwowa i schemat zastępczy tyrystora; grafika nie objęta prawami autorskimi - public domain z zasobów Wikipedii PL" /></p>
+
+</article>

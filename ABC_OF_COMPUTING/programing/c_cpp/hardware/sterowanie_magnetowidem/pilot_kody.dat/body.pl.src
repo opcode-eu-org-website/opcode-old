@@ -1,0 +1,125 @@
+//PLAY:
+#define PLAY_S 23832
+#define PLAY_L 15
+
+//ON_OFF:
+#define ON_OFF_S 1429
+#define ON_OFF_L 12
+
+//CH+:
+#define CH_UP_S 1424
+#define CH_UP_L 12
+
+//CH-:
+#define CH_DOWN_S 1425
+#define CH_DOWN_L 12
+
+//PAUSE:
+#define PAUSE_S 23822
+#define PAUSE_L 15
+
+//STOP:
+#define STOP_S 23823
+#define STOP_L 15
+
+//FF:
+#define FF_S 23825
+#define FF_L 15
+
+//REW:
+#define REW_S 23824
+#define REW_L 15
+
+//IFF:
+#define IFF_S 1494
+#define IFF_L 12
+
+//IREW:
+#define IREW_S 1495
+#define IREW_L 12
+
+//REC:
+#define REC_S 1437
+#define REC_L 12
+
+//1:
+#define NUM_1_S 1408
+#define NUM_1_L 12
+
+//2:
+#define NUM_2_S 1409
+#define NUM_2_L 12
+
+//3:
+#define NUM_3_S 1410
+#define NUM_3_L 12
+
+//4:
+#define NUM_4_S 1411
+#define NUM_4_L 12
+
+//5:
+#define NUM_5_S 1412
+#define NUM_5_L 12
+
+//6:
+#define NUM_6_S 1413
+#define NUM_6_L 12
+
+//7:
+#define NUM_7_S 1414
+#define NUM_7_L 15
+
+//8:
+#define NUM_8_S 1415
+#define NUM_8_L 12
+
+//9:
+#define NUM_9_S 1416
+#define NUM_9_L 12
+
+//0:
+#define NUM_0_S 1417
+#define NUM_0_L 12
+
+//DWUCYFROWY:
+#define DWUCYFROWY_S 1418
+#define DWUCYFROWY_L 12
+
+
+//MENU:
+#define MENU_S 1485
+#define MENU_L 12
+
+//TIMER:
+#define TIMER_S 1504
+#define TIMER_L 12
+
+//CLEAR:
+#define CLEAR_S 1507
+#define CLEAR_L 12
+
+//INFO:
+#define INFO_S 1498
+#define INFO_L 12
+
+//SP_LP:
+#define SP_LP_S 1496
+#define SP_LP_L 12
+
+//INPUT_SELECT:
+#define INPUT_SELECT_S 1487
+#define INPUT_SELECT_L 12
+
+//SLOW:
+#define SLOW_S 1443
+#define SLOW_L 12
+
+//x2:
+#define x2_S 1428
+#define x2_L 12
+
+//COUNTER_REMAIN:
+#define COUNTER_REMAIN_S 1473
+#define COUNTER_REMAIN_L 12
+

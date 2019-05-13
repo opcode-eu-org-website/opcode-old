@@ -1,0 +1,49 @@
+<article>
+<title>Ogólna konfiguracja</title>
+
+<p>Zgodnie z unixową tradycją informacje konfiguracyjne przechowywane są w plikach umieszczonych w katalogu <kbd class="path">/etc</kbd>. Do najważniejszych należy zaliczyć:</p>
+<ul>
+	<li><kbd class="path">/etc/sysctl.conf</kbd> - konfiguracja parametrów jądra</li>
+	<li><kbd class="path">/etc/rc.*</kbd> - zarządzanie startem systemu, w szczególności:<ul>
+		<li><kbd class="path">/etc/rc.d/<var>XXX</var>.sh</kbd>, <kbd class="path">/usr/local/etc/rc.d/<var>XXX</var>.sh</kbd> - skrypty startowe (FreeBSD), za ich aktywację odpowiadają wpisy <code><var>XXX</var>_enable</code> w <kbd class="path">/etc/rc.conf</kbd></li>
+		<li><kbd class="path">/etc/rc.conf</kbd> - w OpenBSD pełnia konfiguracji systemu (dość długi skrypt), w FreeBSD oprócz wspomnianego wyboru skryptów startowych także parametry startu takie jak konfiguracja sieci.</li>
+	</ul></li>
+	<li><kbd class="path">/etc/defaults/*</kbd> - w FreeBSD parametry dodatkowe skryptów startowych</li>
+</ul>
+
+<p>Mamy możliwość manualnej konfiguracji sieci poprzez komendy typu ifconfig, route itp, np.:</p>
+<pre># dodatkowy adres IP:
+ifconfig bge0 inet 192.168.24.13 netmask 255.255.0.0 alias
+# w FreeBSD zamiast alias można dać tez add
+
+# ustawienie routingu domyślnego
+route add default 192.168.0.1
+
+# informacja o routingu (odpowiednik linuxowego route -n /ip route sh):
+netstat -rn</pre>
+
+<p>Możliwe jest też bardziej wyrafinowane (niż wrzucenie tych komend do skryptu startowego) skonfigurowanie sieci na stałe, np. w FreeBSD służą do tego opcje w <kbd class="path">/etc/rc.conf</kbd>:</p>
+<pre>ifconfig_bge0="inet 192.168.24.1 netmask 255.255.0.0"
+ifconfig_bge0_alias0="inet 192.168.24.13 netmask 255.255.0.0"
+defaultrouter="192.168.0.1"
+
+# lub dla DHCP na domyślnym interfejsie:
+ifconfig_DEFAULT="DHCP"
+</pre>
+
+<p>Systemy z rodziny *BSD oferują jeden lub kilka (FreeBSD wszystkie trzy) z następujących mechanizmów firewall'a: <wiki en="IPFilter">ipf</wiki>, <wiki en="Ipfirewall">ipfw</wiki>, <wiki en="PF (firewall)">pf</wiki>. Zazwyczaj za realizację funkcji typu NAT, jak i bardziej zaawansowanego routingu odpowiadają osobne daemony. Warto zainteresować się także programem <homepage url="http://www.bsdua.org/netfwd.html">netfwd</homepage>.</p>
+
+<p>W FreeBSD dość istotne parametry można także ustawiać za pomocą <code>sysinstall</code>. W tym miejscu warto zwrócić uwagę drobne różnice składniowe w standardowych komendach - np. ifconfig.</p>
+
+<p>Z innych przydatnych administracyjnych komend FreeBSD należy wspomnieć o:</p>
+<ul>
+	<li><code>systat</code> - różne informacje o systemie (np. z opcją <code>-tcp</code> połączenia TCP)</li>
+	<li><code>sysctl</code> - różne informacje o systemie i ustawienia (odpowiednik systemu <kbd class="path">/proc</kbd>, np. <code>sysctl hw</code> wyświetli informacje o sprzęcie)</li>
+	<li><code>truss</code> - śledzenie wywołań systemowych programu</li>
+	<li><code>pciconf</code> - zarządzenie (w tym listowanie urządzeń) PCI</li>
+	<li><code>usbdevs</code> - zarządzenie (w tym listowanie urządzeń) USC</li>
+	<li><code>atacontrol</code> - zarządzenie (w tym listowanie urządzeń) ATA</li>
+	<li><code>camcontrol</code> - zarządzenie (w tym listowanie urządzeń) SCSI</li>
+</ul>
+
+</article>

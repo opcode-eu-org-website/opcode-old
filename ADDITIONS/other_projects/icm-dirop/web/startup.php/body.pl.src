@@ -1,0 +1,96 @@
+<?php
+/**
+	System prezentacji zasobów DIROP na WWW
+	
+	plik startowy systemu wywoływany poprzez plik definujący jego konfiguracje poprzez include()
+	odpowiedzialny za:
+		selektywne włączanie innych plików systemu,
+		wstępne przetworzenie URL rządania,
+		łączenie z bazą danych
+		wygenerowanie błędu 404 gdy wyświetlana strona nie ustawiła $PAGE_SHOWED na true (nie miała co pokazać)
+**/
+
+
+
+/// rózne stałe i funkcje pomocnicze
+include(DIROP_INCLUDE_DIR_PATH . "miscellaneous.php");
+
+/// funkcje - szablony XHTML
+include(DIROP_INCLUDE_DIR_PATH . "xhtml_template.php");
+
+
+
+/// obsługa wywołań specjalnych - pomoc i formularz kontaktowy
+if (isset($_GET['help'])) {
+	include(DIROP_INCLUDE_DIR_PATH . "sub_pages/help.php");
+	exit;
+} else if (isset($_GET['contact'])) {
+	include(DIROP_INCLUDE_DIR_PATH . "sub_pages/contact.php");
+	exit;
+}
+
+
+
+/// URI rządania (bez hosta i parametrów)
+$arr_tmp = explode("?", urldecode($_SERVER['REQUEST_URI']));
+$REQUEST_URL = $arr_tmp[0];
+
+/// wycinamy rozpoczynającą $REQUEST_URL nazwę skryptu (jeżeli była podana)
+$int_tmp = strlen(DIROP_SCRIPT_PATH);
+if ( substr($REQUEST_URL, 0, $int_tmp) == DIROP_SCRIPT_PATH )
+	$REQUEST_URL = substr($REQUEST_URL, $int_tmp);
+
+
+/// pseudo ścieżki
+$titles = explode("/", $REQUEST_URL); // $titles[$BASE_PATH_LEN + 0] == book, $titles[$BASE_PATH_LEN + 1] == volume, $titles[$BASE_PATH_LEN + 2] == page
+
+/// łączenie z bazą danych
+$baza_danych = pg_connect(CONNECTION_STRING) or error('db_connect');
+
+
+/// wyszukiwanie w książce
+if ($_GET['find_in'] == "fulltext") {
+	include(DIROP_INCLUDE_DIR_PATH . "search_in_book.php");
+/// analiza ścieżek
+} else {
+	include(DIROP_INCLUDE_DIR_PATH . "path_parse.php");
+}
+
+/// wyświetlanie listy, strony lub informacji (strony specjalnej)
+/// każdy z włączanych plików view_*.php generuje _pełną_ stronę XHTM w oparciu o włączone wcześniej szablony
+switch ($MODE) {
+	case MODE_BOOK_LIST:
+		/// wyświetlanie listy książek - opieramy się na $BOOK_LIST
+		include(DIROP_INCLUDE_DIR_PATH . "view_list_books.php");
+		break;
+	case MODE_VOLUME_LIST:
+		/// wyświetlanie list voluminów w serii - opieramy się na $BOOK_LIST
+		include(DIROP_INCLUDE_DIR_PATH . "view_list_volumes.php");
+		break;
+	case MODE_SEARCH:
+		/// wyświetlanie wyników wyszukiwania - opieramy się na $SEARCH_RESULTS i $SEARCH_INFO
+		include(DIROP_INCLUDE_DIR_PATH . "view_search_in_book.php");
+		break;
+	case MODE_PAGE:
+		/// strona książki - opieramy się na $BOOK_INFO i dodatkowych zapytaniach
+		include(DIROP_INCLUDE_DIR_PATH . "view_page.php");
+		break;
+	case MODE_INFO:
+		/// strona informacyjna o voluminie - opieramy się na $BOOK_INFO['dc_...'] i $BOOK_INFO['info_...']
+		include(DIROP_INCLUDE_DIR_PATH . "view_full_info.php");
+		break;
+}
+
+
+/// rozłaczmy z bazą danych
+pg_free_result($result);
+pg_close($baza_danych);
+
+
+/// jeżeli została wypisana zawartość strony kończymy
+if ($PAGE_SHOWED)
+	exit;
+
+/// gdy nie to wypisujemy stronę błędu 404
+include(DIROP_INCLUDE_DIR_PATH . "sub_pages/404.php");
+?>

@@ -1,0 +1,9 @@
+<article>
+<title>Złącze PN – dioda</title>
+<p><wiki pl="Dioda półprzewodnikowa">Dioda półprzewodnikowa</wiki> to w istocie pojedyńcze <wiki pl="Złącze p-n">złącze p-n</wiki>. Niespolaryzowane złącze odpowiada sytuacji pokazanej na poniższym rysunku (kolor zielony). W takim wypadku prąd rekombinacji równoważony jest poprzez prąd generacji.</p>
+<p class="center"><img src="zlacze_pn.svg" alt="złącze PN" /></p>
+
+<p>Polaryzacja w kierunku przewodzenia (gdy <eq>U<sub>P</sub> &gt; U<sub>N</sub></eq>) powoduje obniżenie bariery potencjału (dokładniej to obu barier - pokazanej na rysunku bariery dla elektronów oraz analogicznej bariery dla dziur). Efektem tego jest wzrost prądu rekombinacji, co przy niezmienionym prądzie generacji (zależy on od złącza a nie od bariery potencjału), prowadzi do powstania wypadkowego prądu płynącego przez złącze.</p>
+
+<p>Typową eksponencjalną charakterystykę <eq>I_F(U_F)</eq> złącza PN można przedstawić wzorem <eq_latex>I_F = I_S \exp(U_F/\varphi_{_T} -1)</eq_latex>, gzie <eq_latex>\varphi_{_T} = kT/e</eq_latex> i typowo wynosi około 25mV, natomiast <eq>I<sub>S</sub></eq> zależne jest od typu złącza i konkretnego egzemplarza. Dziki temu możemy zapisać rezystancję dynamiczną diody (związaną z spadkiem napięcia na przewodzącym złączu) jako <eq_latex>r_D = \varphi_{_T}/I_{FQ}</eq_latex>. Tą cechę diody można wykorzystać np. do stworzenia regulowanego dzielnika (regulowane źródło prądu DC + dioda) będącego w stanie zmniejszać amplitudę sygnałów dużej częstości (gdzie nie możemy zastosować potencjometru, gdyż za bardzo zagłuszyłby sygnał).</p>
+</article>

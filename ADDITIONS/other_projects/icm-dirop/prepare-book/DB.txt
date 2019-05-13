@@ -1,0 +1,81 @@
+                                                                                                                              Table "public.book"
+   Column   |          Type          |                     Modifiers                     |                                                                                     Description                                                                                      
+------------+------------------------+---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ book_id    | integer                | not null default nextval('book_id_seq'::regclass) | unikalny numeryczny identyfikator serii
+ title      | character varying(255) |                                                   | pelny TYTUL serii w utf8 (gdy jedno woluminowa == tytul voluminu)
+ url        | character varying(100) |                                                   | URL serii (gdy jedno woluminowa == url voluminu)
+ single_vid | integer                |                                                   | wskazuje volume_id gdy JEDNO WOLUMINOWA, jezeli nieznany to -1, jezeli wielo woluminowa to -2 (domyslnie szukaj tylko w bierzacym woluminie) lub -3 (domyslnie szukaj w calej serii)
+ extra      | text                   |                                                   | dodatkowe informacje, np. o wyszukiwaniu specjalnym
+Indexes:
+    "book_pkey" PRIMARY KEY, btree (book_id)
+    "unique_url" UNIQUE, btree (url)
+Has OIDs: no
+
+                                                                                               Table "public.volume"
+         Column          |          Type          |                      Modifiers                      |                                               Description                                                
+-------------------------+------------------------+-----------------------------------------------------+----------------------------------------------------------------------------------------------------------
+ volume_id               | integer                | not null default nextval('volume_id_seq'::regclass) | unikalny identyfikator volumenu
+ book_id                 | integer                | not null                                            | unikalny identyfikator ksiazki do ktorej nalezy volumin
+ title                   | character varying(255) | not null                                            | pelny TYTUL pozycji w utf8
+ url                     | character varying(100) |                                                     | URL pozycji
+ dc_title                | text                   |                                                     | Dublin Core - tytul (pelen tytul pozycji)
+ dc_creator              | text                   |                                                     | Dublin Core - tworca
+ dc_subject_and_keywords | text                   |                                                     | Dublin Core - temat i slowa kluczowe
+ dc_description          | text                   |                                                     | Dublin Core - opis (pelen opis pozycji)
+ dc_publisher            | text                   |                                                     | Dublin Core - wydawaca
+ dc_date                 | text                   |                                                     | Dublin Core - data wydania
+ info_category           | text                   |                                                     | lista (rozdzielana srednikami) KATEGORII do ktorych zalicza sie pozycja
+ info_status             | integer                |                                                     | status pozycji: -2==oczekujaca na dodanie, -1==ukryta, 0==normalna, 1==nowowsc, ... dalsze w przyszlosci
+ dc_contributor          | text                   |                                                     | Dublin Core - wspoltworca (w znaczeniu redaktor opracowania)
+Indexes:
+    "volume_pkey" PRIMARY KEY, btree (volume_id)
+    "unique_volume_url_in_book" UNIQUE, btree (book_id, url)
+Foreign-key constraints:
+    "volume_book_id_fkey" FOREIGN KEY (book_id) REFERENCES book(book_id) ON DELETE CASCADE
+Has OIDs: no
+
+                                                                                                            Table "public.page"
+  Column   |         Type          |                     Modifiers                     |                                                                    Description                                                                    
+-----------+-----------------------+---------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------
+ page_id   | integer               | not null default nextval('page_id_seq'::regclass) | unikalny identyfikator strony
+ volume_id | integer               | not null                                          | unikalny identyfikator woluminu do ktorej nalezy strona
+ page_no   | integer               |                                                   | kolejny NUMER strony w ramach voluminu == prefix nazwy pliku z skanem (zaczynamy od zera, zwiekszany automatycznie przy wstawianiu, musi by cigy)
+ title     | character varying(50) |                                                   | TYTUL strony (uzywany w URL) / ladny numer (w postaci napisowej, uwzgledniajacy numeracje rzymska itp)
+Indexes:
+    "page_pkey" PRIMARY KEY, btree (page_id)
+    "unique_page_no_in_volume" UNIQUE, btree (volume_id, page_no)
+    "unique_title_in_volume" UNIQUE, btree (volume_id, title)
+Foreign-key constraints:
+    "page_volume_id_fkey" FOREIGN KEY (volume_id) REFERENCES volume(volume_id) ON DELETE CASCADE
+Has OIDs: no
+
+                                                                   Table "public.fulltext"
+   Column    |  Type   |                       Modifiers                       |                                 Description                                  
+-------------+---------+-------------------------------------------------------+------------------------------------------------------------------------------
+ fulltext_id | integer | not null default nextval('fulltext_id_seq'::regclass) | unikalny identyfikator wpisu pelnotekstowego
+ page_id     | integer | not null                                              | unikalny identyfikator strony do ktorej nalezy wpis pelnotekstowy
+ fulltext_s  | text    |                                                       | teskst do wyszukiwan
+ fulltext    | text    |                                                       | teskst do prezentacji
+ type        | integer |                                                       | typ wyszukiwania ktorego dotyczy wpis: NULL => pelnotekstowe, 1 => indeksowe
+Indexes:
+    "fulltext_pkey" PRIMARY KEY, btree (fulltext_id)
+    "fulltext_page_id_index" btree (page_id)
+Foreign-key constraints:
+    "fulltext_page_id_fkey" FOREIGN KEY (page_id) REFERENCES page(page_id) ON DELETE CASCADE
+Has OIDs: no
+
+                                                                                                                                                                                                                                                                                                                                                            Table "public.content"
+   Column   |         Type          |                      Modifiers                       |                                                                                                                                                                                                                                                                                                                   Description                                                                                                                                                                                                                                                                                                                    
+------------+-----------------------+------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ content_id | integer               | not null default nextval('content_id_seq'::regclass) | unikalny identyfikator pozycji spisu tresci
+ title      | text                  | not null                                             | tekst pozycji spisu tresci
+ parent_id  | integer               |                                                      | identyfikator (content_id) rodzica
+ volume_id  | integer               |                                                      | identyfikator woluminu do ktorego nalezy pozycja spisu tresci
+ page_title | character varying(50) |                                                      | tytyl (url) strony na ktora wskazuje pozycja spisu tresci
+ page_no    | integer               |                                                      | numer strony (jest to powielanie informacji z page_title, ale w formie wygodniejszej do odnajdywania bierzacej strony - aktualizowac po zmianach w tabeli page dla volume_id=$VOL za pomoca: UPDATE content AS c SET page_no=NULL WHERE c.volume_id=$VOL; UPDATE content AS c SET page_no=(SELECT page_no FROM page AS p WHERE p.volume_id=c.volume_id AND p.title=c.page_title) WHERE c.volume_id=$VOL; UPDATE content AS c SET page_no=(SELECT page_no FROM content AS c2 WHERE c2.content_id>c.content_id AND c2.page_no IS NOT NULL AND c2.volume_id=c.volume_id ORDER BY c2.content_id LIMIT 1) WHERE page_no IS NULL AND c.volume_id=$VOL;
+Indexes:
+    "content_pkey" PRIMARY KEY, btree (content_id)
+Foreign-key constraints:
+    "content_volume_id_fkey" FOREIGN KEY (volume_id) REFERENCES volume(volume_id) ON DELETE CASCADE
+Has OIDs: no
+

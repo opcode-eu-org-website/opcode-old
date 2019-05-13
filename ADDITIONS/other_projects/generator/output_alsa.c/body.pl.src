@@ -1,0 +1,40 @@
+#include "output_alsa.h"
+
+snd_pcm_t* output_alsa_init(config_t *config) {
+	snd_pcm_t *alsa_dev;
+	int err;
+	
+	/*if (config->rate != 8000 && config->rate != 16000) {
+		fputs("Unsupported bitrate for ALSA", stderr);
+		exit(EXIT_FAILURE);
+	}*/
+	
+	err = snd_pcm_open(&alsa_dev, config->output_device_name, SND_PCM_STREAM_PLAYBACK, 0);
+	if (err < 0) {
+		printf("ERROR (1b): %s\n", snd_strerror(err));
+		exit(EXIT_FAILURE);
+	}
+	err = snd_pcm_set_params(alsa_dev, SND_PCM_FORMAT_S16, SND_PCM_ACCESS_RW_INTERLEAVED, 1, config->rate, 1, 100000);
+	if (err < 0) {
+		printf("ERROR (2b): %s\n", snd_strerror(err));
+		exit(EXIT_FAILURE);
+	}
+	
+	return alsa_dev;
+}
+
+void output_alsa_write(snd_pcm_t* alsa_dev, signal_t *signal) {
+	int err;
+	
+	err = snd_pcm_writei(alsa_dev, signal->data, signal->num_of_sample);
+	if (err < 0) {
+		err = snd_pcm_recover(alsa_dev, err, 0);
+	}
+	if (err < 0) {
+		printf("ERROR (3b): %s\n", snd_strerror(err));
+		exit(EXIT_FAILURE);
+	}
+	if (err < signal->num_of_sample) {
+		puts("error");
+	}
+}

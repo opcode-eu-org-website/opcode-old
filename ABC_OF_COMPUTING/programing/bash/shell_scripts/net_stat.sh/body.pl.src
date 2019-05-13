@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# konfiguracja
+RX_ERR="3072"
+TX_ERR="3072"
+INTERFACE=${1-eth0}
+WAIT_TIME=0.1
+FILENAME="/tmp/spped_$WAIT_TIME_$INTERFACE"
+
+zczytaj() {
+	cat /proc/net/dev /proc/uptime | tr ':' ' ' | awk '
+		$1=="'$INTERFACE'" {
+			printf("NEW_rec=%s; NEW_tran=%s; ", $2, $10)
+		}
+		END {
+			printf("NEW_time=%s;\n", $1)
+		}'
+}
+
+# inicjalizacja i wypisanie nagłówka
+zczytaj > ${FILENAME}_new.txt
+date +"%s,  %Y-%m-%d %H:%M:%S %z (%Z),  %A" --utc
+echo -e "   RX    \t   TX"
+sleep $WAIT_TIME
+
+while true; do
+	# zapamietujemy poprzednie jako stare
+	sed 's%NEW%OLD%g'< ${FILENAME}_new.txt > ${FILENAME}_old.txt
+	
+	# zczytujemy dane do pliku
+	zczytaj > ${FILENAME}_new.txt
+
+	# wczytujemy pliki
+	. ${FILENAME}_new.txt
+	. ${FILENAME}_old.txt
+
+	# dokonujemy obliczeń
+	TIME=`echo "scale=4; $NEW_time-$OLD_time" |bc`
+	RX_SPEED=`echo "scale=4; (8/1024)*($NEW_rec-$OLD_rec)/($TIME)" |bc`
+	TX_SPEED=`echo "scale=4; (8/1024)*($NEW_tran-$OLD_tran)/($TIME)" |bc`
+	
+	# formatujemy wynik
+	RX_SPEED=`env LANG=C printf "%09.4f" $RX_SPEED`
+	TX_SPEED=`env LANG=C printf "%09.4f" $TX_SPEED`
+	
+	# wypisujemy wynik
+	if [ `echo $RX_SPEED| cut -f1 -d.` -gt $RX_ERR -o `echo $TX_SPEED| cut -f1 -d.` -gt $TX_ERR ]; then
+			date +"%s,  %Y-%m-%d %H:%M:%S %z (%Z),  %A" --utc
+			echo -en "$RX_SPEED\t$TX_SPEED\n"
+	else
+			echo -en "$RX_SPEED\t$TX_SPEED\r"
+	fi
+
+	sleep $WAIT_TIME
+done;

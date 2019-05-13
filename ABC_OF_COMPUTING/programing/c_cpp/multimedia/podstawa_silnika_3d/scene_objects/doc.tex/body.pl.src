@@ -1,0 +1,4 @@
+\section{Obiekty sceny}
+Klasy z tej grupy (GeometryObject, TextureObject i LightObject) wykorzystywane są jako elementy składowe (pola) klasy SceneObject wykorzystywanej w systemie zarządzania sceną. Za wyjątkiem GeometryObject, który osiągnął już zadowalającą funkcjonalność wszystkie one są w zasadzie prototypami wymagającymi intensywnego rozwoju.
+
+Struktura VertexPoint ma charakter pomocniczy wobec GeometryObject i jest odpowiedzialna za przechowywanie danych pojedynczego wierzchołka.

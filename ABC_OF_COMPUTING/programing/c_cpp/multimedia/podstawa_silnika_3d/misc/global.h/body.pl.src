@@ -1,0 +1,18 @@
+#ifndef GLOBAL_H
+#define GLOBAL_H
+
+#include "misc/config.h"
+#include "misc/input.h"
+#include "misc/camera.h"
+#include "scene_manager/objectsspace.h"
+
+extern int okno;
+extern Config *config;
+extern Input *input;
+extern Camera *camera;
+extern ObjectsSpace *objects_space;
+extern bool show_debug;
+
+void quit_game();
+
+#endif

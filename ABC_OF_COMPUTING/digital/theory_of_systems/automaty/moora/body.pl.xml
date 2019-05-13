@@ -1,0 +1,11 @@
+<article>
+<title>Moor'a</title>
+<p><wiki pl="Automat Moore'a">Automat Moore'a</wiki> charakteryzuje się powiązaniem wyjść wyłącznie z stanem wewnętrznym automatu, czyli automat będący w określonym stanie zawsze ma takie samo wyjście. Automat możemy opisać przy pomocy <wiki pl="Graf (matematyka)">grafu</wiki>, gdzie wierzchołkami są stany z powiązanymi z nimi wyjściami, a krawędziami są przejścia pomiędzy stanami (wraz z powodującym je sygnałem). Inną formą prezentacji jest tabela przejść/wyjść, gdzie dla każdego stanu podane są stany następne do których automat przechodzi pod wpływem danego wektora oraz wyjście związane z aktualnym stanem:</p>
+
+<table><col /><col /><col /><col /><col />
+	<tr><td>stan obecny</td><td>wektor wejściowy 1</td><td>wektor wejściowy 2</td><td>...</td><td>wyjście</td></tr>
+	<tr><td>A</td><td>B</td><td>A</td><td>...</td><td>10</td></tr>
+	<tr><td>B</td><td>C</td><td>D</td><td>...</td><td>11</td></tr>
+	<tr colspan="5"><td>...</td></tr>
+</table>
+</article>

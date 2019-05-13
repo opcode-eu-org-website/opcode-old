@@ -1,0 +1,38 @@
+#!/bin/bash
+
+grep -v 'CREATE TABLE' ../modbus_reader.sql | awk '
+	$3 == "reg_list" {
+		gr="";
+		for (i=10; i<=NF; i++)
+			gr=sprintf("%s %s", gr, $i);
+	}
+	$3 == "reg_desc" {
+		l="";
+		for (i=6; i<=NF; i++)
+			l=sprintf("%s %s", l, $i);
+		printf ("%s,%s\n", l, gr);
+	}
+' | sed -e 's#, #|#g' -e 's#^ *##g' -e 's#[);"]*##g' > reg_list.txt
+
+cat header.xml > output.xml
+export IFS="|"
+while read REGISTER NAME UNIT GROUP; do
+	if [ "${UNIT:0:1}" = "k" ]; then
+		MULTIPLIER=1
+		FORMULA=1000
+		UNIT=${UNIT:1}
+	else
+		MULTIPLIER=0
+		FORMULA=1
+	fi
+	
+	export REGISTER
+	export NAME
+	export UNIT
+	export MULTIPLIER
+	export FORMULA
+	export GROUP
+	
+	envsubst '${REGISTER} ${NAME} ${UNIT} ${MULTIPLIER} ${FORMULA} ${GROUP}' < item.template.xml >> output.xml
+done < reg_list.txt
+cat footer.xml >> output.xml

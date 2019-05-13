@@ -1,0 +1,44 @@
+#include <linux/soundcard.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <errno.h>
+
+
+#include "output_dsp.h"
+
+int output_dsp_init(config_t *config) {
+	int dsp_dev, param;
+	
+	/*if (config->rate != 8000 && config->rate != 16000) {
+		fputs("Unsupported bitrate for DSP", stderr);
+		exit(EXIT_FAILURE);
+	}*/
+	
+	dsp_dev = open(config->output_device_name, O_WRONLY);
+	if (dsp_dev < 0) {
+		perror("Opening DSP device");
+		exit(EXIT_FAILURE);
+	}
+	
+	param = config->rate;
+	if ( ioctl(dsp_dev, SOUND_PCM_WRITE_RATE, &param) < 0 )
+		perror("ioctl on dsp device error");
+	
+	param = 16;
+	if ( ioctl(dsp_dev, SOUND_PCM_WRITE_BITS, &param) < 0 )
+		perror("ioctl on dsp device error");
+	
+	param = 1;
+	if ( ioctl(dsp_dev, SOUND_PCM_WRITE_CHANNELS, &param) < 0 )
+		perror("ioctl on dsp device error");
+	
+	return dsp_dev;
+}
+
+void output_dsp_write(int dsp_dev, signal_t *signal) {
+	if ( write(dsp_dev, signal->data, 2*signal->num_of_sample) < 2*signal->num_of_sample )
+		fputs("error in write to dsp", stderr);
+}
+

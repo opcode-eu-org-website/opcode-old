@@ -1,0 +1,4 @@
+<article>
+<title>Użytkownicy</title>
+<p>Konta użytkowników konfiguruje się w standardowych <kbd class="path">/etc/passwd</kbd> <kbd class="path">/etc/shadow</kbd> <kbd class="path">/etc/group</kbd> (które możemy zarządzać bezpośrednio bądź poprzez komendy typu <code>useradd</code>). Natomiast system ten posiada mechanizm "ról" pozwalający na nadanie pewnym użytkownikom większych praw (coś na kształt sudo) - mechanizm ten konfigurowany jest w pliku <kbd class="path">/etc/user_attr</kbd>, który możemy zarządzać także przy pomocy komendy <code>roleadd</code> i pokrewnych.</p>
+</article>

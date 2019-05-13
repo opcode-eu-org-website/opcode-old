@@ -1,0 +1,13 @@
+#ifndef _OUTPUT_UC_H
+#define _OUTPUT_UC_H
+
+#define tty_device_speed B115200  // 115200
+
+#include "config.h"
+#include "signal.h"
+
+int output_uC_init(config_t *config);
+
+void output_uC_write(int tty_dev, signal_t *signal);
+
+#endif

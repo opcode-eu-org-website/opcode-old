@@ -1,0 +1,233 @@
+<?php 
+/**
+ * skrypt służy do umieszczania wpisów informacyjnych w bazie danych
+ * oraz wyświetlania zaakceptowanych wpisów, obsługuje także akceptację wpisów
+ *
+ * zawsze wyświetlany jest minimum 1 wpis (o najbliższej dacie),
+ * wyświetlane są wszystkie w pisy o dacie w przeciągu najbliższych 24 h
+ * wpisy o dacie o 1 godzinie w przeszłość są automatycznie kasowane
+ *
+ * system opracowany dla portalu http://emergency.gry-online.pl
+ *
+**/
+?>
+
+<html>
+<head><title>system informacji o serwerach gry</title></head>
+<body>
+
+<?php
+
+/// protrect for sql injection
+function protect_sql($sql) {
+	return strtr($sql, ";'\"()", "_____");
+}
+
+
+/** konfiguracja bazy danych **/
+
+$db_host = "localhost";
+$db_database="";
+$db_user="";
+$db_pass="";
+
+$URL_SKRYPTU="";
+
+
+/** INSTALACJA BAZY DANYCH
+
+CREATE TABLE `serwery` (
+ `SID`  INT NOT NULL AUTO_INCREMENT,
+ `name` VARCHAR( 55 ) NOT NULL ,
+ `nick` VARCHAR( 55 ) NOT NULL ,
+ `mods` VARCHAR( 255 ) ,
+ `time` INT NOT NULL ,
+ `accept` INT(1) NOT NULL,
+
+ PRIMARY KEY ( `DID` )
+);
+
+**/
+
+function err_info($sql) {
+    return "<p>" . mysql_error() . "<br />Błąd spowodowany poleceniem SQL:<br />" . $sql . "</p>";
+}
+
+require_once("./inc/functions.inc.php");
+function is_authorised() {
+	//return check_login($_SESSION['username'], $_SESSION['md5_password']);
+	return check_login($_COOKIE["username"], $_COOKIE["md5_password"]);
+}
+
+///
+/// dodawanie nowego wpisu
+///
+if ($_POST["action"]=="add") {
+	mysql_connect($db_host, $db_user, $db_pass);
+	mysql_select_db($db_database);
+	
+	$time = $_POST["date"] + $_POST["hour"] * 3600 + $_POST["minuts"] * 60;
+
+	$sql = "INSERT INTO serwery SET name='" . protect_sql($_POST["name"]) . "' , nick='" . protect_sql($_POST["nick"]) . "' , mods='" . protect_sql($_POST["mods"]) . "' , time='" . $time . "', accept='0'";
+	$query = mysql_db_query($db_database, $sql) or die(err_info($sql));
+	echo "<p>Informacja została pomyślnie dodana do bazy. Po zatwierdzeniu jej przez zespół redakcyjny ukaże się na stronie.<br /><br /><a href=\"$URL_SKRYPTU\">powrót do strony głównej</a></p>";
+
+///
+/// formularz dodawania
+///
+} else if ($_GET["action"]=="add_form") {
+	?>
+	<p>Wpisz informacje o stawianym serwerze:</p>
+	<form method="post" action="">
+		<input type="hidden" name="action" value="add" />
+		<p>Nazwa serwera: <input type="text" name="name" size="25" maxlength="25" />
+			<br />Nick założyciela: <input type="text" name="nick" size="25" maxlength="25" />
+			
+			<br />Wykorzystywane mody: <input type="text" name="mods" size="25" maxlength="250" />
+			
+			<br />Data: <select name="date"> <?php
+			$czas = time();
+			$dzien = mktime (0, 0, 0, date('m', $czas), date('d', $czas), date('Y', $czas));
+			for ($i=0; $i<14; $i++) {
+				$czas_new = $dzien + 86400 * $i;
+				echo "				<option value=\"$czas_new\">" . date('Y-m-d', $czas_new) . "</option>\n";
+			}
+			?></select>
+			<br />Godzina: <select name="hour">
+				<option value="0">0</option>
+				<option value="1">01</option>
+				<option value="2">02</option>
+				<option value="3">03</option>
+				<option value="4">04</option>
+				<option value="5">05</option>
+				<option value="6">06</option>
+				<option value="7">07</option>
+				<option value="8">08</option>
+				<option value="9">09</option>
+				<option value="10">10</option>
+				<option value="11">11</option>
+				<option value="12">12</option>
+				<option value="13">13</option>
+				<option value="14">14</option>
+				<option value="15">15</option>
+				<option value="16">16</option>
+				<option value="17">17</option>
+				<option value="18">18</option>
+				<option value="19">19</option>
+				<option value="20">20</option>
+				<option value="21">21</option>
+				<option value="22">22</option>
+				<option value="23">23</option>
+			</select> Minuty: <select name="minuts">
+				<option value="0">00</option>
+				<option value="5">05</option>
+				<option value="10">10</option>
+				<option value="15">15</option>
+				<option value="20">20</option>
+				<option value="25">25</option>
+				<option value="30">30</option>
+				<option value="35">35</option>
+				<option value="40">40</option>
+				<option value="45">45</option>
+				<option value="50">50</option>
+				<option value="55">55</option>
+				<option value="60">60</option>
+			</select>
+			
+			<br /><br /><input type="submit" value="Dodaj" />
+		</p>
+	</form>
+	<?php
+
+///
+/// lista wpisów do moderacji
+///
+} else if ($_GET["action"]=="show_moderate" && is_authorised()) {
+	mysql_connect($db_host, $db_user, $db_pass);
+	mysql_select_db($db_database);
+	
+	echo "<h2>Wpisy czekające na zaakceptowanie</h2>";
+	$sql = "SELECT * FROM serwery WHERE accept='0'";
+	$query = mysql_db_query($db_database, $sql) or die(err_info($sql));
+	while ($serwer = mysql_fetch_array($query)) {
+		echo "<p>Nazwa: " . $serwer["name"] . "<br>Nick: " . $serwer["nick"];
+		echo "<br>Mody: " . $serwer["mods"] . "<br>Data: " . date('Y-m-d H:i', $serwer["time"]);;
+		echo "<a href=\"?action=accept&amp;SID=" . $serwer["SID"] . "\">Zaakceptuj</a>";
+		echo "<a href=\"?action=delete&amp;SID=" . $serwer["SID"] . "\">Usuń</a>";
+	}
+	
+	echo "<h2>Wpisy zaakceptowane</h2>";
+	$sql = "SELECT * FROM serwery WHERE accept='1'";
+	$query = mysql_db_query($db_database, $sql) or die(err_info($sql));
+	while ($serwer = mysql_fetch_array($query)) {
+		echo "<p>Nazwa: " . $serwer["name"] . "<br>Nick: " . $serwer["nick"];
+		echo "<br>Mody: " . $serwer["mods"] . "<br>Data: " . date('Y-m-d H:i', $serwer["time"]);;
+		echo "<a href=\"?action=delete&amp;SID=" . $serwer["SID"] . "\">Usuń</a>";
+	}
+
+
+///
+/// akceptacja wpisu
+///
+} else if ($_GET["action"]=="accept" && is_authorised()) {
+	mysql_connect($db_host, $db_user, $db_pass);
+	mysql_select_db($db_database);
+	
+	$sql = "UPDATE serwery SET accept='1' WHERE SID='" . $_GET["SID"] . "'";
+	$query = mysql_db_query($db_database, $sql) or die(err_info($sql));
+	echo "<p>Zaakceptowany<br /><br /><a href=\"?action=show_moderate\">powrót do listy</a></p>";
+
+///
+/// potwierdzenie usuniecia wpisu
+///
+} else if ($_GET["action"]=="delete" && is_authorised()) {
+	echo "<h2>Na pewno usunąć?</h2><p><a href=\"?action=delete_yes&amp;SID=" . $_GET["SID"] . "\">TAK</a><br /><br /><a href=\"?action=show_moderate\">NIE</a></p>";
+
+///
+/// usuniecie wpisu
+///
+} else if ($_GET["action"]=="delete_yes" && is_authorised()) {
+	mysql_connect($db_host, $db_user, $db_pass);
+	mysql_select_db($db_database);
+	
+	$sql = "DELETE FROM serwery WHERE SID='" . $_GET["SID"] . "'";
+	$query = mysql_db_query($db_database, $sql) or die(err_info($sql));
+	echo "<p>Usunięty<br /><br /><a href=\"?action=show_moderate\">powrót do listy</a></p>";
+
+
+///
+/// wyświetlane wpisy
+///
+} else {
+	mysql_connect($db_host, $db_user, $db_pass);
+	mysql_select_db($db_database);
+	
+	$czas_del = time() - 3600;
+	$czas_show = time() + 86400;
+	$time_show2 = time() + 1209600;
+	$i=0; $ctrl=0;
+	
+	$sql = "SELECT * FROM serwery WHERE accept='1' ORDER BY time DESC";
+	$query = mysql_db_query($db_database, $sql) or die(err_info($sql));
+	while ($serwer = mysql_fetch_array($query)) {
+		$i++;
+		/// jeżeli założony godzinę temu usuwamy
+		if ($serwer["time"] < $czas_del) {
+			$sql2 = "DELETE FROM serwery WHERE SID='" . $serwer["SID"] . "'";
+			$query2 = mysql_db_query($db_database, $sql2) or die(err_info($sql2));
+		
+		/// Pokazujemy najbliższy lub wszystkie z najbliższych 24 godzin
+		} else if ( $serwer["time"] < $czas_show || ($i == 1 && $serwer["time"] < $time_show2 ) {
+			echo "<p>Nazwa: " . $serwer["name"] . "<br>Nick: " . $serwer["nick"];
+			echo "<br>Mody: " . $serwer["mods"] . "<br>Data: " . date('Y-m-d H:i', $serwer["time"]);
+			$ctrl=1;
+		}
+	}
+	if ($ctrl==0) {
+		echo "<p>brak serwerow w przeciagu najblizszych 1209600 sekund ;-)</p>"
+	}
+}
+
+?>
+</body>
+</html>

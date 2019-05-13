@@ -1,0 +1,41 @@
+<article>
+<title>Multimedia</title>
+<p>Dźwięk w Linuxie obsługiwany jest najczęściej przez sterowniki Alsa lub OSS - w obu przypadkach dostępne jest urządzenie <kbd class="path">/dev/dsp</kbd> jednak w przypadku Alsa nie jest ono natywnym sposobem obsługi tego sterownika. Często także powyżej sterownika funkcjonują serwery dźwięku takie jak "jack" lub "arts"</p>
+<p>Z kolei <strong>SDL</strong> jest biblioteka multimedialna, obsługująca grafikę 2D i 3D, dźwięk, urządzenia wejścia/wyjścia. W zastosowaniach graficznych wykorzystuje <strong>OpenGL</strong> (niskopoziomowy interfejs graficzny). OpenGL posiada również własne wyżej poziomowe biblioteki (GLU, GLUT, GLUI, ...). Można powiedzieć że SDL stanowi swego rodzaju wieloplatformowy odpowiednik dla DirectX (OpenGL jest rozwiązaniem konkurencyjnym dla Direct3D).</p>
+<p>W tym miejscu warto też wspomnieć że istnieją również wyżej poziomowe, wieloplatformowe biblioteki wyspecjalizowane w tworzeniu gier, takie jak: <strong>Allegro</strong> (grafika 2D), <strong>Crystal Space</strong> (grafika 3D), ... .</p>
+<ul>
+	<li><id_link id="c_cpp:multimedia:dsp.c">dsp.c</id_link> - program kopiujący dane z /dev/dsp do serwera artsd (kiedys kopiowal do /dev/dsp); demonstruje korzystanie z tego pliku oraz rozwiązuje problem oglądania TV z tunera z wykorzystaniem (zintegrowanych) kart dźwiękowych opartych na CMI9880</li>
+	<li><id_link id="c_cpp:multimedia:alsa_copy.c">alsa_copy.c</id_link> - program o funkcjonalności dsp.c tyleże korzystający wyłącznie z biblioteki asound (ALSA) a zatem umożliwiający korzystanie z dmix</li>
+	<li><id_link id="c_cpp:multimedia:openal.c">openal.c</id_link> - program prezentuje podstawy korzystania z biblioteki OpenAL służącej do implementacji dźwięku (przestrzennego) w multimediach</li>
+	
+	<li><id_link id="c_cpp:multimedia:pokaz_slajdow_sdl.c">pokaz_slajdow_sdl.c</id_link> - program demonstrujący korzystanie z SDL (wyświetlanie bitmap, obsługa zdarzeń - klawiatura i tworzenie własnych, timery, czyszczenie ekranu)</li>
+	<li><id_link id="c_cpp:multimedia:rysownik_sdl.c">rysownik_sdl.c</id_link> - program demonstrujący korzystanie z SDL (rysowanie pikseli, obsługa zdarzeń - klawiatura i mysz, zapis obrazu do bitmapy)</li>
+	<li><id_link id="c_cpp:multimedia:read_png.c">read_png.c</id_link> - program demonstrujący korzystanie z libPNG do wczytywania obrazkow</li>
+	
+	<li><id_link id="c_cpp:multimedia:obraz_kontrolny.cpp">obraz_kontrolny.cpp</id_link> - program generujący z wykorzystaniem SDL obraz kontrolny (umieszcza stosowne napisy na podanym pliku graficznym), domonstruje również użycie LibVLC jako wyjścia obrazu (zobacz w sieci: <doc url="http://wiki.videolan.org/LibVLC_SampleCode_SDL">przykład użycia libvlc jako wejścia obrazu</doc>), zamieszczam też <a class="int" href="./obrazy_kontrolne.tar.gz">archiwum</a> z obrazami kontrolnymi do wykorzystania w tym programie.</li>
+	
+	<li>zamieszczam zestaw przykładowych programów obrazujących korzystanie z OpenGL:<ul>
+		<li>kod odpowiedzialny za inicjalizację okana OpenGL - pokazujący różnice w korzystaniu z glut, sdl i glx <id_link id="c_cpp:multimedia:opengl-main-glut_sdl_glx.c">opengl-main-glut_sdl_glx.c</id_link> lub dający więcej funkcjonalności ale tylko z wykorzystaniem glut <id_link id="c_cpp:multimedia:opengl-main-glut.c">opengl-main-glut.c</id_link></li>
+		<li>kod odpowiedzialny za inicjalizację OpenGL - <id_link id="c_cpp:multimedia:opengl-init.c">opengl-init.c</id_link></li>
+		<li>kod odpowiedzialny za rysowanie sceny OpenGL - <id_link id="c_cpp:multimedia:opengl-draw-simple.c">opengl-draw-simple.c</id_link> (podstawy) lub <id_link id="c_cpp:multimedia:opengl-draw-vertex.c">opengl-draw-vertex.c</id_link> (obsługa bardziej zaawansowanych metod rysowanie) lub <id_link id="c_cpp:multimedia:opengl-draw-light.c">opengl-draw-light.c</id_link> (obsługa świateł)</li>
+		<li>kod odpowiedzialny za ładowanie shaderów z wykorzystaniem mmap <id_link id="c_cpp:multimedia:opengl-load_shader.c">opengl-load_shader.c</id_link></li>
+	</ul>Zobacz także mój projekt <id_link id="podstawa_silnika_3d">podstawa silnika 3d</id_link>.</li>
+</ul>
+
+<p>Zobacz w Sieci:
+	<doc url="http://januszg.hg.pl/opengl/">Strona domowa Janusza Ganczarskiego - OpenGL</doc>,
+	<doc url="http://www.clockworkcoders.com/oglsl/">OpenGL Shading Language Tutorials and Demos</doc>,
+	<doc url="http://www.lighthouse3d.com/opengl/glsl/">GLSL Tutorial</doc>,
+	<doc url="http://www.dimmension3.spine.pl/modules.php?name=Tutorials&amp;wtd=show_cat&amp;cat=opengl">Grafika 3D - OpenGL</doc>,
+	<doc url="http://www.spacesimulator.net/tutorials.html">Tutoriale do OpenGL na spacesimulator.net</doc>,
+	<doc url="http://4programmers.net/Z_pogranicza/Kurs_programowania_GLUT">Kurs programowania GLUT</doc>,
+	<doc url="http://forum.gamedev.pl/index.php/topic,754.0.html">Jaka metoda generowania dynamicznych cieni?</doc>,
+	<doc url="http://www.opengl.org/documentation/specs/">oficjalna dokumentacja OpenGL</doc> (man pages, specifications, ... for OpenGL, GLUT, GLU, GLX, ...),
+	<wiki pl="Shader">Shader</wiki>,
+	<wiki pl="OpenGL">Opengl</wiki>,
+	<wiki pl="OpenGL Utility Toolkit">GLUT</wiki>,
+	<wiki en="b:GLSL Programming" pl="OpenGL Shading Language">OpenGL Shading Language</wiki>,
+	<wiki pl="b:OpenGL Shading Language">OpenGL Shading Language @ Wikibooks</wiki>,
+	<wiki en="OpenCL">OpenCL</wiki>.
+Interesujące jest także wykorzystanie dostępnych na wolnych licencjach bibliotek / silników obsługi grafiki trójwymiarowej, takich jak <wiki pl="OGRE">OGRE</wiki>, <wiki pl="Irrlicht">Irrlicht</wiki>, <wiki pl="Crystal Space">Crystal Space</wiki>. Zobacz w Sieci: <doc url="http://kursy.ddt.pl/?TutorialId=12">Kurs Irrlicht, C++</doc>, <wiki pl="b:OGRE">OGRE @ Wikibooks</wiki>.</p>
+</article>

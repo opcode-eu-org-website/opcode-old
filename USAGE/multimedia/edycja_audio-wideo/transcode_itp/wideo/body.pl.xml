@@ -1,0 +1,19 @@
+<article>
+<title>wideo</title>
+	<p><strong>docinanie plików wideo:</strong><br />
+		<code>avisplit -i <samp>IN.avi</samp> -o <samp>OUT.avi</samp> -t 00:05:30-43175</code>
+	</p>
+	<p><strong>odzyskanie informacji o długosci filmu:</strong><br />
+		<code>aviindex -i <samp>broken.avi</samp> -n -o <samp>broken.idx</samp>; avimerge -x <samp>broken.idx</samp> -i <samp>broken.avi</samp> -o <samp>fixed.avi</samp></code><br />
+		w przypadku problemow z audio warto z orginalu wydzielic sciezke audio a nastepnie polaczyc poprawione video i wydzielone uprzednio audio
+	</p>
+	<p><strong>kodowanie xvid:</strong><br />
+		pierwszy przebieg:<br />
+		<code>transcode -i <samp>IN.avi</samp> -o <samp>TMP.avi</samp> -y xvid4 -R 1</code><br />
+		pierwdrugi przebieg:<br />
+		<code>transcode -i <samp>TMP.avi</samp> -o <samp>OUT.avi</samp> -y xvid4 -R 2 -w 3500,25,100 -avi_limit 4000</code>
+	</p>
+	<p><strong>konwersja plików .ts (zapisu transmisji DVB) na .mp4</strong> (potrafi naprawić identyfikację kanału oraz przwijanie):<br />
+		<code>avconv -i <samp>IN.ts</samp> -codec copy <samp>OUT.mp4</samp></code>
+	</p>
+</article>

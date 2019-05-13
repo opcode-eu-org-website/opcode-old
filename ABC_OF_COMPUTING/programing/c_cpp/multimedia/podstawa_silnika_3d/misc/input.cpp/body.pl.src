@@ -1,0 +1,103 @@
+#include <GL/glut.h>
+#include "input.h"
+#include "global.h"
+
+int Input::last_x;
+int Input::last_y;
+
+void Input::init_glut() {
+	last_x=0;
+	last_y=0;
+	
+	// określenie funkcji wywoływanej po naciśnięciu przycisku myszy
+	glutMouseFunc(&mouse_click_event);
+	// określenie funkcji wywoływanej przy poruszeniu myszki z wciśniętym przyciskiem
+	glutMotionFunc(&mouse_move1_event);
+	// określenie funkcji wywoływanej przy poruszeniu myszki bezz wciśniętego przycisku
+	glutPassiveMotionFunc(&mouse_move2_event);
+	// określenie funkcji wywoływanej po naciśnięciu przycisku na klawiaturze
+	glutKeyboardFunc(&keyboard_event);
+	
+	// niewidoczny kursor
+	glutSetCursor(GLUT_CURSOR_NONE);
+	glutWarpPointer(glutGet( GLUT_WINDOW_WIDTH )/2, glutGet( GLUT_WINDOW_HEIGHT )/2);
+}
+
+void Input::mouse_click_event(int key, int state, int x, int y) {
+	if (key == 3) { // kółko w górę
+		if (camera->zoom > config->getf(Config::MIN_ZOOM)) {
+			camera->zoom -= config->getf(Config::STEP_ZOOM);
+			camera->change();
+		}
+	} else if (key == 4) { // kółko w dół
+		if (camera->zoom < config->getf(Config::MAX_ZOOM)) {
+			camera->zoom += config->getf(Config::STEP_ZOOM);
+			camera->change();
+		}
+	} else {
+		last_x=x;
+		last_y=y;
+	}
+	// UWAGA: wartości przycisków odpowiadających ruchowi kółka
+	//        nie znalazłem w dokumentacji a odczytałem doświadczalnie
+	//         - mogą się różnić pomiędzy implementacjami
+}
+
+void Input::mouse_move1_event(int x,int y) {
+	// dla testow - ruch z wcsnietym klawiszem
+	camera->rot_xz -= (x-last_x)*config->getf(Config::STEP_ROTATE);
+	camera->rot_yz -= (y-last_y)*config->getf(Config::STEP_ROTATE);
+	camera->change();
+	last_x=x;
+	last_y=y;
+}
+
+void Input::mouse_move2_event(int x,int y) {
+	float center_x = glutGet( GLUT_WINDOW_WIDTH )/2;
+	float center_y = glutGet( GLUT_WINDOW_HEIGHT )/2;
+	if (center_x != x || center_y != y ) {
+		camera->rot_xz += (x-center_x)*config->getf(Config::STEP_ROTATE);
+		float new_rot_yz = camera->rot_yz - (y-center_y)*config->getf(Config::STEP_ROTATE);
+		if (new_rot_yz < 70 && new_rot_yz > -20)
+			camera->rot_yz = new_rot_yz;
+		camera->change();
+		glutWarpPointer(center_x, center_y);
+	}
+}
+
+void Input::keyboard_event(unsigned char key, int x, int y) {
+	if (key == config->geti(Config::KEY_EXIT)) {
+		quit_game();
+	/// sterowanie podstawowe - ruch w kierunku patrzenia
+	} else if (key == config->geti(Config::KEY_FORWARD)) {
+		camera->move_forward(  config->getf(Config::STEP_MOVE_Z) );
+	} else if (key == config->geti(Config::KEY_BACKWARD)) {
+		camera->move_forward( -config->getf(Config::STEP_MOVE_Z) );
+	} else if (key == config->geti(Config::KEY_LEFT)) {
+		camera->move_laterally(  config->getf(Config::STEP_MOVE_X) );
+	} else if (key == config->geti(Config::KEY_RIGHT)) {
+		camera->move_laterally( -config->getf(Config::STEP_MOVE_X) );
+	/// sterowanie specjalne - bezpośrednie odziaływanie na współrzędne swiata
+	} else if (key == '8') {
+		camera->z += config->getf(Config::STEP_MOVE_Z);
+		camera->change();
+	} else if (key == '2') {
+		camera->z -= config->getf(Config::STEP_MOVE_Z);
+		camera->change();
+	} else if (key == '4') {
+		camera->x += config->getf(Config::STEP_MOVE_X);
+		camera->change();
+	} else if (key == '6') {
+		camera->x -= config->getf(Config::STEP_MOVE_X);
+		camera->change();
+	} else if (key == '3') {
+		camera->y += config->getf(Config::STEP_MOVE_Y);
+		camera->change();
+	} else if (key == '9') {
+		camera->y -= config->getf(Config::STEP_MOVE_Y);
+		camera->change();
+	/// wczenie wyczenie wyswietlania informacji dodatkowych
+	} else if (key == '0') {
+		show_debug = ! show_debug;
+	}
+}

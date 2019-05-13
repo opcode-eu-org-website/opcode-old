@@ -1,0 +1,12 @@
+<article>
+<title>Linki i moje projekty</title>
+
+<p>Zachęcam także do zapoznania się z moimi projektami związanymi z programowaniem mikrokontrolerów: <id_link id="nutos_IM_notify">powiadamiacz o IM dla jabberd2 (AVR NutOS)</id_link>, <id_link id="sterownik_ogrzewania">sterownik ogrzewania (AVR)</id_link>, <id_link id="sterownik_oswietlenia">sterownik oświetlenia (AVR)</id_link>, <id_link id="centralka_nie_tylko_alarmowa">centralka alarmowa</id_link>.</p>
+
+<p>Zobacz w Sieci:
+	<doc url="http://atmega32.republika.pl/">programowanie mikrokontrolera ATmega32</doc> (m.in. opis liczników, komparatora, ...),
+	<doc url="http://radzio.dxp.pl/">radzio.dxp.pl</doc>, <doc url="http://mikrokontrolery.net/">mikrokontrolery.net</doc>,
+	<doc url="http://www.pg.gda.pl/~zbczaja/">Zbigniew Czaja - strona domowa</doc>,
+	<homepage url="http://www.linusakesson.net/scene/craft/">Craft</homepage> (gra wideo na ATmega88),
+	<doc url="http://www.elektroda.pl/rtvforum/viewtopic.php?t=508366">Zablokowany ATMEGA8</doc>.</p>
+</article>

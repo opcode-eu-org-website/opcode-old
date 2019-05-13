@@ -1,0 +1,99 @@
+/*
+ * plik ma na celu prezentację ciekawych zagadnień z programowania w języku C / C++
+ * prezentuje metody komunikacji sieciowej (TCP/IP)
+ *
+ * jest to bardzo prosty program który komunikuje się z serwerem Jabber
+ * (więcej info o Jabber'ze: www.jabber.org i www.jabberpl.org)
+ * zasadniczo powstał on w celu wysyłania powiadomień o nowej poczcie
+ * przy takim wykorzystaniu oczywiście fragment odpowiedzialny za odbiór odpowiedzi
+ * jest bezurzyteczny, ale został zamieszczony w celach edukacyjnych
+ *
+ */
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <netinet/ip.h>
+
+#include <unistd.h>
+
+#include <string>
+#include <sstream>
+
+#include <stdio.h>
+
+#define _NUMER_PORTU_ 5222
+#define _ADRES_SERWERA_ "jabber.domena"
+#define _MAIL_USER_ "uzytkownik"
+#define _MAIL_USER_PASSWORD_ "secret1"
+
+int main(int argv, char *args[]) {
+	// pierwszy parametr - JID
+	// drugi parametr - wiadomość
+
+	// otwieramy gniazdo
+	int sockfd = socket (PF_INET, SOCK_STREAM, 0);
+	struct sockaddr_in adres;
+		adres.sin_family = AF_INET;
+		adres.sin_port = htons (_NUMER_PORTU_);
+	struct hostent *serwer = gethostbyname (_ADRES_SERWERA_); // rozwiązujemy adres serwera
+		memcpy ((void *) &adres.sin_addr.s_addr, (void*) serwer->h_addr, serwer->h_length);
+
+	// łączymy z serwerem
+	connect (sockfd, (struct sockaddr *) &adres, sizeof (adres));
+
+	// tworzymy wiadomosc
+	for (unsigned int i = 0; i<strlen(args[2]); i++) {
+		// w tej pętli zamienimy znaczki < i > na inne gdyz ich wystepownie w XML'u nie powinno mieć miejsca
+		if (args[2][i] == '<') args[2][i] = '[';
+		if (args[2][i] == '>') args[2][i] = ']';
+	}
+	std::ostringstream message; // to wygodny sposób obsługi napisów
+
+	message << "<stream:stream to='" << _ADRES_SERWERA_;
+	message << "' xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>";
+	message << "<iq id='auth' type='set'><query xmlns='jabber:iq:auth'><username>";
+	message << _MAIL_USER_ << "</username>" << "<password>" << _MAIL_USER_PASSWORD_;
+	message << "</password><resource>system</resource></query></iq>";
+	message << "<message to='" << args[1] << "'><body>" << args[2] << "</body></message>";
+	message.put(0);
+	//printf("%s", (message.str()).c_str());
+
+	// wysylamy dane
+	send(sockfd, (message.str()).c_str(), (message.str()).length()-1, 0);
+
+
+	// ODBIOR DANYCH
+	// bardzo prosta funkcja odbioru danych - mozna by ją wykorzystać do kontroli poprawności wysłania wiadomości ...
+	struct timeval czas_1,czas_2;
+	fd_set zestaw_1,zestaw_2;
+	czas_1.tv_sec = 4;	// limit czasu oczekiwania na dane - czas_1.tv_usec dla limitu w milisekundach
+	FD_ZERO(&zestaw_1);
+	FD_SET(sockfd, &zestaw_1);
+	bool quit = false;
+
+	while (quit == false) {
+		czas_2 = czas_1;
+		zestaw_2 = zestaw_1;
+		select (FD_SETSIZE, &zestaw_2, 0, 0, &czas_2); // czekamy na dane w deskryptorach gniazd
+		if (FD_ISSET (sockfd, &zestaw_2)) // serwer coś nadał
+		{
+			char bufor[1000];
+			int bajty = read (sockfd, bufor, 1000);
+			if (bajty == 0) // zostaliśmy rozłączeni
+			{
+				close (sockfd);
+				FD_CLR (sockfd, &zestaw_1);
+				quit = true;
+			}
+			printf("ODPOWIEDZ: %s\n", bufor);
+			quit = true;
+		}
+	}
+
+
+	// wychodzimy
+	close(sockfd);
+
+	return 0;
+}

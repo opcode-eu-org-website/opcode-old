@@ -1,0 +1,25 @@
+# więcej informacj w dsp_gui_qt.c
+
+PLIK_WYNIKOWY=dsp_gui_qt
+PLIK_ZRODLOWY=dsp_gui_qt
+
+
+# domyslna akacja (all) wymagająca pliku .o oraz .mo (tworzonych przez poniższe akcje)
+# wykonuje linkowanie plików *.o i *.mo oraz bibliotek (-lqt-mt) w program wynikowy
+all: ${PLIK_ZRODLOWY}.o ${PLIK_ZRODLOWY}.mo
+	g++ *.o *.mo -o ${PLIK_WYNIKOWY} -lqt-mt
+
+
+# kompilacja zwykłych źródeł C++
+%.o: %.cpp
+#	$< oznacza plik wejsciowy (wymieniony powyżej jako wymagany (po dwukropku) %.cpp)
+#	$@ oznacza plik wynikowy (wymieniony powyżej przed dwukropkiem %.o
+#		gdzie % oznacza dowlna zadana nazwe pliku
+	g++ -c $< -o $@ -I/usr/include/qt3/
+
+
+# kompilacja plików generowanych przez MOC
+%.mo: %.h
+	moc $< -o $@.m.cc
+	g++ -c $@.m.cc -o $@ -I/usr/include/qt3/
+	rm -f $@.m.cc

@@ -1,0 +1,18 @@
+#include <QDialog>
+#include <QTcpSocket>
+#include <QTcpServer>
+
+#include "ui_net_window.h"
+
+class NetWindow: public QDialog {
+Q_OBJECT
+ public:
+   Ui::NetWindow interfejs;
+   NetWindow(QWidget * parent, Qt::WFlags f);
+   ~NetWindow();
+ public slots:
+   void connectSend();
+   void odczytDanych();
+   void rozlaczono();
+   void odebranoNowePolaczenie();
+};

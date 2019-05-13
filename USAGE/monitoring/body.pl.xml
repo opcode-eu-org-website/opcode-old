@@ -1,0 +1,7 @@
+<article>
+<title>Monitoring</title>
+
+<p>Dział ten gromadzi projekty programistyczne związane z monitoringiem pracy różnych systemów (zarówno informatycznych jak i infrastrukturalnych). Większość projektów rozwijana jest pod kontem monitoringu serwerowni. Bardziej elektroniczne projekty związane z automatyką domową przedstawione są w dziale <id_link id="smart_home">inteligentny dom</id_link>.</p>
+
+<p>Na wstępie warto też wspomnieć o otwartym wieloplatformowym oprogramowaniu typu <wiki pl="SCADA">SCADA</wiki>: <homepage url="http://www.szarp.org/">SZARP</homepage>, <homepage url="http://oscada.org/">OpenSCADA</homepage> oraz dużej użyteczności (także w zagadnieniach innych niż monitorowanie infrastruktury IT) programów do monitorowania sieci i serwerów typu <homepage url="http://www.zabbix.com/">Zabbix</homepage>, <homepage url="http://www.nagios.org/">Nagios</homepage>, <homepage url="http://www.cacti.net/">Cacti</homepage> i <wiki en="Comparison of network monitoring systems">innych</wiki>.</p>
+</article>

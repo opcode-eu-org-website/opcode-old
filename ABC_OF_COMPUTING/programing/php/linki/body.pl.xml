@@ -1,0 +1,7 @@
+<article>
+<title>Linki i moje projekty</title>
+
+<p>Zachęcam także do zapoznania się z moim projektem związanym z programowaniem w PHP: <id_link id="news.php">prosty system do publikacji news'ów</id_link>, <id_link id="shell_phpmyadmin">logowanie do phpmyadmin w oparciu o konto shellowe i plik ~/.my.cnf</id_link>, <id_link id="system.php">elementem silnika tej strony opartym o php</id_link>, <id_link id="game_serwer_info.php">system informacji o stawianiu serwerów gry sieciowej</id_link>, <id_link id="icm-dirop">System obsługi DIRopu</id_link> (część webowa).</p>
+
+<p>Zobacz w Sieci: <doc url="http://php.webinside.pl/">PHP - tutoriale i artykuły php, manual, php, skrypty</doc>, <wiki en="b:PHP Programming" pl="b:Programowanie:PHP">PHP @ Wikibooks</wiki>, <wiki en="b:PHP and MySQL Programming">PHP and MySQL Programming</wiki>.</p>
+</article>

@@ -1,0 +1,700 @@
+/*
+ * program pozwlający na wykorzystanie uC Atmega8 (a także wielu innych uC z rodziny AVR)
+ * w roli inteligentnego bufora I/O obsługującego:
+ *   16 linii cyfrowych wejścia wyjścia (port B i D uC)
+ *   4 linii z możliwością wyboru pomiędzy cyfrowym wejściem/wyjściem, analogowym wejściem,
+ *             rezystancyjnym wejściem trójstanowym (piny 0..3 portu C uC)
+ * 
+ * 
+ * kompilacja i wgranie przez ISP z użyciem USBasp:
+ *  avr-gcc -mmcu=atmega8 -Os -o sterownik.o main.c
+ *  avr-objcopy -O ihex sterownik.o sterownik.hex
+ *  sudo avrdude -c usbasp -p m8 -U flash:w:sterownik.hex
+ *
+ * konfiguracja układu na wewnętrzny szybki oscylator
+ *  sudo avrdude -c usbasp -p m8 -U lfuse:w:0xe4:m
+ * 
+ *
+ * układ zapewnia m.in:
+ *   - programową eliminację drgań (badanie stabilności stanu) na wejściach cyfrowych
+ *   - detekcję zmiany stanu wraz z zatrzaskiwaniem takiej informacji
+ *     (umożliwia wykrycie faktu zmiany stanu pinu pomimo iż pomiędzu odczytami i2c
+ *     zdążył on wrócić do pierwotnego stanu)
+ *
+ * całość konfiguracji układu (kirunki transmisji na poszczególnych pinach DIO,
+ * wartości progowe dla linii trójstanowych, wykorzystanie pinów portu C jako
+ * ADC lub DIO, ...) odbywa się poprzez szyne I2C
+ * 
+ * rejestry I2C:
+ *  ro 0x00        -- general status
+ *  ro 0x40 - 0x59 -- stabilność pinu
+ *  
+ *  rw 0x60 - 0x78 --  ustawienie ilości okresów sprawdzania stabilności potrzebnych do uznania pinu za stabilny
+ *  rw 0x79        --  ustawienie ilości tyknięć timera w jednym okresie sprawdzania stabilności
+ *  rw 0x7A        --  ustawienie włączenia i prędkości sprawdzania stabilności:
+ *                   0x00 - wyłączony
+ *                   0xFn - włączony, dla n=2 => speed=F_CPU/8   n=3 => speed=F_CPU/64   n=4 => speed=F_CPU/256
+ *  rw 0x7B        -- maska ustawiająca czytane poprty i porty z sprawdzaniem stabilności
+ *  rw 0x80 - 0x83 -- ustawienie limitów linii trójstanowych - normal minimum
+ *  rw 0x84 - 0x87 -- ustawienie limitów linii trójstanowych - normal maximum
+ *  rw 0x88 - 0xFB -- ustawienie limitów linii trójstanowych - active minimum
+ *  rw 0x8C - 0x8F -- ustawienie limitów linii trójstanowych - active maximum
+ *  rw 0x91 - 0x93 -- ustawienie wartości PORTn  n=B,C,D
+ *  rw 0x95 - 0x97 -- ustawienie wartości DDRn  n=B,C,D (stan wysoki - output)
+ *  rw 0x99 - 0x9B -- wartość PINn  n=B,C,D
+ *  ro 0XA0 - 0xA3 -- wartość z konwersji anlog-digital z odpowiedniej linii
+ *  rw 0xAF        -- ustawienie włączenia i prędkości ADC:
+ *                  0x00 - wyłączony
+ *                  0x0n - włączony, dla n=3 => speed=F_CPU/8   ...   n=6 => speed=F_CPU/64
+ *  rw 0xBn        -- bajt n (znaczenia bajtów opisane poniżej w define) statusu portu B
+ *  rw 0xCn        -- bajt n (znaczenia bajtów opisane poniżej w define) statusu portu C
+ *  rw 0xDn        -- bajt n (znaczenia bajtów opisane poniżej w define) statusu portu D
+ *  rw 0xE0        -- status linii trójstanowych
+ * 
+ *  Przykłady:
+ *  	# dioda na porcie D
+ *  	i2cset -y $BUS_ADDR 0x10 0x97 0x20
+ *  	alias l_on='i2cset -y $BUS_ADDR 0x10 0x93 0x20'
+ *  	alias l_off='i2cset -y $BUS_ADDR 0x10 0x93 0x00'
+ *  
+ *  	# odczyt portu D z podciąganiem
+ *  	i2cset -y $BUS_ADDR 0x10 0x93 0xff
+ *  	for i in `seq 1 30`; do sleep 0.1; i2cget -y $BUS_ADDR 0x10 0x9B; done
+ *  
+ *  	# buforowany odczyt portu D
+ *  	i2cset -y $BUS_ADDR 0x10 0x7a 0xff
+ *  
+ *  	i2cget -y $BUS_ADDR 0x10 0xD0
+ *  
+ *  	i2cget -y $BUS_ADDR 0x10 0xD2
+ *  	i2cget -y $BUS_ADDR 0x10 0xD2
+ *  	i2cget -y $BUS_ADDR 0x10 0xD2
+ *  
+ *  
+ *  	# odczyt ADC(2)
+ *  	i2cget -y $BUS_ADDR 0x10 0xAf 0xf3
+ *  	i2cset -y $BUS_ADDR 0x10 0xAf 0xf3;  i2cget -y $BUS_ADDR 0x10 0xA2;
+ *  	# tu jest jakiś dziwny problem objawiający się koniecznościa każdorazowego
+ *  	# ponawiania ustawienia konfiguracji ADC ... ale niech będzie ...
+ */
+
+#include <inttypes.h>
+
+#include <stdio.h>
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
+#define I2C_ADDRESS 0x10
+
+
+/// bit mask of last port value
+#define _VALUE_                        0
+/// bit mask of input stability
+#define _IS_STABLE_                    1
+
+/// bit mask of pins that changed values
+#define _CHANGE_MASK_                  2
+/// bit mask of pins values that caused set bits in _CHANGE_MASK_
+#define _CHANGE_VALUE_                 3
+/// bit mask of pins that changed values to level specified in _CHANGE_TO_LEVEL_VAL_
+#define _CHANGE_TO_LEVEL_MASK_         4
+
+/// bit mask of pins that changed stable values
+#define _STABLE_CHANGE_MASK_           5
+/// bit mask of pins values that caused set bits in _STABLE_CHANGE_MASK_
+#define _STABLE_CHANGE_VALUE_          6
+/// bit mask of pins that changed stable values to level specified in _CHANGE_TO_LEVEL_VAL_
+#define _STABLE_CHANGE_TO_LEVEL_MASK_  7
+
+
+/// bit mask for determinate pins using usnatble value of input to settings _VALUE_, _CHANGE_*_
+#define _USE_UNSTABLE_VALUE_           12
+/// bit mask for modify status on change pin value based on _CHANGE_MASK_
+#define _INFO_ON_CHANGE_               13
+/// bit mask for modify status on change pin value based on _CHANGE_TO_LEVEL_MASK_
+#define _INFO_ON_CHANGE_TO_LEVEL_      14
+/// bit mask determinate pins value for _CHANGE_TO_LEVEL_MASK_
+#define _CHANGE_TO_LEVEL_VAL_          15
+
+
+volatile uint8_t status_mask;
+volatile uint8_t status_b[16];
+volatile uint8_t status_c[16];
+volatile uint8_t status_d[16];
+volatile uint8_t status_tri[16];
+volatile uint8_t status_adc_val[4];
+volatile uint8_t status_input_mask, status_adc_mode;
+volatile uint8_t adc_normal_max[4], adc_normal_min[4], adc_active_max[4], adc_active_min[4];
+volatile uint8_t pin_stability[24], pin_stability_init[24];
+
+
+/// UPDATE STATUS INFO, AFTER READ PORT VALUE
+inline void __attribute__((always_inline)) check_port_value(uint8_t nval, volatile uint8_t *status, uint8_t num) {
+	uint8_t nmask, i;
+	
+	nmask = nval ^ status[_VALUE_];
+	
+	// when port value is changed
+	if (nmask != 0x00) {
+		// set suitable pin(s) status as unstable
+		if (status_input_mask & (0x10 << num)) {
+			for (i=0; i<8; i++) {
+				if (nmask & (1<<i)) {
+					pin_stability[ i | (num << 3) ] = pin_stability_init[ i | (num << 3) ];
+					status[_IS_STABLE_] &= ~(1<<i);
+				}
+			}
+		}
+		
+		cli();
+		// store new port value
+		status[_VALUE_] = nval;
+		// store values that caused the (first) change of pin
+		status[_CHANGE_VALUE_] |= nmask & (~status[_CHANGE_MASK_]) & nval;
+		// update info about changes (for pins witch info-on-change)
+		status[_CHANGE_MASK_] |= nmask;
+		// update info about changes (for pins witch info-on-change-to-level)
+		status[_CHANGE_TO_LEVEL_MASK_] |= nmask & (~(nval ^ status[_CHANGE_TO_LEVEL_VAL_]));
+		
+		// update global status
+		if (status[_USE_UNSTABLE_VALUE_] & (
+				(status[_CHANGE_MASK_] & status[_INFO_ON_CHANGE_]) |
+				(status[_CHANGE_TO_LEVEL_MASK_] & status[_INFO_ON_CHANGE_TO_LEVEL_])
+			)) {
+				status_mask |= 1 << num;
+		}
+		sei();
+	}
+}
+
+/// UPDATE STATUS INFO, AFTER STABILIZE PIN VALUE
+inline void __attribute__((always_inline)) set_pin_stable(uint8_t pin_num, volatile uint8_t *status, uint8_t num) {
+	uint8_t nval, nmask;
+	
+	nmask = 1 << pin_num;
+	nval = status[_VALUE_] & nmask;
+	
+	// store values that caused the (first) change of pin
+	status[_STABLE_CHANGE_VALUE_] |= (~status[_CHANGE_MASK_]) & nval;
+	// update info about changes (for pins witch info-on-change)
+	status[_STABLE_CHANGE_MASK_] |= nmask;
+	// update info about changes (for pins witch info-on-change-to-level)
+	status[_STABLE_CHANGE_TO_LEVEL_MASK_] |= nmask & (~(nval ^ status[_CHANGE_TO_LEVEL_VAL_]));
+	
+	// set stable info
+	status[_IS_STABLE_] |= nmask;
+	
+	// update global status
+	if ( (status[_STABLE_CHANGE_MASK_] & status[_INFO_ON_CHANGE_]) |
+		 (status[_STABLE_CHANGE_TO_LEVEL_MASK_] & status[_INFO_ON_CHANGE_TO_LEVEL_])
+		) {
+			status_mask |= 1 << num;
+	}
+}
+
+/// UPDATE STATUS INFO, AFTER READ TRI-STATE VALUE
+inline void __attribute__((always_inline)) check_tristate_value(uint8_t nval, uint8_t chan) {
+	if (nval != status_adc_val[chan]) {
+		status_adc_val[chan] = nval;
+		status_mask |= 0x10 << chan;
+		
+		if (nval < adc_normal_max[chan] && nval > adc_normal_min[chan]) { // NORMAL STATE
+			if (((status_tri[_VALUE_] >> chan) & 0x11) != 0x00) {
+				status_tri[_VALUE_] = status_tri[_VALUE_] & (0x11 << chan);
+				if (! (status_tri[_CHANGE_MASK_] & (1 << chan))) { // first change
+					status_tri[_CHANGE_MASK_] |= 1 << chan;
+					status_mask |= 0x08;
+				}
+			}
+		} else if (nval < adc_active_max[chan] && nval > adc_active_min[chan]) { // ACTIVE STATE
+			if (((status_tri[_VALUE_] >> chan) & 0x11) != 0x01) {
+				status_tri[_VALUE_] = (status_tri[_VALUE_] & (0x11 << chan)) | 0x01;
+				if (! (status_tri[_CHANGE_MASK_] & (1 << chan))) { // first change
+					status_tri[_CHANGE_MASK_] |= 1 << chan;
+					status_tri[_CHANGE_VALUE_] |= 0x01 << chan;
+					status_mask |= 0x08;
+				}
+			}
+		} else { // ERROR STATE
+			if (((status_tri[_VALUE_] >> chan) & 0x11) != 0x10) {
+				status_tri[_VALUE_] = (status_tri[_VALUE_] & (0x11 << chan)) | 0x10;
+				if (! (status_tri[_CHANGE_MASK_] & (1 << chan))) { // first change
+					status_tri[_CHANGE_MASK_] |= 1 << chan;
+					status_tri[_CHANGE_VALUE_] |= 0x10 << chan;
+					status_mask |= 0x08;
+				}
+			}
+		}
+	}
+}
+
+/// CLOCK INTERRUPT - DE-BOUNCING
+ISR(TIMER1_COMPA_vect, ISR_NOBLOCK) {
+	uint8_t i;
+#ifdef DEBUG
+	PORTB |= _BV( PB4 );
+#endif
+	
+	if ((status_input_mask & 0x11) == 0x11) {
+		for (i=0; i<8; i++) {
+			if (pin_stability[i] > 0) {
+				if (--pin_stability[i] == 0) {
+					set_pin_stable(i, status_b, 0);
+				}
+			}
+		}
+	}
+	if ((status_input_mask & 0x22) == 0x22) {
+		for (; i<16; i++) { // TODO: potrzebujemy sprawdzać 4 górne bity portu C ?
+			if (pin_stability[i] > 0) {
+				if (--pin_stability[i] == 0) {
+					set_pin_stable(i-8, status_c, 1);
+				}
+			}
+		}
+	}
+	if ((status_input_mask & 0x44) == 0x44) {
+		for (; i<24; i++) {
+			if (pin_stability[i] > 0) {
+				if (--pin_stability[i] == 0) {
+					set_pin_stable(i-16, status_d, 2);
+				}
+			}
+		}
+	}
+	
+	// reset timera
+	TCNT1 = 0x0000;
+	
+#ifdef DEBUG
+	PORTB &= ~( _BV( PB4 ) );
+#endif
+}
+
+/// READ ADC DATA
+uint8_t adc_chan = 0;
+ISR(ADC_vect, ISR_NOBLOCK) {
+	uint8_t val = ADCH;
+	uint8_t chan = adc_chan;
+	
+#ifdef DEBUG
+	PORTB |= _BV( PB3 );
+#endif
+	
+	// start next channel
+	if (++adc_chan > 3)
+		adc_chan = 0;
+	ADMUX = adc_chan | _BV(ADLAR);
+	ADCSRA = status_adc_mode;
+	
+	// check value
+	check_tristate_value(val, chan);
+	
+#ifdef DEBUG
+	PORTB &= ~( _BV( PB3 ) );
+#endif
+}
+
+
+/// MAIN() - INITIALIZING  AND  READ GPIO DATA IN MAIN LOOP
+int main( void ) {
+#ifdef DEBUG
+	DDRB = 0x1c;
+	PORTB = 0;
+#endif
+	
+	uint8_t i;
+	
+	for (i=0; i<16; i++) {
+		status_b[i] = 0;
+		status_c[i] = 0;
+		status_d[i] = 0;
+	}
+	for (i=12; i<14; i++) {
+		status_b[i] = 0xff;
+		status_c[i] = 0xff;
+		status_d[i] = 0xff;
+	}
+	
+	for (i=0; i<24; i++) {
+		pin_stability_init[i] = 10;
+	}
+	
+	// counter - przerwanie co 1/8000000 * 64 * 40 = 320us (przy F_CPU = 8MHz)
+	TCNT1 = 0x0000;
+	TIMSK |= _BV( OCIE1A ); // enable interrupt from this timer
+	OCR1A = 40;
+	TCCR1B = 0;
+		// włączony (wraz z ustawieniem prędkości) zostanie stosownym poleceniem I2C
+
+	// konfiguracja I2C jako slave
+	TWAR = I2C_ADDRESS << 1;
+		// adres, nie reagujemy na generall call
+	TWCR = _BV(TWEN) | _BV(TWIE) | _BV(TWINT) | _BV(TWEA);
+		// włączony | włączone generowanie przerwań | wyczyszczona flaga przerwań | włączone generowanie ACK
+	
+	// włączenie obsługi przerwań
+	sei();
+	
+	// konfiguracja ADC
+	ADMUX = _BV(ADLAR);
+		// ustawiamy na kanał 0 (PC0), wynik dosunięty do lewej, napięcie odniesienia z AREF
+	ADCSRA = 0;
+		// włączony (wraz z ustawieniem prędkości) zostanie stosownym poleceniem I2C
+	
+	
+	status_input_mask = 0xFF;
+	
+	// pętla główna odczyt GPIO
+	while(1) {
+		if (status_input_mask & 0x01) check_port_value(PINB, status_b, 0);
+		if (status_input_mask & 0x02) check_port_value(PINC, status_c, 1);
+		if (status_input_mask & 0x04) check_port_value(PIND, status_d, 2);
+		
+#ifdef DEBUG
+		//if (PORTB & _BV( PB5 ))   PORTB &= ~( _BV( PB5 ) );  else   PORTB |= ( _BV( PB5 ) );
+		PORTB |= ( _BV( PB5 ) );
+		PORTB &= ~( _BV( PB5 ) );
+#endif
+	}
+}
+
+
+/// RETURN (AND CLEAN IF NEED) STATUS INFO
+inline uint8_t __attribute__((always_inline)) read_status(volatile uint8_t *status, uint8_t index) {
+	uint8_t ret;
+	ret = status[index];
+	if (index >= _CHANGE_MASK_ && index <= _STABLE_CHANGE_TO_LEVEL_MASK_)
+		status[index] = 0;
+	return ret;
+}
+
+/// WRITE STATUS INFO
+inline void __attribute__((always_inline)) write_status(volatile uint8_t *status, uint8_t index, uint8_t val) {
+	if (index >= _USE_UNSTABLE_VALUE_ && index <= _CHANGE_TO_LEVEL_VAL_)
+		status[index] = val;
+}
+
+/// TWI COMMUNICATION
+uint8_t twi_cmd = 0;
+ISR( TWI_vect ) {
+	uint8_t status = TWSR & 0xf8;
+	uint8_t mode;
+	uint8_t ack = 1;
+	
+	/*
+	if (status == 0xA0) { // hack for fast servicing of repeated start
+		TWCR = (1<<TWEN) | (1<<TWIE) | (1<<TWINT) | (1<<TWEA);
+		return;
+	}
+	*/
+	
+	switch (status) {
+		// RECIVER (i2c write mode)
+		case 0x68:
+		case 0x60: // otrzymano adres, zwrócono ACK,                ==>> odbiór danych
+			twi_cmd = 0xff;
+			break;
+		case 0x80: // otrzymano dane, zwrócono ACK                  ==>> odbiór danych (kolejny bajt)
+			if (twi_cmd == 0xff) { // reseved for internal use
+				twi_cmd = TWDR;
+			} else {
+				mode = twi_cmd & 0xF0;
+				switch (mode) {
+					case 0x60: // INITIAL PIN STABILITY
+					case 0x70: // (number of TIMER1_COMPA cycles to wait before considering the value of a stable)
+						mode = twi_cmd & 0x1F;
+						if (mode < 24) { 
+							pin_stability_init[mode] = TWDR;
+						} else if (mode == 24) {
+							// number of timer ticks in one TIMER1_COMPA cycle
+							OCR1A = TWDR;
+						} else if (mode == 25) {
+							// de-bouncing status
+							// 0xFn - enable de-bouncing timer interrupt with timer speed determinate by n
+							//        (see TCCR1B register in Atmega8 documentation)
+							//        n=2 => speed=F_CPU/8   n=3 => speed=F_CPU/64   n=4 => speed=F_CPU/256
+							// 0x00 - disable de-bouncing timer
+							mode = TWDR;
+							if (mode & 0xF0) {
+								TCCR1B = mode & 0x07;
+							} else {
+								TCCR1B = 0;
+							}
+						} else if (mode == 26) {
+							// input port read / de-bouncing bit-mask:
+							// 0x01 - reaad port B
+							// 0x10 - de-bouncing port B
+							// 0x02 - reaad port C
+							// 0x20 - de-bouncing port C
+							// 0x04 - reaad port D
+							// 0x40 - de-bouncing port D
+							status_input_mask = TWDR;
+						}
+						break;
+					case 0x80: // TRI-STATE limits
+						mode = twi_cmd & 0x0F;
+						if (mode < 4)
+							adc_normal_min[mode] = TWDR;
+						else if (mode < 8)
+							adc_normal_max[mode - 4] = TWDR;
+						else if (mode < 12)
+							adc_active_min[mode - 8] = TWDR;
+						else if (mode < 16)
+							adc_active_max[mode - 12] = TWDR;
+						break;
+					case 0x90:
+						mode = twi_cmd & 0x0F;
+						switch (mode) {
+							// mode & 0x0c == 0b00  =>  PORTx (port x output value / port x pullup resistor mask)
+							case 0x01:
+								PORTB = TWDR;
+								break;
+							case 0x02:
+								PORTC = TWDR;
+								break;
+							case 0x03:
+								PORTD = TWDR;
+								break;
+							// mode & 0x0c == 0b01  =>  DDRx (port x direction)
+							case 0x05:
+								DDRB = TWDR;
+								break;
+							case 0x06:
+								DDRC = TWDR;
+								break;
+							case 0x07:
+								DDRD = TWDR;
+								break;
+							// mode & 0x0c == 0b10  =>  PINx (port x input value)
+							case 0x09:
+								PINB = TWDR;
+								break;
+							case 0x0a:
+								PINC = TWDR;
+								break;
+							case 0x0b:
+								PIND = TWDR;
+								break;
+						}
+						break;
+					case 0xA0: // ADC
+						if (twi_cmd == 0xAF) {
+							// 0xmn - enable ADC (and tri-state line) with speed determinate by n
+							//        (see ADCSRA register in Atmega8 documentation)
+							//        n=3 => speed=F_CPU/8   n=4 => speed=F_CPU/16   n=5 => speed=F_CPU/32   n=6 => speed=F_CPU/64
+							//        m - set first channel to read
+							// 0x00 - disable ADC (and tri-state line)
+							mode = TWDR;
+							if (mode != 0) {
+								// prędkość ADC na podstawie wartości odebranej w poleceniu włączenia
+								status_adc_mode = _BV(ADEN) | _BV(ADSC) | _BV(ADIE)|_BV(ADIF) | mode & 0x07;
+								// ADC włączony, pelecenie startu konwersji, włączone generowanie przerwań
+								
+								// kanał od którego zaczynamy
+								adc_chan = mode & 0x30;
+								ADMUX = adc_chan | _BV(ADLAR);
+							} else {
+								status_adc_mode = 0;
+							}
+							ADCSRA = status_adc_mode;
+						}
+					case 0xB0: // PORT B
+						write_status(status_b,    twi_cmd & 0x0f,  TWDR);
+						break;
+					case 0xC0: // PORT C
+						write_status(status_c,    twi_cmd & 0x0f,  TWDR);
+						break;
+					case 0xD0: // PORT D
+						write_status(status_d,    twi_cmd & 0x0f,  TWDR);
+						break;
+					case 0xE0: // TRI-STATE
+						write_status(status_tri,  twi_cmd & 0x0f,  TWDR);
+						break;
+				}
+				twi_cmd = 0x00;
+				ack = 0;
+			}
+			break;
+		case 0x88: // otrzymano dane, zwrócono NOT ACK              ==>> oczekiwanie na adres
+			break;
+		case 0xA0: // otrzymano STOP lub powtórzony START           ==>> oczekiwanie na adres
+			break;
+		
+		// TRANSMITER (i2c read mode)
+		case 0xB0:
+		case 0xA8: // otrzymano adres, zwrócono ACK,                ==>> wysyłanie danych
+		case 0xB8: // przesłano bajt z TWDR, otrzymano ACK          ==>> wysyłanie danych (kolejny bajt)
+			mode = twi_cmd & 0xF0;
+			switch (mode) {
+				case 0x00:
+					if (twi_cmd == 0x00) { // 0x0n - change masks
+						// bits 0,1,2:  PINB, PINC, PIND  changed
+						// bits 3:      3-state input changed
+						// bits 4-7:    ADC changed
+						TWDR = status_mask;
+						status_mask = 0x00;
+					}
+					break;
+				case 0x40: // CURRENT PIN STABILITY COUNTER
+				case 0x50: // (number of TIMER1_COMPA cycles remaining to wait)
+					mode = twi_cmd & 0x1F;
+					if (mode < 24)
+						TWDR = pin_stability[mode];
+					break;
+				case 0x60: // INITIAL PIN STABILITY
+				case 0x70: // (number of TIMER1_COMPA cycles to wait before considering the value of a stable)
+					mode = twi_cmd & 0x1F;
+					if (mode < 24) {
+						TWDR = pin_stability_init[mode];
+					} else if (mode == 24) {
+						// number of timer ticks in one TIMER1_COMPA cycle
+						TWDR = OCR1A;
+					} else if (mode == 25) {
+						// de-bouncing status
+						mode = TCCR1B & 0x07;
+						if (mode) {
+							TWDR = mode | 0xF0;
+						} else {
+							TWDR = 0;
+						}
+					} else if (mode == 26) {
+						// input port read / de-bouncing bit-mask
+						TWDR = status_input_mask;
+					}
+					break;
+				case 0x80: // TRI-STATE limits
+					mode = twi_cmd & 0x0F;
+					if (mode < 4)
+						TWDR = adc_normal_min[mode];
+					else if (mode < 8)
+						TWDR = adc_normal_max[mode - 4];
+					else if (mode < 12)
+						TWDR = adc_active_min[mode - 8];
+					else if (mode < 16)
+						TWDR = adc_active_max[mode - 12];
+					break;
+				case 0x90:
+					mode = twi_cmd & 0x0F;
+					switch (mode) {
+						// mode & 0x0c == 0b00  =>  PORTx (port x output value / port x pullup resistor mask)
+						case 0x01:
+							TWDR = PORTB;
+							break;
+						case 0x02:
+							TWDR = PORTC;
+							break;
+						case 0x03:
+							TWDR = PORTD;
+							break;
+						// mode & 0x0c == 0b01  =>  DDRx (port x direction)
+						case 0x05:
+							TWDR = DDRB;
+							break;
+						case 0x06:
+							TWDR = DDRC;
+							break;
+						case 0x07:
+							TWDR = DDRD;
+							break;
+						// mode & 0x0c == 0b10  =>  PINx (port x input value)
+						case 0x09:
+							TWDR = PINB;
+							break;
+						case 0x0a:
+							TWDR = PINC;
+							break;
+						case 0x0b:
+							TWDR = PIND;
+							break;
+					}
+					break;
+				case 0xA0: // ADC
+					if (twi_cmd == 0xAF)
+						TWDR = status_adc_mode;
+					else
+						TWDR = status_adc_val[twi_cmd & 0x03];
+					break;
+				case 0xB0: // PORT B
+					TWDR = read_status(status_b,    twi_cmd & 0x0f);
+					break;
+				case 0xC0: // PORT C
+					TWDR = read_status(status_c,    twi_cmd & 0x0f);
+					break;
+				case 0xD0: // PORT D
+					TWDR = read_status(status_d,    twi_cmd & 0x0f);
+					break;
+				case 0xE0: // TRI-STATE
+					TWDR = read_status(status_tri,  twi_cmd & 0x0f);
+					break;
+			}
+			twi_cmd = 0x00;
+			ack = 0;
+			if (PORTB & _BV( PB4 ))   PORTB &= ~( _BV( PB4 ) );  else   PORTB |= ( _BV( PB4 ) );
+			break;
+		case 0xC0: // przesłano bajt z TWDR, otrzymano NOT ACK      ==>> oczekiwanie na adres
+			break;
+		case 0xC8: // przesłano ostatni bajt z TWDR, otrzymano ACK  ==>> oczekiwanie na adres
+			break;
+			
+		case 0x00: // Bus error
+			TWCR = (1<<TWSTO)|(1<<TWINT);
+			break;
+		
+	}
+	
+	// clear interrupt flag
+	TWCR = (1<<TWEN) | (1<<TWIE) | (1<<TWINT) | (ack<<TWEA);
+}
+
+/*
+#define OUTPUT_STATUS_SIZE 1
+#define INPUT_STATUS_SIZE 3
+volatile uint8_t output_status[OUTPUT_STATUS_SIZE];
+volatile uint8_t input_status[INPUT_STATUS_SIZE];
+volatile uint8_t buf_pos;
+
+ISR( TWI_vect ) {
+	uint8_t status = TWSR & 0xf8;
+	uint8_t ack = 1;
+	
+	switch (status) {
+		// RECIVER (i2c write mode)
+		case 0x68:
+		case 0x60: // otrzymano adres, zwrócono ACK,                ==>> odbiór danych
+			buf_pos = 0;
+			break;
+		case 0x80: // otrzymano dane, zwrócono ACK                  ==>> odbiór danych (kolejny bajt)
+			output_status[buf_pos++] = TWDR;
+			if (buf_pos >= OUTPUT_STATUS_SIZE) //                   ==>> kolejne dane błędem
+				ack = 0;
+			break;
+		case 0x88: // otrzymano dane, zwrócono NOT ACK              ==>> oczekiwanie na adres
+			break;
+		case 0xA0: // otrzymano STOP lub powtórzony START           ==>> oczekiwanie na adres
+			break;
+		
+		// TRANSMITER (i2c read mode)
+		case 0xB0:
+		case 0xA8: // otrzymano adres, zwrócono ACK,                ==>> wysyłanie danych
+			buf_pos = 0;
+		case 0xB8: // przesłano bajt z TWDR, otrzymano ACK          ==>> wysyłanie danych (kolejny bajt)
+			TWDR = input_status[buf_pos++];
+			if (buf_pos >= INPUT_STATUS_SIZE) //                    ==>> zakończenie wysyłania (ostatni bajt)
+				ack = 0;
+			break;
+		case 0xC0: // przesłano bajt z TWDR, otrzymano NOT ACK      ==>> oczekiwanie na adres
+			break;
+		case 0xC8: // przesłano ostatni bajt z TWDR, otrzymano ACK  ==>> oczekiwanie na adres
+			break;
+			
+		case 0x00: // Bus error
+			TWCR = (1<<TWSTO)|(1<<TWINT);
+			break;
+		
+	}
+	
+	// clear interrupt flag
+	TWCR = (1<<TWEN) | (1<<TWIE) | (1<<TWINT) | (ack<<TWEA);
+}
+*/

@@ -1,0 +1,33 @@
+<article>
+<title>Graficzny interfejs użytkownika (GUI)</title>
+<p><strong>GTK</strong> jest biblioteką do tworzenia GUI, stworzoną na potrzeby GIMPa oraz wykorzystywaną w projekcie GNOME. Napisana jest w sposób obiektowy w języku C. Inną biblioteką do tworzenia GUI (i nie tylko ma moduły obsługi baz danych, sieci, grafiki 3D - OpenGL, ...) jest <strong>Qt</strong>, w której powstaje KDE. Jest to w pełni obiektowa biblioteka C++.</p>
+<ul>
+	<li><id_link id="c_cpp:user_interface:text_on_framebuffer.c">text_on_framebuffer.c</id_link> - program prezentujący korzystanie z surowego framebuffer'a i biblioteki FreeType do renderingu tekstu</li>
+	
+	<li><id_link id="c_cpp:user_interface:dsp_gui_gtk.c">dsp_gui_gtk.c</id_link> - GUI napisane w GTK dla zamieszczonego powyżej dsp.c; prezentuje podstawy korzystania z GTK, program przechwytuje także sygnał o śmierci potomka w celu potwierdzenia tego zdarzenia; więcej o GTK: <wiki en="b:GTK+ By Example">GTK+ By Example</wiki></li>
+	
+	<li><id_link id="c_cpp:user_interface:dsp_gui_qt:dsp_gui_qt.cpp">dsp_gui_qt.cpp</id_link>, <id_link id="c_cpp:user_interface:dsp_gui_qt:dsp_gui_qt.h">dsp_gui_qt.h</id_link>, <id_link id="c_cpp:user_interface:dsp_gui_qt:Makefile">Makefile</id_link> - GUI napisane w Qt3 dla zamieszczonego powyżej dsp.c; prezentuje podstawy korzystania z Qt oraz pisanie Makefile i podstawy programowanie obiektowego (deklaracja klasy ...); więcej o Qt: <wiki en="b:Qt">Qt @ Wikibooks</wiki></li>
+	<li><id_link id="c_cpp:user_interface:Qt_okno_glowne.h">Qt_okno_glowne.h</id_link> - minimalistyczny plik nagłówkowy pozwalający na zbudowanie okna programu stworzonego w <id_link id="qt-designer">QtDesigner</id_link></li>
+	<li>Program prezentujący timer, przetwarzanie plików xml, tabelki i drzewaka, menu kontekstowe, tworzenie subokna oraz wyświetlanie komunikatów:<ul>
+		<li><id_link id="c_cpp:user_interface:Qt_timer_subwindow_xml:timer_subwindow_xml.cpp">timer_subwindow_xml.cpp</id_link> - główny plik programu (funkcja main)</li>
+		<li><id_link id="c_cpp:user_interface:Qt_timer_subwindow_xml:timer_window.cpp">timer_window.cpp</id_link> i <id_link id="c_cpp:user_interface:Qt_timer_subwindow_xml:timer_window.h">timer_window.h</id_link> - klasa głównego okna</li>
+		<li><id_link id="c_cpp:user_interface:Qt_timer_subwindow_xml:config_window.cpp">config_window.cpp</id_link> i <id_link id="c_cpp:user_interface:Qt_timer_subwindow_xml:config_window.h">config_window.h</id_link> - klasa okna konfiguracji</li>
+		<li><a class="int" href="./Qt_timer_subwindow_xml/Qt_timer_subwindow_xml.tgz">Qt_timer_subwindow_xml.tgz</a> - archiwum z całością prgramu (wraz z plikami .ui)</li>
+	</ul></li>
+	<li>Program prezentujący rysowanie, obsługę sieci (http, gniazda), obsługe wielowątkowości i singletonu, a także pasek stanu paski narzędzi oraz menu:<ul>
+		<li><id_link id="c_cpp:user_interface:Qt_graphics_net_menu_toolbar:graphics_net_menu_toolbar.cpp">graphics_net_menu_toolbar.cpp</id_link> - główny plik programu (funkcja main)</li>
+		<li><id_link id="c_cpp:user_interface:Qt_graphics_net_menu_toolbar:paint_window.cpp">paint_window.cpp</id_link> i <id_link id="c_cpp:user_interface:Qt_graphics_net_menu_toolbar:paint_window.h">paint_window.h</id_link> - klasa okna głównego (rysowanie)</li>
+		<li><id_link id="c_cpp:user_interface:Qt_graphics_net_menu_toolbar:net_window.cpp">net_window.cpp</id_link> i <id_link id="c_cpp:user_interface:Qt_graphics_net_menu_toolbar:net_window.h">net_window.h</id_link> - klasa okna komunikacji sieciowej</li>
+		<li><id_link id="c_cpp:user_interface:Qt_graphics_net_menu_toolbar:info_thread.cpp">info_thread.cpp</id_link> i <id_link id="c_cpp:user_interface:Qt_graphics_net_menu_toolbar:info_thread.h">info_thread.h</id_link> - klasa sub wątka</li>
+		<li><id_link id="c_cpp:user_interface:Qt_graphics_net_menu_toolbar:singleton.h">singleton.h</id_link> - klasa singletonu</li>
+		<li><a class="int" href="./Qt_graphics_net_menu_toolbar/Qt_graphics_net_menu_toolbar.tgz">Qt_graphics_net_menu_toolbar.tgz</a> - archiwum z całością programu (wraz z plikami .ui)</li>
+	</ul></li>
+	
+	<li><id_link id="c_cpp:user_interface:gui_beos_demo:MyWindow.cpp">MyWindow.cpp</id_link>, <id_link id="c_cpp:user_interface:gui_beos_demo:MyWindow.h">MyWindow.h</id_link>, <id_link id="c_cpp:user_interface:gui_beos_demo:main.cpp">main.cpp</id_link>, <id_link id="c_cpp:user_interface:gui_beos_demo:main.h">main.h</id_link> - program demonstrujący tworzenie GUI dla BeOS R5 i pochodnych (całość wraz z plikiem projektu - <a class="int" href="./gui_beos_demo.tgz">gui_beos_demo.tgz</a>)</li>
+</ul>
+<ul>
+	<li><id_link id="c_cpp:user_interface:ncurses_1.c">ncurses_1.c</id_link> - zaawansowane wyświetlanie na terminalu tekstowym z wykorzystaniem biblioteki termcap</li>
+	<li><id_link id="c_cpp:user_interface:ncurses_2.c">ncurses_2.c</id_link> - zaawansowane wyświetlanie na terminalu tekstowym z wykorzystaniem biblioteki terminfo</li>
+	<li><id_link id="c_cpp:user_interface:ncurses_3.c">ncurses_3.c</id_link> - zaawansowane wyświetlanie na terminalu tekstowym z wykorzystaniem biblioteki ncurses</li>
+</ul>
+</article>

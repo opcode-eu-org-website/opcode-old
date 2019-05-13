@@ -1,0 +1,18 @@
+<article>
+<title>Metody numeryczne</title>
+
+<p>Jest to zbiór funkcji prezentujących podstawy metod numerycznych. Jako że programy te napisałem pewien czas temu nie jestem w stanie obecnie zagwarantować że działają one w pełni poprawnie. Więcej o metodach numerycznych także na <doc url="http://www.fuw.edu.pl/~pjank/mn/">Strona o Metodach Numerycznych</doc>.</p>
+
+<ul>
+	<li><id_link id="c_cpp:numerical_analysis:calkowanie.cc">calkowanie.cc</id_link></li>
+	<li><id_link id="c_cpp:numerical_analysis:interpolacja.cc">interpolacja.cc</id_link></li>
+	<li><id_link id="c_cpp:numerical_analysis:miejsca_zerowe.cc">miejsca_zerowe.cc</id_link></li>
+	<li><id_link id="c_cpp:numerical_analysis:rownania_rozniczkowe_czastkowe.cc">rownania_rozniczkowe_czastkowe.cc</id_link></li>
+	<li><id_link id="c_cpp:numerical_analysis:rownania_rozniczkowe_zwyczajne.cc">rownania_rozniczkowe_zwyczajne.cc</id_link></li>
+	<li><id_link id="c_cpp:numerical_analysis:rozniczkowanie.cc">rozniczkowanie.cc</id_link></li>
+	<li><id_link id="c_cpp:numerical_analysis:sortowanie.cc">sortowanie.cc</id_link></li>
+	<li><id_link id="c_cpp:numerical_analysis:transformata_fouriera.cc">transformata_fouriera.cc</id_link></li>
+	<li><id_link id="c_cpp:numerical_analysis:uklady_rownan.cc">uklady_rownan.cc</id_link></li>
+	<li><id_link id="c_cpp:numerical_analysis:wartosci_wlasne.cc">wartosci_wlasne.cc</id_link></li>
+</ul>
+</article>

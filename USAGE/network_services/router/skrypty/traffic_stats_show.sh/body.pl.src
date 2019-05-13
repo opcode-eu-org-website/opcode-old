@@ -1,0 +1,34 @@
+#!/bin/bash
+
+#
+# skrypt generujący ładniejsze statystki (dla WWW) na podstawie /var/log/predkosci.log
+#  generowanego przez skrypt statystyki_ruchu.sh
+#
+
+echo "Content-type: text/plain"
+echo ""
+
+echo "WLACZONE ADRESY IP:"
+echo "==================="
+sort -n -t . -k 1,1 -k 2,2 -k 3,3 -k 4,4 /proc/net/arp | grep -v eth1
+
+echo ""
+echo ""
+echo ""
+
+echo "PREDKOSCI REALNE (w bajtach/s, srednie z 30 sek):"
+echo "================================================="
+echo -e "IP\t\twysylane\todbierane (z Internetu)"
+lista_ip=`ip addr sh | awk '
+	$1=="inet" {
+	split($2, tmp, "[./]");
+	printf("(%s",tmp[1])
+	for (i=2; i<=tmp[5]/8; i++)
+		printf(".%s", tmp[i])
+	printf(")")
+	}' | sed -e 's#)(#)|(#g'`
+grep -v '^[A-Z]' /var/log/predkosci.log | egrep "$lista_ip" |  sort -n -t . -k 1,1 -k 2,2 -k 3,3 -k 4,4
+echo ""
+grep '^[A-Z]' /var/log/predkosci.log
+
+exit

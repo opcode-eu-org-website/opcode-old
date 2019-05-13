@@ -1,0 +1,38 @@
+context after_dial {
+	s => {
+		goto calling|1;
+		goto called|1;
+	};
+
+	calling => {
+		Verbose(2, "after_dial for dial calling");
+		Answer();
+		// musi tutaj wystąpić coś co puści jakąś sygnalizację (audio?) w kanał
+		// w oczekiwaniu na zbridge'owanie ... Ringing() wydaje się najlepsze
+		Ringing();
+		// musi tu być coś co spowoduje czekanie ...
+		WaitExten(0.6);
+		Hangup();
+	};
+	
+	called => {
+		Verbose(2, "after_dial for channel called from: ${CALLING_CHANNEL}");
+		Ringing();
+		Wait(0.3); // nie wiem dlaczego, ale musimy tu poczekać
+		Answer();
+		Bridge(${CALLING_CHANNEL}, "tTkK");
+		Wait(1);
+	};
+
+	h => {
+		System(sleep 3);
+		NoOp();
+	};
+
+	// dla wszystkich pozostałych numerów (mogą przyjść z funkcji transferu)
+	// wracamy do dialplanu w lua
+	_. => {
+		goto input_from_transfers|${EXTEN}|1;
+	};
+};
+

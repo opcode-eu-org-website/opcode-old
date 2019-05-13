@@ -1,0 +1,12 @@
+<article>
+<title>Minimalizacja - metoda tablic Karnaugha</title>
+
+<p>Aby uzyskać wyrażenie na opisywaną przez tablicę funkcję wypisujemy w oparciu o zakreślenia:</p>
+<ol>
+	<li>jedynek - <strong>sumę ilorazów zadanych przez zmienne</strong> niezmieniające się w ramach pętelki,</li>
+	<li>zer - <strong>iloraz sum zadanych przez zanegowane zmienne</strong> niezmieniające się w ramach pętelki.</li>
+</ol>
+<p>Możemy także wypisać funkcję zaprzeczoną - w tym celu dla obejmowania pętelkami jedynek postępujemy jak w pkt. 2 a dla zer jak w pkt. 1 (zamieniamy rolami zera z jedynkami w wartościach funkcji podanych w tablicy).</p>
+
+<p>Warto także zapoznać się z komputerowym systemem minimalizacji funkcji logicznych <homepage url="https://code.google.com/archive/p/eqntott/downloads">espresso</homepage>. Zamieszam także skrypt do generowania plików PLA na podstawie wyrażenia boolowskiego - <id_link id="expr2pla.sh">expr2pla.sh</id_link></p>
+</article>

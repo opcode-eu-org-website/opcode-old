@@ -1,0 +1,61 @@
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity PRUS1 is
+	port (
+		rxd: in std_logic;
+		clk, reset: in std_logic;
+		lcd_BUS: out std_logic_vector (10 downto 0)
+	);
+end;
+
+architecture logic of PRUS1 is
+	signal uart_DATA, lcd_DATA: std_logic_vector (7 downto 0);
+	signal uart_REDY, lcd_RS, lcd_RUN: std_logic;
+begin
+	uart: entity work.UART_RXD(logic)
+		generic map(RX_CLK_DIV => 52083) -- 1/9600 s
+		port map(
+			clk => clk,
+			reset => reset,
+			
+			rxd => rxd,
+			
+			data_out => uart_DATA,
+			data_ready => uart_REDY
+		);
+	ster: entity work.STEROWNIK(logic)
+		generic map(
+			WAIT_CLK_DIV_120us => 60000, -- 24
+			WAIT_CLK_DIV_5ms => 2500000
+		)
+		port map(
+			clk => clk,
+			reset => reset,
+			
+			rxd_data => uart_DATA,
+			rxd_ready => uart_REDY,
+			
+			lcd_data => lcd_DATA,
+			lcd_rs => lcd_RS,
+			lcd_run => lcd_RUN
+		);
+	lcd: entity work.LCD_DRV(logic)
+		generic map(
+			LCD_CLK_CNT_40ns => 20,
+			LCD_CLK_CNT_230ns => 165
+		)
+		port map(
+			clk => clk,
+			reset => reset,
+			
+			data_in => lcd_DATA,
+			rs_mode => lcd_RS,
+			lcd_run => lcd_RUN,
+			
+			data_out => lcd_BUS (10 downto 3),
+			rs_out => lcd_BUS (0),
+			e_out => lcd_BUS (1),
+			rw_out => lcd_BUS (2)
+		);
+end;

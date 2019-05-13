@@ -1,0 +1,7 @@
+<article>
+<title>LDAP password change on web page</title>
+
+<p>Jest to prosty skrypt umożliwiający zmianę hasła LDAPowego przy pomocy strony WWW.</p>
+
+<p class="download"><a class="int" href="./passwd.php">POBIERZ</a></p>
+</article>

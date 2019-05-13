@@ -1,0 +1,145 @@
+#ifndef SPACE_H
+#define SPACE_H
+
+#include "point.h"
+#include "space_types.h"
+
+#include <list>
+using namespace std;
+
+template <typename data_t> class Space {
+	private:
+		// wskaźnik na tablice kontrolna
+		SpaceTypes::BoolArray2D * ctrl;
+		int max_z, max_x;
+	public:
+		// wskaźnik na tablice danych
+		SpaceTypes::Array2D<data_t> * data;
+		
+		Space(int z, int x) {
+			data = new typename SpaceTypes::Array2D<data_t>::Array2D(z, x);
+			ctrl = new typename SpaceTypes::BoolArray2D::BoolArray2D(z, x);
+			// tu nie powinno być śmieci
+			// gdy jawnie nie wypełnione to powinien być zawsze NULL
+			memset(data->base(), 0x00, data->size());
+			max_z = z; max_x = x;
+		}
+		~Space() {
+			delete data;
+			delete ctrl;
+		}
+		
+		/// funkcja znajduje komórki przestrzeni mające część wspólną (lub będące we wnetrzu)
+		/// czworokątu zadanego przez tablicę jego wierzchołków - p
+		///
+		/// funkcja dla każdej znalezionej komórki wywołuje metodą copy_content() obieku, wskażnik
+		/// do którego znajduje się w tej komórce, przekazując do niej jako pierwszy argument dst
+		/// a jako drugi wskażnik do biektu na rzecz któregio została wywołana
+		void find_and_copy(PointXZ<float> p[4], data_t dst) {
+			// set all element to true
+			memset(ctrl->base(), 0xff, ctrl->size());
+			
+			// zmienne pomocnicze
+			int i, j;
+			list<int> x;
+			
+			// sprawdzamy czy otrzymany storzek widzenia nie wychodzi poza zakres
+			// jezeli tak redukujemy dio wartosci granicznych
+			for (i=0; i<4; i++) {
+				if (p[i].x<0) p[i].x=0;
+				if (p[i].z<0) p[i].z=0;
+				if (p[i].x>max_x) p[i].x=max_x;
+				if (p[i].z>max_z) p[i].z=max_z;
+			}
+			
+			// zmienne do opisu figury
+			SpaceTypes::Line l[4];
+			PointXZ<int> min(p[0].x, p[0].z);
+			PointXZ<int> max(p[0].x, p[0].z);
+			
+			for (i=0, j=1; i<4; i++, j++) {
+			// zakładamy że punkty są uporządkowane na obwodzie figury której szukamy
+				if (j==4) j=0;
+				
+				// obliczenie parametrów prostych ograniczających figurę
+				if (p[i].z == p[j].z) {
+					// linia równoległa do osi X
+					if (p[i].x < p[j].x) {
+						l[i].a = p[i].x;
+						l[i].b = p[j].x;
+					} else {
+						l[i].a = p[j].x;
+						l[i].b = p[i].x;
+					}
+					l[i].z = p[j].z;
+					l[i].is_const_z = true;
+				} else {
+					l[i].a = (p[j].x - p[i].x)/(p[j].z - p[i].z);
+					l[i].b = p[i].x - l[i].a*p[i].z;
+					l[i].is_const_z = false;
+				}
+				
+				// znajdujemy prostokąt ograniczający
+				// rzutowanie na int zawesze daje przybliżenie w dół, dlatego przy max +1
+				if (p[i].x > max.x)
+					max.x = p[i].x + 1;
+				else if (p[i].x < min.x)
+					min.x = p[i].x;
+				
+				if (p[i].z > max.z)
+					max.z = p[i].z + 1;
+				else if (p[i].z < min.z)
+					min.z = p[i].z;
+			}
+			
+			for (i=min.z; i<=max.z; i++) { // rows number ~ z
+				// generujemy wspólrzędną x przecięcia dla wszystkich 4 linii
+				for (j=0; j<4; j++) {
+					if (l[j].is_const_z) {
+						// jest linia równoległa do x zatem nie możemy obliczać dla niej x
+						if (l[j].z == i) {
+							// ponadto równoległa do aktualnego wiersza zatem wypisujemy ją całą
+							for (int k=l[j].a; k<=l[j].b; k++) {
+								if (ctrl->check_and_false(i, k)) {
+									data_t cell = *data->get_cell(i, k);
+									cell->copy_content(dst, cell);
+								}
+							}
+							// i pomijamy dalsze sprawdzanie
+							x.clear();
+							break;
+						}
+					} else {
+						x.push_back( l[j].a*i + l[j].b );
+						// wynik rzutowany jest na int - w dół
+						// jest to zgodne z numerowaniem komórek lewym górnym rogiem
+					}
+				}
+				// wybieramy odpowiednie x'y
+				x.sort();
+				for(list<int>::iterator iter = x.begin(); iter != x.end(); ++iter) {
+					if (*iter >= min.x) {
+						j = *iter;
+						iter++;
+						int stop=*iter;
+						// bierzemy komórki powyżej i poniżej przetwoazranej linii
+						// położone pomiędzy min(X) > x_min a nastepnym w kolejnosci
+						while (j++<stop) {
+							// pod warunkiem że nie zostały już wzięte
+							if (i>0 && ctrl->check_and_false(i-1, j)) {
+								data_t cell = *data->get_cell(i-1, j);
+								cell->copy_content(dst, cell);
+							}
+							if (ctrl->check_and_false(i, j)) {
+								data_t cell = *data->get_cell(i, j);
+								cell->copy_content(dst, cell);
+							}
+						}
+						break;
+					}
+				}
+				x.clear();
+			}
+		}
+};
+#endif

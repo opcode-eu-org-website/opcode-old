@@ -1,0 +1,7 @@
+<article>
+<title>Instalacja oprogramowania</title>
+
+<p>Zarówno FreeBSD, jak i OpenBSD oferują oprogramowanie w postaci pakietów binarnych, jak i systemu portów. Porty to przygotowane do łatwego kompilowania źródła (coś na kształt pakietów źródłowych). Instalacja programów znajdujących się w paczkach binarnych jest dość prosta i sprowadza się do wydania komendy <code>pkg_add -r <var>nazwa_pakietu</var></code>. Aby to zadziałało oczywiście pakiet musi znajdować się w repozytorium w postaci pliku <code><var>nazwa_pakietu</var>.tbz</code>. Natomiast sam adres repozytorium może być modyfikowany poprzez ustawianie zmiennej środowiskowej <code>PACKAGESITE</code> np. <code>export PACKAGESITE=ftp://ftp.freebsd.org/pub/FreeBSD/ports/i386/packages-6.4-release/Latest/</code>. Wyeksportowanie tej zmiennej może być niekiedy konieczne do instalacji pakietu.</p>
+
+<p>Znalezienie w jakim pakiecie jest potrzebna nam aplikacja ułatwiają serwisy takie jak: <homepage>http://www.freebsd.org/ports/</homepage>. Do zarządzania pakietami przydają się także komendy takie jak: <code>pkg_info</code>, <code>pkg_version</code> i <code>pkg_delete</code>.</p>
+</article>

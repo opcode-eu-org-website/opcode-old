@@ -1,0 +1,12 @@
+#ifndef VERTEXPOINT_H
+#define VERTEXPOINT_H
+
+#include <GL/glut.h>
+
+/// struktura opisująca punkt naszego vertexu (zgodny z GL_T2F_V3F)
+struct VertexPoint {
+	GLfloat tekstura1[2];
+	GLfloat punkt[3];
+	VertexPoint(float x, float y, float z, float s, float r);
+};
+#endif

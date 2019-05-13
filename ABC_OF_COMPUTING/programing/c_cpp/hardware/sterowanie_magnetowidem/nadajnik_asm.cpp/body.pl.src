@@ -1,0 +1,206 @@
+/*
+ * program zczytuje kod pilota przy pomocy FT1 na płytce doświadczalnej
+ * przetwarza go do różnych postaci, wykonuje test jego poprawnosci
+ * i dopisuje informacje o nim do pliku wynikowego "pilot.dat"
+ *
+ * 2005.05.08
+ *
+ */
+
+#include <stdio.h>
+#include <sys/io.h>
+#include <unistd.h>
+#include <string.h>
+
+#include "config.h"
+#include "czas.cpp"
+
+#include "pilot.dat"
+
+
+// takie rozwiazanie moze ulatwic nam zycie gdybysmy chcielu uzyc innego pinu portu
+
+
+
+void help(char *argc[]) {
+	printf("Program wysyla do magnetowidu zadana komende.\nUzycie: %s opcja\n", argc[0]);
+	printf("Opcja moze przyjmowac jedna z nastepujacych wartosci:\n");
+	printf("help (wyswietla ten tekst),\n");
+	printf("on-off, play, pause, stop, do_przodu, do_tylu, index_do_przodu, index_do_tylu, rec,\n");
+	printf("input, ch+, ch-, dwucyfrowy, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0\n");
+	printf("menu, timer, clear, display, przelacz_licznik, sp-lp, slow, x2\n");
+	
+}
+
+
+// funkcja służąca do wysyłania zczytanego kodu, głównie w celu spawdzenia jego poprawności
+void wyslij(double czasy[], double czas_zera, int ograniczenie) {
+
+	unsigned long long czas_n;
+
+	// w kazdej iteracji nadajemy jeden bit
+	for (int i=0; i<=ograniczenie; i++) {
+		// nadawanie jedynki
+		NADAJ_JEDYNKE;
+		czas_n = czas();
+		while(czasy[i] > (czas()-czas_n));
+
+		// nadawanie zera
+		NADAJ_ZERO;
+		czas_n = czas();
+		while( czas_zera > (czas()-czas_n));
+	}
+	//while( 0.019825 * PROCESOR > (czas()-czas_n));
+}
+
+
+/*
+ * funkcja główna programu ...
+ *
+ */
+int main(int argv, char *argc[]) {
+	iopl (3); //ioperm (LPT_PORT,1,1);
+
+	if (argv != 2) {
+		printf("Niepoprawna liczba parametrow\n");
+		help(argc); return -1;
+	}
+
+
+	// zmienne pod ktore w skutek wyboru podstawie odpowiednie wartosci kodujace sygnal pilota
+	int sygnal, ograniczenie;
+
+
+	if ( !strcasecmp(argc[1],"help") ) {
+		help(argc); return 0;
+
+	} else if ( !strcasecmp(argc[1],"on-off") ) {
+		sygnal = ON_OFF_S;
+		ograniczenie = ON_OFF_L;
+	} else if ( !strcasecmp(argc[1],"play") ) {
+		sygnal = PLAY_S;
+		ograniczenie = PLAY_L;
+	} else if ( !strcasecmp(argc[1],"pause") ) {
+		sygnal = PAUSE_S;
+		ograniczenie = PAUSE_L;
+	} else if ( !strcasecmp(argc[1],"stop") ) {
+		sygnal = STOP_S;
+		ograniczenie = STOP_L;
+	} else if ( !strcasecmp(argc[1],"do_przodu") ) {
+		sygnal = FF_S;
+		ograniczenie = FF_L;
+	} else if ( !strcasecmp(argc[1],"do_tylu") ) {
+		sygnal = REW_S;
+		ograniczenie = REW_L;
+	} else if ( !strcasecmp(argc[1],"rec") ) {
+		sygnal = REC_S;
+		ograniczenie = REC_L;
+	} else if ( !strcasecmp(argc[1],"index_do_przodu") ) {
+		sygnal = IFF_S;
+		ograniczenie = IFF_L;
+	} else if ( !strcasecmp(argc[1],"index_do_tylu") ) {
+		sygnal = IREW_S;
+		ograniczenie = IREW_L;
+
+
+	} else if ( !strcasecmp(argc[1],"input") ) {
+		sygnal = INPUT_SELECT_S;
+		ograniczenie = INPUT_SELECT_L;
+	} else if ( !strcasecmp(argc[1],"ch+") ) {
+		sygnal = CH_UP_S;
+		ograniczenie = CH_UP_L;
+	} else if ( !strcasecmp(argc[1],"ch-") ) {
+		sygnal = CH_DOWN_S;
+		ograniczenie = CH_DOWN_L;
+
+	} else if ( !strcasecmp(argc[1],"dwucyfrowy") ) {
+		sygnal = DWUCYFROWY_S;
+		ograniczenie = DWUCYFROWY_L;
+	} else if ( !strcasecmp(argc[1],"1") ) {
+		sygnal = NUM_1_S;
+		ograniczenie = NUM_1_L;
+	} else if ( !strcasecmp(argc[1],"2") ) {
+		sygnal = NUM_2_S;
+		ograniczenie = NUM_2_L;
+	} else if ( !strcasecmp(argc[1],"3") ) {
+		sygnal = NUM_3_S;
+		ograniczenie = NUM_3_L;
+	} else if ( !strcasecmp(argc[1],"4") ) {
+		sygnal = NUM_4_S;
+		ograniczenie = NUM_4_L;
+	} else if ( !strcasecmp(argc[1],"5") ) {
+		sygnal = NUM_5_S;
+		ograniczenie = NUM_5_L;
+	} else if ( !strcasecmp(argc[1],"6") ) {
+		sygnal = NUM_6_S;
+		ograniczenie = NUM_6_L;
+	} else if ( !strcasecmp(argc[1],"7") ) {
+		sygnal = NUM_7_S;
+		ograniczenie = NUM_7_L;
+	} else if ( !strcasecmp(argc[1],"8") ) {
+		sygnal = NUM_8_S;
+		ograniczenie = NUM_8_L;
+	} else if ( !strcasecmp(argc[1],"9") ) {
+		sygnal = NUM_9_S;
+		ograniczenie = NUM_9_L;
+	} else if ( !strcasecmp(argc[1],"0") ) {
+		sygnal = NUM_0_S;
+		ograniczenie = NUM_0_L;
+
+
+	} else if ( !strcasecmp(argc[1],"menu") ) {
+		sygnal = MENU_S;
+		ograniczenie = MENU_L;
+	} else if ( !strcasecmp(argc[1],"timer") ) {
+		sygnal = TIMER_S;
+		ograniczenie = TIMER_L;
+	} else if ( !strcasecmp(argc[1],"clear") ) {
+		sygnal = CLEAR_S;
+		ograniczenie = CLEAR_L;
+	} else if ( !strcasecmp(argc[1],"display") ) {
+		sygnal = INFO_S;
+		ograniczenie = INFO_L;
+	} else if ( !strcasecmp(argc[1],"przelacz_licznik") ) {
+		sygnal = COUNTER_REMAIN_S;
+		ograniczenie = COUNTER_REMAIN_L;
+
+
+	} else if ( !strcasecmp(argc[1],"sp-lp") ) {
+		sygnal = SP_LP_S;
+		ograniczenie = SP_LP_L;
+	} else if ( !strcasecmp(argc[1],"slow") ) {
+		sygnal = SLOW_S;
+		ograniczenie = SLOW_L;
+	} else if ( !strcasecmp(argc[1],"x2") ) {
+		sygnal = x2_S;
+		ograniczenie = x2_L;
+
+
+	} else {
+		printf("Nieznany parametr\n");
+		help(argc); return -1;
+	}
+
+
+	// tablica czasow i jej rozmiar
+	int czasy_size = 50;
+	double* czasy = new double [ czasy_size ];
+	// powinenem kiedys zwolnic ta pamiec ...
+	// jak sie okazlo taka deklaracja jest potrzebna aby ta tablice muc przekazac do funkcji,
+	// gdy "double czasy [ czasy_size ]" dzialalo tylko dla odwolan w main()
+
+	czasy[0] = CZAS_POCZATKU * PROCESOR *  CZAS_PODSTAWOWY;
+	// wyczyszczenie tablicy "czasy"
+	for (int i=1; i<= ograniczenie; i++) {
+		czasy[i] = (sygnal & 1)!=0 ? CZAS_DLUGI : CZAS_KROTKI ;
+		sygnal = sygnal >> 1;
+		czasy[i] = czasy[i] * PROCESOR *  CZAS_PODSTAWOWY;
+	}
+
+	asm("cli"); // wylacza przerwania
+		for (int i=0; i<10; i++)
+			wyslij(czasy, CZAS_ZERA * PROCESOR * CZAS_PODSTAWOWY, ograniczenie);
+	asm("sti"); // wlacza przerwania
+
+	return 0;
+}

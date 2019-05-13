@@ -1,0 +1,6 @@
+<article>
+<title>Dzielnik napięcia</title>
+<p>Rezystancja zastępcza dzielnika napięcia wynosi <eq_latex>R_z = R_1 || R_2 = \frac{R_1 R_2}{R_1 + R_2}</eq_latex>.</p>
+
+<p>Wygodną metodą doboru wartości rezystancji celem uzyskania sztywnego dzielnika jest przyjęcie porządnej tolerancji napięcia <eq>U<sub>tol<sub>max</sub></sub></eq>(dla założonego maksymalnego prądu odbieranego  <eq>I<sub>odb<sub>max</sub></sub></eq>). Następnie zapisujemy warunek <eq_latex>R_z \leq \frac{U_{tol_{max}}}{I_{odb_{max}}}</eq_latex>, a jako że <eq_latex>R_z &lt; \min(R_1, R_2)</eq_latex> to poprzedni warunek określa nam wartość mniejszego z oporów w dzielniku. Wartość drugiego oporu możemy uzyskać z zależności <eq_latex>R_1 = \frac{U_{tol_{max}}}{I_{odb_{max}}} \cdot \frac{U_{we}-U_{wy}}{U_{wy}}</eq_latex> (gdy <eq_latex>U_{wy} &lt; U_{we} /2</eq_latex>) lub <eq_latex>R_2 = \frac{U_{tol_{max}}}{I_{odb_{max}}} \cdot \frac{U_wy}{U_{we}-U_{wy}}</eq_latex> (w przeciwnym wypadku).</p>
+</article>

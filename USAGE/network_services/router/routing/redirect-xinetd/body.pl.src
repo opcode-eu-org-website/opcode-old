@@ -1,0 +1,45 @@
+# bind = ::0 jest sztuczką powodującą że usługa jest dostępna przez IPv6 oraz przez IPv6 ...
+# niestety dostęp po IPv4 śmieci wtedy w logach: "Setting IPV6_V6ONLY option failed"
+# jeżeli nie podano tej opcji usługa dostępna jest tylko po IPv4
+# (chyba że podano flagę IPv6, ale nie jest możliwe podanie flag IPv4 i IPv6 jednocześnie ...)
+# wersja pakietu xinetd: 2.3.14-1
+service www
+{
+    bind           = ::0
+    socket_type    = stream     
+    wait           = no
+    user           = root
+    redirect       = moj.serwer.www 80
+}
+
+# wymaga wpisania do /etc/services :
+# xmpp-sclient		5223/tcp	jabber-client	# Jabber Client Connection
+# xmpp-sclient		5223/udp	jabber-client
+service xmpp-sclient
+{
+    bind           = ::0
+    socket_type    = stream
+    wait           = no
+    user           = root
+    redirect       = moj.serwer.xmpp 5223
+}
+
+
+service xmpp-client
+{
+    bind           = ::0
+    socket_type    = stream
+    wait           = no
+    user           = root
+    redirect       = moj.serwer.xmpp 5222
+}
+
+
+service xmpp-server
+{
+    bind           = ::0
+    socket_type    = stream
+    wait           = no
+    user           = root
+    redirect       = moj.serwer.xmpp 5269
+}

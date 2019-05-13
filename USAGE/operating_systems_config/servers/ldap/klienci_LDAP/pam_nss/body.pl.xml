@@ -1,0 +1,59 @@
+<article>
+<title>Autoryzacja kont systemowych w LDAP z użyciem PAM i NSS</title>
+
+<p>W przypadku korzystania z LDAP do autoryzacji użytkowników systemowych wymagane jest umieszczenie odpowiedniej konfiguracji (wskazującego źródło informacji autoryzacyjnych LDAP) w plikach <kbd class="path">/etc/nss-ldapd.conf</kbd> (lub <kbd class="path">/etc/libnss-ldap.conf</kbd>) oraz <kbd class="path">/etc/pam_ldap.conf</kbd>. Jako że pliki te są łudząco podobne do siebie należy uważać aby nie powstawały rozbieżności między nimi - niespójność danych w tych plikach grodzi dziwnymi i trudnymi do diagnozowania błędami) oraz odpowiedniej konfiguracji samego pam w plikach <kbd class="path">/etc/pam.d/*</kbd> np:</p>
+<pre>
+account    required     pam_ldap.so
+auth       sufficient   pam_ldap.so use_first_pass
+password   sufficient   pam_ldap.so use_first_pass
+
+session    optional     pam_ldap.so
+</pre>
+
+<p>Konfiguracja krok po kroku:</p>
+<ol>
+	<li><code>aptitude install libnss-ldapd libpam-ldap</code></li>
+	<li>w trakcie konfiguracji podajemy (dwu krotnie - osobno dla nss i osobno dla pam) poprawny URI serwera LDAP oraz bazowe DN dla wyszukiwania (zwyczajowo jest to nasza domena zapisywana w postaci kolejnych <code>dc=</code> składających się z kolejnych członów domeny rozdzielanych kroplami - np. dla <var>subdomena.example.net</var> będzie to <var>dc=subdomena,dc=example,dc=net</var>)<br />
+		aby nie musieć podawać danych autoryzacyjnych LDAP (gdy nasz serwer odpowiada na niezautoryzowane zapytania) na pytania o zezwolenie lokalnemu root'owi na dostęp administracyjny oraz o to czy LDAP wymaga autoryzacji odpowiadamy przecząco
+	</li>
+	<li>W tym momencie komenda <code>grep -v '^#' /etc/*ldap*.conf  | grep -v '^[^:]*:$'</code> powinna zwracać coś na kształt:<pre>
+/etc/nss-ldapd.conf:uid nslcd
+/etc/nss-ldapd.conf:gid nslcd
+/etc/nss-ldapd.conf:uri <var>ldap://mojserwerldap/</var>
+/etc/nss-ldapd.conf:base <var>dc=subdomena,dc=example,dc=net</var>
+/etc/pam_ldap.conf:base <var>dc=subdomena,dc=example,dc=net</var>
+/etc/pam_ldap.conf:uri <var>ldap://mojserwerldap/</var>
+/etc/pam_ldap.conf:ldap_version 3
+/etc/pam_ldap.conf:pam_password crypt</pre>
+	Polecam także dodanie do pliku <kbd class="path">/etc/pam_ldap.conf</kbd> ograniczenia czasu oczekiwania na odpowiedź serwera LDAP: <pre>
+timelimit 10
+bind_timelimit 10
+bind_policy soft</pre>
+	</li>
+	<li>W przypadku nowszych systemów odpowiadamy na pytania dotyczące modyfikacji konfiguracji PAM aby używać autoryzacji UNIXowej i LDAP w przypadku starszych samodzielnie modyfikujemy pliki <kbd class="path">/etc/pam.d/common-*</kbd>:<ul>
+		<li><kbd class="path">common-account</kbd> zastępujemy następującą zawartością:<pre>
+account [success=2 new_authtok_reqd=done default=ignore]        pam_unix.so
+account [success=1 default=ignore]      pam_ldap.so
+account requisite                       pam_deny.so
+account required                        pam_permit.so
+account required                        pam_access.so</pre>
+		</li>
+		<li><kbd class="path">common-auth</kbd> zastępujemy następującą zawartością:<pre>
+auth    [success=2 default=ignore]      pam_unix.so nullok_secure
+auth    [success=1 default=ignore]      pam_ldap.so use_first_pass
+auth    requisite                       pam_deny.so
+auth    required                        pam_permit.so</pre>
+		</li>
+		<li>w <kbd class="path">common-password</kbd> dodajemy:<pre>
+password    sufficient    pam_ldap.so
+password    required      pam_deny.so</pre>
+		</li>
+		<li>w <kbd class="path">common-session</kbd> dodajemy:<pre>
+session     required      pam_limits.so
+session     optional      pam_ldap.so</pre>
+		Opcjonalnie możemy dodać <code>session     required      pam_mkhomedir.so skel=/etc/skel umask=0022</code> aby automatycznie tworzyć katalogi domowe</li>
+	</ul></li>
+	<li>Wpisy ldap przy wybranych przez nas pozycjach w <kbd class="path">/etc/nsswitch.conf</kbd> powinny zostać dodane automatycznie, jeżeli nie robimy to ręcznie.</li>
+	<li>W <kbd class="path">/etc/security/access.conf</kbd> umieszczamy wpis ograniczający prawo logowania do użytkowników znajdujących się w podanych grupach: <code>-:ALL EXCEPT root <var>grupaA</var> <var>grupaB</var>:ALL EXCEPT LOCAL</code></li>
+</ol>
+</article>

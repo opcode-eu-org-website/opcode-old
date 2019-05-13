@@ -1,0 +1,155 @@
+/*****************************************************
+ ** USTAWIENIA WYGLADU STANDARDOWYCH ELEMENTOW HTML **
+ *****************************************************/
+* {
+	border: 0;
+	margin: 0;
+	padding: 0;
+	font-size: 9pt;
+}
+hr {
+	color: #a4a4a4;
+	border-bottom: 1px dotted #a4a4a4;
+}
+a {
+	color: #06c;
+}
+a:hover {
+	background-color: #fff;
+}
+h1,h2,h3,h4,h5,h6 {
+	color: #036;
+}
+h1 {
+	font-size: 2em;
+}
+h2 {
+	font-size: 1.5em;
+}
+h3 {
+	font-size: 1.17em;
+}
+form label {
+	display: block;
+	margin-top: 3px;
+	vertical-align: top;
+	width: 25em;
+}
+input, textarea, select {
+	display: block;
+	margin: 0.5em 20px 0.5em 20px;
+}
+input[type="image"] {
+	margin-left: 0;
+}
+
+
+
+/****************************
+ ** ELEMENTY UKŁADU STRONY **
+ ****************************/
+
+/** HEADER - WNETRZE NAGLOWKA **/
+div.header div#title {
+	padding: 0 0.5em 0.5em 0;
+	margin: 0;
+	border-bottom: 1px solid #a4a4a4;
+	text-align: right;
+}
+div.header p#path {
+	padding: 0 0.2em 1.5em 0.2em;
+	margin: 0;
+	text-align: left;
+	color: #06c;
+}
+
+/** CONTENT - STRONA SKANU **/
+div.content div.image {
+	position: relative;
+	margin: 0.5em 0 0.5em 0.5em;
+	text-align: center;
+}
+div.content div.image img {
+	position: relative;
+	background-color: #ffffff;
+	border: 1px solid #a4a4a4;
+}
+div.content div.navigation-top {
+	height: 1.9em;
+	margin: 0 0 0 0.5em;
+	border-bottom: 1px dotted #a4a4a4;
+	text-align: center;
+}
+div.content div.navigation-bottom {
+	height: 1.9em;
+	margin: 0 0 0 0.5em;
+	border-top: 1px dotted #a4a4a4;
+	text-align: center;
+}
+
+/** CONTENT - STRONY LIST **/
+div.content h2 {
+	margin: 0 0 1.5em 0.5em;
+	border-bottom: 1px dotted #a4a4a4;
+	text-align: right;
+}
+div.content h3 {
+	margin: 1.5em 0 0 0.5em;
+	text-align: left;
+}
+div.content div.result {
+	margin: 0 0 0 2em;
+}
+div.content div.result p.summary {
+	margin: 1em 0 0 0.5em;
+	color: #000000;
+	font-size: 15px;
+}
+div.content div.result p.summary > * {
+	font-size: 15px;
+}
+div.content div.result p.fulltext {
+	margin: 0 0 0.5em 1em;
+}
+
+/** GRAYBOX - box for left_menu - OGOLNE **/
+div.left_menu div.graybox:first-child {
+	margin-top: 2.8em;
+}
+div.graybox {
+	position: relative;
+	padding: 0.5em;
+	margin: 1em 0 1em 0;
+	background-color: #eaeaea;
+	border: 1px solid #a4a4a4;
+}
+div.graybox h6 {
+	text-align: left;
+	font-weight: bold;
+	font-size: 100%;
+	padding-bottom: 0.5em;
+	margin-bottom: 0.5em;
+	border-bottom: 1px dotted #a4a4a4;
+}
+div.graybox hr {
+	margin: 0 0.5em 0 0.5em;
+}
+
+/** FORMULARZE W GAYBOXACH */
+form.navigation select, form.navigation label, form.navigation input {
+	display: inline;
+	vertical-align: middle;
+	float: none;
+	margin: 0.5em 2px 0.5em 2px;
+}
+form.navigation input[type="image"] {
+	float: right;
+}
+form.search_library input[type="image"] {
+	margin-left: 20px;
+}
+
+/** obrazek w stopcje **/
+div.footer img {
+	float: right;
+}

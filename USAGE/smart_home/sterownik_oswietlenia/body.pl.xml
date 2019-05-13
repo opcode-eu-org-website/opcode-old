@@ -1,0 +1,32 @@
+<article>
+<title>Triakowy sterownik obwodów 230V AC</title>
+
+<p>Sterownik umożliwia sterowanie wieloma obwodami 230V AC poprzez interfejs <wiki pl="RS-485">RS-485</wiki> z protokołem modbus-rtu, z wykorzystaniem <id_link id="digital:programowalne">mikrokontrolera</id_link> Atmega8 i zestawy optotriak + triak. W zależności od wariantu realizacyjnego może to być od 6 linii PWM (z fazową regulacją jasności w technologii <wiki pl="Modulacja szerokości impulsów">Pulse Width Modulation</wiki>), poprzez <sch_link name="sterownik_oswietlenia-4PWM">4 PWM + 4 ON/OFF</sch_link>, do 12 linii ON/OFF. Dla modułów triakowych przewidziano zastosowanie BTA16 (lub BTB16) pracujących na 10A z radiatorem HS-142-50 (patrz <id_link id="electronics:radiatory">artykuł o doborze radiatorów</id_link>).</p>
+
+<p>Projekt tworzony był z myślą o sterowaniu obwodów oświetleniowych jednak z powodzeniem może być zastosowany do sterowania innymi obwodami AC, zwłaszcza o niewielkich prądach (gdzie straty mocy na triaku nie są wada w porównaniu z rozwiązaniami przekaźnikowymi).  Wchodzące w skład projektu moduły triakowe mogą być też wykorzystane jako autonomiczne moduły załączające (umieszczone np. w standardowych obudowach na szynę DIN) i sterowane bezpośrednio z innego sterownika (np. opartego na procesorze ARM i systemie Linux).</p>
+
+<p class="download"><a class="int" href="./sterownik_oswietlenia.tgz">Pobierz</a></p>
+
+<p>Na projekt sterownika składają się moduły:</p><ul>
+	<li>triak + optotriak + układ detekcji zera dla linii PWM:<ul>
+		<li><sch_link name="modul-triak-PWM">schemat ideowy</sch_link></li>
+		<li><pcb_link name="modul-triak-PWM">projekt PCB</pcb_link></li>
+		<li>Pliki do wykorzystania przy tworzeniu projektu zbiorczego: <a class="int" href="./modul-triak-PWM.sym">symbol</a>, <a class="int" href="./modul-triak-PWM-conn.sch">schemat</a> wstawiający złącze do podłączenia modułu na osobnym PCB</li>
+	</ul></li>
+	<li>triak + optotriak z wbudowaną detekcją zera dla linii ON/OFF:<ul>
+		<li><sch_link name="modul-triak-no_PWM">schemat ideowy</sch_link></li>
+		<li><pcb_link name="modul-triak-no_PWM">projekt PCB</pcb_link></li>
+		<li>Pliki do wykorzystania przy tworzeniu projektu zbiorczego: <a class="int" href="./modul-triak-no_PWM.sym">symbol</a>, <a class="int" href="./modul-triak-no_PWM-conn.sch">schemat</a> wstawiający złącze do podłączenia modułu na osobnym PCB</li>
+	</ul></li>
+	<li>mikrokontroler Atmega8 + komunikacja poprzez interfejs <wiki pl="RS-485">RS-485</wiki> z projektu <id_link id="toolbox4electronic:libs4avr">biblioteczki dla uC</id_link> obudowane złaczami i peryferiami do podłączenia 4 modułów PWM i 4 modułów ON/OFF:<ul>
+		<li><sch_link name="sterownik_oswietlenia-4PWM">schemat ideowy</sch_link></li>
+		<li><pcb_link name="sterownik_oswietlenia-4PWM">projekt PCB</pcb_link></li>
+	</ul></li>
+	<li><id_link id="sterownik_oswietlenia.c">program sterujący pracą mikrokontrolera</id_link></li>
+</ul>
+
+<sch_show name="modul-triak-PWM" />
+<sch_show name="modul-triak-no_PWM" />
+
+<p>Zobacz w Sieci: <doc url="http://www.elektroda.pl/rtvforum/viewtopic.php?t=44066">System modułowy z komunikacją po RS 4xx</doc>.</p>
+</article>

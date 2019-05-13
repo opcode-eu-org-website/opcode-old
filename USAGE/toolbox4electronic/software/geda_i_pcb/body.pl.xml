@@ -1,0 +1,37 @@
+<article>
+<title>GEDA i PCB</title>
+
+<p>Jest to zestaw oprogramowania służącego do tworzenia schematów elektronicznych (<code>gschem</code>) oraz projektów płytek drukowanych (<code>pcb</code> / <code>pcb-rnd</code>).</p>
+
+<p><b>Biblioteka symboli, footprintów oraz zbiór narzędzi i konfigów związanych z gschem i pcb-rnd został przeniesiony do repozytorium git: <a href="https://bitbucket.org/RPaciorek/EDA-libs">https://bitbucket.org/RPaciorek/EDA-libs</a>.</b></p>
+
+<subtitle>Skróty klawiaturowe w PCB</subtitle>
+<p>Przydatna klawiszologia dla pcb (oraz pcb-rnd w wersji &lt;2.0):</p>
+<ul>
+	<li>informacyjne, pomocnicze:<ul>
+		<li>Shift+D - pokazanie numeracji pinów w suboknie</li>
+		<li>D - pokazanie numeracji pinów (lub numeru wskazanego pinu) na schemacie</li>
+		<li>F - wyszukanie połączeń</li>
+		<li>O - aktualizacja "rat line"</li>
+	</ul></li>
+	
+	<li>zmiany rozmiarów odstępów, itp.:<ul>
+		<li>S / Shift+S - zmiana rozmiaru obwódki wskazanego elementu (np. grubości linii rysunku warstwy opisowej lub grubości pola lutowniczego wokół)</li>
+		<li>Alt+S / Alt+Shift+S - zmiana rozmiaru otworu wskazanego elementu (pinu, via, ...)</li>
+		<li>Q - zmiana kształtu (koło/kwadrat) wskazanego pinu lub wszystkich pinów w wskazanym elemencie</li>
+		<li>K / Shif+K - zmiana odstępu pomiędzy linią, via, pinem, etc a wielobokiem</li>
+		<li>J - przełączenie odstępu pomiędzy linią a wielobokiem</li>
+	</ul></li>
+	
+	<li>inne:<ul>
+		<li>B / Shift+B - przeniesienie wskazanego / zaznaczonych elementów na drugą stronę płytki</li>
+		<li>M / Shift+M - przeniesienie wskazanego / zaznaczonych ścieżek na aktualnie wybraną warstwę</li>
+		<li>zmiana narzędzia: F2 - rysowanie linii, ..., F9 - obrót elementu</li>
+		<li>H - ukrycie nazw</li>
+	</ul></li>
+</ul>
+
+<subtitle>Atrybuty net i netlist w gschem</subtitle>
+<p>W gschem występujądwa atrybuty o podobnych nazwach - "netname" oraz "net". Warto wiedzieć że pierwszy z nich służy do nazywania danego drutu i umożliwia łączenie poprzez nazwy czy też tworzenie magistral (bus). Drugi jest postaci "nazwa:pin" i służy do powiedzenia że do danego pinu podłączony (wirtualny) drucik o wskazanej nazwie. Umożliwia to nadpisanie domyślnych podłączeń w układach (gnd, vcc, itp) a także stworzenie jedno-pinowego elementu który będzie podłączał się do wskazanej w atrybucie net sieci.</p>
+
+</article>

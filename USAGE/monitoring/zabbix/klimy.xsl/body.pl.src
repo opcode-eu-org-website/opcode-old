@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+
+<xsl:stylesheet version="2.0"
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+	xmlns:fn="http://www.w3.org/2005/xpath-functions"
+	exclude-result-prefixes="fn"
+>
+	<xsl:output method='text' encoding='utf-8' />
+	<xsl:param name="hostname" />
+
+	<xsl:variable name="LF"><xsl:text>
+</xsl:text></xsl:variable>
+
+	<xsl:strip-space elements="*" />
+	
+	<xsl:template match="Item">
+		<xsl:choose>
+			<xsl:when test="Label='Return Air Temperature'">
+				<xsl:value-of select="$hostname" />
+				<text> temperatura </text>
+				<xsl:value-of select="Value"/>
+				<xsl:value-of select="$LF"/>
+			</xsl:when>
+			<xsl:when test="Label='Return Air Humidity'">
+				<xsl:value-of select="$hostname" />
+				<text> wilgotnosc </text>
+				<xsl:value-of select="Value"/>
+				<xsl:value-of select="$LF"/>
+			</xsl:when>
+			<xsl:when test="Label='Unit Status'">
+				<xsl:value-of select="$hostname" />
+				<text> status.unit </text>
+				<xsl:apply-templates select="Value" />
+				<xsl:value-of select="$LF"/>
+			</xsl:when>
+			<xsl:when test="Label='Cooling Status'">
+				<xsl:value-of select="$hostname" />
+				<text> status.cooling </text>
+				<xsl:apply-templates select="Value" />
+				<xsl:value-of select="$LF"/>
+			</xsl:when>
+			<xsl:when test="Label='Electrical Heater Status'">
+				<xsl:value-of select="$hostname" />
+				<text> status.heater </text>
+				<xsl:apply-templates select="Value" />
+				<xsl:value-of select="$LF"/>
+			</xsl:when>
+			<xsl:when test="Label='Dehumdification Status'">
+				<xsl:value-of select="$hostname" />
+				<text> status.dehumdification </text>
+				<xsl:apply-templates select="Value" />
+				<xsl:value-of select="$LF"/>
+			</xsl:when>
+			<xsl:when test="Label='Humidifier Status'">
+				<xsl:value-of select="$hostname" />
+				<text> status.humidifier </text>
+				<xsl:apply-templates select="Value" />
+				<xsl:value-of select="$LF"/>
+			</xsl:when>
+		</xsl:choose>
+	</xsl:template>
+	<xsl:template match="Value">
+		<xsl:choose>
+			<xsl:when test="text()='On'">
+				<text>1</text>
+			</xsl:when>
+			<xsl:when test="text()='Unit On'">
+				<text>1</text>
+			</xsl:when>
+			<xsl:when test="text()='Off'">
+				<text>0</text>
+			</xsl:when>
+			<xsl:when test="text()='Unit Off'">
+				<text>0</text>
+			</xsl:when>
+			<xsl:otherwise>
+				<text>2</text>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+</xsl:stylesheet>

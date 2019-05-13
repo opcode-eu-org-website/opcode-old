@@ -1,0 +1,22 @@
+*** OAI2DP.pm	2008-07-14 19:43:02.000000000 +0200
+--- lib/OAI/OAI2DP.pm	2008-07-08 17:26:51.000000000 +0200
+***************
+*** 99,105 ****
+     {
+        foreach my $param ($self->{'cgi'}->param)
+        {
+!          $request .= " $param=\"".$self->{'cgi'}->param ($param)."\"";
+        }
+     }
+     $request .= '>'.$self->{'cgi'}->{'baseURL'}.'</request>';
+--- 99,108 ----
+     {
+        foreach my $param ($self->{'cgi'}->param)
+        {
+!          my $rrp_hack_tmp = $self->{'cgi'}->param ($param);
+!          $rrp_hack_tmp =~ s/"//g;
+!          $request .= " $param=\"".$rrp_hack_tmp."\"";
+!          #$request .= " $param=\"".$self->{'cgi'}->param ($param)."\"";
+        }
+     }
+     $request .= '>'.$self->{'cgi'}->{'baseURL'}.'</request>';

@@ -1,0 +1,7 @@
+<article>
+<title>Klucz</title>
+
+<p>Tradycyjny <id_link id="ABC_OF_COMPUTING:electronics:tranzystory">klucz na tranzystorze NPN</id_link> jest bardzo dobrym rozwiązaniem gdy zadowala nas odłączanie od zasilanego obwodu potencjału niższego (masy). W przeciwnym razie powinniśmy użyć klucza PNP jednak on wymaga aby napięcie sterowania osiągało co najmniej wartość napięcia zasilania, co także często jest niezadowalające. Rozwiązaniem takiego problemu wydaje się zastosowanie układu złożonego z tranzystora PNP i tranzystora P-MOSFET, gdzie MOSFET jest sterowany z klucza NPN. Dodatkowo dzięki takiemu rozwiązaniu (przy zastosowaniu odpowiedniego MOSFETa) uzyskujemy praktycznie pomijalny spadek napięcia na takim kluczu (znacznie mniejszy niż umowne 0.2V przy tranzystorach bipolarnych).</p>
+
+<p class="center"><img_from_src name="klucz_npn_pmosfet" type="sch" alt="schemat ideowy klucza z MOSFETem sterowanym z NPN" /></p>
+</article>

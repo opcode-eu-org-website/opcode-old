@@ -1,0 +1,14 @@
+<article>
+<title>Sterownik LCD z komunikacją RS232 w VHDL</title>
+
+<p>Niniejszy kod ten powstał w ramach zaliczenia przedmiotu Projektowanie Programowalnych Układów Scalonych na Wydziale Elektroniki i Technik Informacyjnyh Politechniki Warszawskiej. Zadanie polegało na stworzeniu układu sterującego alfanumerycznym wyświetlaczem LCD opartym o sterownik zgodny z <datasheet id="hd44780">HD44780</datasheet> w postaci oprogramowania układu FPGA. Układ miał odbierać dane i komendy sterujące z wykorzystaniem portu szeregowe UART.</p>
+
+<p>Projekt został zrealizowany w postaci kodu VHDL. Posiada konstrukcję modularną, wydzielić można następujące moduły:</p>
+<ul>
+	<li>układ odbierający dane z postu szeregowego (<id_link id="uart_rxd.vhdl">uart_rxd.vhdl</id_link>)</li>
+	<li>układ zapewniający komunikację z wyświetlaczem LCD - wysyłanie komend i danych (<id_link id="lcd.vhdl">lcd.vhdl</id_link>)</li>
+	<li>układ sterujący (<id_link id="sterownik.vhdl">sterownik.vhdl</id_link>)</li>
+	<li>połączenia pomiędzy modułami zostały opisane w <id_link id="polaczenie.vhdl">polaczenie.vhdl</id_link></li>
+</ul>
+<p>Wszystkie trzy układy sterujące zostały zrealizowane w formie automatów.</p>
+</article>

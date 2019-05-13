@@ -1,0 +1,7 @@
+<article>
+<title>Budowanie modułów dla swojego jądra</title>
+<p>Często nie ma paczek z zbudowanymi modułami dla używanej przez nas wersji jądra, niekiedy takich modułów nie ma w ogóle. Należy wtedy zainstalować pakiet XXXX-source (np. shfs-source, o którym poniżej), w katalogu <kbd class="path">/usr/src/</kbd> pojawi się plik z spakowanymi źródłami danego modułu. Należy po przejściu do wspomnianego katalogu rozpakować źródła (najczęściej: <code>tar -xjf <samp>xxxx</samp>.tar.bz2 lub tar -xzf <samp>xxxx</samp>.tar.gz</code>).
+	Następnie przejść do katalogu z nagłówkami odpowiedniego jądra (musi być zainstalowany odpowiedni pakiet linux-headers-<samp>YYYYZZZZ</samp>, gdzie <samp>YYYY</samp> wersja jadra, a <samp>ZZZZ</samp> to określenie wersji pakietu jądra - np: <code>-1-686-smp</code>) - <kbd class="path">/usr/src/linux-headers-YYYYZZZZ</kbd>.
+	I tam wykonać: <code>make-kpkg --rootcmd=fakeroot --append-to-version=<samp>ZZZZ</samp> modules-image</code>. Po wykonaniu tego polecenia wracamy do <kbd class="path">/usr/src/</kbd> i tam czekają na nas gotowe do zainstalowania (np. przez dpkg -i) pakiety Debiana (*.deb).
+</p>
+</article>

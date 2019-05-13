@@ -1,0 +1,5 @@
+<article>
+<title>Skrypty z opcjami</title>
+
+<p>Przy zastosowaniu narzędzi takich jak <code>getopt</code>, <code>getopts</code> możliwe jest pisanie skryptów dobrze reagujących na przekazywane opcje i parametry (w taki sposób jak normalne unix'owe programy). Poniżej prezentuję rozwiązanie oparte na programie "getopt", pozwala ono na korzystanie zarówno z długich jak i krótkich opcji (łatwiejsza w zastosowaniu komenda getopts ma niestety problem z opcjami długimi). Alternatywne rozwiązanie oparte na awk zawarte jest w <id_link id="engine-base.sh">engine-base.sh</id_link>.</p>
+</article>

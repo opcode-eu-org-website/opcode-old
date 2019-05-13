@@ -1,0 +1,143 @@
+#!/bin/bash
+
+# możliwe jest także wywołanie z jednym parametrem stanowiącym łańcuch tekstowy
+# wykonywana jest wtedy konwersja kodowania base64/qp2 na 8 bit
+# oraz odpowiedniego kodowania znaków narodowych do utf8
+#
+# wymagane paczki: mew-bin (dla mewdecode), konwert, gawk, procmail (dla formail)
+
+convert_charset() {
+	case "$1" in
+		"ISO-8859-2" | "iso-8859-2")
+			echo "konwert isolatin2-utf8"
+			;;
+		"UTF-8" | "utf-8")
+			echo "cat"
+			;;
+		*)
+			echo "cat"
+			;;
+	esac
+}
+
+convert_encode() {
+	case "$1" in
+		"Q" | "q" | "quoted-printable" | " quoted-printable")
+			echo "konwert qp-8bit"
+			;;
+		"B" | "b" | "base64" | " base64")
+			echo "mewdecode"
+			;;
+		*)
+			echo "cat"
+			;;
+	esac
+}
+
+base64qp2utf8() {
+	sed -e 's#=?\([^=]\)#\n=?\1#g' | sed -e 's#\([^?]*\)=?\([^?]*\)?\([qQbB]\)?\([^?]*\)?=\(.*\)#\1\n\2 \3 =?@@@?= \4\n\5#g' |
+	  while read w1 w2 w3 w4; do
+		if [ "$w3" = "=?@@@?=" ]; then
+			echo "$w4" | `convert_encode "$w2"` | `convert_charset "$w1"` | sed -e 's#^ *##g' -e 's# *$##g'
+		else
+			echo "$w1 $w2 $w3 $w4" | sed -e 's#^ *##g' -e 's# *$##g'
+		fi
+	done | tr '\n' ' '
+}
+
+email2text() {
+	# header
+	DATE=`echo "$1" | formail -cx 'Date:'`
+	FROM=`echo "$1" | formail -cx 'From:' | base64qp2utf8`
+	SUBJ=`echo "$1" | formail -cx 'Subject:' | base64qp2utf8`
+	echo -e "DATE: $DATE\nFROM: $FROM\nSUBJECT: $SUBJ\nBODY:"
+	
+	if [ "$2" != "nobody" ]; then
+		# body
+		CONT_ENCO=`echo "$1" | formail -cx 'Content-Transfer-Encoding:'`
+		CONT_TYPE=`echo "$1" | formail -cx 'Content-Type:'`
+		
+		MIME_TYPE=`echo $CONT_TYPE | sed 's#\([^;]*\);.*$#\1#'`
+		case "$MIME_TYPE" in
+			"text/plain" | "")
+				MIME_CHAR=`echo $CONT_TYPE | sed 's#[^;]*;.*charset="*\([^" ]*\)"*$#\1#'`
+				echo "$1" | formail -I '' | `convert_encode "$CONT_ENCO"` | `convert_charset "$MIME_CHAR"`
+				;;
+			"multipart/mixed" | "multipart/alternative")
+				MIME_BOUN=`echo $CONT_TYPE | sed 's#[^;]*;.*boundary="*\([^"]*\)"*$#\1#'`
+				SUBMESSAGE=`echo "$1" | formail -I '' |
+					awk 'BEGIN {RS=".?.?'"$MIME_BOUN"'"} /Content-Type:.*text\/plain;/ {print $0; exit}'`
+				
+				CONT_ENCO=`echo "$SUBMESSAGE" | formail -cx 'Content-Transfer-Encoding:'`
+				MIME_CHAR=`echo "$SUBMESSAGE" | formail -cx 'Content-Type:' | sed 's#[^;]*;.*charset="*\([^" ]*\)"*$#\1#'`
+				echo "$SUBMESSAGE" | formail -I '' | `convert_encode "$CONT_ENCO"` | `convert_charset "$MIME_CHAR"`
+				
+				echo ""
+				echo "[This is multipart message - get first text/plain section]"
+				;;
+			*)
+				echo "[No text/plain in this mail]"
+				;;
+		esac
+	fi
+}
+
+if [ "$2" = "user" ]; then
+	if [ "$3" = "" ]; then
+		user="$USER"
+	else
+		user="$3"
+	fi
+	if [ -f /home/$user/.email2text.files ]; then
+		while read f; do
+			if [ -e $f ]; then
+				files="$files $f"
+			fi
+		done </home/$user/.email2text.files
+	else
+		files=/home/$user/mail/INBOX
+	fi
+else
+	files=$2
+fi
+
+if [ "$1" = "num" ]; then
+	nice -n 5 lsmbox -ot $files | awk '$1=="Summary:" {printf("%d", $3)}'
+	exit
+elif [ "$1" = "info" ]; then
+	# wyszukaj nowe wiadomosci i kazda z nich przekaz do skryptu
+	# mboxgrep czeka na zakonczenie dzialania uruchomionego skryptu
+	# przed przystapieniem do przetwarzania nastepnej wiadomosci
+	nice -n 5 mboxgrep --pipe=$0 -v -G -H "^Status:" $files
+	exit
+elif [ "$1" = "split" ]; then
+	# podziel wiadomosci i przekaz do skryptu
+	# formail czeka na zakonczenie dzialania uruchomionego skryptu
+	# przed przystapieniem do przetwarzania nastepnej wiadomosci
+	formail -c -s $0 < $2
+	exit
+elif [ "$1" = "header" ]; then
+	echo "$2" | base64qp2utf8
+	exit
+elif [ "$1" = "header" ]; then
+	echo "USAGE:"
+	echo "$0 num|info user nazwa_uzytkownika"
+	echo "  wtedy gdy istnieje czytamy ~/.email2text.files celem uzyskania"
+	echo "  listy plików do sprawdzenia (jeden plik na linię"
+	echo "  domyśnie brany /home/nazwa_uzytkownika/mail/INBOX"
+	echo "$0 num|info|split|header plik"
+	exit
+fi
+
+script_name=`basename $0`
+if [ "$script_name" = "mail2text-long" ]; then
+	MESSAGE=`head -n 300`
+	email2text "$MESSAGE"
+	exit
+else #if [ "$script_name" = "mail2text-short" ]; then
+	MESSAGE=`head -n 300`
+	echo -e "************************************************************"
+	email2text "$MESSAGE" | head -n 8
+	echo -e "************************************************************"
+	exit
+fi

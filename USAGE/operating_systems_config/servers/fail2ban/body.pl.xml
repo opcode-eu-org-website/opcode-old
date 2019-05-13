@@ -1,0 +1,5 @@
+<article>
+<title>Fail2ban - odpieranie ataków siłowych</title>
+
+<p>Częstym problemem (zwłaszcza w ssh) jest znaczna liczba (często realizowanych przez kiepskie boty) ataków siłowych. Wygodnym narzędziem do zabezpieczenia się przed nimi jest fail2ban. Jego działanie polega na analizowaniu wskazanego logu, wychwytywaniu prób ataku w oparciu o zadane kryteria i dodawaniu do firewala systemowego własnych regułek. W przypadku Linuxa fail2ban dodaje je do własnego łańcucha iptables regułek blokujących (łańcuch ten jest wstawiany na samym początku reguł). Przykładowa <a class="int" href="./jail.conf">konfiguracja</a>. Podobnym, ale trochę mniej konfigurowalnym (za to wspierającym IPv6) narzędziem jest <homepage url="http://www.sshguard.net/">sshguard</homepage>.</p>
+</article>

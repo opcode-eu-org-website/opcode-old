@@ -1,0 +1,21 @@
+#ifndef OBJECTSLIST_H
+#define OBJECTSLIST_H
+
+using namespace std;
+#include<list>
+
+#include "point.h"
+#include "sceneobject.h"
+
+struct ObjectsList {
+	list<SceneObject*> content;
+	float height;
+	
+	static void copy_content(ObjectsList *dst, ObjectsList *obj);
+	static void delete_content(ObjectsList *obj);
+	static void render_content(ObjectsList *obj);
+	static bool check_collisions_with_content(ObjectsList *obj, float x, float y, float z);
+	static void load_content(ObjectsList *obj);
+	static void set_eye(PointXZY<float> eye);
+};
+#endif

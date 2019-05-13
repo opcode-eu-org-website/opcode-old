@@ -1,0 +1,5 @@
+<article>
+<title>Elementy teorii układów logicznych</title>
+
+<p>Podstawowym podziałem jest podział na układy <wiki pl="Układ kombinacyjny">kombinacyjne</wiki> (stan ich zależy tylko od aktualnego wejścia) oraz <wiki pl="Układ sekwencyjny">sekwencyjne</wiki> (stan ich zależy od aktualnego wejścia oraz historii układu). Na potrzeby teoretycznej analizy układów kombinacyjnych często stosuje się ich opis z wykorzystaniem tabeli gdzie kolejne wiersze odpowiadają różnym wektorom pobudzającym (kodowanym w <wiki pl="NKB">NKB</wiki>) a kolumny pokazują sygnały na wyjściach układu.</p>
+</article>

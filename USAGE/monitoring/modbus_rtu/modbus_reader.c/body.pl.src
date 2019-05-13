@@ -1,0 +1,204 @@
+#include <inttypes.h>
+#include <stdio.h>
+
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/time.h>
+#include <math.h>
+
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#include <sqlite3.h>
+
+#include "error_reporting.h"
+#include "modbus_rtu.h"
+#include "zabbix.h"
+
+
+#define DATABESE_FILE "/tmp/modbus.db"
+
+#define MODBUS_RETRY 3
+#define MODBUS_READ_BUF_SIZE 255
+uint8_t modbus_read_buf[MODBUS_READ_BUF_SIZE];
+
+#define ZABBIX_SERWER_IP "192.168.119.13"
+#define ZABBIX_SERWER_PORT 10051
+#define ZABBIX_MESSAGE_BUF_SIZE 8192
+char zabbix_message_buf[ZABBIX_MESSAGE_BUF_SIZE];
+
+#define LOCALDB_CONDITION ( reg==1042 || reg==1044 || reg==1046 || reg==1060 || reg==1062 || reg==1064 )
+
+void parse_modbus_value(uint8_t addr, uint16_t reg, float val, const char *dev_name, int reg_list,
+                        sqlite3 *db, zabbix_msg_t *msg, struct timeval *tv) {
+	char buf[100];
+	
+	if LOCALDB_CONDITION {
+		//snprintf(buf, 100, "INSERT INTO data VALUES (%d, %d, %f, %d);", addr, reg, val, (int)tv->tv_sec);
+		snprintf(buf, 100, "UPDATE data SET val=%f, time_s=%d WHERE address=%d AND register=%d;",
+		         val, (int)tv->tv_sec, addr, reg);
+		char *ErrMsg = NULL;
+		if ( sqlite3_exec(db, buf, NULL, NULL, &ErrMsg) != SQLITE_OK ) {
+			LOG_PRINT_WARN("Adding data to database - SQL error: %s\n", ErrMsg);
+			sqlite3_free(ErrMsg);
+		}
+	}
+	
+	/* zamiast robienia UPDATE w sql można rozważyć trzymanie tych danych w pamięci programu z uzyciem std::map z C++:
+	 *  - mamy tablicę indeksowaną adresami urządzeń
+	 *  - tablica ta zawiera wskaźniki do struktur opisujących dane urządzenie
+	 *  - struktura taka zawiera mapę rejestr-wartość
+	 * program okresowo (osobny wątek)m sprawdza czy ostatnie wartości nie przekraczają progów alarmowych
+	 * progi alarmowe przechowywane również w mapach znajdujących się w tych strukturach
+	 * 
+	 * możemy także rozważyć trzymanie w tych strukturach danych dotyczących sposobu czytania urządzenia
+	 */
+	
+	snprintf(buf, 100, "pm710.%d", reg);
+	zabbix_message_add_item_f(msg, dev_name, buf, val);
+}
+
+int main(int argc, char **argv) {
+	// open syslog
+	openlog("modbus_reader", LOG_PID, LOG_DAEMON);
+	
+	// initialize RS485
+	int serial = init_tty("/dev/ttyS3", B19200);
+	if ( serial < 0 ) {
+		LOG_PRINT_CRIT("Open TTY ERROR\n");
+		exit(-1);
+	}
+	
+	// open database
+	sqlite3 *db;
+	if ( sqlite3_open(DATABESE_FILE, &db) ) {
+		LOG_PRINT_CRIT("Can't open database: %s", sqlite3_errmsg(db));
+		sqlite3_close(db);
+		exit(-1);
+	}
+	
+	// prepare zabbix message structure
+	zabbix_msg_t message;
+	struct sockaddr_in zabbix_ser;
+	zabbix_ser.sin_family=AF_INET;
+	zabbix_ser.sin_port=htons(ZABBIX_SERWER_PORT);
+	zabbix_ser.sin_addr.s_addr=inet_addr(ZABBIX_SERWER_IP);
+	
+	message.zabbix_server = &zabbix_ser;
+	message.max_size = ZABBIX_MESSAGE_BUF_SIZE;
+	message.data = zabbix_message_buf;
+	
+	// start loop
+	int count = 0;
+	struct timeval loop_time;
+	loop_time.tv_usec = 500000;
+	loop_time.tv_sec = 0;
+	while(1) {
+		// zapis czasu
+		struct timeval tv_curr, tv_next, timeout;
+		gettimeofday(&tv_curr, NULL);
+		timeradd(&loop_time, &tv_curr, &tv_next);
+		
+		int count2 = 0, count3 = 0;
+
+		// operacje na szynie modbusowej
+		int ret;
+		sqlite3_stmt *stmt;
+		ret = sqlite3_prepare_v2( db,
+			"SELECT d.address, d.name, r.base_register, r.offset, r.function, r.value_type, r.reg_list_id" \
+			" FROM devices AS d" \
+			" JOIN device_groups AS g ON" \
+			"  ( d.dev_group = g.dev_group AND ((?1 % g.frenq) = (d.frenq_offset*g.device_offset_multip + g.frenq_offset)) )" \
+			" JOIN reg_list AS r ON" \
+			"  (g.reg_list_id = r.reg_list_id)" \
+			" ORDER BY d.address,r.base_register;",
+			-1, &stmt, NULL
+		);
+		if ( ret != SQLITE_OK ) {
+			LOG_PRINT_WARN("sqlite3_prepare_v2() in %s:%d exit with code %d", __FILE__, __LINE__, ret);
+		} else {
+			ret = sqlite3_bind_int(stmt, 1, count++);
+			if ( ret != SQLITE_OK ) {
+				LOG_PRINT_WARN("sqlite3_bind_int() in %s:%d exit with code %d", __FILE__, __LINE__, ret);
+			} else {
+				while ( ( ret = sqlite3_step(stmt) ) == SQLITE_ROW ) {
+					/// petla po czytanych z urządzeń grupach rejestrów dla danego obiegu petli głównej (count) --->
+					int address = sqlite3_column_int(stmt, 0);
+					const char *device_name = (const char*) sqlite3_column_text(stmt, 1);
+					int base_register = sqlite3_column_int(stmt, 2);
+					int offset = sqlite3_column_int(stmt, 3);
+					int function = sqlite3_column_int(stmt, 4);
+					int value_type = sqlite3_column_int(stmt, 5);
+					int reg_list_id = sqlite3_column_int(stmt, 6);
+					
+					int i = 0;
+					count2++;
+					do {
+						count3++;
+						ret = modbus_write_read(serial, address, function, base_register - 1,
+						                        offset, modbus_read_buf, MODBUS_READ_BUF_SIZE, 0);
+						gettimeofday(&tv_curr, NULL);
+					} while (ret < 0 && i++ < MODBUS_RETRY);
+					
+					if (ret < 0) {
+						LOG_PRINT_ERROR("modbus_write_read() in %s:%d for addr=%d, base_reg=%d exit with code %d",
+						       __FILE__, __LINE__, address, base_register, ret);
+					} else {
+						zabbix_message_reinit(&message);
+						switch(value_type) {
+							case 1: // float
+								for (offset=0; offset < ret; offset++) {
+									uint8_t raw_val[4];
+									if(offset%4 == 0) {
+										raw_val[3] = modbus_read_buf[offset];
+										raw_val[2] = modbus_read_buf[offset+1];
+										raw_val[1] = modbus_read_buf[offset+2];
+										raw_val[0] = modbus_read_buf[offset+3];
+										if ( ! isnan(*(float *)raw_val) )
+											parse_modbus_value(address, base_register+offset/2, *(float *)raw_val,
+											                   device_name, reg_list_id, db, &message, &tv_curr);
+									}
+								}
+								break;;
+							case 2: // integer
+								for (offset=0; offset < ret; offset++) {
+									if(offset%2 == 0) {
+										parse_modbus_value(address, base_register+offset,
+										                   ntohs(*(uint16_t *)(modbus_read_buf+offset)),
+										                   device_name, reg_list_id, db, &message, &tv_curr);
+									}
+								}
+								break;;
+							default:
+								LOG_PRINT_WARN("Unsupported modbus value_type");
+						}
+						if ( zabbix_send(&message) < 0 )
+							LOG_PRINT_ERROR("ERROR in zabbix_send");
+					}
+					/// <---
+				}
+				if ( ret != SQLITE_DONE ) {
+					LOG_PRINT_WARN("sqlite3_step() in %s:%d exit with code %d", __FILE__, __LINE__, ret);
+				}
+			}
+		}
+		if ( ( ret = sqlite3_finalize(stmt) ) != SQLITE_OK ) {
+			LOG_PRINT_WARN("sqlite3_finalize() in %s:%d exit with code %d", __FILE__, __LINE__, ret);
+		}
+		
+		// porównanie czasu z zapisanym i czekanie na select()
+		gettimeofday(&tv_curr, NULL);
+		timersub(&tv_next, &tv_curr, &timeout);
+		if (timeout.tv_sec < 0)
+			LOG_PRINT_WARN("OverRun Error (%ds %dus) in count=%d count2=%d count3=%d",
+			       (int)timeout.tv_sec, (int)timeout.tv_usec, count, count2, count3);
+		else
+			select(0, NULL, NULL, NULL, &timeout);
+	}
+	
+	sqlite3_close(db);
+	close(serial);
+	closelog();
+	return 0;
+}

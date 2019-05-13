@@ -1,0 +1,179 @@
+#!/bin/bash
+
+# włączenie konfiguracji
+. $HOME/.CommonsConfig.conf
+
+switch_bzr() {
+	if [ -L .bzr ]; then
+		/bin/rm .bzr
+	elif [ -e .bzr ]; then
+		print_error "`pwd`/.bzr exists but is not a symbolic link"
+		exit
+	fi
+	ln -s .CommonsConfig-BZR-$1 .bzr
+}
+
+show_maanged_files() {
+	for repo in $BZR_REPO_LIST; do
+		echo "BZR - $repo:"
+		switch_bzr "$repo"
+		bzr ls -r last:1 | while read l; do echo "  $l"; done
+	done
+	echo "SSHFS:"
+	echo "$SSHFS_LINK_LIST" | while read r l; do echo "  $l (as $r)"; done
+}
+
+
+
+# funkcja wypisująca komunikat o błedzie (na konsolę i poprzez kdialog
+print_error() {
+	echo -e "\\033[1;31mERROR: $1\\033[0m"
+	kdialog --error "$1"
+}
+
+print_timeout_error() {
+	print_error "$2" &
+# 	sleep $1
+# 	kill %1
+}
+
+progress_bar_run() {
+	dcopserver
+	progress_bar_info="$1"
+	progress_bar_progress=0
+	progress_bar=`kdialog --progressbar \
+		"$progress_bar_info:                                                               " $2`
+	progress_bar=`dcopclient "$progress_bar"`
+}
+progress_bar_update() {
+	progress_bar_progress=$(( $progress_bar_progress + 1 ))
+	dcop $progress_bar ProgressDialog setProgress $progress_bar_progress
+	dcop $progress_bar ProgressDialog setLabel "$progress_bar_info: $1"
+}
+progress_bar_close() {
+	dcop $progress_bar ProgressDialog close
+}
+
+
+
+start_CommonsConfig() {
+	progress_bar_run "starting commons config system" $(( `echo $BZR_REPO_LIST | wc -w` + 3 ))
+	cd
+	
+	echo '*' > .bzrignore
+	
+	# aktualizacja danych z repozytoriów BZR
+	for repo in $BZR_REPO_LIST; do
+		progress_bar_update "upgrade BZR \"$repo\" repo"
+		switch_bzr "$repo"
+		bzr pull "sftp://$BZR_HOST/$BZR_REMOTE_DIR/$repo"
+		bzr up
+	done
+	
+	progress_bar_update "mounting SSHFS resources"
+	
+	# sprawdzamy czy zamontowany SSHFS
+	if mount | grep .CommonsConfig-SSHFS > /dev/null; then
+ 		echo "SSH-FS is mounted"
+	else
+		# montowanie SSHFS
+		if [ -L .CommonsConfig-SSHFS ]; then
+			/bin/rm .CommonsConfig-SSHFS
+		fi
+		mkdir -p .CommonsConfig-SSHFS
+		sshfs -o workaround=rename "$SSHFS_HOST:$SSHFS_REMOTE_DIR" .CommonsConfig-SSHFS
+		
+		# jeżeli montowanie sshfs się nie udało to korzystamy z kopii lokalnej
+		if [ $? != 0 ]; then
+			print_error "Unable to mount $SSHFS_HOST:$SSHFS_REMOTE_DIR via sshfs. Use bzr local reposity."
+			
+			# zwolnienie katalogu
+			if ! rmdir .CommonsConfig-SSHFS; then
+				mv .CommonsConfig-SSHFS .CommonsConfig-SSHFS.error_backup_`date +"%s"`
+			fi
+			
+			# utwotrzenie dowiązania
+			ln -s .CommonsConfig-SSHFS.local_backup .CommonsConfig-SSHFS
+		fi
+	fi
+	
+	# tworzenie dowiązań do danych na SSHFS
+	progress_bar_update "prepare link to SSHFS resources"
+	echo "$SSHFS_LINK_LIST" | while read remote local; do
+		if [ -L "$local" ]; then
+			/bin/rm "$local"
+		elif [ -e "$local" ]; then
+			print_error "$local is not symlink"
+			if [ -e ~/.CommonsConfig-SSHFS/$remote ]; then
+				mv "$local" "$HOME/.CommonsConfig-SSHFS/$remote.`date +"%s"`"
+				mv "$local" "$local.`date +"%s"`"
+			else
+				cp -r "$HOME/$local" "$HOME/.CommonsConfig-SSHFS/$remote" &&
+ 				mv "$local" "$local.`date +"%s"`"
+			fi
+		fi
+		ln -s "$HOME/.CommonsConfig-SSHFS/$remote" "$HOME/$local"
+	done
+	
+	progress_bar_close
+}
+
+stop_CommonsConfig() {
+	progress_bar_run "stoping commons config system" $(( `echo $BZR_REPO_LIST_AUTOPUSH | wc -w` + 2 ))
+	
+	progress_bar_update "updating local copy of SSHFS"
+	rsync -rltu ~/.CommonsConfig-SSHFS/ ~/.CommonsConfig-SSHFS.local_backup/
+	
+	# aktualizacja danych z repozytoriów BZR
+	for repo in $BZR_REPO_LIST_AUTOPUSH; do
+		progress_bar_update "pushing BZR \"$repo\" repo"
+		switch_bzr "$repo"
+		bzr_auto_add "$repo"
+		bzr ci -m "automatyczna auktaulizacja" > /tmp/$PPID.bzr-$repo-ci.stdout 2>/tmp/$PPID.bzr-$repo-ci.stderr
+		if [ $? -ne 0 -a $? -ne 3 ]; then #FIXME sprawdzic kod powr przy prawdziwych błędach
+			error=`cat /tmp/$PPID.bzr-$repo-ci.stderr`
+			print_timeout_error 30 "push_bzr: $error"
+		fi
+		
+		bzr push "sftp://$BZR_HOST/$BZR_REMOTE_DIR/$repo" > /tmp/$PPID.bzr-$repo-push.stdout 2>/tmp/$PPID.bzr-$repo-push.stderr
+		if [ $? -ne 0 ]; then
+			error=`cat /tmp/$PPID.bzr-$repo-push.stderr`
+			print_timeout_error 30 "push_bzr: $error"
+		fi
+	done
+	
+	progress_bar_close
+}
+
+# funkcja instalująca system
+install_mount_script() {
+	# instalacja skryptu montującego dla KDE
+	# możnaby także dopisać w ~/.bash_profile
+	#   if [ "$DISPLAY" != "" ]; then MOUNT_CMD fi
+	mkdir -p $HOME/.kde/env
+	echo "#!/bin/bash
+	
+	$HOME/.CommonsConfig-base.sh start
+	" > $HOME/.kde/env/commons-config-mount.sh
+	chmod +x $HOME/.kde/env/commons-config-mount.sh
+	
+	# instalacja skryptu odmontowywującego dla KDE
+	# możnaby także dopisać w ~/.bash_logout
+	#   if [ "$DISPLAY" != "" ]; then UMOUNT_CMD fi
+	# ale KDE nie uwzględnia tego pliku
+	mkdir -p $HOME/.kde/shutdown
+	echo "#!/bin/bash
+	
+	$HOME/.CommonsConfig-base.sh stop
+	" > $HOME/.kde/shutdown/commons-config-umount.sh
+	chmod +x $HOME/.kde/shutdown/commons-config-umount.sh
+}
+
+case $1 in
+	"start")
+		start_CommonsConfig
+	;;
+	"stop")
+		stop_CommonsConfig
+	;;
+esac

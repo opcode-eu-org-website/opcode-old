@@ -1,0 +1,8 @@
+#!/bin/bash
+
+hostlist="HPM_1 HPM_2"
+
+for h in $hostlist; do
+	wget -O - http://${h//_/-} 2>/dev/null |
+		xalan -xsl /etc/zabbix/data_fetching_scripts/klimy.xsl -param hostname "'$h'" 2>/dev/null
+done | zabbix_sender -z 127.0.0.1 -i - | grep 'Failed [^0]'

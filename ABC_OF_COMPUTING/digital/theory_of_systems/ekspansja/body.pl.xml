@@ -1,0 +1,17 @@
+<article>
+<title>Ekspansja</title>
+
+<subtitle id="blokujaca">macierz blokująca</subtitle>
+<p>Macierz blokująca dla kostki <eq>k<sub>i</sub></eq> (i funkcji <eq>f</eq>) jest to macierz utworzona z macierzy wektorów <eq>r<sub>i</sub></eq> dla których <eq>f</eq> ma wartość 0, poprzez zanegowanie kolumn o indeksach <eq>j</eq> dla których <eq>k<sub>ij</sub>=1</eq>.</p>
+
+<subtitle id="pokrycie">pokrycie kolumnowe</subtitle>
+<p>Jest to zbiór kolumn <eq>L<sub>j</sub></eq> takich że w każdym wierszu co najmniej jedna z kolumn ma wartość 1. Minimalnym pokryciem nazywamy takie pokrycie, dla którego usunięcie z niego jakiejkolwiek kolumny sprawiłoby że przestaje być ono pokryciem. Możemy także wprowadzić relację mniejszości pokrycia równoważną relacji mniejszości ilości kolumn składających się na pokrycie.</p>
+
+<p>Minimalne pokrycia obliczamy poprzez minimalizację wyrażenia: <eq_latex>\bigcap_i \left( \bigcup_{j: b_{ij}=1} L_j \right)</eq_latex>. Wyrażenie doprowadzamy do postaci sumy iloczynów, reprezentującej wszystkie minimalne pokrycia kolumnowe zadanej macierzy B.</p>
+
+<subtitle id="implikanty">implikanty proste</subtitle>
+<p>Implikanty uzyskujemy poprzez wybór z wektora <eq>k<sub>i</sub></eq> wartości <eq>k<sub>ij</sub></eq> dla kolumn wchodzących w skład minimalnego pokrycia kolumnowego, gdy <eq>k<sub>ij</sub> = 1</eq> to do implikantu wchodzi <eq>x<sub>j</sub></eq> w przeciwnym wypadku (<eq>k<sub>ij</sub> = 0</eq>) wchodzi wartość zanegowana <eq_latex>\bar x_j</eq_latex>.</p>
+
+<subtitle id="selekcja">selekcja najlepszych implikantów</subtitle>
+<p>Najpierw ustalamy które kostki <eq>k<sub>i</sub></eq> pokrywają dany implikant <eq>I<sub>j</sub></eq> (kostka pokrywa implikant gdy dla każdej wartości z kostki implikant ma wartość z nią zgodną lub dowolną). Następnie tworzymy macierz P o kolumnach zawierającą informację o tym pokrywaniu (gdy <eq>k<sub>j</sub></eq> pokrywa <eq>I<sub>j</sub></eq> to <eq>p<sub>ij</sub> = 1</eq>, w przeciwnym wypadku jest 0) i obliczamy minimalne pokrycie kolumnowe. Suma implikantów z minimalnego pokrycia kolumnowego stanowi minimalną formułę dla funkcji początkowych.</p>
+</article>

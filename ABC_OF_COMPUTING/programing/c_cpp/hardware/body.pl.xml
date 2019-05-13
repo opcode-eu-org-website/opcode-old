@@ -1,0 +1,16 @@
+<article>
+<title>Bliżej sprzętu i jądra</title>
+<ul>
+	<li><id_link id="c_cpp:hardware:test_libusb.c">test_libusb.c</id_link> - program demonstrujący komunikację poprzez USB z wykorzystaniem biblioteki libusb</li>
+	<li><id_link id="c_cpp:hardware:ups_off.c">ups_off.c</id_link> - program sprawdzający stan zasilania z ups'u (poprzez port COM) i wykonujący wyłączenie systemu gdy jest zasilanie z zrodla awaryjnego ...</li>
+	<li><id_link id="c_cpp:hardware:zawieszacz.c">zawieszacz.c</id_link> - co zrobić aby system zajmował się tylko naszym programem ...</li>
+	<li><id_link id="c_cpp:hardware:priorytety.c">priorytety.c</id_link> - ustalanie priorytetów (nice i priorytet czasu rzeczywistego)</li>
+	<li><id_link id="c_cpp:hardware:czekanie.c">czekanie.c</id_link> - jak wykonywać dość precyzyjne opóźnienia w programie ...</li>
+	<li><id_link id="c_cpp:hardware:modul:modul.c">modul.c</id_link>, <id_link id="c_cpp:hardware:modul:Makefile">Makefile</id_link> - demonstracyjny moduł jądra Linux wraz z Makefile umożliwiającym jego zbudowanie ... pokazuje inicjacje i usuwanie modułu, korzystanie z urządzeń znakowych oraz przerwań; więcej o modułach: <doc url="http://www.faqs.org/docs/kernel/">The Linux Kernel Module Programming Guide</doc>, <doc url="http://lwn.net/Kernel/LDD3/" mirror="programowanie/Linux Device Drivers 3">Linux Device Drivers</doc></li>
+	<li><id_link id="c_cpp:hardware:zabawy_pamiecia.c">zabawy_pamiecia.c</id_link> - plik obrazuje sposób alokacji pamięci przez system Linux</li>
+	<li><a class="int" href="./ftdi_ds18b20.tar.gz">ftdi_ds18b20.tar.gz</a> - zestaw modułów dla Linuxa składających się na sterownik do obsługi termometru ds18b20 opartego na interfejsie OneWire z wykorzystaniem układu FTDI FT245BM do emulacji portu OneWire (rozpowszechniane na zasadach GNU GPL)</li>
+	<li><a class="int" href="./vkbd.tar.gz">vkbd.tar.gz</a> - moduł wirtualnej klawiatury, umożliwiającej odbieranie znaków i key-kodów wpisywanych do urządzenia w /dev tak jakby przychodziły z podsystemu input od rzeczywistej lokalnej klawiatury (rozpowszechniane na GNU GPL)</li>
+</ul>
+
+<p>Oczywiście oprócz zaprezentowanych w powyższych przykładach technik programowania modułów jądra. Linux oferuje wiele innych udogodnień - np. kolejki kfifo (bufory cykliczne). Należy zaznaczyć też iż programowanie jądra wymaga szczególnej uwagi gdyż wiele z mechanizmów chroniących programy uruchamiane w przestrzeni użytkownika tutaj nie funkcjonuje. Ponadto szczególną uwagę należy zwrócić na niemożność używania wielu funkcji w obsłudze przerwań.</p>
+</article>

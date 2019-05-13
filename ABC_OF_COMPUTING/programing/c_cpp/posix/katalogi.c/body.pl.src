@@ -1,0 +1,59 @@
+/*
+ * plik ma na celu prezentację podstawowych zagadnień z programowania w języku C / C++
+ * prezentuje metodę odczytu katalogów
+ *
+ */
+
+ 
+// będziemy coś wypisywać ...
+#include <stdio.h>
+
+// funkcja exit
+#include <stdlib.h>
+
+// katalogi
+#include <dirent.h>
+
+// obsługa błędów
+#include <errno.h>
+
+main() {
+	DIR* katalog = opendir( "/tmp" ); // otwieramy katalog
+	// obsługa błędów - np nie istniejącego katalogu
+	if (katalog == NULL) {
+		// nie udało się - zapamiętujemy kod błędu
+		int kod_bledu=errno;
+		
+		// mamy parę metod wypisania ...
+		perror( "próba otwarcia katalogu" );
+		fprintf(stderr, "błąd (kod %d): \"%s\" (%s : %d)\n", kod_bledu, strerror(kod_bledu), __FILE__, __LINE__);
+		
+		// kończymy zwracając informację o niepowodzeniu (1) do rodzica
+		exit (1);
+		
+		// warto takze zapoznac sie z funkcjami z rodziny: err(), warn(), a także error() i syslog()
+		// w szczególności uzyteczny jest w nich output formatowany printf z obsługą %m (wwstawia komunikat z ernno)
+		//
+		// error(-1, 0, "Ala ma %d kotow: %m", 5); lub errx("Ala ma %d kotow: %m", 5);
+		//    wypisze komunikat podstawiając za %m aktualny błąd errno i zakonczy progam z kodem -1
+		// error(0, 0, "Ala ma %d kotow: %m", 5); lub warnx("ooo %m ppp %i", 5);
+		//    wypisze komunikat podstawiając za %m aktualny błąd errno ale nie zakończy programu
+		// error(0, 1, "Ala ma %d kotow: %m", 5);
+		//   wypisze komunikat podstawiając za %m błąd odpowiadjący errno=1
+	}
+	
+	printf("typ\tnazwa\n");
+	struct dirent* pozycja = 0; // tworzymy strukturę odpowiedzialną za przechowywanie informacji o pozycji katalogu
+	while (pozycja = readdir(katalog)) { // pętla po kolejnych pozycjach katalogu
+		printf("%d\t%s\n", (*pozycja).d_type, (*pozycja).d_name);
+	}
+	
+	closedir(katalog); // zamknięcie katalogu
+	
+	// warto także spomnieć o POSIXowych funkcjach do operacji na plikach i katalogach takich jak:
+	//    rename, chmod, chown, mkdir
+	// należy zaznaczyć tutaj iż nie ma funkcji systemowej kopiującej plik
+	//    - kopiowanie odbywa się przez otwarcie odczyt w pętli i zapis pod nową nazwą
+	
+	exit (1);
+}

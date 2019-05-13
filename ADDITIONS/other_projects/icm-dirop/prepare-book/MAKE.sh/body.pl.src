@@ -1,0 +1,232 @@
+#!/bin/bash
+
+# system dodawania i modyfikacji pozycji DIROPu
+#
+# system składa się z szeregu plików z zbiorami funkcji bash'owych integrowanych przez ten skrypt
+# każdy plik oprócz funkcji zawiera komendę echo wypisującą informację o użyciu zgromadzonych w nim funkcji
+# pliki te mogą dokonywać ładowania innych plików systemu na swoje potrzeby
+#
+# niniejszy plik definiuje podstawowe ustawienia konfiguracyjne systemu (zmienne DIROP_SYSTEM_DIR i SERVER_NAME),
+# tekst dodatkowej informacji z wskazówkami dotyczącymi użycia systemu
+# odpowiada także za przetwarzanie argumentów linii poleceń, wyświetlanie pomocy dotyczącej jego użycia
+# oraz za inicjalizację (kontrolę obecności wykorzystywanych narzędzi, ładowanie modułów make_* i ich uruchamianie)
+
+
+##################
+## KONFIGURACJA ##
+##################
+
+# konfiguracja ustawiania w pliku w którym włączany jest ten
+# DIROP_DIROP_SYSTEM_DIR=""
+# print_info() { echo "" }
+
+# sprawdzenie czy poprawna ścieżka do katalogu systemu skryptow
+if [ ! -d $DIROP_SYSTEM_DIR ]; then
+	echo "brak katalogu $DIROP_SYSTEM_DIR na $HOSTNAME" >&2
+	exit
+fi
+
+
+##################################################
+## OPCJE LINII POLECEN ORAZ PLIK KONFIGURACYJNY ##
+##################################################
+
+if [ $# = 0 ]; then
+	echo "skrypt wymaga opcji, zobacz --help aby uzyskać pomoc" >&2
+fi
+
+STANDARD_CONFIG_NAME="config.sh"
+print_help() {
+echo "USAGE: $0 opcje
+
+
+OPCJE OGOLNE
+  -c, --config <path>
+      ścieżka do pliku konfiguracyjnego / standardowa nazwa pliku konfiguracyjnego
+      jeżeli nie określono uzyty zostanie plik $STANDARD_CONFIG_NAME (jeżeli istnieje)
+
+  -v, --volyme_id <int>
+      numeryczny identyfikator wolumenu (w niektórych działaniach wystarcza zamiast konfigu)
+
+  -d, --dir <path>
+      ściezka do katalogu roboczego
+
+
+OPCJE DZIAŁAŃ
+  -r, --run_in_all_subdirs
+      dla każdego z podkatalogów katalogu biezrącego (lub określonego przez -d)
+      wywołuje skrypt z opcją -m oraz domyślnym plikiem konfiguracyjnym ($STANDARD_CONFIG_NAME)
+      lub plikiem wskazanym przez -c (względem przetwarzanego podkatalogu)
+
+  -m, --make=\"[(no_)start_book]\"
+      wywołuje działania inicjacyjne oraz przetwarzanie obrazków, tesktów i generację SQL
+      (chyba że ustawione są w konfigu zmienne MAKE_* na false)
+      opcjonalny argument no_start_book|start_book ma takie zamo znaczenie jak w --make-sql
+
+  --make-img
+      wywołuje przetwarzanie obrazków
+
+  --make-txt
+      wywołuje przetwarzanie tekstów
+
+  --make-sql=\"[(no_)start_book]\"
+      wywołuje generowanie wpisów SQL
+      * jeżeli podano opcjonalny argument \"no_start_book\" generowany SQL nie rozpoczyna
+      nowej książki bez względu na ustawienia w pliku konfiguracyjnym
+      * jeżeli podano \"start_book\" generowany SQL rozpoczyna nową książkę bez względu na
+      ustawienia w pliku konfiguracyjnym
+  --make-sql-content=\"[content_txt-file_path]\"
+      wywołuje generowanie wpisów SQL dla spisu treści
+      * opcja nie wymaga podania pliku konfiguracyjnego (wystarczająca jest określenie --volyme_id oraz
+      podania opcjonalnego argumentu określającego położenie pliku spisu treści)
+  --make-sql-page_title_update=\"[START_NORMAL,START_ROMAN,INFO_PAGE]\"
+      generuje aktualizację (umieszczaną w \$OUTPUT_DIR/update.sql) numeracji stron pozyji
+      * opcja nie wymaga podania pliku konfiguracyjnego (wystarczająca jest określenie --volyme_id oraz
+      podania opcjonalnego argumentu określającego numery skanów (z nazwy pliku) stron na których
+      zaczyna się kolejno numeracja arabska, numeracja rzymska oraz strony startowej
+      * możliwe jest też podanie pliku konfiguracyjnego zawierającego te wartości
+
+  --insert_lost_pages OFFSET_FROM,OFFSET_VALUE[,INTEGRATE]
+      funkcja zmieniając nazwy przenosi pliki *-small.png z podkatalogu png do katalogu png_NEW,
+      pliki *.tif z podkatalogu tif do katalogu tif_NEW, alalogicznie *.txt z txt do txt_NEW,
+      wstawia także pliki z informacją o braku dla formatu txt i png oraz generuje aktualizację
+      SQLową bazy danych, dokonującą w niej wstawienia brakujących stron (w insert_lost_pages.sql)
+      * opcja nie wymaga podania pliku konfiguracyjnego (wystarczająca jest określenie --volyme_id)
+      * opcja wymaga podania agrumentu postaci:
+         numer_skanu_od_ktorego_zaczynamy_przesowanie,wartosc_o_ile_przesowamy
+      * po skorzystaniu z tej opcji należy użyć --make-sql-page-title-update celem uzyskania
+      aktualizacji numeracji stron
+      * jeżeli jako argument podano ,,INTEGRATE zostanie wykonana tylko integracja
+      katalogów _NEW z katalogami pierwotnymi, jeżeli podano także niepuste wartości offsetów to
+      PO integracji zostanie wykonany kolejny offset
+
+
+OPCJE INFORMACYJNE
+  -h, --help                        wypisanie tego tekstu pomocy
+  --sample_config_dump          wypisanie szablonu pliku konfiguracyjnego
+  -i, --info                        wypisanie informacji dodatkowych"
+}
+
+LISTA_OPCJI=`getopt -o c:d:v:rm::ih -l config:,dir:,volume_id:,run_in_all_subdirs,make::,make-img,make-txt,make-sql::,make-sql-content::,make-sql-page_title_update::,insert_lost_pages:,sample_config_dump,help,info -- "$@"`
+
+# opcje podstawowe i informacyjne
+CONFIG_FILE=$STANDARD_CONFIG_NAME
+eval set -- "$LISTA_OPCJI"
+while true; do
+	case $1 in
+		# opcje podstawowe
+		-c|--config) # config_path
+			CONFIG_FILE="$2" ;;
+		-d|--dir) # working_dir
+			if [ -d "$2" ]; then
+				cd "$2"
+			else
+				echo "ERROR: Wskazany katalog ($2) nie istnieje"
+				exit
+			fi ;;
+		-v|--volume_id) #volume_id
+			FORCE_VOLUME_ID=$2 ;;
+		
+		--sample_config_dump)
+			cat ${DIROP_SYSTEM_DIR}config.inc.sh
+			exit
+			;;
+		-h|--help)
+			print_help
+			exit
+			;;
+		-i|--info)
+			print_info
+			exit
+			;;
+		--) shift; break;;
+	esac
+	shift;
+done
+
+# włączenie pliku konfiguracyjnego określonego prze $CONFIG_FILE
+. ${DIROP_SYSTEM_DIR}config.inc.sh
+if [ -e "$CONFIG_FILE" ]; then
+	echo -e "\\033[36mLoading config from file $CONFIG_FILE\\033[0m"
+	. "$CONFIG_FILE"
+fi
+
+# przetworzenie zmiennych konfiguracyjnych
+. ${DIROP_SYSTEM_DIR}parse_config.inc.sh > /dev/null
+control_volume_info
+rel_to_abs_path
+if [ "$FORCE_VOLUME_ID" != "" ]; then
+	VOLUME_ID=$FORCE_VOLUME_ID;
+fi
+
+
+###########################
+## INICIALIZACJA SYSTEMU ##
+###########################
+
+# kontrola czy dostępne są wymagane pakiety
+SOFT="unrtf convert identify konwert trs awk seq"
+for f in $SOFT; do
+	if ! which $f > /dev/null 2> /dev/null; then
+		echo -e "\\033[38mERROR: brak $f który jest wymagany dla działania skryptów\\033[0m" >&2
+		exit
+	fi
+done
+unset SOFT
+
+
+#################################################
+## START SYSTEMU - PRZETWORZENIE OPCJI DZIALAN ##
+#################################################
+# opcje działań
+. ${DIROP_SYSTEM_DIR}make.inc.sh > /dev/null
+eval set -- "$LISTA_OPCJI"
+while true; do
+	case $1 in
+		-r|--run_in_all_subdirs)
+			for d in *; do
+				pushd $d
+					${DIROP_SYSTEM_DIR}MAKE.sh -mc $CONFIG_FILE > stdout.txt 2> stderr.txt
+				popd
+			done ;;
+		-m|--make)
+			make_output_dir
+			make_rename_input_doc2rtf
+			if $MAKE_IMG; then make_img; fi
+			if $MAKE_TXT; then make_txt; fi
+			if $MAKE_SQL; then make_sql $2; fi
+			;;
+		--make-img)
+			make_img
+			;;
+		--make-txt)
+			make_txt
+			;;
+		--make-sql)
+			make_sql $2
+			;;
+		--make-sql-content)
+			make_sql_content $2
+			;;
+		--make-sql-page_title_update) # start_normal,start_roman,info_page
+			START_NORMAL=`echo $2 | cut -d',' -f1`
+			START_ROMAN=`echo $2 | cut -d',' -f2`
+			INFO_PAGE=`echo $2 | cut -d',' -f3`
+			make_update_title
+			;;
+		--insert_lost_pages) # offset_from,offset_value
+			OFFSET_FROM=`echo $2 | cut -d',' -f1`
+			OFFSET_VALUE=`echo $2 | cut -d',' -f2`
+			if [ "`echo $2 | cut -d',' -f3`" = "INTEGRATE" ]; then
+				mv png_NEW/* png
+				mv tif_NEW/* tif
+				mv txt_NEW/* txt
+			fi
+			if [ "$OFFSET_VALUE" != "" -a "$OFFSET_FROM" != "" ]; then
+				make_insert_lost_pages
+			fi
+			;;
+		--) shift; break;;
+	esac
+	shift;
+done

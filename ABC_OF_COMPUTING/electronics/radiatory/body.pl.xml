@@ -1,0 +1,16 @@
+<article>
+<title>Radiatory</title>
+
+<p>Często elementy elektroniczne wymagają dodatkowego chłodzenia - przynajmniej w postaci radiatora. Jego dobór przeprowadza się następująco:</p>
+
+<pre>
+{rezystancja termiczna radiatora} =   ( {temperatura maksymalna układu} - {temperatura otoczenia} ) / { moc wydzielana }
+                                    - ( {rezystancja termiczna złacze-obudowa} + {rezystancja termiczna obudowa-radiator} )
+</pre>
+
+<p>Gdzie <code>{temperatura maksymalna układu}</code> i <code>{rezystancja termiczna złacze-obudowa}</code> to dane katalogowe chłodzonego układu (tranzystora, triaka, ...), zaś jako <code>{rezystancja termiczna obudowa-radiator}</code> przyjmuje się wartość od 1K/W (bezpośrednie przykręcenie) do 0.2K/W (pasta silikonowa).</p>
+
+<p>Dla przykładudla BTA16, temperatury otoczenia 50 stopni C i 10 W strat (co odpowiada przepuszczaniu przez triaka 10A) mamy: <code>{rezystancja termiczna radiatora przy 10 W strat} = (125-50) / 10 - 2.1 - 0.1 = 5.3K/W</code> czyli wartość rezystancji termicznej radiatora musi być <strong>mniejsza</strong> lub równa od 5.3K/W.</p>
+
+<p>Zobacz także w Sieci: <doc url="http://www.elportal.pl/pdf/k01/32_13.pdf">artykuł w EdW</doc></p>
+</article>

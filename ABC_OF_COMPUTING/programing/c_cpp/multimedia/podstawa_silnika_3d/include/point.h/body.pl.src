@@ -1,0 +1,26 @@
+#ifndef POINT_H
+#define POINT_H
+
+template <typename T> struct PointXZ {
+	T x;
+	T z;
+	PointXZ(T x, T z){
+		this->x = x;
+		this->z = z;
+	}
+	PointXZ(){}
+};
+
+template <typename T> struct PointXZY {
+	T x;
+	T z;
+	T y;
+	PointXZY(T x, T z, T y){
+		this->x = x;
+		this->z = z;
+		this->y = y;
+	}
+	PointXZY(){}
+};
+
+#endif

@@ -1,0 +1,32 @@
+#ifndef SINGLETON_H
+#define SINGLETON_H
+
+#include <QString>
+#include <inttypes.h>
+
+class Singleton {
+	public:
+		// tutaj umieszczamy zmienne które ma przechowywać nasza klasa
+		uint16_t port;
+		QString adres_ip;
+		
+		// publiczna statyczna funkcja
+		static Singleton& use() {
+			// funkcja tworzy instancję tej klasy ale tylko gdy jej nie było
+			// w zasadzie można by trzymać wskaźnik, sprawdzać if'em czy nie NULL
+			// i gdy null to tworzyć obiekt przez new i zwracać wskaźnik do niego,
+			// ale po co skoro możemy skorzystać z mechanizmu lokalnych zmiennych statycznych,
+			// które są tworzone przy pierwszym napotkaniu deklaracji, a potem deklaracja ta
+			// jest ignorowana i tylko z nich korzystamy, ponadto ich destruktory są wywoływane
+			// automatycznie przy kończeniu programu ...
+			static Singleton singleton_use;
+			return singleton_use;
+		}
+	private:
+		Singleton(){};
+		Singleton(const Singleton&){};
+		// oba domyślne konstruktory muszą być prywatne ...
+		// aby nie dało się inaczej utworzyć tego obiektu
+};
+
+#endif

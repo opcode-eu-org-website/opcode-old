@@ -1,0 +1,68 @@
+/**
+ * Plik stanowi zestaw funkcji do obsługi wyświetlacza na bazie HD44780
+ * do wykorzystania zarówno w mikrokontrolerach jak i sprzęcie PC
+ * konieczne jest wstawienie odpowiedniej wersji definiowania funkcji:
+ *   lcd_send() - patrz poniżej
+**/
+
+/*
+#ifndef lcd_send
+	//#define lcd_send(byte) outb(byte, 0x378)
+	#define LCD_E        0x10
+	#define LCD_RS_DATA  0x20
+	#define LCD_RS_CMD   0x00
+	#define LCD_DATA_OFFSET 0
+	#define lcd_send(byte) PORTC = byte
+#endif
+*/
+
+/// wysłanie komendy lub danych z obsługą przełączania E, RS
+/// gdy mode == 0x00 to komenda
+/// gdy mode == 0x10 to dana
+void lcd_switch_and_send(uint8_t val, uint8_t mode) {
+	val &= 0x0f;
+	
+	lcd_send(mode); // RS = mode E = 0
+	lcd_send((val << LCD_DATA_OFFSET) | LCD_E | mode); // E =1
+	_delay_ms(1);
+	lcd_send(mode); // E = 0
+}
+
+/// wysłanie komendy lub danych z obsługą przełączania E, RS
+/// gdy jmamy 4 bitową szynę
+void lcd_switch_and_send_4bit(uint8_t val, uint8_t mode) {
+	lcd_switch_and_send((val >> 4) & 0x0f,   mode);
+	lcd_switch_and_send(val & 0x0f, mode);
+}
+
+/// pomcnicze makra związane z wysyłaniem komend / danych
+#define lcd_send_comand(val) lcd_switch_and_send_4bit(val, LCD_RS_CMD)
+#define lcd_send_data(val)   lcd_switch_and_send_4bit(val, LCD_RS_DATA)
+
+/// pomocnicza funkcja obsługująca wysyłanie napisu
+void lcd_send_string(const char *napis, uint8_t dlugosc) {
+	uint8_t i;
+	for (i=0; i<dlugosc; i++) {
+		lcd_send_data( napis[i] );
+	}
+}
+
+/// pomocnicze makra związane z ważnymi komendami
+// Function Set (2 linie 4 bit) = 0010, 0010 10**
+#define lcd_set_4bit_2line() lcd_switch_and_send(0x20, LCD_RS_CMD); lcd_send_comand(0x28)
+// On-Off Control (wyświetlacz włączony, kursor wyłączony) = 0000 1100
+#define lcd_set_display_on_cursor_off() lcd_send_comand (0x0c);
+// Entry Mode Set (przesówanie w prawo przy zapisie do DD RAM) = 0000 0110
+#define lcd_set_move_right() lcd_send_comand (0x06);
+
+#define lcd_init_4bit_2line() \
+	lcd_set_4bit_2line();\
+	lcd_set_display_on_cursor_off();\
+	lcd_set_move_right();
+
+// Clear Display = 0000 0001
+#define lcd_clear() lcd_send_comand(0x01)
+// First line (Return Home) = 0000 0010
+#define lcd_first_line() lcd_send_comand(0x02)
+// Second line (Return Home 2) = 1100 0000
+#define lcd_second_line() lcd_send_comand(0xc0)

@@ -1,0 +1,14 @@
+<article>
+<title>Zasoby systemowe</title>
+
+<p>W Linuxie większości ustawień systemowych (np. wielkość segmentu pamięci dzielonej) dokonuje się przez system <kbd class="path">/proc</kbd> (niekiedy przez <kbd class="path">/sys</kbd>). W przypadku Solarisów tradycyjną metodą są ustawienia w <kbd class="path">/etc/system</kbd> np.</p>
+<pre>forceload: sys/shmsys
+set shmsys:shminfo_shmmax=3221225472</pre>
+<p>A bardziej nowoczesną (i preferowaną) metodą konfiguracja poprzez projekty (szczegóły w <man>resource_controls</man>). Baza projektów znajduje się w pliku <kbd class="path">/etc/project</kbd>, a ustawień dokonuje się poprzez <code>projadd</code> i <code>projmod</code> np.:</p>
+<pre># utworzenie projektu
+projadd user.postgres
+# ustawienie parametrów projektu
+projmod -s -K "project.max-shm-memory=(priv,8G,deny)" user.postgres
+# dodanie użytkownika do projektu
+projmod -a -U postgres user.postgres</pre>
+</article>

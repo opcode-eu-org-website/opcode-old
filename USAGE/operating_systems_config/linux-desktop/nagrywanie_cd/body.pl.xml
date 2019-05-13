@@ -1,0 +1,25 @@
+<article>
+<title>Nagrywanie CD/DVD i zapis pakietowy UTF</title>
+
+<p>Współcześnie (w odróżnieniu od stanu z przed kilku lat) programy nagrywające CD/DVD nie wymagają emulacji SCSI gdy wykorzystywany jest sprzęt IDE. Ponadto warto zainteresować się także zapisem pakietowym (<wiki pl="Universal Disk Format">UDF</wiki>). Korzystanie z niego wygląda następująco:</p>
+<pre>
+	# przygotowanie płytki
+	cdrwtool -d /dev/cdrom -q
+	pktsetup cdrom /dev/cdrom
+	mkudffs --utf8 /dev/pktcdvd/cdrom
+	
+	# montowanie płytki
+	pktsetup cdrom /dev/cdrom
+	mount -t udf -o rw,noatime /dev/pktcdvd/cdrom /cdrom
+	chmod o+w /cdrom
+	
+	#teraz możemy pisać i czytać
+	
+	# odmontowywanie płytki
+	umount /cdrom
+	pktsetup -d cdrom
+	eject /dev/cdrom
+</pre>
+<p>Płytę także można montować normalnie (tylko do odczytu) w standardowy sposób przy czym podać należy jako system plików udf - w <kbd class="path">/etc/fstab</kbd> można wpisać <code>udf,iso9660</code>. Można także bawić się z zapisem gołych danych na płycie (np. pliku tar).</p>
+<p>Kasowanie "niegrzecznych" płytek (takich przy których kasowaniu np. k3b ma problemy) warto spróbować wykonać bezpośrednio z pod konsoli komendą <code>wodim blank=all</code>.</p>
+</article>

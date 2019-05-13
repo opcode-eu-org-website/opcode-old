@@ -1,0 +1,21 @@
+#include "misc/global.h"
+#include <GL/glut.h>
+#include <stdlib.h> // exit
+
+int okno;
+Config *config;
+Input *input;
+Camera *camera;
+ObjectsSpace *objects_space;
+bool show_debug;
+
+void quit_game() {
+	// niszczymy przestrzen
+	objects_space->delete_space();
+	delete objects_space;
+	
+	// niszczymy okno GLUT'owe
+	glutDestroyWindow(okno);
+	// kończymy program
+	exit(0);
+}

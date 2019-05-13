@@ -1,0 +1,2937 @@
+<soft_db>
+	<!-- app_link przy generacji xhtml zastępowany normalnym opisem -->
+	<!-- kategorie mogą zawierać inne kategorie itd .. -->
+	<!--
+	<soft_cat name="">
+		<desc><title>nazwa kategorii</title><p>Kilka słów na temat kategorii</p></desc>
+		<app name=""  attr="atrybuty dodawane do nazwy polecenia (gdy typ=cmd)" type="app|cmd" priority="base|important|normal|addional">
+			<desc>opis programu (wymagane, unikalne)</desc>
+			<homepage>strona domowa (rekomendowane, unikalne)</homepage>
+			
+			<id_link id="identyfikator:wewnetrzny">opis</id_link>
+			
+			<cmd_name>dodatkowe komendy związane z programem (opcjonalne)</cmd_name>
+			<alt_name>dodatkowe nazwy związane z programem (opcjonalne)</alt_name>
+			<alt_homepage>strona domowa (opcjonalne)</alt_homepage>
+			
+			<deb repo="repo gdy inne niż official/main">paczka debiana (rekomendowane)</deb>
+		</app>
+		<app_link name="" />
+	</soft_cat>
+	-->
+
+	<soft_cat name="cmd-shell">
+		<desc>
+			<title>Narzędzia shell'owe</title>
+			<p>Podstawowym elementem każdego systemu operacyjnego (oczywiście poza samym jądrem i elementami mu towarzyszącymi ...) jest interpretator poleceń (na ogół ten główny działa w trybie tekstowym, ale nawet jeżeli nie to tekstowy jest zawsze do naszej dyspozycji ...) - shell. Najpopularniejszym tekstowym shell'em jest <dfn>bash</dfn> (podobnie jak <dfn>pdksh</dfn> oraz BSD'owski <dfn>ash</dfn> wywodzi się od sh, w odróżnieniu od shell'i wywodzących się z csh). Shell interpretuje komendy wprowadzane przez użytkownika, wykonuje programy a nawet jest skryptowym językiem programowania umożliwiającym automatyzację wielu czynności.</p>
+			<p>Wiele z podstawowych funkcji realizowanych jest przez niezależne polecenia (ich postać na ogół nie odróżnia się od komend wbudowanych w shell'a). Do takich należą zbiory podstawowych użytków tekstowych (<dfn>grep</dfn>, <dfn>sed</dfn>, <dfn>less</dfn>, czy <dfn>textutils</dfn> w skład którego wchodzą między innymi: wc, uniq, sort) i plikowych (<dfn>fileutils</dfn> w skład którego wchodzą między innymi: ls, cp, ln, mkdir, rm).</p>
+		</desc>
+	
+		<app name="bash" type="cmd" priority="important">
+			<desc>chyba najbardziej rozbudowana powłoka tekstowa ...</desc>
+			<homepage>http://www.gnu.org/software/bash/</homepage>
+		</app>
+		<app name="zsh" type="cmd" priority="">
+			<desc>shell o składni typu sh przeznaczony głównie do pracy interaktywnej, posiada bogate i wygodne opcje konfiguracyjne</desc>
+			<homepage>http://www.zsh.org/</homepage>
+		</app>
+		<app name="fish" type="cmd" priority="">
+			<desc>shell przeznaczony głównie do pracy interaktywnej o nietypowej składni</desc>
+			<homepage>http://www.zsh.org/</homepage>
+		</app>
+		<app name="ipython" type="cmd" priority="">
+			<desc>interaktywny shell pythona przeznaczony głównie do debugowania ale dobrze sprawdzający się jako shell systemowy, zobacz <doc url="http://forum.dug.net.pl/viewtopic.php?p=74203#74203">ipython @ dug</doc></desc>
+			<homepage>http://ipython.scipy.org/</homepage>
+		</app>
+		<app name="pdksh" type="cmd" priority="">
+			<desc>kolejny shell wywodzący się z sh</desc>
+			<homepage>http://web.cs.mun.ca/~michael/pdksh/</homepage>
+		</app>
+		<app name="tcsh" type="cmd" priority="">
+			<desc>znany shell "typu C"</desc>
+			<homepage>http://www.tcsh.org/</homepage>
+		</app>
+		<app name="mc" type="cmd" priority="">
+			<desc>Midnight Commander - pełnoekranowy manager plików</desc>
+			<homepage>http://www.ibiblio.org/mc/</homepage>
+		</app>
+		<app name="screen" type="cmd" priority="">
+			<desc>menadżer ekranu - umożliwia utrzymywanie i zarzadzanie wieloma sesjami terminalowymi (w tym odłączanie i ponowne podłączanie odpalonych programów do terminala)</desc>
+		</app>
+		<app name="tmux" type="cmd" priority="">
+			<desc>menadżer ekranu - umożliwia utrzymywanie i zarzadzanie wieloma sesjami terminalowymi (w tym odłączanie i ponowne podłączanie odpalonych programów do terminala)</desc>
+		</app>
+		<app name="watch" type="cmd" priority="">
+			<desc>okresowe powtarzanie danej komendy z wyjściem pełnoekranowym</desc>
+		</app>
+	</soft_cat>
+	<soft_cat name="cmd-pomoc">
+		<desc>
+			<title>Uzyskiwanie pomocy</title>
+			<p>Poniżej najważniejsze komendy przeznaczone do przeglądania pomocy wbudowanej w system. Należy także wspomnieć iż w wielu komendach możemy także uzyskać pomoc za pomocą opcji <code>--help</code> lub <code>-h</code>. Ponadto dla wielu programów/bibliotek itp dostępna jest dokumentacja w <kbd class="path">/usr/share/doc</kbd>.</p>
+		</desc>
+	
+		<app name="man [nazwa polecenia]" type="cmd" priority="">
+			<desc>podręcznik elektroniczny, warto również zobaczyć reakcję polecenia na parametr <code>--help</code></desc>
+		</app>
+		<app name="info [nazwa polecenia]" type="cmd" priority="">
+			<desc>nowa wersja podręcznika systemowego</desc>
+		</app>
+		<app name="pinfo" type="cmd" priority="">
+			<desc>wygodna przeglądarka dokumentacji info w trybie tekstowym</desc>
+			<homepage>http://pinfo.alioth.debian.org/</homepage>
+		</app>
+		<app name="apropos [tekst]" type="cmd" priority="">
+			<desc>listuje strony podręcznika związane z danym tekstem, <code>apropos -s 1 ''</code> | less pozwala zapoznać się z spisem wszystkich stron w rozdziale pierwszym (o tym co jest w którym rozdziale mozna zobaczyć w <code>man man</code>)</desc>
+		</app>
+	</soft_cat>
+	<soft_cat name="cmd-file_dir_info">
+		<desc>
+			<title>Uzyskiwanie informacji o plikach, katalogach, poruszanie się w strukturze drzewa katalogów</title>
+		</desc>
+	
+		<app name="cd" attr="[ścieżka]" type="cmd" priority="">
+			<desc>zmiana bieżącego katalogu <br />
+				warto zauważyć iż katalog bieżący oznaczamy <code>.</code>, nadrzędny oznaczamy <code>..</code>, ścieżki zaczynające się od ukośnika / oznaczają ścieżki bezwzględne (od korzenia systemu plików), natomiast katalog domowy oznacza się <code>~</code>
+			</desc>
+		</app>
+		<app name="ls" attr="[opcje] [ścieżka]" type="cmd" priority="">
+			<desc>listowanie zawartości katalogu<br />
+				do ważniejszych opcja należy zaliczyć <code>-a</code> powodująca wyświetlanie plików ukrytych (zaczynających się od kropki) i <code>-l</code> wyświetlająca pliki w formie listy z szczegółowymi informacjami (uprawnienia, rozmiar, właściciel, grupa, rozmiar)
+			</desc>
+		</app>
+		<app name="tree" type="cmd" priority="">
+			<desc>listowanie drzewa katalogów</desc>
+		</app>
+		<app name="du" attr="[opcje] [ścieżka]" type="cmd" priority="">
+			<desc>wyświetla informacje o miejscu zajmowanym przez katalogi/pliki<br />
+				do ważniejszych opcji należy zaliczyć <code>-k</code> - podaje ilość zajmowanego miejsca w kilobajtach, <code>-s</code> - podaje tylko sumę dla każdego katalogu
+			</desc>
+		</app>
+		<app name="pwd" type="cmd" priority="">
+			<desc>wypisuje ścieżkę bieżącego katalogu</desc>
+		</app>
+		<app name="mount" type="cmd" priority="">
+			<desc>montuje systemy plików<br />
+				warto zwrócić szczególną uwagę na opcję montowania bind (podawaną po <code>-o</code> lub jako <code>--bind</code>) umożliwiającą montowanie katalogu w innym katalogu oraz na <code>-o remount</code> umożliwiającą zmianę parametrów podmontowanego systemu plików
+			</desc>
+		</app>
+		<app name="umount" type="cmd" priority="">
+			<desc>odmontowywuje systemy plików</desc>
+		</app>
+		<app name="fdisk" type="cmd" priority="">
+			<desc><code>cfdisk</code>, <code>sfdisk</code>	- modyfikowanie / oglądanie podziału dysku na partycje</desc>
+		</app>
+		
+		<app name="realpath" type="cmd" priority="">
+			<desc>narzędzie zamieniające ścieżki utworzone w oparciu o linki symboliczne na ściezki rzeczywiste (równoważne pod względem funkcjonalnym <code>/bin/readlink -f</code>)</desc>
+			<homepage>http://packages.debian.org/squeeze/realpath</homepage>
+		</app>
+		<app name="readlink" type="cmd" priority="">
+			<desc>narzędzie do pokazywania wartości linków symbolicznych i rozwijania ścieżek, np. jednolinijkowiec <code>for l in *; do if [ -L "$l" ]; then f=`readlink "$l"`; \rm "$l"; cp "$f" "$l"; fi; done</code> pozwala na zamianę linków na rzeczywiste pliki w bierzącym katalogu</desc>
+		</app>
+	</soft_cat>
+	<soft_cat name="cmd-file_dir_modifity">
+		<desc>
+			<title>Zmiany w strukturze katalogów, kopiowanie przenoszenie usuwanie</title>
+		</desc>
+	
+		<app name="mkdir" attr="[ścieżka]" type="cmd" priority="">
+			<desc>tworzenie katalogów</desc>
+		</app>
+		<app name="rmdir" attr="[ścieżka]" type="cmd" priority="">
+			<desc>usuwanie katalogów</desc>
+		</app>
+		<app name="cp" attr="[opcje] [źródło] [ce]" type="cmd" priority="">
+			<desc>kopiowanie plików<br />
+				do ważniejszych opcji należy zaliczyć <code>-r</code> kopiuje podkatalogi wraz z plikami, <code>-f</code> pliki w katalogu docelowym posiadające identyczne nazwy będą nadpisywane bez pytania, <code>-i</code> oczekuje potwierdzenia przed nadpisaniem, <code>-v</code> wyświetla nazwę każdego pliku podczas kopiowania
+			</desc>
+		</app>
+		<app name="ln" attr="[opcje] [źródło] [cel]" type="cmd" priority="">
+			<desc>służy do tworzenia <strong>dowiązań twardych</strong> oraz symbolicznych, domyślnie tworzy dowiązanie twarde - drugi równoprawny wpis o pliku (w szczególności plik zostanie skasowany, gdy wszystkie dowiązania twarde do niego i on sam zostaną usunięte)<br />
+				do ważniejszych opcji należy zaliczyć <code>-s</code> - tworzy <strong>dowiązanie symboliczne</strong> (plik wskazujący na położenie celu, konieczne przy dowiązaniach do katalogów, a także plików położonych na innych partycjach), <code>-f</code> - pliki w katalogu docelowym posiadające identyczne nazwy będą nadpisywane bez pytania
+			</desc>
+		</app>
+		<app name="mv" attr="[opcje] [źródło] [cel]" type="cmd" priority="">
+			<desc>przenoszenie/zmiana nazwy pliku <br />
+				do ważniejszych opcji należy zaliczyć <code>-f</code> pliki w katalogu docelowym posiadające identyczne nazwy będą nadpisywane bez pytania, <code>-i</code> oczekuje potwierdzenia przed nadpisaniem, <code>-v</code> wyświetla nazwę każdego pliku podczas kopiowania
+			</desc>
+		</app>
+		<app name="rm" attr="[opcje] [ścieżka]" type="cmd" priority="">
+			<desc>usuwanie plików lub katalogów, jeżeli brak jest odpowiednich praw do zapisu, wyświetlana jest prośba o potwierdzenie. <br />
+				do ważniejszych opcji należy zaliczyć <code>-f</code> brak pytań przy każdym usuwanym pliku, <code>-i</code> oczekuje na potwierdzenie, <code>-r</code> podkatalogi i pliki również zostaną usunięte, <code>-v</code> wypisuje nazwę pliku przed usunięciem
+			</desc>
+		</app>
+		<app name="symlinks" type="cmd" priority="">
+			<desc>narzędzie do weryfikacji, upraszczania, zmiany na względne, itp linków symbolicznych</desc>
+		</app>
+		<app name="rdiff-backup" type="cmd" priority="">
+			<desc> i <code>pdumpfs</code>	- różnicowe kopie zapasowe ...</desc>
+		</app>
+		<app name="rsync" type="cmd" priority="">
+			<desc>program do synchronizacji plików i drzew katalogów przez sieć (różnicowe kopie zapasowe), bardzo wygodne jesty użycie poprzez ssh i dynamicznie urychamiany rsynk po drugiej stronie przy użyciu opcji <code>-e 'ssh'</code></desc>
+			<homepage>http://rsync.samba.org</homepage>
+		</app>
+		<app name="dd" type="cmd" priority="">
+			<desc>tworzenie kopi urządzenia / pliku obrazu</desc>
+		</app>
+		<app name="ddrescue" type="cmd" priority="">
+			<desc>dd z lepszą tolerancją błędów odczytu</desc>
+			<homepage>http://www.gnu.org/software/ddrescue/ddrescue.html</homepage>
+		</app>
+	</soft_cat>
+	<soft_cat name="cmd-pakowanie_i_kompresja">
+		<desc>
+			<title>Pakowanie i kompresja</title>
+		</desc>
+	
+		<app name="tar" type="cmd" priority="">
+			<desc>programy do pakowania/rozpakowywania</desc>
+		</app>
+		<app name="gzip" type="cmd" priority="">
+			<desc>kompresuje podany plik (nie łączy wielu plików w jedno archiwum)</desc>
+		</app>
+		<app name="bzip2" type="cmd" priority="">
+			<desc>kolejny kompresor</desc>
+		</app>
+		<app name="split" type="cmd" priority="">
+			<desc>dzieli plik na części (łączyć można np. cat'em)</desc>
+		</app>
+		
+		<app name="pax" type="cmd" priority="">
+			<desc>rozbudowany archiwizer umożliwiający również kopiowanie drzewa katalogów</desc>
+		</app>
+		<app name="cpio" type="cmd" priority="">
+			<desc>również archiwizery ...</desc>
+		</app>
+		<app name="afio" type="cmd" priority="">
+			<desc>również archiwizery ...</desc>
+		</app>
+		<app name="compress" type="cmd" priority="">
+			<desc>popularne narzędzie kompresji plikó</desc>
+			<homepage>http://ncompress.sourceforge.net/</homepage>
+			<deb>ncompress</deb>
+		</app>
+		<app name="zoo" type="cmd" priority="">
+			<desc>narzedzie do kompresji i dekompresji</desc>
+			<homepage>http://www.ibiblio.org/pub/packages/ccic/software/unix/utils/zoo210.tar.gz</homepage>
+		</app>
+		<app name="zip" type="cmd" priority="">
+			<desc>program do obsługi archiwów ZIP</desc>
+			<deb>zip</deb>
+		</app>
+		<app name="unrar" type="cmd" priority="">
+			<desc>rozpakowywacz archiwów RAR</desc>
+			<deb>unrar-free</deb>
+		</app>
+		<app name="unzip" type="cmd" priority="">
+			<desc>rozpakowywacz archiwów RAR</desc>
+			<deb>unzip</deb>
+		</app>
+	</soft_cat>
+	<soft_cat name="cmd-uprawnienia">
+		<desc>
+			<title>Atrybuty i uprawnienia</title>
+		</desc>
+	
+		<app name="touch" type="cmd" priority="">
+			<desc>zmienia daty modyfikacji, dostępu, ... do pliku, pozwala na łatwe tworzenie pustych plików</desc>
+		</app>
+		
+		<app name="chown" attr="[opcje] [właściciel] [ścieżka]" type="cmd" priority="">
+			<desc>zmiana właściciela pliku<br />
+				do ważniejszych opcji należy zaliczyć <code>-R</code> powodująca zmienianie również w podkatalogach
+			</desc>
+		</app>
+		<app name="chgrp" attr="[opcje] [grupa] [ścieżka]" type="cmd" priority="">
+			<desc>zmiana grupy pliku<br />
+				do ważniejszych opcji należy zaliczyć <code>-R</code> powodująca zmienianie również w podkatalogach
+			</desc>
+		</app>
+		<app name="chmod" attr="[opcje] [uprawnienia] [pliki]" type="cmd" priority="">
+			<desc>zmiana prawa dostępu do pliku(ów)<br />
+				do ważniejszych opcji należy zaliczyć <code>-R</code> powodująca zmienianie również w podkatalogach<br />
+				<strong>Unixowe uprawnienia do plików</strong> składają się z trzech członów: uprawnienia dla właściciela (u), grupy (g) i pozostałych użytkowników (o). W każdym z członów mogą być przyznane uprawnienia do czytania (r), pisania (w) i wykonywania (x); w odniesieniu do plików jest to intuicyjne (uprawnienie do wykonywania jest potrzebne do uruchomienia programów), natomiast w stosunku do katalogów wygląda to następująco: uprawnienia do czytania pozwalają na wylistowanie zawartości, do wykonania pozwalają na dostęp, do zawartości katalogu (wejścia do niego) do pisania na tworzenie nowych obiektów wewnątrz niego i zmienianie nazw istniejących. Warto zaznaczyć iż program w pliku nie mającym praw wykonywlności też moży być wykonany (w przypadku skryptu poprzez uruchomienie interpretatora i podanie tego programu jako odpowiedniego argumentu wywołania, w przypadku typowych binarek poprzez wywołanie <code>/lib/ld-2.3.6.so</code> z tym plikiem i jego opcjami jako paramtrem.
+			</desc>
+		</app>
+		<app name="chattr" type="cmd" priority="">
+			<desc>zmienia atrybuty plików związane z systemem plików</desc>
+		</app>
+		<app name="getfacl" type="cmd" priority="">
+			<desc>odczyt uprawnień związanych z listami kontroli dostępu</desc>
+		</app>
+		<app name="setfacl" type="cmd" priority="">
+			<desc>ustawianie uprawnień związanych z listami kontroli dostępu.<br />
+				ACL jest opcjonalnym mechanizmem który (na wspierających go systemach plików) pozwala na definiowanie uprawnień do pliku dla dodatkowych użytkowników i grup - plik ma nadal swojego właściciela, grupę i wszystkich pozostałych, ale przed prawami dla "others" wchodzą prawa użytkowników i grup definiowanych w ACL (w najpopularniejszej minimalnej wersji według schematu rwx). Wypadkowe prawa obliczane są jako suma wynikła z praw użytkownika i grup do których należy.<br />
+				ACL pozwala ponadto definiować uprawnienia domyślne dla nowo powstałych plików w katalogu (są one opcją katalogu).<br />
+				Więcej szczegółów o ACL - <doc url="https://wiki.archlinux.org/index.php/Access_Control_Lists" mirror="oprogramowanie/ArchLinuxWiki">Access Control Lists w Linuxie</doc>, <doc url="http://wazniak.mimuw.edu.pl/images/a/ae/Bsi_01_lab.pdf">Mechanizmy lokalnej kontroli dostępu (ACL)</doc>)
+			</desc>
+		</app>
+	</soft_cat>
+	<soft_cat name="cmd-wyszukiwanie">
+		<desc>
+			<title>Wyszukiwanie plików i w plikach, porównywanie plików, ...</title>
+		</desc>
+	
+		<app name="find" attr="[opcje]" type="cmd" priority="">
+			<desc>przeszukiwanie systemu plików <br />
+			do ważniejszych opcji należy zaliczyć <code>-name nazwa-pliku</code> wyszukanie pliku nazwa-pliku, <code>-size +N</code> wyszukanie pliku o rozmiarze większym niż N</desc>
+		</app>
+		<app name="locate" type="cmd" priority="">
+			<desc>wyszukuje pliki po nazwie korzystając z specjalnej bazy danych (wyniki mogą być mniej aktualne niż przy find, za to szybsze)</desc>
+		</app>
+		<app name="grep" attr="[opcje] [ścieżka]" type="cmd" priority="">
+			<desc>wypisywanie linijek zawierających słowa kluczowe (oraz po skorzystaniu z odpowiednich opcji linijek sąsiadujących albo linii nie pasujących), warto tu zwrócić uwagę na możliwość podania kilku wzorców (łączone LUB) lub nawet całego pliku wzorców (można w ten sposób porównywać pliki)</desc>
+		</app>
+		<app name="diff" type="cmd" priority="">
+			<desc>porównuje pliki, do uzyskania pliku zmodyfikowanego z orginalnego i łaty wygenerowanej przez <code>diff</code> służy program <code>patch</code></desc>
+		</app>
+		<app name="comm" type="cmd" priority="">
+			<desc>wyświetlanie linii występujących tylko w jednym (wskazanym) z dwóch posortowanych plików lub linii wspólnych</desc>
+		</app>
+		<app name="patchutils" type="app" priority="">
+			<alt_cmd>combinediff</alt_cmd><alt_cmd>dehtmldiff</alt_cmd><alt_cmd>filterdiff</alt_cmd><alt_cmd>fixcvsdiff</alt_cmd><alt_cmd>flipdiff</alt_cmd><alt_cmd>grepdiff</alt_cmd><alt_cmd>interdiff</alt_cmd><alt_cmd>lsdiff</alt_cmd><alt_cmd>recountdiff</alt_cmd><alt_cmd>rediff</alt_cmd><alt_cmd>splitdiff</alt_cmd><alt_cmd>unwrapdiff</alt_cmd>
+			<desc>zestaw narzedzi do pracy z patch'ami</desc>
+			<homepage>http://cyberelk.net/tim/software/patchutils/</homepage>
+		</app>
+		<app name="quilt" type="app" priority="">
+			<desc>narzedzie do pracy z seriami patch'y</desc>
+			<homepage>https://savannah.nongnu.org/projects/quilt/</homepage>
+		</app>
+		<app name="vbindiff" type="cmd" priority="">
+			<alt_name>Visual Binary Diff</alt_name>
+			<desc>porównuje wizualnie pliki binarne (interfejs ncurces)</desc>
+			<homepage>http://home.comcast.net/~chris-madsen/vbindiff/</homepage>
+		</app>
+		<app name="patch" type="cmd" priority="">
+			<desc>stosuje na pliku łatę zwracaną przez diff</desc>
+		</app>
+		<app name="sort" type="cmd" priority="">
+			<desc>sortuje ...</desc>
+		</app>
+		<app name="wc" type="cmd" priority="">
+			<desc>liczy linie, wyrazy, znaki, ...</desc>
+		</app>
+		<app name="file" attr="[plik]" type="cmd" priority="">
+			<desc>rozpoznaje typ pliku</desc>
+		</app>
+	</soft_cat>
+	<soft_cat name="cmd-wyswietlanie_i_edycja_plikow">
+		<desc>
+			<title>Wyświetlanie i edycja plików</title>
+		</desc>
+	
+		<app name="cat" type="cmd" priority="">
+			<desc>wypisywanie i łączenie plików</desc>
+		</app>
+		<app name="more" type="cmd" priority="">
+			<desc>przeglądanie tekstu ekran po ekranie</desc>
+		</app>
+		<app name="less" type="cmd" priority="">
+			<desc>przeglądarka tekstu ekran po ekranie o większych możliwościach od <code>more</code>(nie musi czytać całego dokumentu, coznacznie szybsze przy dużych dokumentach oraz posiada możliwość przeglądanie dokumentu w tył)</desc>
+		</app>
+		<app name="head" type="cmd" priority="">
+			<desc>wypisuje początek pliku</desc>
+		</app>
+		<app name="tail" type="cmd" priority="">
+			<desc>wypisuje koniec pliku</desc>
+		</app>
+		<app name="multitail" type="cmd" priority="">
+			<desc>tail lepiej operujący na wielu plikach równocześnie</desc>
+		</app>
+		<app name="tac" type="cmd" priority="">
+			<desc>wypisuje plik od konca (ostatnia linia jako pierwsza</desc>
+		</app>
+	
+		<app name="ed" type="cmd" priority="">
+			<desc>prosty "jednolinijkowy" edytor tekstowy</desc>
+		</app>
+	
+		<app name="vim" attr="" type="cmd" priority="">
+			<alt_cmd>vim</alt_cmd>
+			<desc>legendarny edytor tekstowy<br />
+				podstawowe komendy VIMa:
+					<kbd>i</kbd> - tryb wstawiania,
+					<kbd>Insert</kbd> - zmiana trybu wstawiania i zastępowania,
+					<kbd>Esc</kbd> - wyjęscie z trybu wstawiania/zastępowania,
+					<kbd>y</kbd> - kopiuje,
+					<kbd>d</kbd> - kasuje
+						(po <kbd>y</kbd>, <kbd>d</kbd> mozna podac np <kbd>20l</kbd> lub <kbd>20{strzalka w prawo}</kbd> co oznacza 20 kolejnych znakow, w oznacza slowo, podwojenie <kbd>y</kbd> lub <kbd>d</kbd> oznacza kopiowanie/kasowanie całej linii),
+					<kbd>x</kbd> - kasuje tyle znakow jaka liczba poprzedzony,
+					<kbd>p</kbd> - wkleja po,
+					<kbd>P</kbd> - wkleja przed,
+					<kbd>/</kbd> - szukanie,
+					<kbd>N</kbd> - poprzednie znaleznien,
+					<kbd>n</kbd> - nastepne,
+					<kbd>1,$s#<var>szukany</var>#<var>zamiennik</var>#g</kbd> - zastępowanie w całym pliku (bez adresu <kbd>1,$</kbd> - w bierzącej linii),
+					<kbd>:w</kbd> - zapis
+					<kbd>:q</kbd> - wyjście
+					<kbd>:q!</kbd> - wujście bez zapisywania
+					<kbd>:wq</kbd> - zapis i wyjście
+					<kbd>:next</kbd> - następny plik
+					<kbd>:previous</kbd> - poprzedni plik
+					<kbd>:split</kbd> - podział okna
+					<kbd>Ctrl</kbd>+<kbd>W</kbd> - przełączanie między oknami
+				<br /><doc url="http://gnu.univ.gda.pl/~tomasz/prog/vi/refcard/virefcard-pl.pdf" mirror="oprogramowanie/refcard">Ściąga do vi (pl)</doc>, <doc url="http://tnerual.eriogerg.free.fr/vim.html" mirror="oprogramowanie/refcard">Ściąga do vi (en)</doc> - kilkustronicowe broszurki z najważniejszymi poleceniami, <doc url="http://michael.peopleofhonoronly.com/vim/" mirror="oprogramowanie/vim-CheatSheet">graficzny tutorial do vim'a</doc> (i <doc url="http://www.viemu.com/a_vi_vim_graphical_cheat_sheet_tutorial.html">alternatywna wersja</doc>), <doc url="http://arctgx.ovh.org/lin/vim.html">Praktyczny Vim</doc>
+				<br />Warto także zainteresować się sprawdzaniem pisowni w vim: instalujemy paczkę vim-spellfiles-pl (jest w experimental, instaluje się w <kbd class="path">/usr/share/vim/vim70/spell/</kbd>), w <kbd class="path">~/.vimrc</kbd> wpisuje: <code>set spelllang=pl,en</code>, a następnie sprawdzamy przy pomocy <code>:set spell</code>.
+			</desc>
+			<homepage>http://www.vim.org/</homepage>
+		</app>
+		<app name="emacs" type="cmd" priority="">
+			<desc>inny kultowy edytor tekstowy<br />
+				<doc url="http://gnu.univ.gda.pl/~tomasz/prog/emacs/refcard/emacsrefcard-pl.pdf" mirror="oprogramowanie/refcard">Ściąga do Emacsa</doc> - kilkustronicowa broszurka z najważniejszymi poleceniami
+			</desc>
+			<homepage>http://www.gnu.org/software/emacs/emacs.html</homepage>
+		</app>
+		<app name="joe" type="cmd" priority="">
+			<desc>kolejny edytor tekstowy</desc>
+		</app>
+		<app name="sed" type="cmd" priority="">
+			<desc>edytor strumieniowy, umożliwia np. podmianę pierwszego wystąpienia napisu w pliku <code>sed -e '0,/<var>zastepowany</var>/ s#<var>zastepowany</var>#<var>zastepujacy</var>#'</code> lub wszystkich wystąpień - <code>sed -e 's#<var>zastepowany</var>#<var>zastepujacy</var>#g'</code></desc>
+		</app>
+		<app name="xmlstarlet" type="cmd" priority="">
+			<desc>comand line'owe narzędzie do przetwarzania, modywfikowania, ... plików xml (można powiedzieć taki odpowiednik sed/awk dla xml'a)</desc>
+		</app>
+			
+		<app name="cut" type="cmd" priority="">
+			<desc>wybiera z pliku zadany zestaw kolumn</desc>
+		</app>
+		<app name="paste" type="cmd" priority="">
+			<desc>łączenie plików (wg. zadanych kryteriów) poprzez łączenie linii</desc>
+		</app>
+		<app name="join" type="cmd" priority="">
+			<desc>łączenie plików (wg. zadanych kryteriów) poprzez wstawianie linii</desc>
+		</app>
+		<app name="rev" type="cmd" priority="">
+			<desc>wypisuje plik odwracając kolejność znaków w każdym wierszu</desc>
+		</app>
+		<app name="nl" type="cmd" priority="">
+			<desc>wypisuje plik z numerowanymi liniami</desc>
+		</app>
+		<app name="pr" type="cmd" priority="">
+			<desc>konwersja plików tekstowych do drukowania (np. dodanie marginesu)</desc>
+		</app>
+
+		<app name="tr" type="cmd" priority="">
+			<desc>zamienia jeden zestaw znaków innym (niestety ma problem z znakami dwubajtowymi)</desc>
+		</app>
+		<app name="konwert" type="cmd" priority="">
+			<desc>oparty na perlu program do konwersji różnych kodowań, posiadający predefiniowane zestawy (np. <code>konwert utf8-ascii</code> usunie znaki narodowe itp z pliku kodowanego w utf-8, natomiast filtr qp-8bit pozwoli zamienić kodowanie quoted printable na normalne 8 bitowe, a rtf-8bit zrobi to z kodowaniem rtf'u)</desc>
+			<homepage>http://qrczak.ids.net.pl/programy/linux/konwert/</homepage>
+		</app>
+		<app name="trs" type="cmd" priority="">
+			<desc>bardziej inteligentny od <code>tr</code> program wchodzący w skład pakietu konwert służy do zamieniania napisów z jednego zestawu napisami z drugiego (w odróżnieniu od tr nadaje się do znaków kilku bajtowych - utf8, lepiej od sed'a sprawdza się przy zmianie kodowań - patrz przykład w manualu)</desc>
+		</app>
+		<app name="iconv" type="cmd" priority="">
+			<desc>zmienia kodowanie znaków w pliku</desc>
+		</app>
+		<app name="mewencode" type="cmd" priority="">
+			<alt_cmd>mewdecode</alt_cmd>
+			<desc>program (stanowiący część pakieu narzędzi dodatkowych dla kilenta pocztowego Mew) do obsługi kodowań mime (w tym Quoted-Printable, base64), m.in. zmienia kodowanie base64 na 8 bitowe</desc>
+			<homepage>http://www.Mew.org/</homepage>
+			<deb>mew-bin</deb>
+		</app>
+		<app name="mimedecode" type="cmd" priority="">
+			<desc>narzędzie do obsługi kodowania MIME</desc>
+			<homepage>http://www.freesoft.org/CIE/FAQ/mimedeco.c</homepage>
+		</app>
+		<app name="qprint" type="cmd" priority="">
+			<desc><!-- no DEB -->program do kodowania i dekodowania "Quoted-Printable"</desc>
+			<homepage>http://www.fourmilab.ch/webtools/qprint/</homepage>
+		</app>
+		<app name="base64" type="cmd" priority="">
+			<desc><!-- no DEB -->program do kodowania i dekodowania base64</desc>
+			<homepage>http://www.fourmilab.ch/webtools/base64/</homepage>
+		</app>
+
+
+		<app name="hexcat" type="cmd" priority="">
+			<desc>wypisywanie plików jako liczby szesnastkowe</desc>
+		</app>
+		<app name="od" type="cmd" priority="">
+			<desc>wypisywanie plików jako liczby oktalne, szesnastkowe, ...</desc>
+		</app>
+		<app name="xxd" type="cmd" priority="">
+			<desc>wypisywanie plików jako liczby szesnastkowe</desc>
+		</app>
+		<app name="hexdump" type="cmd" priority="">
+			<desc>wypisuje zawartość pliku interpretując go jako plik binarny, np. <code>hexdump -e '1/4 "%08d " 1/2 "%05d " 2/1 "%02x " "\n"' plik</code> każde kolejne 8 bajtów będzie interpretował jako 32 bitowa liczba całkowita (4 bajty), 16 bitowowa liczba całkowita (2 bajty) i dwie liczby jedno bajtowe (wyświetlane szesnastkowo).</desc>
+		</app>
+		<app name="bvi" type="cmd" priority="">
+			<desc><code>hexer</code>	- edytor binarny o interfejsie przypominającym vi</desc>
+		</app>
+		<app name="hexcurse" type="cmd" priority="">
+			<desc>edytor binarny o interfejsie opartym o ncurses</desc>
+		</app>
+		
+		<app name="indent" type="cmd" priority="">
+			<desc>automatyczne formatowanie kodu C</desc>
+		</app>
+		<app name="tidy" type="cmd" priority="">
+			<desc>automatyczne formatowanie xml/html/...</desc>
+		</app>
+		<app name="expand" type="cmd" priority="">
+			<desc>konwersja tabulacji na spacje</desc>
+		</app>
+		<app name="unexpand" type="cmd" priority="">
+			<desc>konwersja spacji na tabulacje</desc>
+		</app>
+	</soft_cat>
+	<soft_cat name="cmd-planowanie_zadan">
+		<desc>
+			<title>Planowanie zadań</title>
+		</desc>
+	
+		<app name="crontab" type="cmd" priority="">
+			<desc>pozwala oglądać i edytować tablice zaplanowanych zadań (dla cron'a). Warto tu też wspomnieć o programie "anacron" będącym mniej przestrzegającą reguł czasowych odmianą cron'a</desc><!-- FIXME -->
+		</app>
+		<app name="at" type="cmd" priority="">
+			<desc>pozwala jednorazowo zaplanować zadanie</desc>
+		</app>
+	</soft_cat>
+	<soft_cat name="cmd-procesy">
+		<desc>
+			<title>Procesy, ich parametry i informacje o nich</title>
+		</desc>
+	
+		<app name="nice" type="cmd" priority="">
+			<desc>uruchamia program z zmodyfikowanymi priorytetem szeregowania (im wyższy tym program jest bardziej dyskryminowany przy przełączaniu zadań)</desc>
+		</app>
+		<app name="renice" type="cmd" priority="">
+			<desc>zmienia priorytet szeregowania procesu</desc>
+		</app>
+		<app name="ionice" type="cmd" priority="">
+			<desc>uruchamia program z zmodyfikowanymi priorytetem IO lub zmienia te priorytety dla wskazanego procesu</desc>
+		</app>
+		<app name="cpulimit" type="cmd" priority="">
+			<homepage>http://cpulimit.sourceforge.net/</homepage>
+			<desc>umożliwia ograniczenie wykorzystania procesora przez program</desc>
+		</app>
+		<app name="kill" type="cmd" priority="">
+			<desc>przesyła sygnał do procesów o podanych PID</desc>
+		</app>
+		<app name="killall" type="cmd" priority="">
+			<desc>przesyła sygnał do procesów o pasującej nazwie</desc>
+		</app>
+		<app name="ps" type="cmd" priority="">
+			<desc>wyświetla aktualnie działające procesy i informacje o nich (dla ps polecam opcje -Alf ...)</desc>
+		</app>
+		<app name="pgrep" type="cmd" priority="">
+			<desc>wyświetla filtrowaną listę aktualnie działających procesów</desc>
+		</app>
+		<app name="pstree" type="cmd" priority="">
+			<desc>wyświetla drzewo aktualnie działających procesów</desc>
+		</app>
+		<app name="pwdx" type="cmd" priority="">
+			<desc>podaje katalog roboczy podanego procesu</desc>
+		</app>
+		<app name="top" type="cmd" priority="">
+			<desc>monitorowanie procesów obciążających CPU, pamięć, ...</desc>
+		</app>
+		<app name="iotop" type="cmd" priority="">
+			<desc>monitorowanie procesów obciążających I/O</desc>
+		</app>
+		<app name="fuser" type="cmd" priority="">
+			<desc>informacje o procesach korzystających z plików ...</desc>
+		</app>
+		<app name="lsof" type="cmd" priority="">
+			<desc>informacje o plikach otwartych przez program (patrz też <kbd class="path">/proc/<var>PID</var>/fd/</kbd>)</desc>
+		</app>
+		<app name="socklist" type="cmd" priority="">
+			<desc>wyświetla listę otwartych socketów</desc>
+		</app>
+		<app name="vmstat" type="cmd" priority="">
+			<desc>informacje o obciążeniu systemu</desc>
+		</app>
+		<app name="ipcs" type="cmd" priority="">
+			<desc>informacje o wykożystaniu pamięci współdzielonej</desc>
+		</app>
+	</soft_cat>
+	<soft_cat name="cmd-sys_user_info">
+		<desc>
+			<title>Informacje o użytkownikach, systemie, ...</title>
+		</desc>
+	
+		<app name="id" type="cmd" priority="">
+			<desc>informacja o aktualnym użytkowniku</desc>
+		</app>
+		<app name="whoami" type="cmd" priority="">
+			<desc>informacja o aktualnym użytkowniku</desc>
+		</app>
+		<app name="w" type="cmd" priority="">
+			<desc>kto obecnie zalogowany</desc>
+		</app>
+		<app name="who" type="cmd" priority="">
+			<desc>kto obecnie zalogowany (ale np. z opcją <code>-r</code> aktualny poziom działania systemu i czas uruchomienia)</desc>
+		</app>
+		<app name="finger [nazwa uzytkownika]" type="cmd" priority="">
+			<desc>informacja o użytkowniku</desc>
+		</app>
+		<app name="last" type="cmd" priority="">
+			<desc>ostatnio logujący się użytkownicy</desc>
+		</app>
+		<app name="lastb" type="cmd" priority="">
+			<desc>ostatnie nieudane logowania</desc>
+		</app>
+		<app name="lastlog" type="cmd" priority="">
+			<desc>ostatnie logowania użytkowników</desc>
+		</app>
+		<app name="uname" type="cmd" priority="">
+			<desc>informacja o systemie</desc>
+		</app>
+		<app name="lsb_release" type="cmd" priority="">
+			<desc>informacja o systemie zgodnym z LSB</desc>
+		</app>
+		<app name="printenv" type="cmd" priority="">
+			<desc>zmienne środowiskowe wypisywanie oraz przekazywanie do uruchamianego programu</desc>
+		</app>
+		<app name="env" type="cmd" priority="">
+			<desc>zmienne środowiskowe wypisywanie oraz przekazywanie do uruchamianego programu</desc>
+		</app>
+		<app name="setenv" type="cmd" priority="">
+			<desc>zdefiniowanie zmiennych środowiskowych</desc>
+		</app>
+		<app name="unsetenv" type="cmd" priority="">
+			<desc>skasowanie zmiennych środowiskowych</desc>
+		</app>
+		<app name="free" type="cmd" priority="">
+			<desc>informacja o pamięci</desc>
+		</app>
+		<app name="uptime" type="cmd" priority="">
+			<desc>informacja o tym jak długo działa system ...</desc>
+		</app>
+		<app name="getent" type="cmd" priority="">
+			<desc>informacje z baz administracyjnych</desc>
+		</app>
+		<app name="time" type="cmd" priority="">
+			<desc>czas działania programu</desc>
+		</app>
+		<app name="dumpkey" type="cmd" priority="">
+			<desc>zwraca kody wciskanych klawiszy ...</desc>
+		</app>
+		<app name="xconsole" type="cmd" priority="">
+			<desc>pokazuje komunikaty wyrzucane na konsolę w środowisku graficznym (wymaga dostępu do <kbd class="path">/dev/xconsole</kbd>, prawa dostępu do tego pliku są ustalane w <kbd class="path">/etc/init.d/sysklogd</kbd></desc>
+		</app>
+	</soft_cat>
+	<soft_cat name="cmd-user_komunikacja">
+		<desc>
+			<title>Komunikacja z i pomiędzy użytkownikami</title>
+		</desc>
+	
+		<app name="write" attr="[nazwa użytkownika] [terminal]" type="cmd" priority="">
+			<alt_name>nwrite</alt_name>
+			<desc>wysyła komunikat do danego użytkownika<br />
+				Warto tutaj wspomnieć o możliwości kierowania komunikatu na wybrany terminal (m.in. <code>/dev/tty*</code> w "przypadku" prawdziwych terminali, <code>/dev/pts/*</code> w przypadku X-serwera, xterminali i sesji ssh, zerowy to najczęściej X-serwer). W przypadku posiadania stosownych uprawnień można też pisać bezpośrednio do tych plików.
+			</desc>
+			<deb>nwrite</deb>
+			<homepage>ftp://ftp.csua.berkeley.edu/pub/nwrite/</homepage>
+		</app>
+		<app name="wall" type="cmd" priority="">
+			<desc>wiadomość rozgłoszeniowa (do wszystkich zalogowanych użytkowników)</desc>
+		</app>
+		<app name="talk [nazwa użytkownika]" type="cmd" priority="">
+			<desc>rozmowa z użytkownikiem</desc>
+		</app>
+		<app name="mesg" type="cmd" priority="">
+			<desc>pozwala zezwolić bądź zabronić na wysyłanie wiadomości przez write na twój terminal ...</desc>
+		</app>
+	</soft_cat>
+	<soft_cat name="cmd-diagnostyczne_i_administracyjne">
+		<desc>
+			<title>Narzędzia diagnostyczne i administracyjne</title>
+			<p>Oprócz opisanych poniżej narzędzi istnieje wiele innych programów związanych z tą tematyką (zobacz w innych artykułach na temat linuxa na stronie). Wartościowe są również informacje zawarte w systemie <kbd class="path">/proc</kbd>, <kbd class="path">/sys</kbd> oraz w logach (<kbd class="path">/var/log</kbd>).</p>
+		</desc>
+	
+		<app name="su" type="cmd" priority="">
+			<desc>przełącza użytkownika (podobnie działa stworzony dkla kde <code>kdesu</code>, w przypadku <code>su</code> aby przełączony używtkownik miał dostęp do "naszego" x serwera wcześniej wydajemy <code>xhost LOCAL:<var>nazwa_uzytkownika_na_ktorego_przelaczamy</var></code>)</desc>
+		</app>
+		<app name="sudo" type="cmd" priority="">
+			<desc>program pozwalający na wykonywanie uprzywilejowanych komend przez wyznaczonych użytkowników</desc>
+			<homepage>http://www.sudo.ws/</homepage>
+		</app>
+		<app name="fuse-utils" type="app" priority="">
+			<desc>narzędzia do korzystania z <wiki pl="FUSE">FUSE</wiki></desc>
+			<homepage>http://fuse.sourceforge.net/</homepage>
+		</app>
+		<app name="fakechroot" type="app" priority="">
+			<desc>nardzedzie do uruchamiania programu z podmienionym katalogiem głównym</desc>
+			<homepage>http://fakechroot.alioth.debian.org/</homepage>
+		</app>
+			
+		<app name="stty" type="cmd" priority="">
+			<desc>konfiguruje terminal (np. port szeregowy /dev/tyyS* , później możemy korzystać z niego np. za pomocą cat, echo, ... i przekierowań potoków - np. <code>cat /dev/ttyS0 &gt; <var>~/serial.log</var></code> będzie logowało informacje z portu do wskazanego pliku)</desc>
+		</app>
+		<app name="xset" type="cmd" priority="">
+			<desc>konfigurowanie ekranu x-serwera, np. <code>sleep 1; xset dpms force off</code> spowoduje wyłączenie (uśpienie) monitora</desc>
+		</app>
+			
+		<app name="adduser" type="cmd" priority="">
+			<desc>dodawanie użytkownika</desc>
+		</app>
+		<app name="addgroup" type="cmd" priority="">
+			<desc>dodawanie grupy</desc>
+		</app>
+		<app name="deluser" type="cmd" priority="">
+			<desc>usuwanie użytkownika</desc>
+		</app>
+		<app name="delgroup" type="cmd" priority="">
+			<desc>usuwanie grupy</desc>
+		</app>
+		<app name="passwd" type="cmd" priority="">
+			<desc>zmiana hasła</desc>
+		</app>
+		<app name="chage" type="cmd" priority="">
+			<desc>informacja o ważności hasła</desc>
+		</app>
+		<app name="shutdown" type="cmd" priority="">
+			<desc>wyłączanie i restartowanie systemu (komputera), podobnie do operowania na poziomach <code>init</code></desc>
+		</app>
+		
+		<app name="dmesg" type="cmd" priority="">
+			<desc>logi jądra</desc>
+		</app>
+		<app name="lspci" type="cmd" priority="">
+			<deb>pciutils</deb>
+			<desc>listowanie tego co siedzi na pci, pcmcia, ... (aktualizacjia bazy identyfikacyjnej <code>update-pciids</code>)</desc>
+		</app>
+		<app name="lspcmcia" type="cmd" priority="">
+			<deb>pcmciautils</deb>
+			<desc>listowanie slotów PCMCIA</desc>
+		</app>
+		<app name="pcardctr" type="cmd" priority="">
+			<deb>pcmciautils</deb>
+			<desc>kontrola PCMCIA - wyłączanie, włączanie urządzeń itp</desc>
+		</app>
+		<app name="lsusb" type="cmd" priority="">
+			<deb>usbutils</deb>
+			<desc>listowanie tego co siedzi na usb (aktualizacjia bazy identyfikacyjnej <code>update-usbids</code>)</desc>
+		</app>
+		<app name="lsscsi" type="cmd" priority="">
+			<desc>listowanie tego co siedzi na SCSI (oraz interfejsach tak widzianych - np. SATA, FC, ...)</desc>
+		</app>
+		<app name="dmidecode" type="cmd" priority="">
+			<desc>odczyt informacji o sprzęcie</desc>
+		</app>
+		<app name="ddcprobe" type="cmd" priority="">
+			<desc>odczyt informacji o monitorze</desc>
+		</app>
+		<app name="lshal" type="cmd" priority="">
+			<desc>odczyt informacji na temat HAL</desc>
+		</app>
+		
+		<app name="ldconfig" type="cmd" priority="">
+			<desc>konfiguracja bibliotek dynamicznych (m.in. określanie ścieżek w jakich są wyszukiwane), patrz też <kbd class="path">/etc/ld.so.conf</kbd></desc>
+		</app>
+		<app name="ldd" type="cmd" priority="">
+			<desc>wyświetlanie wykorzystywanych przez program bibliotek dynamicznych</desc>
+		</app>
+		
+		<app name="hddtemp" type="cmd" priority="">
+			<desc>nardzędzie do kontroli temperatury dysku twardego</desc>
+			<homepage>http://www.guzu.net/linux/hddtemp.php</homepage>
+		</app>
+		<app name="smartctl" type="cmd" priority="">
+			<desc>nardzędzie do odczytu informacji  <wiki pl="S.M.A.R.T. (informatyka)">S.M.A.R.T.</wiki> dotyczących dysku twardego</desc>
+			<homepage>http://smartmontools.sourceforge.net/</homepage>
+			<deb>smartmontools</deb>
+		</app>
+		<app name="hdparm" type="cmd" priority="">
+			<desc>ustawienia i pomiary prędkości dysków twardych (np. opcja -S ustawia czas po jakim usypiany jest dysk)</desc>
+			<homepage>http://www.ibiblio.org/pub/Linux/system/hardware</homepage>
+		</app>
+		<app name="sdparm" type="cmd" priority="">
+			<desc>narzędzie uzupełniające hdparm w stosunku co urządzeń podsystemu SCSI</desc>
+			<homepage>http://sg.danny.cz/sg/sdparm.html</homepage>
+		</app>
+		<app name="mbmon" type="cmd" priority="important">
+			<alt_name>xmbmon</alt_name>
+			<desc>monitorowanie parametrów pracy płyty głównej</desc>
+			<homepage>http://www.nt.phys.kyushu-u.ac.jp/shimizu/download/download.html</homepage>
+		</app>
+		<app name="etherwake" type="cmd" priority="">
+			<alt_name>wake-on-lan</alt_name>
+			<desc>budzenie przez sieć LAN</desc>
+			<homepage>http://www.scyld.com/expert/wake-on-lan.html</homepage>
+			<deb>etherwake</deb>
+		</app>
+	</soft_cat>
+	<soft_cat name="cmd-narzedzia">
+		<desc>
+			<title>Różne użyteczne narzędzia ...</title>
+		</desc>
+	
+		<app name="cal" type="cmd" priority="">
+			<desc>kalendarz</desc>
+		</app>
+		<app name="date" type="cmd" priority="">
+			<desc>data i czas, program ten potrafi także przeliczać datę i czas - np. <code>date -d @847103830 '+%Y-%m-%d %H:%M:%S'</code>, <code>date -d '1996-11-04 11:37:10' '+%s'</code>, <code>date -d '1996-11-04 11:37:10 +3week -2days'</code></desc>
+		</app>
+		<app name="bc" type="cmd" priority="">
+			<desc>kalkulator (warto rozważyć utworzenie sobie aliasu alias <code>'bc'='bc &lt;(echo scale=3)'</code>, aby zaraz po starcie mieć 3 miejsca po przecinku)</desc>
+		</app>
+		<app name="calc" type="cmd" priority="">
+			<desc>(znany także jako apcalc) zaawansowany kalkulator o składni podobnej do C umożliwiający wykonywanie mi.in. operacji logicznych (w tym binarnych)</desc>
+		</app>
+		<app name="numconv" type="cmd" priority="">
+			<desc>program do konwersji systemów liczbowych oprócz systemów pozycyjnych o różnych podstawach obsługuje także inne systemy liczbowe - np. rzymski</desc>
+		</app>
+		<app name="ipcalc" type="cmd" priority="">
+			<desc>kalkulator IP (pozwalający na obliczanie adresów sieci rozgłoszeniowych, zmianę notacji itd)</desc>
+		</app>
+		<app name="sipcalc" type="cmd" priority="">
+			<desc>kalkulator IP (pozwalający na obliczanie adresów sieci rozgłoszeniowych, zmianę notacji itd)</desc>
+		</app>
+		<app name="seq" type="cmd" priority="">
+			<desc>wypisuje kolejne liczby (przydane np. w for)</desc>
+		</app>
+		<app name="xargs" type="cmd" priority="">
+			<desc>pobierz argumenty z stdin</desc>
+		</app>
+		<app name="strings" type="cmd" priority="">
+			<desc>wypisuje sekwencje znaków drukowanych (określanie zawartości plików nietekstowych)</desc>
+		</app>
+		<app name="clear" type="cmd" priority="">
+			<desc>czyści terminal</desc>
+		</app>
+		<app name="reset" type="cmd" priority="">
+			<desc>przywraca ustawienia terminala (np. gdy po wyświetleniu pliku binarnego są dziwne krzaczki)</desc>
+		</app>
+		<app name="script" type="cmd" priority="">
+			<desc>tworzy zapis sesji (stdin, stdout, ...)</desc>
+		</app>
+		<app name="which [tekst]" type="cmd" priority="">
+			<desc>zwraca wykonywaną ścieżkę / polecenie przy wykonywaniu podanego tekstu</desc>
+		</app>
+		<app name="echo" type="cmd" priority="">
+			<desc>druk na standardowe wyjście</desc>
+		</app>
+		
+		<app name="whois" type="cmd" priority="">
+			<desc>informacje o domenie</desc>
+		</app>
+		<app name="host" type="cmd" priority="">
+			<desc>informacje DNS'owe</desc>
+		</app>
+			
+		<app name="mkfifo" type="cmd" priority="">
+			<desc>tworzy łącze nazwa (specjalny plik który może być wykorzystywany do komunikacji między procesami na zasadzie podobnej do |)</desc>
+		</app>
+			
+		<app name="gnuplot" type="cmd" priority="">
+			<desc>rysowanie wykresów; <id_link id="gnuplot">więcej o gnuplocie</id_link></desc>
+		</app>
+			
+		<app name="xinit" type="cmd" priority="">
+			<desc>uruchamia program w srodowisku graficznym (wraz z startem srodowiska), np. <code>xinit -e __WYBRANY_PROGRAM__ -- :1</code> uruchomi X'y na ekranie 1 (zazwyczaj Alt+Ctrl+F8) a w nich wskazany program</desc>
+		</app>
+		<app name="chvt" type="cmd" priority="">
+			<desc>komenda do przełączania aktywnego terminala wirtualnego (w tym terminali na których pracuje Xserwer),komenda jest odpowiednikiem kombinacji ALT+CTRL+F*</desc>
+		</app>
+		<app name="openvt" type="cmd" priority="">
+			<desc>wykonanie komendy na zadanym terminalu wirtualnym (nie mylić z emulatorem terminala - np. xterm)</desc>
+		</app>
+		<app name="mt" type="cmd" priority="">
+			<desc>obsługa napędów taśmowych (streamerów), np. <code>mt -f <var>/dev/rmt/0</var> rewind</code> przewinięcie do początku taśmy w wskazanym czytniku ...</desc>
+		</app>
+	</soft_cat>
+
+	<soft_cat name="cmd-konfiguracja_sieci">
+		<desc>
+			<title>Polecenia do konfiguracji sieci</title>
+		</desc>
+	
+		<app name="ip" type="cmd" priority="">
+			<desc>konfiguracja sieci IP oraz routingu (umożliwia np. balans obciążenia pomiędzy dwoma łączami - <code>ip route add default scope global nexthop via $IP1 dev $IF1 weight 1 nexthop via $IP2 dev $IF2 weight 1</code>)</desc>
+		</app>
+		<app name="ifconfig" type="cmd" priority="">
+			<desc>konfiguracja interfejsów sieciowych, np. konfiguracja numeru IP i wielkości sieci (maska): <code>ifconfig <var>eth0</var> up <var>192.168.24.1</var> netmask <var>255.255.0.0</var></code> (w FreeBSD <code>ifconfig <var>bge0</var> up <var>192.168.24.1</var> netmask <var>255.255.0.0</var></code>)</desc>
+		</app>
+		<app name="dhclient" type="cmd" priority="">
+			<desc>konfiguracja automatyczna interfejsu w oparciu o DHCP</desc>
+		</app>
+		<app name="route" type="cmd" priority="">
+			<desc>konfiguracja routingu, np. ustawienie bramki domyślnej: <code>route add -net 0.0.0.0 netmask 0.0.0.0 gw <var>192.168.0.1</var></code> (w FreeBSD <code>route add -net 0.0.0.0 -netmask 0.0.0.0 <var>192.168.0.1</var></code></desc>
+		</app>
+			
+		<app name="ethtool" type="cmd" priority="">
+			<desc>konfiguracja kart ethernetowych pod względem takich parametrów jak prędkość transmisji, duplex, wake on lan, ...</desc>
+		</app>
+		<app name="ifplugstatus" type="cmd" priority="">
+			<desc>sprawdzanie czy karta ma link (wykryty kabel)</desc>
+		</app>
+			
+		<app name="iwconfig" type="cmd" priority="">
+			<desc>konfiguracja (większości - do części trzeba użyć <code>wlanctl-ng</code>) bezprzewodowych interfejsów sieciowych</desc>
+		</app>
+		<app name="wpa_supplicant" type="cmd" priority="">
+			<desc>konfiguracja większości bezprzewodowych interfejsów sieciowych z wsparciem dla WPA</desc>
+		</app>
+		<app name="wpa_cli" type="cmd" priority="">
+			<desc>konfiguracja większości bezprzewodowych interfejsów sieciowych z wsparciem dla WPA</desc>
+		</app>
+		<app name="iwlist" type="cmd" priority="">
+			<desc>dodatkowe informacje z bezprzewodowych interfejsów sieciowych (przydatna zwłaszcza opcja <code>scan</code> pokazująca dostępne sieci</desc>
+		</app>
+			
+		<app name="arp" type="cmd" priority="">
+			<desc>manipulowanie tablicą protokołu ARP</desc>
+		</app>
+		<app name="brctl" type="cmd" priority="">
+			<desc>konfiguracja bridge'ów</desc>
+			<deb>bridge-utils</deb>
+		</app>
+		<app name="iptables" type="cmd" priority="">
+			<desc>jądrowe reguły filtrowania i routingu pakietów</desc>
+		</app>
+		<app name="ebtables" type="cmd" priority="">
+			<desc>jądrowe reguły filtrowania i routingu pakietów dla bridge'ów</desc>
+		</app>
+		<app name="arptables" type="cmd" priority="">
+			<desc>jądrowe reguły filtrowania i routingu pakietów w warstwie drugiej OSI</desc>
+		</app>
+			
+		<app name="ping" type="cmd" priority="">
+			<desc>podstawowe narzędzie testowania sieci sprawdza czy można połączyć się z danym hostem (w przypadku problemów z DNS, głównie odwrotnym, przydatna jest opcja -n)</desc>
+			<deb>iputils-ping</deb>
+		</app>
+		<app name="traceroute" type="cmd" priority="">
+			<alt_cmd>tracepath</alt_cmd>
+			<alt_cmd>traceroute6</alt_cmd>
+			<alt_cmd>tracepath6</alt_cmd>
+			<desc>trasa pakietów do danego hosta</desc>
+			<deb>traceroute</deb>
+			<deb>paris-traceroute</deb>
+			<deb>tcptraceroute</deb>
+			<deb>traceroute-nanog</deb>
+			<deb>traceproto</deb>
+			<deb>iputils-tracepath</deb>
+		</app>
+		<app name="mtr" type="cmd" priority="">
+			<desc>trasa, straty, opóźnienia itp pakietów do danego hosta</desc>
+			<deb>mtr</deb>
+			<deb>mtr-tiny</deb>
+		</app>
+		<app name="nmap" type="cmd" priority="">
+			<desc>skaner sieciowy</desc>
+		</app>
+		<app name="dhcping" type="cmd" priority="">
+			<desc>narzędzie do testowania DHCP</desc>
+		</app>
+		<app name="arping" type="cmd" priority="">
+			<desc>narzędzie do pingowania z wykorzystaniem zapytań ARP zamiast ICMP (istnieją dwie zasadnicze odmiany: z iputils oraz z synscan; ta druga zawarta w debianowym pakiecie "arping" umożliwia także pingowanie po adresie MAC (ale nie przez RARP, bo on nie do tego służy), aby to jednak działało host docelowy nie może ignorować pingów rozgłoszeniowych, metoda obejścia opisana jest w README arping'a)</desc>
+			<deb>arping</deb>
+		</app>
+		<app name="arp-scan" type="cmd" priority="">
+			<desc>wyszukiwanie hostów w oparciu o zapytania ARP (taki arping odpalany w pętli)</desc>
+		</app>
+		<app name="ndisc6" type="cmd" priority="">
+			<desc>narzędzie do testowania ICMPv6 Neighbor Discovery</desc>
+			<deb>ndisc6</deb>
+		</app>
+		<app name="rdisc6" type="cmd" priority="">
+			<desc>narzędzie do testowania ICMPv6 Router Discovery</desc>
+			<deb>ndisc6</deb>
+		</app>
+		<app name="rltraceroute6" type="cmd" priority="">
+			<desc>trasa pakietów do danego hosta IPv6 z użyciem UDP/ICMP</desc>
+			<deb>ndisc6</deb>
+		</app>
+		<app name="tcptraceroute6" type="cmd" priority="">
+			<desc>trasa pakietów do danego hosta IPv6 z użyciem TCP</desc>
+			<deb>ndisc6</deb>
+		</app>
+		<app name="tcpspray6" type="cmd" priority="">
+			<desc>narzędzie do pomiaru prędkości łącza z użyciem TCP/IP Discard/Echo</desc>
+			<deb>ndisc6</deb>
+		</app>
+		<app name="na6" type="cmd" priority="">
+			<desc>narzędzie do wysyłania pakietów Neighbor Advertisement</desc>
+			<deb>ipv6toolkit</deb>
+		</app>
+		<app name="ra6" type="cmd" priority="">
+			<desc>narzędzie do wysyłania pakietów Router Advertisement</desc>
+			<deb>ipv6toolkit</deb>
+		</app>
+		<app name="scan6" type="cmd" priority="">
+			<desc>narzędzie do skanowania sieci IPv6</desc>
+			<deb>ipv6toolkit</deb>
+		</app>
+		<app name="nslookup" type="cmd" priority="">
+			<alt_cmd>dig</alt_cmd>
+			<desc>narzędzia do zamiany adresów dpmenowych na IP i odwrotnie oraz wyciągania innych informacji z DNS (np. rekordy MX)</desc>
+		</app>
+		<app name="dnstracer" type="cmd" priority="">
+			<desc>śledzenie trasy zapytań DNS</desc>
+		</app>
+		<app name="dnswalk" type="cmd" priority="">
+			<desc>debuger DNS</desc>
+		</app>
+		
+		<app name="swaks" type="cmd" priority="">
+			<desc>narzędzie do testowania SMTP</desc>
+		</app>
+			
+		<app name="telnet" type="cmd" priority="">
+			<desc>programy umożliwiają zdalny dostęp do powłoki, a także (podobnie jak netcat) m.in. testowanie usług sieciowych (takich jak smtp, www, jabber, ...)</desc>
+		</app>
+		<app_link name="netcat6" />
+			
+		<app name="ifplugstatus" type="cmd" priority="">
+			<desc>program informujący o stanie fizycznego połączenia (linku) na karcie ethernetowej</desc>
+		</app>
+		<app name="netstat" type="cmd" priority="">
+			<desc>informacje o sieci</desc>
+		</app>
+		<app name="iptraf" type="cmd" priority="">
+			<desc>monitor IP LAN</desc>
+		</app>
+		<app name="tcpdump" type="cmd" priority="">
+			<desc>monitor sieci, <code>dhcpdump</code> wsparcie dla tcpdump do obsługi DHCP</desc>
+		</app>
+		<app name="dhcpdump" type="cmd" priority="">
+			<desc>wsparcie dla tcpdump do obsługi DHCP</desc>
+		</app>
+		<app name="wireshark" type="cmd" priority="">
+			<desc>monitor sieci</desc>
+			<homepage>http://www.wireshark.org/</homepage>
+		</app>
+		<app name="ttcp" type="cmd" priority="">
+			<desc>testuje prędkość połączenia sieciowego (<homepage url="http://ftp.arl.mil/ftp/pub/ttcp/">strona domowa</homepage>, <homepage url="http://nms.csail.mit.edu/software/CM/apps/">najnowsza wersja</homepage> oraz <homepage url="ftp://ftp.lcp.nrl.navy.mil/pub/nuttcp/">mutacja</homepage>)</desc>
+		</app>
+		<app name="iperf" type="cmd" priority="">
+			<desc>pomiar prędkości połączenia sieciowego</desc>
+		</app>
+		<app name="nload" type="cmd" priority="">
+			<desc>graficzne (ncurses) pokazywanie wykozystania (prędkości) interfejsów sieciowych</desc>
+		</app>
+	</soft_cat>
+	<soft_cat name="komunikacja">
+		<desc>
+			<title>Programy komunikacyjne</title>
+			<p>Bardzo ważną w dzisiejszych czasach grupą programów są programy odpowiedzialne za komunikację ze światem zewnętrznym.</p>
+			<p>Należy tu chyba zacząć od przeglądarek internetowych - są to programy umożliwiające przede wszystkim oglądanie stron WWW (dokumentów opisanych w HTML'u i przesyłanych poprzez protokoły HTTP i HTTPS), jednak obecnie pełnią więcej funkcji z których przede wszystkim trzeba wspomnieć o obsłudze protokołu FTP. W śród nich również znajdziemy programy działające w trybie tekstowym (choćby słynny <dfn>Lynx</dfn> czy <dfn>W3M</dfn>), jak i w trybie graficznym - <dfn>Mozilla</dfn> i jej odmiany, <dfn>Konqueror</dfn>.</p>
+			<p>Następną grupą programów komunikacyjnych są klienci poczty elektronicznej oraz grup dyskusyjnych (często ta funkcjonalność jest połączona w jednym programie), należy tutaj wspomnieć o tekstowym <dfn>pine</dfn> oraz graficznych klientach. Należy też pamiętać o programach nie będących typowymi klientami ale pomagającym nam w obsłudze poczty takich jak filtr pocztowy (<dfn>procmail</dfn>), narzędzie do przetwarzania nagłówków (<dfn>formail</dfn>, będący częścią procmail'a) i podbieracz poczty (<dfn>fechmail</dfn>).</p>
+			<p>Kolejną ważną grupą są klienci takich usług jak telnet, ftp, ssh, scp, sftp, ..., są to najczęściej programy trybu tekstowego o takich właśnie nazwach, jak również klienci graficznie (głównie usług FTP podobnych).</p>
+			<p>Wspomnieć należy jeszcze o coraz popularniejszych klientach sieci IM, umożliwiających powiadamianie o obecności w sieci, natychmiastowy przesył wiadomości, przesył plików i rozmowy głosowe (skupie się na otwartej i zdecentralizowanej sieci Jabbera), wśród klientów należy wymienić <dfn>Psi</dfn>, <dfn>Exodus</dfn> oraz tekstowy <dfn>imcom</dfn> (stworzony w Perlu) i <dfn>centericq</dfn> (obsługujący również inne sieci IM).</p>
+			<p>Omawianie programów komunikacyjnych zakończyć należy na klientach p2p (sieci bezpośredniej wymiany plików), klientach protokółu VoIP oraz programach obsługujących fax-modem (faxowanie, telefonowanie, aparat zgłoszeniowy, ...) i kartę radiowo-telewizyjną.</p>
+		</desc>
+	
+		<app name="Konqueror" type="app" priority="important">
+			<desc>graficzna przeglądarka z KDE</desc>
+			<homepage>http://www.konqueror.org/</homepage>
+		</app>
+		<app name="Mozilla Firefox" type="app" priority="important">
+			<desc>graficzna przeglądarka WWW, ... (przeglądarka posiada możliwość instalacji licznych rozszerzeń - np. <homepage url="https://addons.mozilla.org/firefox/2390/">VideoDownloader</homepage> ułatwiający wyciąganie nagrań wideo z odtwarzaczy flash)</desc>
+			<homepage>http://www.mozilla.org/projects/firefox/</homepage>
+			<deb>iceweasel</deb>
+		</app>
+		<app name="Lynx" type="app" priority="">
+			<desc>tekstowa przeglądarka WWW</desc>
+			<homepage>http://lynx.isc.org/</homepage>
+		</app>
+		<app name="w3m" type="app" priority="important">
+			<desc>tekstowa przeglądarka z wsparciem tabelek, obrazków, ...</desc>
+			<homepage>http://w3m.sourceforge.net/</homepage>
+			<deb>w3m</deb>
+			<deb>w3m-img</deb>
+		</app>
+		<app name="elinks" type="app" priority="">
+			<desc>tekstowa przeglądarka z wsparciem tabelek, obrazków, ...</desc>
+			<homepage>http://elinks.or.cz/</homepage>
+		</app>
+		<app name="links2" type="app" priority="important">
+			<desc>tekstowa przeglądarka z wsparciem tabelek, obrazków, ...</desc>
+			<homepage>http://links.twibright.com/</homepage>
+		</app>
+		<app name="netsurf" type="app" priority="important">
+			<desc>przeglądarka mogąca działać między innymi na framebufferze z wsparciem dla obrazków oraz CSS</desc>
+			<homepage>http://www.netsurf-browser.org/</homepage>
+			<deb>netsurf-linuxfb</deb>
+		</app>
+		<app name="HTTrack" type="app" priority="important">
+			<desc>przeglądarka off-line (tworzenie mirrorów serwisów WWW, przy pobieraniu w sieci LAN czy też z lokalnego komputera warto w nowszych wersjach zwrócić uwagę na przełącznik <code>-%!</code> oraz odpowiednio duży parametr zadawany przez <code>-A</code>)</desc>
+			<homepage>http://www.httrack.com/</homepage>
+			<deb>httrack</deb>
+			<deb>webhttrack</deb>
+		</app>
+		<app name="wget" type="app" priority="important">
+			<desc>pobieranie stron WWW i plików z sieci Web (HTTP, FTP)</desc>
+			<homepage>http://www.gnu.org/software/wget/</homepage>
+		</app>
+		<app name="curl" type="app" priority="">
+			<desc>pobieranie stron WWW i plików z sieci Web (HTTP, FTP)</desc>
+		</app>
+		<app name="kget" type="app" priority="">
+			<desc>pobieracz plików dla KDE</desc>
+			<homepage>http://kget.sourceforge.net</homepage>
+		</app>
+		
+		<app name="Claws Mail" type="app" priority="important">
+			<desc>graficzny klient e-mail</desc>
+			<homepage>http://www.claws-mail.org/</homepage>
+			<deb>claws-mail</deb>
+			<deb>claws-mail-feeds-reader</deb>
+			<deb>claws-mail-address-keeper</deb>
+			<deb>claws-mail-fancy-plugin</deb>
+			<deb>claws-mail-trayicon</deb>
+			<deb>claws-mail-smime-plugin</deb>
+			<deb>claws-mail-pgpinline</deb>
+			<deb>claws-mail-pgpmime</deb>
+			<deb>claws-mail-attach-remover</deb>
+		</app>
+		<app name="Mozilla Thunderbird" type="app" priority="">
+			<desc>graficzna klient poczty ... </desc>
+			<homepage>http://www.mozilla.org/projects/thunderbird/</homepage>
+			<deb>icedove</deb>
+		</app>
+		<app name="Sylpheed" type="app" priority="">
+			<desc>graficzny klient e-mail</desc>
+			<homepage>http://www.sylpheed.org/</homepage>
+		</app>
+		<app name="Sylpheed-Claws" type="app" priority="">
+			<desc>graficzny klienty e-mail</desc>
+			<homepage>http://claws.sylpheed.org/</homepage>
+		</app>
+		<app name="Balsa" type="app" priority="">
+			<desc>graficzny klient e-mail</desc>
+			<homepage>http://balsa.gnome.org/</homepage>
+		</app>
+		<app name="Evolution" type="app" priority="">
+			<desc>graficzny klient e-mail</desc>
+			<homepage>http://projects.gnome.org/evolution/</homepage>
+		</app>
+		
+		<app name="KMail" type="app" priority="">
+			<desc>graficzny klient e-mail z KDE</desc>
+			<homepage>http://kmail.kde.org/</homepage>
+			<deb>kmail</deb>
+			<deb>kmailcvt</deb>
+		</app>
+		<app name="Knode" type="app" priority="">
+			<desc>graficzny klient nntp dla KDE</desc>
+			<homepage>http://knode.sourceforge.net/</homepage>
+		</app>
+		<app name="Konversation" type="app" priority="">
+			<desc>graficzny klient irc z KDE</desc>
+			<homepage>http://konversation.kde.org/</homepage>
+		</app>
+		<app name="Akregator" type="app" priority="">
+			<desc>graficzny klient RSS z KDE</desc>
+			<homepage>http://akregator.kde.org/</homepage>
+		</app>
+		
+		<app name="Cone" type="app" priority="important">
+			<desc>konsolowy klient e-mail</desc>
+			<homepage>http://www.courier-mta.org/cone/</homepage>
+		</app>
+		<app name="alpine" type="app" priority="">
+			<desc>konsolowy klient e-mail</desc>
+			<homepage>http://www.washington.edu/alpine/</homepage>
+		</app>
+		<app name="mutt" type="app" priority="">
+			<desc>konsolowy klient e-mail</desc>
+			<homepage>http://www.mutt.org/</homepage>
+		</app>
+		
+		<app name="mailutils" type="app" priority="">
+			<alt_name>mailx</alt_name>
+			<alt_cmd>mail</alt_cmd>
+			<desc>wysyłanie/obsługa poczty elektronicznej z linii poleceń (komenda <code>mail</code>)</desc>
+			<homepage>http://www.gnu.org/software/mailutils/</homepage>
+		</app>
+		<app name="sendEmail" type="app" priority="important">
+			<desc>wysyłanie e-maili z załącznikami z linii poleceń</desc>
+			<homepage>http://caspian.dotconf.net/menu/Software/SendEmail/</homepage>
+			<deb>sendemail</deb>
+		</app>
+		<app name="procmail" type="app" priority="important">
+			<desc>przetwarzanie skrzynek pocztowych</desc>
+			<homepage>http://www.procmail.org/</homepage>
+		</app>
+		<app name="fetchmil" type="app" priority="important">
+			<desc>program do odbierania poczty przez POP, IMAP, ...</desc>
+			<homepage>http://catb.org/~esr/fetchmail/</homepage>
+		</app>
+			
+		<app name="Psi" type="app" priority="important">
+			<desc>klient IM "Jabber"</desc>
+			<homepage>http://psi.affinix.com/</homepage>
+		</app>
+		<app name="Pidgin" type="app" priority="important">
+			<desc>Multikomunikator obsługujący m.in. XMPP (jabber), IRC</desc>
+			<homepage>http://www.pidgin.im/</homepage>
+		</app>
+		<app name="finch" type="app" priority="important">
+			<desc>działający w trybie tekstowym odpowiednik Pidgina (m.in. klient xmpp i irc)</desc>
+			<homepage>http://www.pidgin.im</homepage>
+		</app>
+		<app name="WeeChat" type="app" priority="">
+			<desc>Konsolowy klient xmpp i irc</desc>
+			<homepage>http://www.weechat.org/</homepage>
+		</app>
+		<app name="mcabber" type="app" priority="">
+			<desc>Konsolowy klient xmpp</desc>
+			<homepage>http://mcabber.com/</homepage>
+		</app>
+		<app name="freetalk" type="app" priority="">
+			<desc>Konsolowy klient xmpp</desc>
+			<homepage>http://www.gnu.org/software/freetalk/</homepage>
+		</app>
+		<app name="irssi" type="app" priority="">
+			<desc>Konsolowy klient irc (i nie tylko)</desc>
+			<homepage>http://www.irssi.org/</homepage>
+		</app>
+		<app name="Egk2" type="app" priority="">
+			<desc>działający w trybie tekstowym komunikator obsługujący m.in. Jabbera</desc>
+			<homepage>http://ekg2.org/</homepage>
+		</app>
+		
+		<app name="sendxmpp" type="app" priority="important">
+			<desc>narzędzie do wysyłania IM xmpp z linii</desc>
+			<homepage>http://sendxmpp.platon.sk/</homepage>
+		</app>
+		
+		<app name="linphone" type="app" priority="important">
+			<desc>komunikator VoIP</desc>
+			<homepage>http://www.linphone.org/</homepage>
+		</app>
+		<app name="ekiga" type="app" priority="">
+			<desc>(gnomemeeting) - komunikator VoIP z obsługą SIP oraz H.323</desc>
+			<homepage>http://www.ekiga.org/</homepage>
+		</app>
+		<app name="kphone" type="app" priority="">
+			<desc>komunikator VoIP z obsługą SIP</desc>
+			<homepage>http://kphone.sourceforge.net/</homepage>
+		</app>
+		<app name="Twinkle" type="app" priority="">
+			<desc>telefon VoIP (SIP)</desc>
+			<homepage>http://www.twinklephone.com/</homepage>
+		</app>
+		<app name="I Hear U" type="app" priority="">
+			<desc><!-- no DEB -->telefon VoIP (SIP)</desc>
+			<homepage>http://ihu.sourceforge.net/</homepage>
+		</app>
+			
+		<app name="OpenSSH" type="app" priority="important">
+			<desc>ssh, scp, sftp</desc>
+			<homepage>http://www.openssh.com/</homepage>
+		</app>
+			
+		<app name="VLC media player" type="app" priority="important">
+			<desc>sieciowy odtwarzacz (i nadawca) multimediów</desc>
+			<homepage>http://www.videolan.org/vlc/</homepage>
+		</app>
+		<app name="C++ RTMP Server" type="app" priority="">
+			<desc>program do strumieniowania multimediów w sieci</desc>
+			<homepage>http://www.rtmpd.com/</homepage>
+			<deb>crtmpserver</deb>
+		</app>
+	</soft_cat>
+	<soft_cat name="serwery">
+		<desc>
+			<title>Serwery</title>
+			<p>Są to programy pracujące w trybie ciągłym i obsługujące nadchodzące (lub zaplanowane) żądania. Do najważniejszych należą serwery usług sieciowych takie jak poczty (<dfn>sendmail</dfn>, ...), WWW (<dfn>Apache</dfn>, ...), IMAP, Jabber, FTP, SSH, ... oraz wielu usług (<dfn>xinetd</dfn>), systemów baz danych (<dfn>MySQL</dfn>, <dfn>PostgreSQL</dfn>) . Swoistym serwerem jest też systemowy <dfn>corn</dfn> realizujący zaplanowane zadania w zadanym czasie. Więcej na ten temat w osobnym artykule poświęconym stawianiu serwera sieciowego.</p>
+		</desc>
+	
+		<app name="Apache" type="app" priority="important">
+			<desc>rozbudowany (warto zwrócić uwagę na wiele interesujących modułów) serwer HTTP</desc>
+			<homepage>http://www.apache.org/</homepage>
+		</app>
+		<app name="mini-httpd" type="app" priority="important">
+			<desc>prosty serwer HTTP</desc>
+			<homepage>http://www.acme.com/software/mini_httpd/</homepage>
+		</app>
+		<app name="UW-imap" type="app" priority="">
+			<desc>serwer POP i IMAP</desc>
+			<homepage>http://www.washington.edu/imap/</homepage>
+		</app>
+		<app name="Dovecot" type="app" priority="important">
+			<desc>serwer IMAP i POP</desc>
+			<homepage>http://dovecot.procontrol.fi/</homepage>
+		</app>
+		<app name="Exim" type="app" priority="important">
+			<desc>serwer SMTP</desc>
+			<homepage>http://www.exim.org/</homepage>
+		</app>
+		<app name="Sendmail" type="app" priority="">
+			<desc></desc>
+			<homepage>http://www.sendmail.org/</homepage>
+		</app>
+		<app name="nullmailer" type="app" priority="important">
+			<desc>mały i prosty serwerek odbierający pocztę lokalną (komendy mail itp) i przesyłający ją do wskazanyego serwera SMTP</desc>
+			<homepage>http://untroubled.org/nullmailer/</homepage>
+		</app>
+		<app name="esmtp" type="app" priority="">
+			<desc>mały i prosty serwerek SMTP typu relay-only MTA</desc>
+			<homepage>http://esmtp.sourceforge.net</homepage>
+		</app>
+		<app name="msmtp" type="app" priority="">
+			<desc>klient SMTP służący do przekazywania lokalnej poczty do prawdziwego MTA</desc>
+			<homepage>http://msmtp.sourceforge.net</homepage>
+		</app>
+		<app name="ssmtp" type="app" priority="">
+			<desc>mały i prosty serwerek SMTP służący do przekazywania lokalnej poczty do prawdziwego MTA</desc>
+		</app>
+		<app name="OpenSSH" type="app" priority="important">
+			<desc></desc>
+			<homepage>http://www.openssh.com/</homepage>
+		</app>
+		<app name="jabberd" type="app" priority="">
+			<desc>serwer sieci IM: Jabber</desc>
+			<homepage>http://jabberd.jabberstudio.org/</homepage>
+		</app>
+		<app name="jabberd2" type="app" priority="">
+			<desc>serwer sieci IM: Jabber</desc>
+			<homepage>http://jabberd.jabberstudio.org/2/</homepage>
+		</app>
+		<app name="ejabberd" type="app" priority="important">
+			<desc>serwer sieci IM: Jabber</desc>
+			<homepage>http://www.ejabberd.im/</homepage>
+		</app>
+		
+		<app name="MySQL" type="app" priority="important">
+			<desc></desc>
+			<homepage>http://www.mysql.org/</homepage>
+		</app>
+		<app name="PostgreSQL" type="app" priority="">
+			<desc></desc>
+			<homepage>http://www.postgresql.org/</homepage>
+		</app>
+		<app name="Xinetd" type="app" priority="">
+			<desc></desc>
+			<homepage>https://github.com/xinetd-org/xinetd</homepage>
+		</app>
+		<app name="NTP" type="app" priority="">
+			<desc>synchronizacja czasu ...</desc>
+			<homepage>http://www.ntp.org/</homepage>
+		</app>
+		<app name="Proftpd" type="app" priority="">
+			<desc>rozbudowany serwer FTP (przypominający nieco Apache - zwłaszcza pod względem konfiguracji)</desc>
+			<homepage>http://www.proftpd.org/</homepage>
+		</app>
+		<app name="UDPcast" type="app" priority="">
+			<desc>multicastowy serwer plików</desc>
+			<homepage>http://udpcast.linux.lu/</homepage>
+		</app>
+			
+		<app name="Flumotion" type="app" priority="">
+			<desc>serwer strumieniowy</desc>
+			<homepage>http://www.flumotion.net/</homepage>
+		</app>
+		<app name="icecast" type="app" priority="">
+			<desc>serwer radia internetowego</desc>
+			<homepage>http://www.icecast.org/</homepage>
+		</app>
+		<app name="Asterisk" type="app" priority="">
+			<desc>centralka telefoniczna</desc>
+			<homepage>http://www.asterisk.org/</homepage>
+		</app>
+		<app name="DialogPalette" type="app" priority="">
+			<desc>system IVR oparty na PBX Asterisk</desc>
+			<homepage>http://dialogpalette.sourceforge.net/</homepage>
+		</app>
+		<app name="FreeSWITCH" type="app" priority="">
+			<desc> (OpenPBX, fork Asteriska) - serwery SIP, centralki telefoniczne, konkurencyjne wobec Asteriska</desc>
+			<homepage>http://www.freeswitch.org/</homepage>
+		</app>
+		<app name="SipX" type="app" priority="">
+			<desc>serwer SIP (konkurencyjny wobec Asteriska)</desc>
+			<homepage>http://www.sipfoundry.org/sipXpbx/</homepage>
+		</app>
+		<app name="CallWeaver" type="app" priority="">
+			<desc>centralki telefoniczne (fork Asteriska)</desc>
+			<homepage>http://www.openpbx.org/</homepage>
+		</app>
+		
+		<app name="phpMyAdmin" type="app" priority="important">
+			<desc>webowy interfejs administracyjny MySQL</desc>
+			<homepage>http://www.phpmyadmin.net/</homepage>
+		</app>
+		<app name="phpPgAdmin" type="app" priority="">
+			<desc>webowy interfejs administracyjny PostgreSQL</desc>
+			<homepage>http://phppgadmin.sourceforge.net/</homepage>
+		</app>
+		<app name="phpBB" type="app" priority="important">
+			<desc>forum dyskusyjne  (warto zwrócić uwagę na wiele interesujących modów)</desc>
+			<homepage>http://www.phpbb.com/</homepage>
+		</app>
+		<app name="SquirrelMail" type="app" priority="important">
+			<desc>bramka mailowa  (warto zwrócić uwagę na wiele interesujących modów)</desc>
+			<homepage>http://www.squirrelmail.org/</homepage>
+		</app>
+		<app name="openwebmail" type="app" priority="">
+			<desc>inna bramka mailowa</desc>
+			<homepage>http://www.openwebmail.org/</homepage>
+		</app>
+		<app name="jwchat" type="app" priority="">
+			<desc>webowy klienta xmpp/jabber współpracują np. z ejabberd'em</desc>
+			<homepage>http://jwchat.org/</homepage>
+		</app>
+		<app name="ijab" type="app" priority="">
+			<desc><!-- no deb -->webowy klienta xmpp/jabber współpracują np. z ejabberd'em</desc>
+			<homepage>http://code.google.com/p/ijab/</homepage>
+		</app>
+		<app name="Webmnin" type="app" priority="">
+			<desc>administracja przez WWW</desc>
+			<homepage>http://www.webmin.com/</homepage>
+		</app>
+		<app name="Usermin" type="app" priority="">
+			<desc>zarządzanie kontem (hasło, forward, procmail, ...) przez WWW</desc>
+			<homepage>http://www.webmin.com/index6.html</homepage>
+		</app>
+		<app name="phpWebFileManager" type="app" priority="">
+			<desc>menager plików przez WWW</desc>
+			<homepage>http://www.platon.sk./projects/phpWebFileManager/</homepage>
+		</app>
+		
+		<app name="dhcp3-server" type="app" priority="">
+			<desc>serwer DHCP</desc>
+			<homepage>http://ftp.isc.org/isc/dhcp/</homepage>
+		</app>
+		<app name="dibbler-client" type="app" priority="">
+			<desc>klient DHCP6</desc>
+			<homepage>http://sourceforge.net/projects/dibbler/</homepage>
+		</app>
+		<app name="radvd" type="app" priority="">
+			<desc>serwer  Router Advertisement dla ipv6</desc>
+			<homepage>http://v6web.litech.org/radvd/dist/</homepage>
+		</app>
+
+		<app name="lpr" type="app" priority="">
+			<desc>system obsługi druku</desc>
+			<deb>lpr</deb>
+		</app>
+		<app name="cups" type="app" priority="">
+			<desc>system obsługi druku</desc>
+			<homepage>http://www.cups.org/</homepage>
+		</app>
+	</soft_cat>
+
+	<soft_cat name="inzynierskie">
+		<desc>
+			<title>Oprogramowanie inżynierskie</title>
+		</desc>
+		<soft_cat name="projektoweanie_elektroniki">
+			<desc>
+				<strong>oprogramowanie do projektowania układów elektronicznych</strong>
+			</desc>
+			
+			<app name="gEDA" type="app" priority="important">
+				<desc>projektowanie układów elektronicznych (w szczególności <strong>gschem</strong>), <wiki en="GEDA">@ Wikipedia</wiki></desc>
+				<homepage>http://www.geda.seul.org/</homepage>
+			</app>
+			<app name="PCB" type="app" priority="important">
+				<desc>projektowanie płytek układów elektronicznych</desc>
+				<homepage>http://pcb.sourceforge.net/</homepage>
+			</app>
+			<app name="xgsch2pcb" type="app" priority="">
+				<desc>program ułatwiający równoczesną pracę w gsch i pcb</desc>
+				<homepage>http://geda.seul.org/tools/xgsch2pcb/index.html</homepage>
+			</app>
+			
+			<app name="KiCAD" type="app" priority="important">
+				<desc>alternatywny dla gEDA + PCB czyli prgram do projektowania układów elektronicznych oraz płytek dla nich, ponadto ładnie razdzi sobie z obwodami elektrycznymi (patrz <kbd class="path">/usr/share/doc/kicad/demos/electric</kbd>)</desc>
+				<homepage>http://www.lis.inpg.fr/realise_au_lis/kicad/</homepage>
+			</app>
+			
+			<app name="Liquid PCB" type="app" priority="">
+				<desc>orginalne podejście do projektowania PCB</desc>
+				<homepage>http://www.liquidpcb.org/</homepage>
+			</app>
+			<app name="xcircuit" type="app" priority="">
+				<desc>tworzenie schematów</desc>
+				<homepage>http://opencircuitdesign.com/xcircuit/</homepage>
+			</app>
+		</soft_cat>
+		
+		<soft_cat name="symulowanie_elektroniki">
+			<desc>
+				<strong>symulatory układów elektronicznych</strong>
+			</desc>
+			
+			<app name="ktechlab" type="app" priority="">
+				<desc>IDE dla elektroniki i mikrokontrolerów dla KDE, program fajnie symuluje układy elektroniczne</desc>
+				<homepage>http://ktechlab.org/</homepage>
+			</app>
+			<app name="oregano" type="app" priority="important">
+				<desc>frondend do gnucap / ngspice</desc>
+				<homepage>https://github.com/marc-lorber/oregano</homepage>
+			</app>
+			<app name="gnucap" type="app" priority="">
+				<desc>program do symulacji układów elektronicznych</desc>
+				<homepage>http://www.gnu.org/software/gnucap/</homepage>
+			</app>
+			<app name="ngspice" type="app" priority="">
+				<desc>kontynuacja znanegi i słynnego programu do symulacji układów elektronicznych</desc>
+				<homepage>http://ngspice.sourceforge.net/</homepage>
+			</app>
+			<app name="klogic" type="app" priority="">
+				<desc>program do projektowania i testowania schematów logicznych</desc>
+				<homepage>http://www.a-rostin.de/klogic/</homepage>
+			</app>
+			<app name="ksimus" type="app" priority="">
+				<desc></desc>
+				<homepage>http://ksimus.berlios.de/</homepage>
+			</app>
+			<app name="qucs" type="app" priority="">
+				<desc></desc>
+				<homepage>http://qucs.sourceforge.net/</homepage>
+			</app>
+			<app name="tkgate" type="app" priority="">
+				<desc></desc>
+				<homepage>http://www.tkgate.org/</homepage>
+			</app>
+		</soft_cat>
+		
+		<soft_cat name="programowanie_elektroniki">
+			<desc>
+				<strong>programatory</strong>
+			</desc>
+			
+			<app name="uisp" type="app" priority="important">
+				<desc>programator ISP</desc>
+				<homepage>http://www.nongnu.org/uisp/</homepage>
+			</app>
+			<app name="avrdude" type="app" priority="important">
+				<desc>programator ISP i JTAG dla AVR</desc>
+				<homepage>http://savannah.nongnu.org/projects/avrdude/</homepage>
+			</app>
+			<app name="AVaRICE" type="app" priority="important">
+				<desc>debuger/programator JTAG</desc>
+				<homepage>http://avarice.sourceforge.net/</homepage>
+			</app>
+			<app name="avrprog" type="app" priority="">
+				<desc>prosty programator dla AVR</desc>
+				<homepage>http://avrprog.sourceforge.net</homepage>
+			</app>
+			<app name="avrp" type="app" priority="">
+				<desc>prosty programator dla AVR</desc>
+				<homepage>http://tihlde.org/~jonah/el/avrp.html</homepage>
+			</app>
+		</soft_cat>
+		
+		<soft_cat name="edytory_hexalne">
+			<desc>
+				<strong>HEX-edytory</strong>
+			</desc>
+			
+			<app name="khexedit" type="app" priority="">
+				<desc>edytor szesnastkowy z KDE</desc>
+			</app>
+			<app name="ghex" type="app" priority="">
+				<desc>edytor szesnastkowy z GNOME</desc>
+			</app>
+		</soft_cat>
+		
+		<soft_cat name="port_szeregowy">
+			<desc>
+				<strong>Programy do obsługi portu szeregowego</strong>
+			</desc>
+			
+			<app name="minicom" type="app" priority="">
+				<desc>terminal portu szeregowego</desc>
+				<homepage>http://alioth.debian.org/projects/minicom</homepage>
+			</app>
+			<app name="picocom" type="app" priority="important">
+				<desc>prosty emulator terminala dla portów szeregowych pracujhący w konsoli (zakończenie przez Ctrl+A + Ctrl+X)</desc>
+				<homepage>http://efault.net/npat/hacks/picocom/</homepage>
+			</app>
+			<app name="jpnevulator" type="app" priority="important">
+				<desc>konsolowy słuchacz portu szeregowego, z opcją nadawania (potrafi wyświrtlać i wywsyłać dane szesnastkowe)</desc>
+				<homepage>http://jpnevulator.snarl.nl/</homepage>
+			</app>
+			<app name="gtkterm" type="app" priority="important">
+				<desc>prosty emulator terminala dla portów szeregowych pracujący w środowisku graficznym (umożliwia wysyłanie i odbieranie danych jako dane zapisane szesnastkowo)</desc>
+				<homepage>http://sourceforge.net/projects/gtkterm/</homepage>
+			</app>
+			<app name="cutecom" type="app" priority="important">
+				<desc>kolejny prosty emulator terminala dla portów szeregowych pracujący w środowisku graficznym umożliwiający wysyłanie i odbieranie danych jako dane zapisane szesnastkowo</desc>
+				<homepage>http://cutecom.sourceforge.net/</homepage>
+			</app>
+		</soft_cat>
+		
+		<soft_cat name="cad">
+			<desc>
+				<strong>Programy do tworzenia schematów, diagramów oraz programy CAD</strong>
+			</desc>
+			<app name="librecad" type="app" priority="important">
+				<desc>fork QCad'a, <wiki en="LibreCAD">@ Wikipedia</wiki></desc>
+				<homepage>http://www.qcad.org/</homepage>
+			</app>
+			<app name="qcad" type="app" priority="">
+				<desc>CAD, <wiki pl="QCad">@ Wikipedia</wiki></desc>
+				<homepage>http://www.qcad.org/</homepage>
+			</app>
+			<app name="freecad" type="app" priority="">
+				<desc>CAD 3D</desc>
+				<homepage>http://freecadweb.org/</homepage>
+			</app>
+			<app name="pythoncad" type="app" priority="">
+				<desc>CAD</desc>
+				<homepage>http://www.pythoncad.org/</homepage>
+			</app>
+			<app name="OpenSCAD" type="app" priority="">
+				<desc>bazujący na edycji skryptowej CAD 3D</desc>
+				<homepage>http://www.openscad.org/</homepage>
+			</app>
+			<app name="dia" type="app" priority="important">
+				<desc>edytor diagramów</desc>
+				<homepage>http://www.gnome.org/projects/dia/</homepage>
+			</app>
+			<app name="archimedes" type="app" priority="">
+				<desc><!-- no DEB -->CAD</desc>
+				<homepage>http://archimedes.iv.org.br/portal/downloads</homepage>
+			</app>
+			<app name="graphviz" type="app" priority="">
+				<desc>system wizualizacji grafów</desc>
+				<homepage>http://www.graphviz.org/</homepage>
+			</app>
+		</soft_cat>
+		
+		<app name="gerbv" type="app" priority="">
+			<desc>przeglądarka plików Gerber</desc>
+			<homepage>http://gerbv.sourceforge.net/</homepage>
+		</app>
+		
+		<app name="ghdl" type="app" priority="">
+			<desc>symulator VHDL</desc>
+			<homepage>http://ghdl.free.fr/</homepage>
+		</app>
+		<app name="gtkwave" type="app" priority="">
+			<desc>prezenter wykresów symulacyjnych (np. z ghdl)</desc>
+			<homepage>http://gtkwave.sourceforge.net/</homepage>
+		</app>
+		
+		<app name="Icarus Verilog" type="app" priority="">
+			<desc>narzędzie symulacji i syntezy Verilog</desc>
+			<homepage>http://www.icarus.com/eda/verilog/</homepage>
+		</app>
+		
+		<app name="espresso" type="app" priority="">
+			<desc><!-- no DEB -->minimalizacja funkcji logicznych, zamieszam także skrypt do generowania plików PLA na podstawie wyrażenia boolowskiego - <id_link id="expr2pla.sh">expr2pla.sh</id_link>.</desc>
+			<homepage>ftp://ftp.cs.man.ac.uk/pub/amulet/balsa/other-software/espresso-ab-1.0.tar.gz</homepage>
+		</app>
+		
+		<app name="baudline" type="app" priority="">
+			<desc><!-- no DEB -->wizualizacja spectrum</desc>
+			<homepage>http://www.baudline.com/</homepage>
+		</app>
+	</soft_cat>
+	<soft_cat name="programistyczne_i_skryptowe">
+		<desc>
+			<title>Narzędzi programistyczne i skryptowe</title>
+			<p>Ważnym elementem są kompilatory (<dfn>gcc</dfn>), oraz interpretatory języków skryptowych (<dfn>gawk</dfn>, <dfn>perl</dfn>, <dfn>php</dfn>, <dfn>python</dfn>). Umożliwiają one tworzenie programów ze źródeł jak i uruchamianie programów tworzony w językach skryptowych. Język awk jest szczególnie przydatnym narzędziem przetwarzania plików tekstowych i jako taki mógłbybyć zaliczony do opisywanych użytków tekstowych.</p>
+		</desc>
+	
+		<app name="gcc" type="app" priority="important">
+			<desc>kolekcja kompilatorów GNU (m.in. C i C++)</desc>
+			<homepage>http://gcc.gnu.org/</homepage>
+		</app>
+		<app name="clang" type="app" priority="important">
+			<desc>alternatywny dla gcc kompilator C i C++</desc>
+			<homepage>http://clang.llvm.org/</homepage>
+		</app>
+		<app name="gawk" type="app" priority="important">
+			<desc>wersja AWK z projektu GNU</desc>
+			<homepage>http://www.gnu.org/software/gawk/gawk.html</homepage>
+		</app>
+		<app name="perl" type="app" priority="">
+			<desc>interpreter języka skryptowego</desc>
+			<homepage>http://www.perl.org/</homepage>
+		</app>
+		<app name="php" type="app" priority="important">
+			<desc>interpreter języka skryptowego</desc>
+			<homepage>http://www.php.net/</homepage>
+		</app>
+		<app name="python" type="app" priority="">
+			<desc>interpreter języka skryptowego</desc>
+			<homepage>http://www.python.org/</homepage>
+		</app>
+		
+		<app name="strace" type="app" priority="">
+			<desc>narzędzie do śledzenia wywołań funkcji dokonywanych przez monitorowany program</desc>
+			<homepage>http://sourceforge.net/projects/strace/</homepage>
+		</app>
+		<app name="statifier" type="app" priority="">
+			<desc>utworzenie statycznego pliku wykonywalnego w oparciu o detekcję wykorzystywanych bibliotek dynamicznych</desc>
+		</app>
+		<app name="subversion" type="app" priority="important">
+			<desc>systemy zarządzania wersjami</desc>
+			<homepage>http://subversion.tigris.org/</homepage>
+		</app>
+		<app name="git" type="app" priority="">
+			<desc>systemy zarządzania wersjami</desc>
+			<homepage>http://git-scm.com/</homepage>
+		</app>
+		<app name="bzr" type="app" priority="important">
+			<desc>systemy zarządzania wersjami</desc>
+			<homepage>http://bazaar-vcs.org/</homepage>
+		</app>
+
+		<app name="hping" type="app" priority="">
+			<desc>programik pozwalający na operowanie gołymi pakietami i nie tylko ...</desc>
+			<homepage>http://www.hping.org/</homepage>
+		</app>
+		<app name="netcat6" type="app" priority="important">
+			<alt_name>gnu netcat</alt_name>
+			<alt_name>netcat</alt_name>
+			<desc>programiki pozwalające na operowanie wysyłanie pakietów TCP i UDP z definiowaną przez nas zawartością, umożliwia m.in. testowanie usług sieciowych (takich jak smtp, www, jabber, ...), więcej w <id_link id="ABC_OF_COMPUTING:networks:IP_network_services:testowanie_sieci">tutaj</id_link></desc>
+			<homepage>http://netcat6.sourceforge.net/</homepage>
+			<alt_homepage>http://netcat.sourceforge.net/</alt_homepage>
+			<alt_homepage>http://www.vulnwatch.org/netcat/</alt_homepage>
+		</app>
+		<app name="socat" type="cmd" priority="">
+			<desc>SOcket CAT - uniwersalne narzędzie do dwukierunkowej wymiany danych (umożliwia m.in. <doc url="http://www.dest-unreach.org/socat/doc/socat-ttyovertcp.txt">przekierowanie portu szeregowego poprzez sieć</doc>)</desc>
+		</app>
+		<app name="tcputils" type="app" priority="">
+			<desc>zestaw narządzi ułatwiających korzystanie z TCP w skryptach ...</desc>
+			<homepage>ftp://ftp.lysator.liu.se/pub/unix/tcputils/</homepage>
+		</app>
+		<app name="firebird" type="app" priority="">
+			<desc>biblioteka bazy danych (<doc url="http://www.firebirdnews.org/docs/fb2min_pl.html">Poznaj Firebird w 2 minuty</doc>)</desc>
+			<homepage>http://www.firebirdsql.org</homepage>
+		</app>
+		<app name="g++" type="app" priority="">
+			<desc>kompilator C++</desc>
+		</app>
+		<app name="devscripts" type="app" priority="">
+			<desc>narzędzia ułatwiające tworzenie paczek Debianowych</desc>
+		</app>
+		<app name="gcc-avr/avr-libc" type="app" priority="">
+			<desc>kompilator i biblioteka standardowa C dla AVR</desc>
+		</app>
+		<app name="php5-cli" type="app" priority="">
+			<desc>interp[reter PHP działający z linii poleceń</desc>
+		</app>
+		<app name="qt4-designer" type="app" priority="">
+			<desc>program do projektowania GUI w Qt</desc>
+		</app>
+		<app name="kdevelop" type="app" priority="">
+			<desc>IDE dla KDE</desc>
+		</app>
+		<app name="lua50" type="app" priority="">
+			<desc>interpreter języka skryptowego</desc>
+		</app>
+		
+		<app name="xml2" type="app" priority="">
+			<desc>konwersja pomiędzy XML, HTML, CSV i formatem liniowym</desc>
+		</app>
+		<app name="xalan" type="app" priority="">
+			<desc>XSLT processor</desc>
+		</app>
+		<app name="saxonb-xslt" type="app" priority="">
+			<desc>XSLT processor</desc>
+		</app>
+		<app name="xsltproc" type="app" priority="">
+			<desc>XSLT processor</desc>
+		</app>
+		<app name="xmlto" type="app" priority="">
+			<desc>XML-to-any converter </desc>
+		</app>
+		<app name="treeline" type="app" priority="">
+			<desc>graficzna obsługa drzewiastych baz danych, w szczególności plików XML</desc>
+			<homepage>http://treeline.bellz.org/</homepage>
+		</app>
+	</soft_cat>
+
+	<soft_cat name="system_operacyjny">
+		<desc>
+			<title>System operacyjny</title>
+			<p>Najważniejszym elementem oprogramowania każdego komputera jest system operacyjny. System operacyjny jest tym elementem który pośredniczy między sprzętem a oprogramowaniem i często realizuje wiele funkcji w imieniu tego drugiego. W jego skład (prócz jądra i wchodzą też podstawowe programy użytkowe, o których jednak w następnych punktach.</p>
+			<p>Najprostszym stosowanym do dzisiaj systemem operacyjnym jest Disk Operation System, czyli znany DOS, odradzający się ostatnio pod postacią <dfn>FreeDOS'a</dfn>. Jest to jednoużytkownikowy, jednozadaniowy (niekiedy może być to ogromną zaletą) mały system operacyjny o bardzo niskich wymaganiach sprzętowych. W związku ze swoją specyfiką system ten nie jest obecnie popularny, jednak jest bardzo użyteczny w specyficznych zastosowaniach.</p>
+			<p>Trochę po przeciwnej stronie plasują się Unix'owate systemy operacyjne takie jak <dfn>GNU/Linux</dfn> czy też <dfn>*BSD</dfn>, są to wielużytkownikowe, wielozadaniowe systemy operacyjne, posiadające większe (ale nadal nie duże) wymagania systemowe. Są to popularne systemy ogólnego przeznaczenia - stosowane zarówno jako serwery sieciowe, komputery biurowe, domowe i profesjonalne maszyny multimedialne.</p>
+		</desc>
+	
+		<app name="Linux" type="app" priority="important">
+			<desc>znany system operacyjny ... a tak naprawdę tylko jądro ...</desc>
+			<homepage>http://www.kernel.org/</homepage>
+		</app>
+		<app name="FreeBSD" type="app" priority="">
+			<desc>system z rodziny BSD</desc>
+			<homepage>http://www.freebsd.org/</homepage>
+		</app>
+		<app name="NetBSD" type="app" priority="">
+			<desc>kolejny system z rodziny BSD</desc>
+			<homepage>http://www.netbsd.org/</homepage>
+		</app>
+		<app name="OpenBSD" type="app" priority="">
+			<desc>i jeszcze jeden system z rodziny BSD</desc>
+			<homepage>http://www.openbsd.org/</homepage>
+		</app>
+		<app name="FreeDOS" type="app" priority="">
+			<desc>wolna wersja DOS'a, binarnie zgodna z tymi które co poniektórzy jeszcze pamiętają ... interesująca jest też jego dystrybucja typu Live - <homepage url="http://www.finnix.org/Balder">Balder</homepage></desc>
+			<homepage>http://www.freedos.org</homepage>
+		</app>
+		<app name="HaikuOS" type="app" priority="">
+			<desc>znany również jako OpenBeOS wolny odpowiednik BeOS'a, niestety ciągle nie gotowy ...</desc>
+			<homepage>http://www.haiku-os.org/</homepage>
+		</app>
+		<app name="Syllable" type="app" priority="">
+			<desc></desc>
+			<homepage>http://syllable.sourceforge.net/</homepage>
+		</app>
+		<app name="AtheOS" type="app" priority="">
+			<desc></desc>
+			<homepage>http://www.atheos.cx/</homepage>
+		</app>
+		<app name="IdyllaOS" type="app" priority="">
+			<desc></desc>
+			<homepage>http://idyllaos.org/</homepage>
+		</app>
+		<app name="wine" type="app" priority="">
+			<desc>implementacja API Windows dla środowiska X11</desc>
+			<homepage>http://www.winehq.com/</homepage>
+		</app>
+		<app name="dosbox" type="app" priority="">
+			<desc>emulator DOSu</desc>
+			<homepage>http://www.dosbox.com/</homepage>
+		</app>
+		<app name="bochs" type="app" priority="">
+			<desc>emulator komputera PC</desc>
+			<homepage>http://bochs.sourceforge.net/</homepage>
+		</app>
+		<app name="qemu" type="app" priority="">
+			<desc>emulator komputera PC</desc>
+			<homepage>http://fabrice.bellard.free.fr/qemu/</homepage>
+		</app>
+	</soft_cat>
+	<soft_cat name="srodowisko_graficzne">
+		<desc>
+			<title>Środowisko graficzne</title>
+			<p>Ważnym elementem każdego popularnego (w sensie grupy docelowej, a nie rzeczywistej popularności) systemu operacyjnego jest środowisko graficzne. Prawie zawsze następuje rozdzielenie samego silnika graficznego (obsługującego wyświetlanie tak jak <dfn>xFree</dfn>, czy <dfn>X.org</dfn>) od graficznego odpowiednika opisywanego powyżej shell'a (tworzącego przyjazne użytkownikowi środowisko do uruchamiania programów i zarządzania plikami ale również odpowiedzialnego za zarządzanie oknami), takiego jak <dfn>Gnome</dfn>, <dfn>KDE</dfn> (obydwa zawierają bogactwo dodatkowego oprogramowania - managery plików, przeglądarki WWW, edytory, klienci poczty, ...), bardzo konfigurowalnego <dfn>Enlightenment</dfn> oraz mających zdecydowanie mniejsze wymagania niż dwa pierwsze <dfn>Window Maker</dfn>, czy <dfn>XFce</dfn>.</p>
+			<p>W tym miejscu trzeba też wspomnieć o graficznych interfejsach i odpowiednikach podstawowych narzędzi tekstowych (takich jak archiwizery).</p>
+		</desc>
+	
+		<app name="X.org" type="app" priority="important">
+			<desc>aktualnie chyba najpopularniejszy X-serwer</desc>
+			<homepage>http://www.x.org/</homepage>
+			<deb>xorg</deb>
+			<deb>xserver-xorg</deb>
+		</app>
+		<app name="xfree86" type="app" priority="">
+			<desc>starsza gałąź X-serwera</desc>
+			<homepage>http://www.xfree86.org/</homepage>
+		</app>
+		<app name="GNOME" type="app" priority="">
+			<desc>popularne śrdowowisko graficzne</desc>
+			<homepage>http://www.gnome.org/</homepage>
+		</app>
+		<app name="KDE" type="app" priority="">
+			<desc>rozbudowane i bardzo popularne śrdowowisko graficzne, zawierające wiele przydatnego oprogramowania</desc>
+			<homepage>http://www.kde.org/</homepage>
+		</app>
+		<app name="kdm" type="app" priority="">
+			<desc>menager logowania KDE</desc>
+			<homepage>http://www.kde.org/</homepage>
+		</app>
+		<app name="gdm" type="app" priority="">
+			<desc>menager logowania GNOME</desc>
+			<homepage>http://www.gnome.org/</homepage>
+		</app>
+		<app name="klipper" type="app" priority="">
+			<desc>narzędzie schowka dla KDE</desc>
+			<homepage>http://www.kde.org/</homepage>
+		</app>
+		<app name="clipit" type="app" priority="important">
+			<desc>narzędzie schowka</desc>
+			<homepage>http://clipit.rspwn.com/</homepage>
+		</app>
+		<app name="lxpanel" type="app" priority="">
+			<desc>panel (menu, pasek zadań, zegar, ...)</desc>
+			<homepage>http://lxde.org</homepage>
+		</app>
+		<app name="fbpanel" type="app" priority="important">
+			<desc>panel (menu, pasek zadań, zegar, ...)</desc>
+			<homepage>http://fbpanel.sourceforge.net/</homepage>
+		</app>
+		<app name="tint2" type="app" priority="">
+			<desc>panel (menu, pasek zadań, zegar, ...)</desc>
+			<homepage>http://code.google.com/p/tint2/</homepage>
+		</app>
+		<app name="knotes" type="app" priority="">
+			<desc>żółte karteczki dla KDE</desc>
+			<homepage>http://pim.kde.org/components/knotes.php</homepage>
+		</app>
+		<app name="openbox" type="app" priority="important">
+			<desc>menager okien</desc>
+			<homepage>http://openbox.org/</homepage>
+		</app>
+		<app name="fluxbox" type="app" priority="">
+			<desc>menager okien</desc>
+			<homepage>http://fluxbox.org/</homepage>
+		</app>
+		<app name="ratpoison" type="app" priority="">
+			<desc>menager okien obsługiwany wyłącznie przy pomocy klawiatury</desc>
+			<homepage>http://www.nongnu.org/ratpoison/</homepage>
+		</app>
+		<app name="Enlightenment" type="app" priority="">
+			<desc>menager okien / lekkie śrdowowisko graficzne</desc>
+			<homepage>http://enlightenment.org/</homepage>
+		</app>
+		<app name="Window Maker" type="app" priority="">
+			<desc>menager okien / lekkie śrdowowisko graficzne</desc>
+			<homepage>http://www.windowmaker.org/</homepage>
+		</app>
+		<app name="XFce" type="app" priority="">
+			<desc>lżejsze popularne śrdowowisko graficzne</desc>
+			<homepage>http://www.xfce.org/</homepage>
+		</app>
+		
+		<app name="wmctrl" type="app" priority="">
+			<desc>narzedzie do sterowania menagerem okien</desc>
+			<homepage>http://tripie.sweb.cz/utils/wmctrl/</homepage>
+		</app>
+		<app name="xosd" type="app" priority="">
+			<alt_cmd>osd_cat</alt_cmd>
+			<desc>narzędzie do wyświetlania informacji poprzez X serwer w trybie OSD</desc>
+			<homepage>http://sourceforge.net/projects/libxosd</homepage>
+			<alt_homepage>http://ignavus.net/software.html</alt_homepage>
+			<deb>xosd-bin</deb>
+		</app>
+		<app name="xscreensaver" type="app" priority="">
+			<desc>zbiór wygaszaczy ekranu wraz z narzędziami do ich konfigurowania i uruchamiania</desc>
+			<homepage>http://www.jwz.org/xscreensaver/</homepage>
+		</app>
+	</soft_cat>
+	<soft_cat name="managery_plikow_terminale_itp">
+		<desc>
+			<title>Menażery plików, emulatory terminali, aplety menu</title>
+			<p>Swego rodzaju odpowiednikami shelli dla środowiska graficznego są menażery plików, emulatory konsol oraz różnego rodzaju panele, aplety, systemy menu działające na pulpicie</p>
+		</desc>
+	
+		<app name="konqueror" type="app" priority="important">
+			<desc>standardowy menażer plików w KDE, obsługuje wiele protokołów dostępu do plików (np. sftp)</desc>
+			<homepage>http://www.konqueror.org/</homepage>
+		</app>
+		<app name="tuxcmd" type="app" priority="">
+			<desc>rozbudowany manager plików</desc>
+			<homepage>http://tuxcmd.sourceforge.net/</homepage>
+		</app>
+		<app name="Krusader" type="app" priority="">
+			<desc>kolejny manager plików</desc>
+			<homepage>http://krusader.sourceforge.net/</homepage>
+		</app>
+			
+		<app name="KRename" type="app" priority="">
+			<desc>narzędzie do zmieniania nazw plikół</desc>
+			<homepage>http://www.krename.net/</homepage>
+		</app>
+		<app name="ark" type="app" priority="">
+			<desc>graficzny zarządca archiwów z KDE</desc>
+			<homepage>http://utils.kde.org/projects/ark</homepage>
+		</app>
+		<app name="kfilereplace" type="app" priority="">
+			<desc>narzędzie do wyszukiwania i zamiany dla KDE</desc>
+			<homepage>http://kfilereplace.sourceforge.net/</homepage>
+		</app>
+		<app name="kfind" type="app" priority="">
+			<desc>wyszukiwacz plików dla kde</desc>
+			<homepage>http://www.kde.org/</homepage>
+		</app>
+		<app name="p7zip" type="app" priority="">
+			<desc>rozbudowany archiwizer/kompresor plikó</desc>
+			<homepage>http://p7zip.sourceforge.net/</homepage>
+			<deb>p7zip-full</deb>
+		</app>
+		
+		<app name="konsole" type="app" priority="">
+			<desc>standardowy emulator terminala w KDE</desc>
+			<homepage>http://konsole.kde.org/</homepage>
+		</app>
+		<app name="aterm" type="app" priority="">
+			<desc>inny popularny emulator terminala</desc>
+			<homepage>http://www.afterstep.org/aterm.php</homepage>
+		</app>
+		<app name="tilda" type="app" priority="">
+			<desc>przezroczysty emulator terminala bez widocznych elementów okna</desc>
+			<homepage>http://tilda.sourceforge.net/</homepage>
+		</app>
+	</soft_cat>
+	
+	<soft_cat name="edytory_tekstu">
+		<desc>
+			<title>Edytory tekstu</title>
+			<p>Kolejną bardzo ważną grupą programów są wszelkiego rodzaju edytory tekstu, zarówno te działające w trybie tekstowym jak <dfn>Vim</dfn> i jego klony, <dfn>Emacs</dfn>, <dfn>Pico</dfn>, jak i te proste notatniki trybu graficznego (<dfn>Kedit</dfn>, ...) aż do rozbudowanych procesorów tekstu wchodzących w skład pakietów biurowych (i omawianych w tamtej części). Oprócz wprowadzania i poprawiania tekstu posiadają one wiele ułatwiających życie funkcji - począwszy od zawijania linijek, poprzez kolorowanie składnia, automatyzację wcięć w kodzie, ... .</p>
+		</desc>
+	
+		<app_link name="vim" />
+		<app_link name="emacs" />
+		
+		<app name="XEmacs" type="app" priority="">
+			<desc></desc>
+			<homepage>http://www.xemacs.org/</homepage>
+		</app>
+		<app name="vile" type="app" priority="">
+			<desc>czyli próba pogodzenia vi i emacs'a</desc>
+			<homepage>http://dickey.his.com/vile/vile.html</homepage>
+		</app>
+		<app name="kwrite" type="app" priority="important">
+			<alt_name>kate</alt_name>
+			<desc>edytor z kolorowaniem składni i innymi bajerami dla KDE</desc>
+			<homepage>http://kate-editor.org/</homepage>
+			<alt_homepage>http://kate.kde.org/</alt_homepage>
+		</app>
+	</soft_cat>
+	<soft_cat name="pakiety_biurowe">
+		<desc>
+			<title>Pakiety biurowe i ich składniki</title>
+			<p>Kolejną grupą programów operujących głównie na tekście są tak zwane pakiety biurowe, w ich skład wchodzi przedewszystkich procesor tekstu (edytor o rozbudowanych opcjach formatowania oraz operujący głównie na własnym formacie pliku, obsługuje eksport i import z formatów obcych - <dfn>AbiWord</dfn>) oraz arkusz kalkulacyjny (program który wykonuje operacje matematyczne, statystyczne, na komórkach tabeli, która jest podstawą jego działania), programy te niemal zawsze funkcjonują w trybie graficznym (ale są wyjątki). Oprócz tych programów często znajdziemy edytory grafiki i programy do tworzenia prezentacji.</p>
+		</desc>
+	
+		<app name="OpenOffice" type="app" priority="important">
+			<desc></desc>
+			<homepage>http://www.openoffice.org/</homepage>
+		</app>
+		<app name="LibreOffice" type="app" priority="important">
+			<desc>fork OpenOffice'a</desc>
+			<homepage>http://www.libreoffice.org/</homepage>
+		</app>
+		<app name="Calligra" type="app" priority="">
+			<desc>dawniej KOffice</desc>
+			<homepage>http://www.calligra.org/</homepage>
+		</app>
+		<app name="AbiWord" type="app" priority="">
+			<desc> (w zasadzie część GNOME)</desc>
+			<homepage>http://www.abisource.com/</homepage>
+		</app>
+		<app name="Gnumeric" type="app" priority="">
+			<desc> (w zasadzie część GNOME)</desc>
+			<homepage>http://www.gnome.org/projects/gnumeric/</homepage>
+		</app>
+	</soft_cat>
+	<soft_cat name="dtp">
+		<desc>
+			<title>Systemy DTP</title>
+			<p>Są to systemy umożliwiające przygotowanie publikacji zawierającej sformatowany tekst (w tym często wyrażenia matematyczne, ...), połączony z elementami graficznymi, tabelami, ... czyli tego wszystkiego co widzimy w książkach, czasopismach i gazetach. Tu również istnieje szeroka pula programów począwszy od systemów wyłącznie przetwarzających podane mu zwykłe pliki tekstowe (z odpowiednimi komendami sterującymi) oraz pliki graficzne w gotową publikację (słynny system <dfn>TeX</dfn> i jego rozwinięcie <dfn>LaTeX</dfn>) aż do systemów stanowiących zintegrowane środowisko do przygotowania publikacji (<dfn>Scribus</dfn>). Co ważne oba te rozwiązania mają istotne zalety - wygoda czystych plików tekstowych oraz wygoda zintegrowanego graficznego środowiska programu.</p>
+		</desc>
+		
+		<app name="texlive" type="app" priority="important">
+			<alt_name>LaTeX</alt_name>
+			<desc>dystrybucja systemu składu tekstu TeX / LaTeX</desc>
+			<homepage>http://www.tug.org/texlive/</homepage>
+			<alt_homepage>http://www.latex-project.org/</alt_homepage>
+		</app>
+		<app name="Scribus" type="app" priority="important">
+			<desc>graficzne środowisko DTP</desc>
+			<homepage>http://www.scribus.net/</homepage>
+		</app>
+		
+		<app name="pdfedit" type="app" priority="important">
+			<desc>edytor plików PDF</desc>
+			<homepage>http://pdfedit.petricek.net/</homepage>
+		</app>
+		<app name="flpsed" type="app" priority="">
+			<desc>edytor umożliwiający dodanie dodatkowego tekstu do plików ps</desc>
+			<homepage>http://www.ecademix.com/JohannesHofmann/flpsed.html</homepage>
+		</app>
+		<app name="Xournal" type="app" priority="">
+			<desc>program umożliwiający dodawanie notatek na plikach pdf</desc>
+			<homepage>http://xournal.sourceforge.net/</homepage>
+		</app>
+		<app name="pdftk" type="app" priority="">
+			<desc>zestaw narzędzi do manipulowania plikami pdf (np. dzielenia, łączenia itd)</desc>
+			<homepage>https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/</homepage>
+		</app>
+			
+		<app name="ghostscript" type="app" priority="">
+			<desc>system obsługi PostScriptu i zastaw narzędzi do plików postscriptowych (m.in. ps2pdf, ps2ps, gs, ...)</desc>
+			<homepage>http://www.ghostscript.com/</homepage>
+		</app>
+		<app name="psutils" type="app" priority="">
+			<desc>zastaw narzędzi do plików postscriptowych (m.in. pstops, umożliwiający wraz narzędziami z innych pakietów np przeskalowanie strony A4 z pliku pdf do formatu A3 - <code>pdftops <var>$f</var>.pdf - | pstops -w 420mm -h 297mm -p A3 0@1.4142 | ps2pdf -sPAPERSIZE=a3 - <var>$f</var>-A3.pdf</code>, umieszczenie 4 stron A4 na jednej kartce - <code>pstops "4:0@.5(0,14.85cm)+1@.5(0,0)+2@.5(10.5cm,14.85cm)+3@.5(10.5cm,0)" <var>infile.ps</var> <var>outfile.ps</var></code>)</desc>
+			<homepage>http://www.tardis.ed.ac.uk/~ajcd/psutils/</homepage>
+		</app>
+		<app name="poster" type="app" priority="">
+			<desc>przetwarzanie plików PS celem drukowania na wielu stronach</desc>
+			<homepage>ftp://ftp.ics.ele.tue.nl/pub/users/jos/poster/</homepage>
+		</app>
+		<app name="fontforge" type="app" priority="">
+			<desc>edytor fontów PostScript'owych</desc>
+			<homepage>http://fontforge.sourceforge.net/</homepage>
+		</app>
+		<app name="fontmatrix" type="app" priority="">
+			<desc>menager czcionek</desc>
+			<homepage>http://fontmatrix.net/</homepage>
+		</app>
+		<app name="gwaterfall" type="app" priority="">
+			<alt_name>gwaterfall</alt_name>
+			<desc>przeglądarka czcionek</desc>
+		</app>
+			
+		<app name="Xpdf" type="app" priority="">
+			<desc>przeglądarka pdf'ów oraz zestaw narzędzi do ich obsługi (np. <code>pdftotext -enc UTF-8 -nopgbrk <var>input.pdf</var></code> przekonwertuje pdf na text czy też pdftops konwertujący PDF do PostScriptu)</desc>
+			<homepage>http://www.foolabs.com/xpdf/</homepage>
+		</app>
+		<app name="kpdf" type="app" priority="important">
+			<desc>przeglądarka pdf'ów dla KDE</desc>
+			<homepage>http://kpdf.kde.org/</homepage>
+		</app>
+		<app name="evince" type="app" priority="">
+			<desc>przeglądarka PS/PDF</desc>
+			<homepage>http://www.gnome.org/projects/evince/</homepage>
+		</app>
+		<app name="GV" type="app" priority="">
+			<desc>przeglądarka plików ps i pdf</desc>
+			<homepage>ftp://ftp.gnu.org/gnu/gv/</homepage>
+		</app>
+		
+		<app name="dvipng" type="app" priority="">
+			<desc>program do konwersji plików DVI na PNG</desc>
+			<homepage>http://sourceforge.net/projects/dvipng/</homepage>
+		</app>
+		<app name="highlight" type="app" priority="">
+			<desc>nardzędzie do generowania plików latex, html, ... z kodem programu z pokolorowaną składnią obsługujace wiele języków programowania</desc>
+			<homepage>http://www.andre-simon.de/</homepage>
+		</app>
+		<app name="html2ps" type="app" priority="">
+			<desc>narzędzie do konwersji HTML na PS</desc>
+			<homepage>http://sourceforge.net/projects/html2ps</homepage>
+		</app>
+		
+		<app name="fbgs" type="app" priority="">
+			<desc>konsolowa oparta na framebuferze przeglądarka PS/PDF</desc>
+			<homepage>http://dl.bytesex.org/releases/fbida/</homepage>
+		</app>
+		<app name="SVP" type="app" priority="">
+			<desc><!-- no DEB -->konsolowa (nie wymagająca X'ów) przeglądarka PDF</desc>
+			<homepage>http://freshmeat.net/projects/svp</homepage>
+		</app>
+	</soft_cat>
+
+	<soft_cat name="grafika">
+		<desc>
+			<title>Edytory graficzne</title>
+			<p>Programy do edycji graficzne dzielimy zasadniczo na trzy typy - programy do tworzenia grafiki rastrowej, grafiki wektorowej i animacji. Grafikę rastrową używa się do obrazków o nieregularnych kształtach, zdjęć, ..., umożliwia ona stosowanie licznych filtrów i efektów, w śród programów do jej edycji trzeba wymienić słynnego <dfn>Gimpa</dfn>. Z kolei podstawową zaletą grafiki wektorowej jest niezmienność jakości przy powiększaniu oraz zdolność do opisywania struktury (linia jest obiektem, a nie tylko zbiorem punktów), dlatego grafika ta jest używana głownie do tworzenia symboli i log oraz schematów. Z kolei animacje tworzone są jako sekwencyjnie wyświetlane pliki graficzne (z ewentualnymi efektami przejścia).</p>
+		</desc>
+	
+		<soft_cat name="grafika_rastrowa">
+			<desc><strong>Grafika rastrowa</strong></desc>
+			<app name="GIMP" type="app" priority="important">
+				<desc>nie trzeba przedstawiać ;-)</desc>
+				<homepage>http://www.gimp.org/</homepage>
+			</app>
+			<app name="Kolour Paint" type="app" priority="important">
+				<desc>prosty ale bardzo użyteczny program graficzny</desc>
+				<homepage>http://kolourpaint.sourceforge.net/</homepage>
+			</app>
+			<app name="krita" type="app" priority="">
+				<desc>rozbudowany edytor grafiki rastrowej dla KDE</desc>
+				<homepage>http://www.koffice.org/krita/</homepage>
+			</app>
+			<app name="cinepaint" type="app" priority="">
+				<desc>edytor grafiki rastrowej</desc>
+				<homepage>http://www.cinepaint.org/</homepage>
+			</app>
+			<app name="pixmap" type="app" priority="">
+				<desc>edytor grafiki rastrowej</desc>
+			</app>
+			<app name="tgif" type="app" priority="">
+				<desc>edytor grafiki rastrowej</desc>
+				<homepage>http://bourbon.usc.edu:8001/tgif/</homepage>
+			</app>
+			<app name="tkpaint" type="app" priority="">
+				<desc>edytor grafiki rastrowej</desc>
+				<homepage>http://mars.netanya.ac.il/~samy/tkpaint.html</homepage>
+			</app>
+		</soft_cat>
+		<soft_cat name="grafika_3d">
+			<desc><strong>Grafika 3D</strong></desc>
+			<app name="blender" type="app" priority="">
+				<desc>program do grafiki 3D</desc>
+				<homepage>http://www.blender.org/</homepage>
+			</app>
+			<app name="YafRay" type="app" priority="">
+				<desc>program do grafiki 3D</desc>
+				<homepage>http://www.yafray.org/</homepage>
+			</app>
+			<app name="k3d" type="app" priority="">
+				<desc>program do grafiki 3D</desc>
+				<homepage>http://k3d.sourceforge.net/</homepage>
+			</app>
+			<app name="kpovmodeler" type="app" priority="">
+				<desc>program do modelowania 3D</desc>
+				<homepage>http://www.kpovmodeler.org/</homepage>
+			</app>
+			<app name="sced" type="app" priority="">
+				<desc>program do grafiki 3D</desc>
+				<homepage>http://http.cs.berkeley.edu/~schenney/sced/sced.html</homepage>
+			</app>
+			<app name="vertex" type="app" priority="">
+				<desc>program do grafiki 3D</desc>
+				<homepage>http://wolfpack.twu.net/Vertex</homepage>
+			</app>
+			<app name="Moonlight3D" type="app" priority="">
+				<desc><!-- no DEB -->program do grafiki 3D</desc>
+				<homepage>http://moonlight3d.net/</homepage>
+			</app>
+			<app name="ayam" type="app" priority="">
+				<desc><!-- no DEB -->program do grafiki 3D</desc>
+				<homepage>http://ayam.sourceforge.net/</homepage>
+			</app>
+		</soft_cat>
+		
+		<soft_cat name="grafika_wektorowa">
+			<desc><strong>Grafika wektorowa</strong></desc>
+			<app name="inkscape" type="app" priority="important">
+				<desc>odpowiednik GIMPa dla grafiki wektorowej ;-)</desc>
+				<homepage>http://www.inkscape.org/</homepage>
+			</app>
+			<app name="karbon" type="app" priority="">
+				<desc>rozbudowany edytor grafiki wektorowej dla KDE</desc>
+				<homepage>http://www.koffice.org/karbon/</homepage>
+			</app>
+			<app name="xfig" type="app" priority="">
+				<desc>edytor grafiki wektorowej</desc>
+				<homepage>http://www.xfig.org/</homepage>
+			</app>
+			<app_link name="graphviz" />
+			<app_link name="pythoncad" />
+			<app_link name="qcad" />
+			<app_link name="dia" />
+			<app name="ipe" type="app" priority="">
+				<desc>edytor grafiki PDFu)</desc>
+				<homepage>http://ipe.compgeom.org/</homepage>
+			</app>
+			
+		</soft_cat>
+		
+		<soft_cat name="narzedzia_graficzne">
+			<desc><strong>Narzędzia graficzne</strong></desc>
+			<app name="imagemagick" type="app" priority="important">
+				<alt_cmd>convert</alt_cmd><alt_cmd>identify</alt_cmd><alt_cmd>animate</alt_cmd>
+				<desc>pakiet do obróbki grafiki</desc>
+				<homepage>http://www.imagemagick.org/</homepage>
+			</app>
+			<app name="netpbm" type="app" priority="">
+				<desc>zestaw narzędzi do konwersji i obróbki plików graficznych, bazujących na wygodnym raw'owym formacie grafiki (niejako analogicznym do cdaudio) - <wiki pl="Portable anymap">Portable anymap</wiki></desc>
+				<homepage>http://netpbm.alioth.debian.org/</homepage>
+			</app>
+			<app name="przykłady" type="app" priority="">
+				<desc>)</desc>
+				<homepage>http://www.greyc.ensicaen.fr/~dtschump/greycstoration/demonstration.html</homepage>
+			</app>
+			<app name="kover" type="app" priority="">
+				<desc>edytor okładek CD</desc>
+				<homepage>http://lisas.de/kover/</homepage>
+			</app>
+			<app name="gtkmorph" type="app" priority="">
+				<desc>morphing</desc>
+				<homepage>http://xmorph.sourceforge.net/</homepage>
+			</app>
+			<app name="autotrace" type="app" priority="">
+				<desc>bitmap to vector</desc>
+				<homepage>http://autotrace.sourceforge.net/</homepage>
+			</app>
+			<app name="potrace" type="app" priority="">
+				<desc>bitmap to vector</desc>
+				<homepage>http://potrace.sourceforge.net/</homepage>
+			</app>
+			<app name="pstoedit" type="app" priority="">
+				<desc>PS, PDF to vector</desc>
+				<homepage>http://www.pstoedit.net/pstoedit</homepage>
+			</app>
+			<app name="gozer" type="app" priority="">
+				<desc>text renderer</desc>
+				<homepage>http://linuxbrit.co.uk/gozer/</homepage>
+			</app>
+			<app name="pngcrush" type="app" priority="">
+				<desc>optymalizacja PNG), </desc>
+				<homepage>http://pmt.sourceforge.net/pngcrush/</homepage>
+			</app>
+			<app name="digikam" type="app" priority="">
+				<desc>manager zdjęć</desc>
+				<homepage>http://digikam.sourceforge.net/</homepage>
+			</app>
+			<app name="galrey" type="app" priority="">
+				<desc>tworzenie galerii zdjęć w HTMLu</desc>
+				<homepage>http://www.flexer.it/galrey</homepage>
+			</app>
+			<app name="gocr" type="app" priority="">
+				<desc>ORC</desc>
+				<homepage>http://altmark.nat.uni-magdeburg.de/~jschulen/ocr/</homepage>
+			</app>
+			<app name="gtkam" type="app" priority="">
+				<desc>obsługa aparatów cyfrowych</desc>
+				<homepage>http://www.gphoto.org/proj/gtkam/</homepage>
+			</app>
+			<app name="metapixel" type="app" priority="">
+				<desc>generator mozaiek fotograficznych</desc>
+				<homepage>http://www.complang.tuwien.ac.at/~schani/metapixel/</homepage>
+			</app>
+			<app name="panorama" type="app" priority="">
+				<desc>zdjęcia panoramiczne</desc>
+				<homepage>http://www.gnu.org/software/panorama</homepage>
+			</app>
+			<app name="xaos" type="app" priority="">
+				<desc>generator fraktali</desc>
+				<homepage>http://xaos.theory.org/</homepage>
+			</app>
+			<app name="xsane" type="app" priority="">
+				<desc>obsługa skanera</desc>
+				<homepage>http://www.xsane.org/</homepage>
+			</app>
+			<app name="kiconedit" type="app" priority="">
+				<desc>edytor ikon z KDE</desc>
+				<homepage>http://www.kde.org/</homepage>
+			</app>
+			<app name="ksnapshot" type="app" priority="">
+				<desc>program do tworzenia zrzutów ekranu dla KDE</desc>
+				<homepage>http://www.kde.org/</homepage>
+			</app>
+			<app name="gphoto2" type="app" priority="">
+				<desc>narzędzie do obsługi aparatów fotograficznych niezgodnych z <wiki en="USB mass storage device class">USB mass storage device class</wiki></desc>
+				<homepage>http://www.gphoto.org/</homepage>
+			</app>
+			<app name="kcoloredit" type="app" priority="">
+				<desc>edytor kolorów kde, pozwala m.in. na złaopanie koloru z dowolnego elementu na ekranie)</desc>
+				<homepage>http://www.kde.org/</homepage>
+			</app>
+		</soft_cat>
+	</soft_cat>
+	<soft_cat name="audio">
+		<desc>
+			<title>Edytory audio</title>
+			<p>Oprogramowanie to umożliwia montaż, doadawanie efektów, konwersję i kompresję oraz przechwytywanie audio.</p>
+		</desc>
+	
+		<app name="audacity" type="app" priority="important">
+			<desc>edytor audio</desc>
+			<homepage>http://audacity.sourceforge.net/</homepage>
+		</app>
+		<app name="ecawave" type="app" priority="">
+			<desc>edytor audio</desc>
+			<homepage>http://www.wakkanet.fi/~kaiv/ecawave/</homepage>
+		</app>
+		<app name="ardour" type="app" priority="">
+			<alt_cmd>ardour2</alt_cmd>
+			<desc>edytor audio</desc>
+			<homepage>http://ardour.org/</homepage>
+		</app>
+		<app name="gnusound" type="app" priority="">
+			<desc>edytor audio</desc>
+			<homepage>http://awacs.dhs.org/software/gnusound/</homepage>
+		</app>
+		<app name="quelcom" type="app" priority="">
+			<desc>edytor audio</desc>
+			<homepage>http://www.etse.urv.es/~dmanye/quelcom/quelcom.html</homepage>
+		</app>
+		<app name="rezound" type="app" priority="">
+			<desc>edytor audio</desc>
+			<homepage>http://rezound.sourceforge.net/</homepage>
+		</app>
+		<app name="snd" type="app" priority="">
+			<desc>edytor audio</desc>
+			<homepage>http://ccrma.stanford.edu/software/snd/</homepage>
+		</app>
+		<app name="sweep" type="app" priority="">
+			<desc>edytor audio</desc>
+			<homepage>http://www.metadecks.org/software/sweep/index.html</homepage>
+		</app>
+		<app name="wavesurfer" type="app" priority="">
+			<desc>edytor audio</desc>
+			<homepage>http://www.speech.kth.se/wavesurfer/</homepage>
+		</app>
+		<app name="xwave" type="app" priority="">
+			<desc>edytor audio</desc>
+		</app>
+		<app name="glame" type="app" priority="">
+			<desc>edytor audio</desc>
+			<homepage>http://glame.sourceforge.net/</homepage>
+		</app>
+		<app name="mhWaveEdit" type="app" priority="">
+			<desc>edytor audio</desc>
+			<homepage>http://www.mtek.chalmers.se/~hjormagn/mhwaveedit.html</homepage>
+		</app>
+		<app name="SoniK" type="app" priority="">
+			<desc><!-- no DEB -->edytor audio</desc>
+			<homepage>http://sonik.sourceforge.net/</homepage>
+		</app>
+		<app name="Kwave" type="app" priority="">
+			<desc>edytor audio</desc>
+			<homepage>http://kwave.sourceforge.net/</homepage>
+		</app>
+		<app name="Rosegarden" type="app" priority="">
+			<desc>sequencer MIDI</desc>
+			<homepage>http://www.rosegardenmusic.com/</homepage>
+		</app>
+		<app name="Wavemixer" type="app" priority="">
+			<desc><!-- no DEB -->edytor audio</desc>
+			<homepage>http://wavemixer.sourceforge.net/</homepage>
+		</app>
+		
+		<app name="arecord" type="app" priority="">
+			<desc>np. <code>arecord -fcd `date +"%F_%T.wav"`</code> zapisze wybrane w mikserze źródło przechwytywania do pliku w jakości CD</desc>
+			<homepage>http://www.alsa-project.org/</homepage>
+		</app>
+		<app name="krecord" type="app" priority="">
+			<desc>rejestrator audio</desc>
+			<homepage>http://linux.bytesex.org/misc/krecord.html</homepage>
+		</app>
+		<app name="sound-recorder" type="app" priority="">
+			<desc>rejestrator audio</desc>
+			<homepage>http://sunsite.unc.edu/pub/Linux/apps/sound/recorder</homepage>
+		</app>
+		<app name="kstreamripper" type="app" priority="">
+			<desc>rejestrator audio</desc>
+			<homepage>http://kstreamripper.tuxipuxi.de/</homepage>
+		</app>
+	
+		<app name="dtmfdial" type="app" priority="">
+			<desc>generator sygnałów tonowych</desc>
+			<homepage>ftp://sunsite.unc.edu/pub/Linux/apps/sound/</homepage>
+		</app>
+		<app name="synaesthesia" type="app" priority="">
+			<desc>wizualizacja audio</desc>
+			<homepage>http://www.logarithmic.net/pfh/synaesthesia</homepage>
+		</app>
+		<app name="mpgtx" type="app" priority="">
+			<desc>pliki MPEG</desc>
+			<homepage>http://mpgtx.sourceforge.net/</homepage>
+		</app>
+		<app name="easytag" type="app" priority="">
+			<desc>edytor tagów ID3</desc>
+			<homepage>http://easytag.sourceforge.net/</homepage>
+		</app>
+				id3 (edytor tagów ID3),
+		<app name="prokyon3" type="app" priority="">
+			<desc>manager mp3</desc>
+			<homepage>http://prokyon3.sf.net/</homepage>
+		</app>
+		<app name="normalize" type="app" priority="">
+			<desc>standaryzuje głośność pliku wav</desc>
+			<homepage>http://www1.cs.columbia.edu/~cvaill/normalize/</homepage>
+		</app>
+		<app name="TiMidity" type="app" priority="">
+			<desc>MIDI to wav</desc>
+			<homepage>http://timidity.sourceforge.net</homepage>
+		</app>
+		<app name="sox" type="app" priority="important">
+			<desc>audio convert</desc>
+			<homepage>http://sox.sourceforge.net</homepage>
+		</app>
+		<app name="LAME" type="app" priority="">
+			<desc><!-- DEB on debian-multimedia.org --> mp3 encoder</desc>
+			<homepage>http://lame.sourceforge.net/</homepage>
+		</app>
+		<app name="darkice" type="app" priority="">
+			<desc>audio streamer</desc>
+			<homepage>http://darkice.sourceforge.net/</homepage>
+		</app>
+		<app name="kaudiocreator" type="app" priority="">
+			<desc>frontend do rippowania CD dla KDE</desc>
+			<homepage>http://www.kde.org/</homepage>
+		</app>
+		<app name="kmid" type="app" priority="">
+			<desc>odtwarzacz MIDI dla KDE</desc>
+			<homepage>http://developer.kde.org/~larrosa/kmid.html</homepage>
+		</app>
+		<app name="cdparanoia" type="app" priority="">
+			<desc>czytnik audioCD</desc>
+			<homepage>http://www.xiph.org/paranoia/</homepage>
+		</app>
+	</soft_cat>
+	<soft_cat name="wideo">
+		<desc>
+			<title>Edytory wideo</title>
+			<p>Programy te umożliwiają obróbkę i montaż cyfrowego wideo wraz z jego ścieżką audio, dodawanie efektów przejść, elementów animacji, a także kompresję i konwersję między formatami. posiadają również moduł umożliwiający przechwytywanie wideo (jego ucyfrawianie).</p>
+		</desc>
+	
+		<app name="cinelerra" type="app" priority="important">
+			<desc>rozbudowany edytor wideo (program do montarzu AV)<!-- DEB on debian-multimedia.org -->,</desc>
+			<homepage>http://heroinewarrior.com/cinelerra.php3</homepage>
+		</app>
+		<app name="kino" type="app" priority="">
+			<desc>rozbudowany edytor wideo (program do montarzu AV)</desc>
+			<homepage>http://kino.schirmacher.de/</homepage>
+		</app>
+		<app name="kdenlive" type="app" priority="">
+			<desc>rozbudowany edytor wideo (program do montarzu AV)<!-- DEB on debian-multimedia.org --></desc>
+			<homepage>http://kdenlive.org/</homepage>
+		</app>
+		<app name="openmovieeditor" type="app" priority="">
+			<desc>rozbudowany edytor wideo (program do montarzu AV)</desc>
+			<homepage>http://www.openmovieeditor.org/</homepage>
+		</app>
+		<app name="openshot" type="app" priority="">
+			<desc>edytor wideo</desc>
+			<homepage>hhttp://www.openshotvideo.com/</homepage>
+		</app>
+		<app name="avidemux" type="app" priority="">
+			<desc>edytor wideo<!-- DEB on debian-multimedia.org -->,</desc>
+			<homepage>http://avidemux.sourceforge.net/</homepage>
+		</app>
+		<app name="PITIVI" type="app" priority="">
+			<desc>edytor wideo</desc>
+			<homepage>http://pitivi.sourceforge.net/</homepage>
+		</app>
+		<app name="LiVES" type="app" priority="">
+			<desc>edytor wideo<!-- DEB on debian-multimedia.org -->,</desc>
+			<homepage>http://www.xs4all.nl/~salsaman/lives/</homepage>
+		</app>
+		<app name="cinefx" type="app" priority="">
+			<desc>odtwarzacz, edytor efektów wideo, ...<!-- no DEB -->,</desc>
+			<homepage>http://www.cinefx.org/</homepage>
+		</app>
+	
+		<app name="zoneminder" type="app" priority="important">
+			<desc>rozbudowany system nadzorczy dla CCTV</desc>
+			<homepage>http://www.zoneminder.com/</homepage>
+		</app>
+		<app name="streamer" type="app" priority="">
+			<desc>rejestrator video</desc>
+			<homepage>http://bytesex.org/xawtv/</homepage>
+		</app>
+		<app name="dvgrab" type="app" priority="">
+			<desc>rejestrator video</desc>
+			<homepage>http://kino.schirmacher.de/</homepage>
+		</app>
+		<app name="motion" type="app" priority="">
+			<desc>rejestrator video z detekcją ruchu</desc>
+			<homepage>http://motion.sourceforge.net/</homepage>
+		</app>
+		<app name="mvc" type="app" priority="">
+			<desc><!-- no DEB -->rejestrator video z detekcją ruchu</desc>
+			<homepage>http://www.turbolinux.com.cn/~merlin/mvc/</homepage>
+		</app>
+	
+		<app name="transcode" type="app" priority="important">
+			<desc><!-- DEB on debian-multimedia.org --> program do konwersji, rejestracji i przetwarzania AV</desc>
+			<homepage>http://www.transcoding.org/cgi-bin/transcode</homepage>
+		</app>
+		<app name="MEncoder" type="app" priority="important">
+			<desc><!-- DEB on debian-multimedia.org --> program do konwersji, rejestracji i przetwarzania wideo</desc>
+			<homepage>http://www.mplayerhq.hu/</homepage>
+		</app>
+		<app name="Gv4l" type="app" priority="">
+			<desc>graficzny interfejs do transcode (rejestracja wideo z podglądem ...</desc>
+			<homepage>http://gv4l.sourceforge.net/</homepage>
+		</app>
+		<app name="dvbcut" type="app" priority="">
+			<desc>graficzne narzędzie do przycinania strumieni DVB / MPEG</desc>
+			<homepage>http://dvbcut.sourceforge.net/</homepage>
+		</app>
+		<app name="theorur" type="app" priority="">
+			<desc><!-- no DEB -->streamer video,</desc>
+			<homepage>http://theorur.tvlivre.org/</homepage>
+		</app>
+		<app name="OGMtools" type="app" priority="">
+			<desc>zestaw narzędzi do obsługi formatu ogg,</desc>
+			<homepage>http://www.bunkus.org/videotools/ogmtools/</homepage>
+		</app>
+		<app name="MKVToolnix" type="app" priority="">
+			<desc>zestaw narzędzi do obsługi formatu Matroska,</desc>
+			<homepage>http://www.bunkus.org/videotools/mkvtoolnix/</homepage>
+		</app>
+		<app name="Konverter" type="app" priority="">
+			<desc>graficzna nakładka na MEncoder dla KDE,</desc>
+			<homepage>http://www.kraus.tk/projects/konverter/</homepage>
+		</app>
+		<app name="mjpegtools" type="app" priority="">
+			<desc>narzędzia do obsługi formatu M-JPEG,</desc>
+			<homepage>http://mjpeg.sourceforge.net/</homepage>
+		</app>
+		<app name="vcdimager" type="app" priority="">
+			<desc>narzedzie do tworzenia i rippowania VideoCD,</desc>
+			<homepage>http://www.gnu.org/software/vcdimager/</homepage>
+		</app>
+		<app name="vorbis-tools" type="app" priority="">
+			<desc>narzędzia do obsługi Ogg Vorbis,</desc>
+			<homepage>http://www.vorbis.com/</homepage>
+		</app>
+		<app name="xvid4conf" type="app" priority="">
+			<desc>narzędzia do obsługi Ogg Vorbis,</desc>
+		</app>
+	</soft_cat>
+	<soft_cat name="przegladarki_i_odtwarzacze">
+		<desc>
+			<title>Przeglądarki multimedialne i odtwarzacze</title>
+			<p>Przeglądarki multimedialne i odtwarzacze audio/video są programami służącymi do wyświetlania / odtworzania plików w wielu formatach, odtwarzacze potrafią zapisywać tak zwane "playlisty" czyli listy plików które mają odtwarzać, przeglądarki oferują tworzenie podglądów katalogów, przeglądać w trybie pokazu slajdów oraz dokonywać prostych modyfikacji plików graficznych i zmian formatu zapisu.</p>
+		</desc>
+	
+		<app name="VLC media player" type="app" priority="important">
+			<desc>uniwersalny odtwarzacz z projektu VideoLAN</desc>
+			<homepage>http://www.videolan.org/vlc/</homepage>
+		</app>
+		<app name="MPlayer" type="app" priority="">
+			<desc>uniwersalny odtwarzacz multimedialny</desc>
+			<homepage>http://www.mplayerhq.hu/</homepage>
+		</app>
+		<app name="mpv" type="app" priority="">
+			<desc>fork MPlayer'a</desc>
+			<homepage>http://mpv.io/</homepage>
+		</app>
+		<app name="MPlayer2" type="app" priority="">
+			<desc>fork MPlayer'a</desc>
+			<homepage>http://www.mplayer2.org/</homepage>
+		</app>
+		<app name="kmplayer" type="app" priority="">
+			<desc>odtwarzacz multimedialny dla KDE potrafiący korzystać z silników GStreamer, MPlayer, Xine i Ice Ape</desc>
+			<homepage>http://kmplayer.kde.org/</homepage>
+		</app>
+		<app name="omxplayer" type="app" priority="">
+			<desc>odtwarzacz multimedialny potrafiący wykorzystać wsparcie sprżetowe dekodowania wideo na Raspberry Pi</desc>
+			<homepage>http://github.com/huceke/omxplayer</homepage>
+		</app>
+		<app name="xine" type="app" priority="">
+			<desc>odtwarzacz multimediów</desc>
+			<homepage>http://www.xine-project.org/</homepage>
+			<deb>xine-ui</deb>
+		</app>
+		<app name="XMMS" type="app" priority="important">
+			<desc>odtwarzacz multimedialny z licznymi wtyczkami</desc>
+			<homepage>http://www.xmms.org/</homepage>
+		</app>
+		
+		
+		<app name="cplay" type="app" priority="">
+			<desc>odtwarzacz audio</desc>
+			<homepage>http://www.tf.hut.fi/~flu/cplay/</homepage>
+		</app>
+		<app name="ecasound2.2" type="app" priority="">
+			<desc>odtwarzacz audio</desc>
+			<homepage>http://www.wakkanet.fi/~kaiv/ecasound/</homepage>
+		</app>
+		<app name="mpd" type="app" priority="">
+			<desc>odtwarzacz audio</desc>
+			<homepage>http://www.musicpd.org/</homepage>
+		</app>
+		<app name="music123" type="app" priority="">
+			<desc>odtwarzacz audio</desc>
+		</app>
+		<app name="playmp3list" type="app" priority="">
+			<desc>odtwarzacz audio</desc>
+			<homepage>http://rucus.ru.ac.za/~urban/projects/playmp3list/</homepage>
+		</app>
+		<app name="splay" type="app" priority="">
+			<desc>odtwarzacz audio</desc>
+			<homepage>http://splay.sourceforge.net/</homepage>
+		</app>
+		<app name="amarok" type="app" priority="">
+			<desc>odtwarzacz audio</desc>
+			<homepage>http://amarok.kde.org/</homepage>
+		</app>
+		<app name="rhythmbox" type="app" priority="">
+			<desc>odtwarzacz audio</desc>
+			<homepage>http://www.gnome.org/projects/rhythmbox/</homepage>
+		</app>
+		<app name="banshee" type="app" priority="">
+			<desc>odtwarzacz audio</desc>
+			<homepage>http://banshee-project.org/</homepage>
+		</app>
+		<app name="noatun" type="app" priority="">
+			<desc>odtwarzacz audio</desc>
+			<homepage>http://noatun.kde.org/</homepage>
+		</app>
+		<app name="listen" type="app" priority="">
+			<desc>odtwarzacz audio</desc>
+			<homepage>http://www.listen-project.org/</homepage>
+		</app>
+		<app name="BMPx" type="app" priority="">
+			<desc>odtwarzacz audio</desc>
+			<homepage>http://www.beep-media-player.org/site/BMPx_Homepage</homepage>
+		</app>
+	
+		<app name="gwenview" type="app" priority="importatnt">
+			<desc>przeglądarka graficzna (warto zainteresować się także wtyczkami <homepage url="http://www.kipi-plugins.org">kipi-plugins</homepage> oraz programami pomocniczymi takimi jak: <homepage url="http://www.exiv2.org">exiv2</homepage>)</desc> <!-- FIXME -->
+			<homepage>http://gwenview.sourceforge.net/</homepage>
+		</app>
+		<app name="imgseek" type="app" priority="">
+			<desc>przeglądarka graficzna</desc>
+			<homepage>http://imgseek.sourceforge.net/</homepage>
+		</app>
+		<app name="showimg" type="app" priority="">
+			<desc>przeglądarka graficzna</desc>
+			<homepage>http://www.jalix.org/projects/showimg</homepage>
+		</app>
+		<app name="fbi" type="app" priority="">
+			<desc>przeglądarka graficzna wykorzystująca framebufer</desc>
+			<homepage>http://dl.bytesex.org/releases/fbida/</homepage>
+		</app>
+		<app name="kview" type="app" priority="">
+			<desc>przeglądarka plików graficznych dla KDE</desc>
+			<homepage>http://www.kde.org/</homepage>
+		</app>
+		<app name="ksvg" type="app" priority="">
+			<desc>przeglądarka SVG dla KDE</desc>
+			<homepage>http://svg.kde.org/</homepage>
+		</app>
+		<app name="djview" type="app" priority="">
+			<desc>przeglądarka plików DjVu</desc>
+			<homepage>http://djvu.sourceforge.net/</homepage>
+		</app>
+		<app name="kdvi" type="app" priority="">
+			<desc>przeglądarka DVI dla KDE</desc>
+			<homepage>http://developer.kde.org/~kdvi/</homepage>
+		</app>
+		<app name="kghostview" type="app" priority="">
+			<desc>przeglądarka PS dla KDE</desc>
+			<homepage>http://www.kde.org/</homepage>
+		</app>
+		<app name="kuickshow" type="app" priority="">
+			<desc>przeglądarka plików graficznych dla KDE</desc>
+			<homepage>http://kuickshow.sourceforge.net/</homepage>
+		</app>
+	
+		<app name="ogle-mmx" type="app" priority="">
+			<desc>odtwarzacz wideo</desc>
+			<homepage>http://www.dtek.chalmers.se/groups/dvd/</homepage>
+		</app>
+		<app name="freevo" type="app" priority="">
+			<desc>odtwarzacz wideo</desc>
+			<homepage>http://freevo.sourceforge.net/</homepage>
+		</app>
+		<app name="gphoton" type="app" priority="">
+			<desc>odtwarzacz wideo<!-- no DEB --></desc>
+			<homepage>http://gphoton.sourceforge.net/</homepage>
+		</app>
+		<app name="SX" type="app" priority="">
+			<desc>odtwarzacz wideo<!-- no DEB --></desc>
+			<homepage>http://www.sect.mce.hw.ac.uk/~peteri/sx/</homepage>
+		</app>
+		<app name="SMPlayer" type="app" priority="">
+			<desc>odtwarzacz wideo</desc>
+			<homepage>http://smplayer.sourceforge.net/en/index.php</homepage>
+		</app>
+	</soft_cat>
+
+	<soft_cat name="rtv">
+		<desc>
+			<title>Programy do obsługi radia i televizji</title>
+		</desc>
+		<app name="tvtime" type="app" priority="">
+			<desc>program do oglądania telewizji</desc>
+			<homepage>http://tvtime.sourceforge.net/</homepage>
+		</app>
+		<app name="xawtv" type="app" priority="important">
+			<desc>program do oglądania telewizji (inne programy z tego zestawu pozwolą na słuchanie radia, czytanie telegazety, ...)</desc>
+			<homepage>http://linux.bytesex.org/xawtv/</homepage>
+		</app>
+		<app name="alevt" type="app" priority="important">
+			<desc>softwarowy dekoder i przeglądarka teletekstu</desc>
+			<homepage>http://www.goron.de/~froese/</homepage>
+		</app>
+		<app name="MythTV" type="app" priority="">
+			<desc>kombajn do obsługi tunera)<!-- DEB on debian-multimedia.org --></desc>
+			<homepage>http://www.mythtv.org/</homepage>
+		</app>
+		<app name="xdtv" type="app" priority="">
+			<desc><!-- DEB on debian-multimedia.org --> - narzedzie do rejestracji obrazu z kart TV</desc>
+			<homepage>http://xawdecode.sourceforge.net/</homepage>
+		</app>
+		<app name="xawdecode" type="app" priority="">
+			<alt_name>XdTV</alt_name>
+			<desc><!-- no DEB --></desc>
+			<homepage>http://xawdecode.sourceforge.net/</homepage>
+		</app>
+		<app name="fftv" type="app" priority="">
+			<desc><!-- no DEB --></desc>
+			<homepage>http://fftv.sourceforge.net/</homepage>
+		</app>
+		<app name="gradio" type="app" priority="">
+			<desc>graficzny interfejs do sterowania tunerem radiowym</desc>
+			<homepage>http://foobazco.org/projects/gradio/</homepage>
+		</app>
+		<app name="GQradio" type="app" priority="">
+			<desc><!-- no DEB -->graficzny interfejs do sterowania tunerem radiowym</desc>
+			<homepage>http://gqmpeg.sourceforge.net/radio.html</homepage>
+		</app>
+		<app name="fmtools" type="app" priority="">
+			<desc>tekstowy interfejs do słuchania radia</desc>
+			<homepage>http://www.exploits.org/v4l/fmtools/</homepage>
+		</app>
+	</soft_cat>
+	<soft_cat name="inne">
+		<desc>
+			<title>Cała reszta</title>
+			<p>Oprócz programów dających się zaliczyć do wspomnianych grup istnieje bardzo wiele oprogramowania specjalistycznego, żeby wspomnieć choćby edytory schematów elektronicznych takie jak <dfn>gEDA-graf</dfn>, oprogramowanie do symulacji i obliczeń naukowych, ... . No i w końcu gry, ale to już temat na osobny artykuł ...</p>
+		</desc>
+		
+		<app name="kgpg" type="app" priority="">
+			<desc>narzędzie kryptograficzne (GPG) dla KDE</desc>
+			<homepage>http://utils.kde.org/projects/kgpg/</homepage>
+		</app>
+		<app name="kleopatra" type="app" priority="">
+			<desc>narzędzie kryptograficzne (x509) dla KDE</desc>
+			<homepage>http://www.kde.org/</homepage>
+		</app>
+		<app name="kompare" type="app" priority="">
+			<desc>porównywacz plików / wyświetlacz plików diff dla KDE</desc>
+			<homepage>http://www.caffeinated.me.uk/kompare/</homepage>
+		</app>
+		<app name="ksysguard" type="app" priority="">
+			<desc>monitor systemu dla KDE (także w wariancie daemona - ksysguardd)</desc>
+			<homepage>http://www.kde.org/</homepage>
+		</app>
+		<app name="ktimer" type="app" priority="">
+			<desc>timer dla KDE</desc>
+			<homepage>http://utils.kde.org/projects/ktimer/</homepage>
+		</app>
+		
+		<app name="shfs" type="app" priority="">
+			<desc>montowanie systemu plików SFTP</desc>
+			<homepage>http://shfs.sourceforge.net/</homepage>
+		</app>
+		<app name="sshfs" type="app" priority="important">
+			<desc>montowanie systemu plików SFTP poprzez fuse</desc>
+			<homepage>http://fuse.sourceforge.net/sshfs.html</homepage>
+		</app>
+		<app name="Synergy" type="app" priority="">
+			<desc>współdzielenie klawiatury i myszy poprzez sieć</desc>
+			<homepage>http://synergy-foss.org/</homepage>
+		</app>
+		<app name="ajaxterm" type="app" priority="">
+			<desc><!-- no DEB -->terminal przez WWW</desc>
+			<homepage>http://antony.lesuisse.org/qweb/trac/wiki/AjaxTerm</homepage>
+		</app>
+		<app name="anyterm" type="app" priority="">
+			<desc><!-- no DEB -->terminal przez WWW</desc>
+			<homepage>http://anyterm.org/</homepage>
+		</app>
+		<app name="trickle" type="app" priority="">
+			<desc>user-space bandwidth shaper</desc>
+			<homepage>http://monkey.org/~marius/trickle/</homepage>
+		</app>
+			
+		<app name="aspell" type="app" priority="">
+			<desc>system sprawdzania pisowni</desc>
+			<homepage>http://aspell.net/</homepage>
+		</app>
+		<app name="xwhois" type="app" priority="">
+			<desc>klient whois działający w trybie graficznym</desc>
+			<homepage>http://c64.org/~nr/xwhois/</homepage>
+		</app>
+		
+		<app name="kaddressbook" type="app" priority="">
+			<desc>książka adresowa KDE</desc>
+			<homepage>http://pim.kde.org/components/kaddressbook.php</homepage>
+		</app>
+		<app name="kcalc" type="app" priority="">
+			<desc>kalkulator KDE</desc>
+			<homepage>http://utils.kde.org/projects/kcalc/</homepage>
+		</app>
+				
+		<app name="GNUPlot" type="app" priority="important">
+			<desc>program do tworzenia wykresów; <id_link id="gnuplot">więcej o gnuplocie</id_link></desc>
+			<homepage>http://www.gnuplot.info/</homepage>
+		</app>
+		<app name="plotutils" type="app" priority="">
+			<desc></desc>
+			<homepage>http://www.fsf.org/software/plotutils/plotutils.html</homepage>
+		</app>
+		<app name="LabPlot" type="app" priority="important">
+			<desc>system analizy danych (wykresy, dopasowania) zgodny z Origin</desc>
+			<homepage>http://labplot.sourceforge.net/</homepage>
+		</app>
+		<app name="yacas" type="app" priority="">
+			<desc>obliczenia algebraiczne</desc>
+			<homepage>http://yacas.sourceforge.net/yacas.html</homepage>
+		</app>
+		<app name="maxima" type="app" priority="">
+			<desc>obliczenia algebraiczne</desc>
+			<homepage>http://maxima.sourceforge.net/</homepage>
+		</app>
+		<app name="Octave" type="app" priority="important">
+			<desc>system obliczeniowy dobrze kompatybilny z MatLabem; <id_link id="octave">więcej o GNU octave</id_link></desc>
+			<homepage>http://www.octave.org/</homepage>
+		</app>
+		<app name="Scilab" type="app" priority="">
+			<desc>pakiet naukowy stworzony do badań matematycznych</desc>
+			<homepage>http://www.scilab.org/</homepage>
+		</app>
+		<app name="StarDict" type="app" priority="">
+			<desc>wielojęzyczny słownik</desc>
+			<homepage>http://stardict.sourceforge.net/</homepage>
+		</app>
+			
+		<app name="recordMyDesktop" type="app" priority="">
+			<desc>nagrywanie filmu z naszego ekranu</desc>
+			<homepage>http://recordmydesktop.sourceforge.net/</homepage>
+		</app>
+		<app name="Griffith" type="app" priority="">
+			<desc>katalogowanie płyt z filmami</desc>
+			<homepage>http://griffith.berlios.de/</homepage>
+		</app>
+			
+		<app name="partimage" type="app" priority="">
+			<desc>tworzenie i przywracanie obrazów partycji</desc>
+			<homepage>http://www.partimage.org/</homepage>
+		</app>
+		<app name="clonezilla" type="app" priority="">
+			<desc>sieciowe (z obsługa multicastu) tworzenie i przywracanie obrazów partycji</desc>
+			<homepage>http://clonezilla.sourceforge.net/</homepage>
+		</app>
+			
+		<app name="Kvkbd" type="app" priority="">
+			<desc><!-- no DEB --> wirtualna klawiatura</desc>
+			<homepage>http://www.kde-apps.org/content/show.php/Kvkbd?content=56019</homepage>
+		</app>
+		<app name="KLDraw" type="app" priority="">
+			<desc><!-- no DEB --> modelowanie LEGO</desc>
+			<homepage>http://www.kde-apps.org/content/show.php/?content=47371</homepage>
+		</app>
+		<app name="LeoCAD" type="app" priority="">
+			<desc>modelowanie LEGO</desc>
+			<homepage>http://www.leocad.org/</homepage>
+		</app>
+		<app name="KLatexFormula" type="app" priority="">
+			<desc><!-- no DEB --> programik do edycji formuł LaTeX'owych</desc>
+			<homepage>http://klatexformula.sourceforge.net/</homepage>
+		</app>
+		<app name="Date Calculator" type="app" priority="">
+			<desc><!-- no DEB -->kalkulator dat</desc>
+			<homepage>http://liquidweather.net/other_themes/date_calc.php</homepage>
+		</app>
+		<app name="Calenculator" type="app" priority="">
+			<desc><!-- no DEB -->kalkulator dat</desc>
+			<homepage>http://linux4you.h18.ru/calenculator/calenculator.en.html</homepage>
+		</app>
+		
+		<soft_cat name="nagrywanie_cd_dvd">
+			<desc>
+				<title>Nagrywanie CD i DVD</title>
+				<p>Dość istotną grupą programów są aplikacje umożliwiające zapis na dyskach optycznych (CD-R(W), DVD+-R(W), ...).</p>
+			</desc>
+		
+			<app name="K3b" type="app" priority="important">
+				<desc>graficzny program do obsługi nagrywania CD i DVD</desc>
+				<homepage>http://k3b.sourceforge.net/</homepage>
+			</app>
+			<app name="Cdrecord" type="app" priority="">
+				<desc>tekstowy program do nagrywania CD (pakiet zawiera także <code>readcd</code> umożliwiający odczyt gołych danych z cd - podobnie jak <code>dd</code>, ale odrobinę bardziej inteligentnie)</desc>
+				<homepage>http://www.fokus.gmd.de/research/cc/glone/employees/joerg.schilling/private/cdrecord.html</homepage>
+			</app>
+			<app name="Cdrdao" type="app" priority="">
+				<desc>tekstowy program do nagrywania CD</desc>
+				<homepage>http://cdrdao.sourceforge.net/</homepage>
+			</app>
+			<app name="wodim" type="app" priority="important">
+				<desc>zestaw programów umożliwiających zapis plików na CD/DVD ... wykorzystywany m.in. przez podawane powyżej nakładki graficzne</desc>
+				<homepage>https://alioth.debian.org/projects/debburn/</homepage>
+			</app>
+			<app name="UDFtool" type="app" priority="important">
+				<desc>zestaw programów umożliwiających zapis pakietowy na CD/DVD ... szczegóły poniżej</desc>
+				<homepage>http://sourceforge.net/projects/linux-udf/</homepage>
+			</app>
+			<app name="DeVeDe" type="app" priority="">
+				<desc>tworzenie DVD-video</desc>
+				<homepage>http://www.rastersoft.com/programas/devede.html</homepage>
+			</app>
+			<app name="dvdisaster" type="app" priority="">
+				<desc>testowanie i odczyt podniszczonych CD</desc>
+				<homepage>http://dvdisaster.net/en/</homepage>
+			</app>
+			<app name="aptoncd" type="app" priority="">
+				<desc>nagrywanie repozytorium na CD w oparciu o pakiety pobrane przez apt/aptitude</desc>
+				<homepage>http://aptoncd.sourceforge.net</homepage>
+			</app>
+			<app name="dvd+rw-tools" type="app" priority="">
+				<desc>narzedzi do obsługi zapisu płyt DVD+-RW</desc>
+				<homepage>http://fy.chalmers.se/~appro/linux/DVD+RW/</homepage>
+			</app>
+			<app name="udftools" type="app" priority="">
+				<desc>zestaw narzędzi do obsługi (zapisu) <wiki pl="UDF (system plików)">UDF</wiki></desc>
+				<homepage>http://sourceforge.net/projects/linux-udf/</homepage>
+			</app>
+		</soft_cat>
+	</soft_cat>
+</soft_db>

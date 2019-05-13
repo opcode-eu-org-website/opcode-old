@@ -1,0 +1,102 @@
+#!/bin/bash
+
+SRC_DIR=$PWD
+DIR=`mktemp -d`
+cd $DIR
+
+TO_RUN="${1-testbench}"
+
+
+exit_on_error() {
+	echo " failed"
+	echo ""
+	echo -e "\\033[1;33;40m\tERROR MESAGE:\\033[0m"
+	echo -e "\\033[1;31m$error\\033[0m" | sed -e 's#^\(.*\)$#\t\t\1#g'
+	echo ""
+	#echo "We don't remove temporary files in $DIR"
+	#echo " use contents of this directory to debug"
+	#echo " and press enter to remove it"
+	#read f
+	#rm -fr $DIR
+	#exit $1;
+	return $1
+}
+
+build_and_run() {
+	# najpierw stosujemy preprocesor C (dzięki temu możemy uzywać np. #include)
+	echo "C-style preprocesing and importing to GHDL work-library:"
+	for f in $SRC_DIR/*.vhdl; do
+		ff=`basename $f`
+		echo -ne "\t* $ff ..."
+		gcc -x c -P -E $f 2>/dev/null | sed '1,2d' > $ff
+		# FIXME o co chodzi z tymi 2 dodatkowymi liniami ...
+		
+		ghdl -i $ff 2>/dev/null
+		echo " done"
+	done
+	
+	# potem dopiero analizujemy ("kompilujemy")
+	is_error=0
+	echo "VHDL analyze:"
+	for f in *.vhdl; do
+		echo -ne "\t* $f ..."
+		# a dopiero potem wykonyujemy analize vhdl
+		if ! error=`ghdl -a $f 2>&1`; then
+			exit_on_error -2
+			is_error=$?
+		else
+			echo " done"
+		fi
+	done
+	if [ $is_error -ne 0 ]; then
+		return $is_error
+	fi
+	
+	# a na koniec elaboracja i ...
+	echo -n "VHDL elaborate $TO_RUN ..."
+	if ! error=`ghdl -m $TO_RUN 2>&1`; then
+		exit_on_error -3
+		return $?
+	else
+		echo " done"
+	fi
+	
+	# uruchomienie i wygenerowanie przebiegu do podanego pliku
+	# jest dużo różnych opcji odpalania powstałego pliku wykonywalnego
+	echo -e "\nRun $TO_RUN ..."
+	ghdl -r $TO_RUN --wave=$TO_RUN.ghw
+	
+	return 0
+}
+
+if build_and_run; then
+	# wyświetlenie przebiegów
+	gtkwave $TO_RUN.ghw &
+fi
+
+while true; do
+	echo -e "\\033[34mAby zakonczyc wpisz e i nacisnij ENTER\\033[0m"
+	echo -e "\\033[34mAby zakonczyc zachowując pliki tymczasowe wpisz b i nacisnij ENTER\\033[0m"
+	echo -e "\\033[34mAby przbudowac ponownie wcisnij ENTER\\033[0m"
+	
+	read ctrl;
+	if [ "$ctrl" = "e" ]; then
+		break
+	elif [ "$ctrl" = "b" ]; then
+		echo "We don't remove temporary files in $DIR"
+		exit
+	fi
+	
+	if build_and_run; then
+		if ! jobs 2>&1 | grep gtkwave > /dev/null; then
+			gtkwave $TO_RUN.ghw &
+		fi
+	fi
+done
+
+# możnaby usunąć wygenerowane pliki:
+# ghdl --remove
+# a także robić Makefile (ghdl --gen-makefile) itd
+
+# kończymy sprzątanie
+cd /tmp && rm -fr $DIR

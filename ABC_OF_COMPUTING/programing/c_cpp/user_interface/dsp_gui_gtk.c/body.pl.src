@@ -1,0 +1,179 @@
+/*
+ * plik ma na celu prezentację podstawowych zagadnień z programowania w języku C / C++
+ * prezentuje bardzo popularną bibliotekę tworzenia GUI, wykorzystywaną m.in. w GNOME - GTK
+ *
+ * jest jednocześnie użytecznym interfejsem dla programu dsp.c, który implementuje
+ * software'ową pętlę pomiędzy wejściem liniowym a wyjściem głośnikowym (dla układów CMI9880)
+ *
+ *
+ * kompilacja:
+ *  gcc -Wall -g plik_zrodlowy.c -o plik_wynikowy `pkg-config --cflags gtk+-2.0` `pkg-config --libs gtk+-2.0`
+ *
+ * zachęcam do zapoznania się z poradnikiem na oficjalnej stronie projektu: http://www.gtk.org/tutorial/
+ * oraz polsko języcznym tekstem na 4programmers: http://4programmers.net/article.php?id=484
+ * warto też zapoznać się z programem glade, który jest (przydatnym przy większych projektach
+ * oraz do podejrzenia jaka funkcja wstawia to co nam akurat potrzeba) generatorem GUI w GTK
+ *
+ */
+
+// nalezy ustawic sciezke i nazwe na ktora skompilowany jest dsp.c
+#define DSP_PROG_PATH "/home/rrp/audio-video/tuner_tv_azx_unmute"
+#define DSP_PROG_NAME "tuner_tv_azx_unmute"
+
+// comenda ustawiajaca priorytety czasu rzeczywistego dla artsd oraz tuner_tv_azx_unmute
+#define RT_PRI_PROG_CMD "sleep 1; PATH_TO_priorytet `pidof /usr/bin/artsd PATH_TO_tuner_tv_azx_unmute`;"
+
+#include <gtk/gtk.h> // nagłówki GTK
+
+#include <unistd.h> // dla: fork(), execl(), execlp()
+#include <stdlib.h> // dla: system()
+
+#include <signal.h> // dla: kill(), signal()
+#include <sys/wait.h> // dla: wait()
+
+
+/** funkcje związane z zdarzeniami **/
+
+void window_close(GtkWidget *widget, gpointer *data) {
+	gtk_main_quit(); // zamyka program GTK
+}
+
+void button1_action() {
+	// jeżeli nie zamierzamy korzystać z podawanych do funkcji argumentów można ich nie podawać
+	if (fork() == 0) {
+		execlp("xawtv", "xawtv", 0);
+	}
+}
+
+void button2_action() {
+	if (fork() == 0) {
+		execlp("gamix", "gamix", 0);
+	}
+}
+
+void button3_action() {
+	if (fork() == 0) {
+		execlp("konsole", "konsole", "-e", "radio", 0);
+	}
+}
+
+int copy_dsp_work=0, pid=-1;
+void button4_action() {
+	// w zasadzie możnaby tu umieścić kod tego programu, ale wersja tekstowa jest przydatna na
+	// terminalu (fbtv, radio) oraz wydaje mi się że zaciemniłoby to obraz tego programu
+	if (copy_dsp_work == 0) {
+		pid = fork();
+		if (pid == 0) {
+			execl(DSP_PROG_PATH, DSP_PROG_NAME, 0);
+		} else if (pid != -1){
+			copy_dsp_work = pid;
+			system(RT_PRI_PROG_CMD);
+		}
+	} else {
+		kill(copy_dsp_work, 15);
+		copy_dsp_work = 0;
+	}
+}
+
+/** funkcja obsługi sygnału **/
+
+void end_of_child(int sig) {
+	// potwierdzamy zakonczenie potomka
+	waitpid(-1, NULL, WNOHANG); 
+}
+
+
+/** funkcja główna **/
+int main(int argc,char *argv[]) {
+/** ustawiamy obsługę sygnału informującego o zakończeniu pracy potomka **/
+	signal(SIGCHLD, &end_of_child);
+
+/** domyślnie wykonujemy start **/
+	button4_action();
+
+
+/** deklaracje wstępne GTK **/
+	GtkWidget *window, *table, *button1, *button2, *button3, *button4;
+		// utworzenie wskaznikow do okna i komponentów
+	
+	gtk_init(&argc, &argv); //inicjalizacja gtk wraz z przekazaniem argumentów linii poleceń
+
+
+/** okno i jego ustawienia **/
+	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+		// utworzenie standardowego okna
+		// (np. GTK_WINDOW_POPUP - bez ramki i guzikow zamkniecia powiekszenia ...)
+	
+	table = gtk_table_new (3, 4, 0);
+		// utworzenie tabeli (3 wiersze 4 kolumny), która posłuży do rozmieszczania składników okna
+	gtk_container_add(GTK_CONTAINER(window), table); // umieszczenie tabeli w oknie
+
+	gtk_signal_connect(GTK_OBJECT(window), "destroy", GTK_SIGNAL_FUNC(window_close), NULL);
+		// rakacja na sygnał związany z zamknięciem okna, mozna to tez zapisać:
+	// g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(window_close), NULL);
+
+	// parametry okna:
+	gtk_window_set_title(GTK_WINDOW(window), "/dev/dsp copy program");
+	//gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+	gtk_window_set_default_size(GTK_WINDOW(window), 430, 110);
+
+
+/** składniki okna **/
+	// przycisk 1
+	button1=gtk_button_new_with_label("TV application"); // utworzenie przycisku
+	gtk_signal_connect(GTK_OBJECT(button1), "clicked", GTK_SIGNAL_FUNC(button1_action), NULL);
+		// funkcja wykonana po nacisnieciu przycisku
+	gtk_table_attach(GTK_TABLE(table), button1, 1, 2, 1, 2, GTK_SHRINK, GTK_SHRINK,0,0);
+		// umieszczenie przycisku w tabeli (znajduje sie w kolumnach od pierwszej do drugiej
+		// i wierszu od pierwszego do drugiego)
+	gtk_widget_show(button1); // pokazanie przycisku
+
+	// przycisk 2
+	button2=gtk_button_new_with_label("Mixer application"); // utworzenie przycisku
+	gtk_signal_connect(GTK_OBJECT(button2), "clicked", GTK_SIGNAL_FUNC(button2_action), NULL);
+		// funkcja wykonana po nacisnieciu przycisku
+	gtk_table_attach(GTK_TABLE(table), button2, 2, 3, 1, 2, GTK_SHRINK, GTK_SHRINK,0,0);
+		// umieszczenie przycisku w tabeli (znajduje sie w kolumnach od drugiej do trzeciej
+		// i wierszu od pierwszego do drugiego)
+	gtk_widget_show(button2); // pokazanie przycisku
+
+	// przycisk 3
+	button3=gtk_button_new_with_label("Radio application"); // utworzenie przycisku
+	gtk_signal_connect(GTK_OBJECT(button3), "clicked", GTK_SIGNAL_FUNC(button3_action), NULL);
+		// funkcja wykonana po nacisnieciu przycisku
+	gtk_table_attach(GTK_TABLE(table), button3, 3, 4, 1, 2, GTK_SHRINK, GTK_SHRINK,0,0);
+		// umieszczenie przycisku w tabeli (znajduje sie w kolumnach od trzeciej do czwartej
+		// i wierszu od pierwszego do drugiego)
+	gtk_widget_show(button3); // pokazanie przycisku
+
+	// przycisk 4 - przełączany (mający stan wciśnięty)
+	button4=gtk_toggle_button_new_with_label("Start / Stop"); // utworzenie przycisku
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button4), 1);
+		// wciśnięcie przycisku, stan przycisku sprawdza z koleji funkcja:
+		// gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button4))
+	gtk_signal_connect(GTK_OBJECT(button4), "toggled", GTK_SIGNAL_FUNC(button4_action), NULL);
+		// funkcja wykonana po nacisnieciu przycisku (toggled działa tak samo jak clicked)
+	gtk_table_attach(GTK_TABLE(table), button4, 1, 4, 2, 3, GTK_FILL, GTK_SHRINK,0,0);
+		// umieszczenie przycisku w tabeli (znajduje sie w kolumnach od pierwszej do czwartej
+		// i wierszu od drugiego do trzeciego)
+	gtk_widget_show(button4); // pokazanie przycisku
+	
+	// ustawienia odstępów
+	gtk_table_set_row_spacing (GTK_TABLE(table), 0, 20); // po zerowym wierszu
+	gtk_table_set_row_spacing (GTK_TABLE(table), 1, 10); // po pierwszym wierszu
+	gtk_table_set_col_spacing (GTK_TABLE(table), 0, 45); // po zerowej kolumnie
+	gtk_table_set_col_spacing (GTK_TABLE(table), 1, 15);
+		// po pierwszej kolumnie (tej w której jest pierszy przycisk)
+	gtk_table_set_col_spacing (GTK_TABLE(table), 2, 15); // po drugiej kolumnie
+
+/** ustawienia końcowe **/
+	gtk_widget_show(table); // pokazanie tabeli
+	gtk_widget_show(window); // pokazanie okna
+
+	gtk_main(); //Główna funckja programu GTK
+
+	g_print("Koniec ...\n"); // wypisujemy na terminal ...
+	if (copy_dsp_work != 0) kill(copy_dsp_work, 15);
+	
+	return 0;
+} 

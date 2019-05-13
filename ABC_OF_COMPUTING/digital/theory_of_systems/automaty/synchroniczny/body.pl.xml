@@ -1,0 +1,4 @@
+<article>
+<title>(a)synchroniczne</title>
+<p>Automatem synchronicznym nazywa się automat który działa zgodnie z zewnętrznym sygnałem taktującym, którego zbocze powoduje dokonanie przejścia stanu w automacie. Automat asynchroniczny stan swój zmienia natychmiast po zmianie wektora wejściowego (dowolnego z jego bitów). W tym wypadku należy mieć na szczególnej uwadze problemy związane z tym że nigdy nie możemy oczekiwać równoczesnej zmiany dwóch sygnałów co prowadzi do tego że np. przejście ze stanu kodowanego jako 11 na 00 będzie przez stan 10 albo 01. Prowadzi to do tak zwanych wyścigów. jeżeli automat może utknąć w którymś z tych stanów są to tzw. wyścigi krytyczne i należy je eliminować.</p>
+</article>

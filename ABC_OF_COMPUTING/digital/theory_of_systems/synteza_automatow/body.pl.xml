@@ -1,0 +1,17 @@
+<article>
+<title>Synteza automatów</title>
+
+<p>Synteza automatu sprowadza się do następujących kroków:</p>
+<ul>
+	<li>opis w postaci grafu</li>
+	<li>konwersja grafu na tablicę przejść/wyjść</li>
+	<li>kodowanie (numeracja stanów)</li>
+	<li>zapisanie tablicy przejść/wyjść w postaci tablicy Karnaugha</li>
+	<li>podział na tyle tablic ile bitów ma kod stanu (na każdy przerzutnik trzymający jeden bit numeru stanu automatu jedna tablica) - każda tablica jako wejścia przyjmuje poprzedni wektor stanu i aktualny wektor wejść</li>
+	<li>jeżeli używamy przerzutników innych niż D to należy dokonać konwersji tych tablic poprzez tablice dla poszczególnych typów przerzutników</li>
+	<li>minimalizacja tablic opisujących logikę podłączoną do danego przerzutnika</li>
+	<li>zdefiniowanie logi przekształcającej wektor stanu (i ew. wektor wejściowy jeżeli automat typu Mealy'ego) na wektor wyjściowy</li>
+</ul>
+
+<p>Automat można zrealizować także w postaci układu mikro-programowalnego:<br /><img_from_src name="mikroprogramowalne" type="dia" alt="Przykład projektu układu mikro-programowalnego" /></p>
+</article>

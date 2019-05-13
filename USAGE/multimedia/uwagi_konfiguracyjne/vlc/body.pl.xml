@@ -1,0 +1,10 @@
+<article>
+<title>VLC niestandardowo</title>
+
+<p><wiki pl="VLC media player">VLC</wiki> jest dość popularnym odtwarzaczem plików multimedialnych. Jednak jego możliwości nie kończą sie na zwykłym odtworzeniu pliku .avi - umożliwia on obsługę strumieni sieciowych (zarówno odbiór jak i nadawanie), odtwarzanie wielu źródeł w ramach jednego okna (a także strumieniowanie takiego sygnału), obsługę urządzeń V4L (kart telewizyjnych), DVB, DVD,&nbsp;...&nbsp;. VLC posiada także, przydatną przy oglądaniu strumieni sieciowych lub telewizyjnych, funkcję nagrywania odbieranego sygnału. Domyślnie jeżeli wejściowy sygnał ma postać skompresowaną (np. DVB) to rejestrowany jest bez rekompresji (warto zauważyć, iż domyslnie rejestrowany jest tylko aktualnie oglądany program, natomiast gdy VLC odpalony jest z opcją <code>--dvb-budget-mode</code> rejestrowany jest cały multiplex). Poniżej prezentuje kilka przykładowych konfigów i skryptów wykorzystujących ponadstandardowe zdolności VLC.</p>
+
+<ul>
+	<li><id_link id="tv.vlc.sh">tv.vlc.sh</id_link> - skrypt do oglądania telewizji i słuchania radia z wykożystaniem VLC (używa dcop, konsole z KDE oraz <id_link id="set_station.sh">set_station.sh</id_link> do ustawiania kanału w oparciu o konfig xawtv)</li>
+	<li><id_link id="rtv_recorder_and_transmiter">rtv.sh</id_link> - skrypt do nagrywania i strumieniowania sygnału RTV wykożystujący m.in. VLC</li>
+</ul>
+</article>

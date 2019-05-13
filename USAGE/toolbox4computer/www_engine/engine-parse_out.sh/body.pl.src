@@ -1,0 +1,202 @@
+#######################################
+#     PRZETWARZANIE DO XHTML/LaTeX    #
+#######################################
+
+# funkcja odpowiedzialna za zamianę <id_link id="i:d">Opis</id_link> na linki globalne
+# w dokumencie określonym przez $1 lub w standardowym wejściu
+link_parser() {
+	awk '
+		BEGIN {
+			RS="<"
+		}
+		/^[ \n\t]*$/ {
+			next
+		}
+		
+		$1 != "id_link" {
+			printf("<%s", $0)
+		}
+		
+		$1 == "id_link" {
+			split(gensub("^id_link.*id *= *\"(.*)\".*>(.*)$", "\\1>\\2", "g"), tmp, ">")
+			# powyzsza linijka robi to samo co:
+			# i = match($0, "id *= *\""); if (i!=0) { $0 = substr($0, i); i = match($0, "\"") + 1 ; $0 = substr($0, i) ;
+			# i = match($0, "\"") - 1 ; tmp[1] = substr($0, 0, i) ; i = match($0, ">") + 1 ; tmp[2] = substr($0, i) }
+			tmp[4]=""
+			
+			for (i=0; i<9; i++) {
+				# komenda okresolna przez cmd wyszukuje w bazie indeksów pasujący
+				cmd=sprintf("grep \"^%s%s:*\t\" \"'"$PAGE_DIR"'/id_index\"", tmp[4], tmp[1])
+				
+				# do tmp[3] zapisujemy liczbę pasującyh indeksów, jeżeli >1 to błąd nie jest unikalny
+				# jeżeli < 1 to nie odnaleziono pasującego - modyfikacja przedrostka wyszukiwania i następny obieg
+				cmd2 = sprintf("%s | wc -l", cmd)
+				cmd2 | getline tmp[3]
+				close(cmd2)
+				if (tmp[3] > 1 ) {
+					printf("<a class=\"int\" href=\"[[!URL""PREFIX!]]/system.system?id=%s\">%s", tmp[1], tmp[2])
+					printf("\n\033[1;31mERROR: not univocal ID ( %s ) in <id_link />\033[0m\n", tmp[1]) > "/dev/stderr"
+					next
+				} else if (tmp[3] < 1 ) {
+					tmp[4]=sprintf("[^:]*:%s", tmp[4])
+					tmp[3]=""
+					continue
+				} else {
+					cmd2 = sprintf("%s | tr -d \"\\n\"", cmd)
+					cmd2 | getline tmp[3]
+					close(cmd2)
+					break
+				}
+			}
+			
+			if (tmp[3]=="") {
+				printf("\n\033[1;31mERROR: not found ID ( %s ) from <id_link />\033[0m\n", tmp[1]) > "/dev/stderr"
+				printf("<a class=\"int\" href=\"[[!URL""PREFIX!]]/system.system?id=%s\">%s", tmp[1], tmp[2])
+			} else {
+				split(tmp[3], tmp2, "\t")
+				printf("<a class=\"int\" href=\"[[!URL""PREFIX!]]%s[[!URLPOSTFIX!]]#%s\">%s", tmp2[2], tmp2[1], tmp[2])
+			}
+		}
+	' "$1" | sed \
+		-e '# zamieniamy zamknięcia id_link na odpowiedni tag xhtml
+			s#</id_link>#</a>#g'
+}
+
+# generacja obrazkowych równań w oparciu o ich zapis w formacie latex
+parse_eq_latex() {
+	awk '
+		BEGIN {
+			RS="<eq_latex>";
+			FS="</eq_latex>";
+			OFS="";
+			tmp=sprintf("%s/eq_latexuation.tex", ENVIRON["TMP_DIR"])
+			cmd="blahtexml --png < " tmp " | tr -d \"\n\""
+		}
+		
+		NR>1&&$1!=""{
+			# zapis równania do pliku tymczasowego
+			unxml_eq=$1
+			gsub("&lt;", "<", unxml_eq)
+			gsub("&gt;", ">", unxml_eq)
+			gsub("&amp;", "\\&", unxml_eq)
+			print unxml_eq > tmp
+			close(tmp)
+			
+			# wygenerowanie obrazka
+			cmd | getline wynik
+			close(cmd)
+			
+			# wygenerowanie tagu xhtml
+			gsub("<blahtex><png><md5>", "", wynik)
+			gsub("</md5></png></blahtex>", "", wynik)
+			$1=sprintf("<img class=\"center\" src=\"./%s.png\" alt=\"$$%s$$\" />", wynik, $1)
+		}
+		{
+			print $0
+		}
+	' "$1"
+}
+
+# przetworzenie dokumentu xml określonego przez $1 na xhtml lub latex (zależnie od wartości $OUT_MODE)
+xml2view() { (
+	set -e; set -o pipefail
+	case $OUT_MODE in
+		"xhtml"*)
+			{	echo '<!DOCTYPE poem [
+				<!ENTITY gt "&#62;">
+				<!ENTITY lt "&#60;">
+				<!ENTITY nbsp "&#160;">
+				<!ENTITY amp "&#38;">
+				]><document>';
+				
+				link_parser "$1";
+				
+				echo '</document>';
+			} | xsltproc --param tryb "'xhtml'" --param photo_dir "'$PHOTO_DIR'" $ENGINE_DIR/base.xsl/body.pl.src - |
+ 			sed \
+				-e '# dodanie spacji w tagach samozamykających się - kompatybilność wsteczna
+					s#/># />#g' \
+				-e '# wywalenie nagłówka xml - to tylko fragment większego dokumentu
+					s#<?xml version="1.0" encoding="[UTFutf]*-8"?>##g' |
+			parse_eq_latex
+			# xsltproc oraz xalan są około 10 razy szybsze od saxonb-xslt, ale nie wspierają xsl 2.0 (a ono potrzebne
+			# dla latex'a (fn:replace)), ponaddto xalan zgłasza błąd gdy występuje ends-with nawet w nieuzywanym kodzie
+			#
+			# uwaga xsltproc i xalan wymagają dziwnego podawania parametrów (muszą byc zabezpieczone przekazanym do niego ')
+			#
+			# wywołanie dla xalan:
+			#     xalan -xsl $ENGINE_DIR/base.xsl/body.pl.src -param tryb "'xhtml'" -param photo_dir "'$PHOTO_DIR'" 
+			;;
+		"latex"*)
+			# ponadto w trybie latex ignorujemy nadmiarowe spacje w dokumencie wejsciowym
+			{	echo '<!DOCTYPE poem [
+				<!ENTITY gt "&#62;">
+				<!ENTITY lt "&#60;">
+				<!ENTITY nbsp "&#126;">
+				<!ENTITY amp "&#38;">
+				]><document>';
+				
+				link_parser "$1";
+				
+				echo '</document>';
+			} > page.xml
+			cat page.xml | sed -e 's#> <#><space /><#g' |
+				saxonb-xslt -strip:all - $ENGINE_DIR/base.xsl/body.pl.src page_url=$PAGE_URL tryb=latex photo_dir=$PHOTO_DIR |
+ 				sed -e 's#<?xml version="1.0" encoding="[UTFutf]*-8"?>##g'
+			;;
+	esac
+) }
+
+
+############################################
+#     GENEROWANIE OBIEKTÓW POMOCNICZYCH    #
+############################################
+
+# funckja wywołuje generacje obiektów (grafik, ...) tworzonych dynamicznie ze źródeł
+# dla wszystkich plików źródłowych znajdującyh się w katalogu zadanym przez $1
+make_objects() {
+	pushd "$1" > /dev/null
+	# generowanie pdf/png z gch
+	for f in *.sch; do
+		if [ -e "$f" -a ! -e "${f%.sch}.png" -a ! -e "${f%.sch}.pdf" ]; then
+			suma_kontrolna=`md5sum $f | cut -f1 -d ' '`
+			if [ -e "$CACHE_DIR/$suma_kontrolna.png" -a -e "$CACHE_DIR/$suma_kontrolna.pdf" ] ; then
+				ln -sr "$CACHE_DIR/$suma_kontrolna.png" "${f%.sch}.png"
+				ln -sr "$CACHE_DIR/$suma_kontrolna.pdf" "${f%.sch}.pdf"
+			else
+				gsch2pdf.sh $f
+				cp "${f%.sch}.png" "$CACHE_DIR/$suma_kontrolna.png"
+				cp "${f%.sch}.pdf" "$CACHE_DIR/$suma_kontrolna.pdf"
+			fi
+		fi
+	done
+	
+	# generowanie pdf/png z dia
+	for f in *.dia; do
+		if [ -e "$f" -a ! -e "${f%.dia}.png" -a ! -e "${f%.dia}.pdf" ]; then
+			suma_kontrolna=`md5sum $f | cut -f1 -d ' '`
+			if [ -e "$CACHE_DIR/$suma_kontrolna.png" -a -e "$CACHE_DIR/$suma_kontrolna.pdf" ] ; then
+				ln -sr "$CACHE_DIR/$suma_kontrolna.png" "${f%.dia}.png"
+				ln -sr "$CACHE_DIR/$suma_kontrolna.pdf" "${f%.dia}.pdf"
+			else
+				dia2pdf.sh $f
+				cp "${f%.dia}.png" "$CACHE_DIR/$suma_kontrolna.png"
+				cp "${f%.dia}.pdf" "$CACHE_DIR/$suma_kontrolna.pdf"
+			fi
+		fi
+	done
+	
+	# generowanie pdf z pcb
+	for f in *.pcb; do
+		if [ -e "$f" -a ! -e "$fpdf" ]; then
+			suma_kontrolna=`md5sum $f | cut -f1 -d ' '`
+			if [ -e "$CACHE_DIR/$suma_kontrolna.pdf" ] ; then
+				ln -sr "$CACHE_DIR/$suma_kontrolna.pdf" "$f.pdf"
+			else
+				pcb2pdf.sh $f
+				cp "$f.pdf" "$CACHE_DIR/$suma_kontrolna.pdf"
+			fi
+		fi
+	done
+	popd > /dev/null
+}

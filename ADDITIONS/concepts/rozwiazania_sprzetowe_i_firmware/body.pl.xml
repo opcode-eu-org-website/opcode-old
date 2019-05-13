@@ -1,0 +1,47 @@
+<article>
+<title>Urządzenia i ich systemy wbudowane</title> 
+
+<p>O ile rynek rozwiązań typowo komputerowych wydaje się być dość dojrzały i posiada dość bogata ofertę to w przypadku rozwiązań "sprzętowych" (czyli dedykowanego sprzetu wraz z działającym na nim oprogramowaniem, np. kamer IP) sytuacja wygląda znacznie gorzej. Poniżej kilka słów refleksji odnoszących się właśnie do kamer IP, ale podobne (a niekiedy większe) problemy nękają rynek sprzetowej telefoni IP, systemów automatyki budynkowej, central alarmowych, a także tańszych zarządzalnych switchy i routerów oraz wielu innych zastosowań wbudowanych.</p>
+
+<p>Dobra kamera IP kosztuje kilkukrotnie (tak koło 5 - 6 razy) więcej od dobrej kamery analogowej. W przypadku tańszych rozwiązań jest to albo niezła kamera (przetwornik, tryb nocny, podświetlenie, konfigurowalne opcje DSP - takie jak balans bieli, zoom optyczny) z badziewnym IP, albo niezłe IP (streaming, uplod FTP, obsługa IPv6, ssh lub chociażby telnet do konfiguracji, ...) z badziwną kamerą (trafia się też badziewna kamera z badziewnym IP).</p>
+
+<p>Zmora jest też sztuczne ograniczanie użytkownika w tym co może zrobić z jego sprzętem (nierzadko podyktowane chęcią sprzedawania zrożnicowanej funkcjonalnie gamy produktów na bazie tego samego sprzętu). Producenci bardzo często zapominają o najistotniejszej funkcjonalności (streamingu RTP / RTSP), także (często) ignorowana jest kwestia streamingu audio wraz z obrazem (ładują na siłe wifi niemalże do każdego modelu, ale na moduł mikrofonu to już szkoda funduszy / miejsca w obudowie). Z pozostałych funkcji najistotniejsza wydaje się obsługa alarmów (zarówno ich generowania w oparciu o detekcję ruchu, przyjmowania z zewnętrznego źródła, jak i wystawiania na zewnątrz bądź wykonywania akcji takiej jak upload wideo).</p>
+
+<p>Dlatego też bardzo brakuje (a brak ten jest bolesny) przyzwoitego, open-sourcowy, nieograniczający użytkownika systemu na który składają się:</p>
+<ul>
+	<li>podcentralki alarmowe IP - kilka(naście) wejść cyfrowych (dla klasycznych czujek ruchu, dymu), wejście protokularne 1-wire (dla termometrów), wejście protokularne RS-485 (dla czujek z komunikacją protokularną (modbus) z obsługą podpisywania odpowiedzi - odpowiedz oprócz samego statusu zawiera także zahaszowany status i sekret czujki), także wariant(y) z dodatkowym przełączanym (między 232 a 485) portem RS, portami i2c, usb, m-bus (może w formie karty rozszerzeń na i2c lub spi) ...</li>
+	<li>opisanych protokularnych czujek (PIR, PIR + mikrofala, stłuczenie, dym optyczny, dym aktywny, zalanie, ...) i klawiatur protokularnych (jako bardziej zaawansowane mogą być stosowane urządzenia IP)</li>
+	<li>przyzwoite kamer analogowe (noc-dzień, wymienne obiektywy, różne warianty obudowy - kopłkowa, pistoletowa, zewnętrzna, ... z IR, bez IR) i te same kamery z wbudowanym modułem IP (streaming, detekcja ruchu, wejście i wyjście alarmu, zapis na ftp/sftp, trap snmp)</li>
+	<li>gamy wideoserwerów i wideorejestratorów IP dla kamer analogowych oraz sprzętowych kart DVR</li>
+	<li>telefonów IP (z wsparciem dla wiadomosci tekstowych xmpp, smtp, rss, ...)</li>
+</ul>
+
+<p>Kolejną tego typu dziedziną gdzie mamy sporo rozwiązań, niekiedy nawet niezłych, ale praktycznie zawsze z jakimiś istotnymi brakami i zawsze z sztucznie ograniczonymi możliwościami są systemy SP / RSC / RAC (<wiki en="Out-of-band management">Out-of-band management</wiki>). Często oferują wiele kanałów dostępu (ssh, ipmi, snmp, www, ... - co jest bardzo miłe) jednak kanały te nie są równoprawne nawet w zakresie w którym bezproblemowo mogłyby być (np. odczyty wartości czujników temperatur i pracy wentylatorów, etc). Rozwiązania te często bazują na linuxach, więc wprowadzenie np. prawdziwych tagowanych VLANów (z możliwością należenia do kilku z osobną adresacją) powinno być problemowe (a chyba w żadnym z rozwiązań nie jest możliwe, ze względu na ograniczenia nakładki nałożonej na linuxową podstawę). Pewną bolączką jest też brak standaryzacji takich rozwiązań (np. CLI). Dobry SP powinien cechować się co najmniej:</p>
+<ul>
+	<li>dostęp / obsługiwane protokoły:<ul>
+		<li>CLI poprzez SSH (RFC4250 - RFC4254) oraz port szeregowy</li>
+		<li>IPMI 2.0</li>
+		<li>SNMP (Agent i  Trapa)</li>
+		<li>WWW</li>
+	</ul></li>
+	<li>konsola zdalna:<ul>
+		<li>konsola tekstowa pre-OS oraz OS (Remote Serial Console, ...)</li>
+		<li>historia konsoli tekstowej (conajmniej 60 linii)</li>
+		<li>konsola graficzna (Virtual KVM, VC, ...) wspierającą standardowy protokół VC</li>
+	</ul></li>
+	<li>zarządzanie zasilaniem serwera (włączenie, wyłączenie i reset zdalny)</li>
+	<li>monitoring<ul>
+		<li>odczyt poprzez CLI, IPMI i SNMP wartości:<ul>
+			<li>pobieranej mocy lub prądu</li>
+			<li>temperatury powietrza i CPU (CPU and chassis environment)</li>
+			<li>prędkości wentylatorów</li>
+			<li>napięć +12V +5V +3.3V, baterii, ...</li>
+		</ul></li>
+		<li>logowanie zdarzeń związanych z sensorami, stanem zasilania itp wraz z opcją wysyłania logów do zdalnego syslog serwera</li>
+		<li>możliwość ustawienia powiadomień SMTP (RFC 5321) i e-mail</li>
+	</ul></li>
+	<li>możliwość udostępniania dwóch wirtualnych napędów (z zdalnych napędów, obrazów ISO (Virtual CD/DVD-ROM) lub zasobu NFS) oraz bootowania z niego</li>
+	<li>obsługa tagowanych VLANów (co najmniej dwa tagowane lub tagowany i nietagowany z niezależną adresacją IPv4 i IPV6)</li>
+	<li>jeżeli jednostka zarządzająca posiada niezależny zegar pobieranie informacji o czasie poprzez NTP (RFC 1305) lub SNTP (RFC 4330)</li>
+</ul>
+</article>

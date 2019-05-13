@@ -1,0 +1,15 @@
+<article>
+<title>Minimalizacja automatów (liczby stanów) - synchroniczne</title>
+<ul>
+	<li>tworzymy tablicę trójkątną (kolumny 1 -> N-1, wiersze 2-> N) w której zaznaczamy dla każdej pary stanów czy jest ona:<ul>
+		<li>zgodna (dla każdego wejścia stany mają niesprzeczne wyjścia i niesprzeczne stany następne)</li>
+		<li>warunkowo zgodna (dla każdego wejścia stany mają niesprzeczne wyjścia i niesprzeczne stany następne, pod warunkiem zgodności innych stanów) - wtedy zapisujemy warunki zgodności (jest to iloczyn logiczny)</li>
+		<li>sprzeczna (dla jakiegoś wektora wejściowego wyjścia są sprzeczne)</li>
+	</ul></li>
+	<li>po wypełnieniu sprawdzamy dla każdej pary sprzecznej czy nie jest warunkiem w innej parze - jeżeli jest to tamta para też sprzeczna, powtarzamy to dla nowo powstałych par sprzecznych, aż dojdziemy do sytuacji że nie ma już nowo powstałych par sprzecznych</li>
+	<li>pozostałe pary (zgodne lub zgodne warunkowo) są parami zgodnymi</li>
+	<li>obliczamy MKZ (można jak opisano powyżej, ale najprościej poprzez grupowanie 3 par w trójkę, 4 trójek w czwórkę itd)</li>
+	<li>wybieramy takie MKZ aby spełnić warunek pokrycia (wszystkie stany muszą być w zbiorze wynikowym) i sprawdzamy czy jakiś stan z jednej grupy nie prowadzi do stanów z innej grupy</li>
+	<li>w tym celu sporządzamy tabelkę gdzie w kolumnach mamy kolejne MKZ, a w wierszach mamy ich reakcję na kolejne wektory wejściowe</li>
+</ul>
+</article>

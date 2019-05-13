@@ -1,0 +1,337 @@
+#!/bin/bash
+
+### KONFIGURACJA ###
+# sciezka do katalogu skryptu
+system_dir="/var/lib/sysmon"
+
+# wlaczenie reszty konfiguracji
+source $system_dir/sysmon_server.conf
+
+### ZMIENNE TRYBU PRACY ###
+CMD=$1; shift 1
+RUN_TIME=`date --utc +'%F %T UTC'`
+RUN_FILE="$system_dir/run.$CMD.txt"
+
+
+### FUNKCJA WYSYLAJACA ###
+send_info() {
+	# dodanie stopki wiadomosci
+	msg="$2\n---\nSYSMON on `hostname -f`\n START: $RUN_TIME\n FINISH: `date --utc +'%F %T UTC'`"
+	
+	# SMTP
+	addr_list=""
+	for addr in $ADMIN_SMTP; do
+		addr_list="$addr_list -t $addr"
+	done
+	if [ "$addr_list" != "" ]; then
+		sendEmail -f "SysMon na $HOSTNAME <$MAIL_FROM>" $addr_list $SENDEMAIL_OPTIONS -u "$1" -m "$msg" >/dev/null 2>/dev/null
+	fi
+
+	# XMPP
+	for addr in $ADMIN_XMPP; do
+		echo -e "$msg" | sendxmpp -f $SENDXMPP_AUTH_FILE -s "$1 (od: SysMon na $HOSTNAME)" $addr >/dev/null 2>/dev/null
+	done
+}
+
+### FUNKCJA SPRAWDZAJACA DOSTEPNOSC HOSTA ###
+# $1 - host address, $2 != 0 then recheck
+# modify $live $dead and $recheck
+check_host_live() {
+	if ping -c1 $1 > /dev/null 2> /dev/null; then
+		# host zyje
+		if $USE_BLOCK && grep "^$1\$" $BLOCK_FILE >/dev/null; then
+			sed -i"$BLOCK_BACKUP_SURFIX" -e"/^$1\$/d" $BLOCK_FILE
+			live="$live\n * $1"
+		fi
+	else
+		# host prawdopodobnie nie zyje ... zatem
+		# jezeli nie ma go w pliku blokad to
+		if !($USE_BLOCK && grep "^$1\$" $BLOCK_FILE >/dev/null); then
+			# rozważamy ponowną próbę
+			if [ $2 != 0 ] && ($recheck || $RECHECK_ANY); then
+				sleep $RECHECK_TIME
+				check_host_live $1 $(( $2 - 1 ))
+			# a gdy wykonaliśmy stosowną ilość prób to
+			else
+				# uznajemy host za martwy
+				dead="$dead\n * $1"
+				$USE_BLOCK && echo $1 >> $BLOCK_FILE 
+				recheck=false
+			fi
+		fi
+	fi
+}
+
+### FUNKCJA SPRAWDZAJACA DOSTEPNOSC URL ###
+# $1 - url
+check_http_services() {
+	tmp_msg=`LANG=C wget -O /dev/null "$1" 2>&1`
+	if [ $? -eq 0 ]; then
+		# jezeli używamy pliku blokad a url był w nim to usuwamy
+		if $USE_BLOCK_FOR_SERVICES && grep "^$1\$" $BLOCK_FILE >/dev/null; then
+			sed -i"$BLOCK_BACKUP_SURFIX" -e"/^${1////\\/}\$/d" $BLOCK_FILE
+			echo " * $1 is OK\\n"
+		fi
+	else
+		if !($USE_BLOCK_FOR_SERVICES && grep "^$1\$" $BLOCK_FILE >/dev/null); then
+			# generujemy info
+			echo "$tmp_msg" | awk '
+				$3=="ERROR" {
+					$1=" * '"$1"'"
+					$2="report:"
+					printf("%s\\n", $0)
+				}
+				$4~/failed/ && '$CHECK_FOR_DEAD_SERVICES'==1 {
+					printf (" * %s report: %s\\n", "'$1'", $0)
+				}
+			'
+			# gdy używamy pliku blokad dodajemy do niego ten URL
+			$USE_BLOCK_FOR_SERVICES && echo $1 >> $BLOCK_FILE
+		fi
+	fi
+
+}
+
+### FUNKCJA SPRAWDZAJACA DOSTEPNOSC USŁUGI W OPARCIU O PORT ###
+# $1 - adres usługi w postaci host:port
+# zarówno host jak i port mogą być określane numerycznie jak i poprzez nazwę
+check_port_services() {
+	if [ $CHECK_FOR_DEAD_SERVICES -eq 1 ]; then
+		opt="-PN"
+	else
+		opt=""
+	fi
+	tmp_msg=$( LANG=C nmap "${1%:*}" -p "${1#*:}" --reason $opt | grep tcp | awk '
+		$2 != "open" {
+			printf(" * %s : port %s (%s)\\n", "'${1}'", $2 , $4)
+		}
+	' )
+	
+	if [ "$tmp_msg" != "" ]; then
+		if !($USE_BLOCK_FOR_SERVICES && grep "^$1\$" $BLOCK_FILE >/dev/null); then
+			echo "$tmp_msg"
+			$USE_BLOCK_FOR_SERVICES && echo $1 >> $BLOCK_FILE
+		fi
+	else
+		if $USE_BLOCK_FOR_SERVICES && grep "^$1\$" $BLOCK_FILE >/dev/null; then
+			sed -i"$BLOCK_BACKUP_SURFIX" -e"/^$1\$/d" $BLOCK_FILE
+			echo " * $1 is OK\\n"
+		fi
+	fi
+}
+
+### FUNKCJA WYKONUJĄCA ZDALNĄ KOMĘDĘ NA HOSCIE ###
+# $1 - host address, $2 - komenda
+# modify $live $dead and $recheck
+do_host_remote_cmd() {
+	# oczekujemy że host uznawany jest za żywy
+	if !($USE_BLOCK_FOR_SSH && grep "^$1\$" $BLOCK_FILE >/dev/null); then
+		cnt=$RECHECK_RETRY
+		while ! live=`RUN_REMOTE $1 $2 2> $ERROR_TMP_FILE`; do
+		# { while ! error=`ssh $1 $2 3>&2 2>&1 1>&3`; do ... done } 2>&1
+			if [ $cnt != 0 ] && ($recheck || $RECHECK_ANY); then
+				sleep $RECHECK_TIME
+				cnt=$(( $cnt - 1))
+			else
+				# host nie odpowiada na SSH
+				if [ -s $ERROR_TMP_FILE ]; then
+					dead="$dead\n * $1 (`cat $ERROR_TMP_FILE | tr '\n' ' '`)"
+				else
+					dead="$dead\n * $1"
+				fi
+				recheck=false
+				return -1;
+			fi
+		done
+		return 0;
+	fi
+	return -2;
+}
+
+
+
+### ZABEZPIECZENIE PRZED ROWNOLEGLA PRACA ###
+if [ -e $RUN_FILE ]; then
+	. $RUN_FILE
+	run_timestamp=$(( `date +%s` - $run_timestamp ))
+	if [ $run_timestamp -lt 1800 ]; then
+		echo "SYSMON witch $CMD is running since $run_timestamp seconds" >&2
+		exit;
+	fi
+fi
+echo "run_timestamp=\"`date +%s`\"" > $RUN_FILE
+
+### WYKONANIE AKCJI PODANEJ W ARGUMENCIE
+case "$CMD" in
+	# SPRAWDZANIE CZY HOSTY ZYJA
+	"ping")
+		live=""; dead=""
+		recheck=true
+		for addr in $HOSTS $HOSTS_PING_ONLY; do
+			check_host_live $addr $RECHECK_RETRY
+		done
+		
+		msg=""; title=""
+		if [ "$dead" != "" ]; then
+			# udekorowanie wiadomosci
+			msg="Next $SYSTEM_NAME hosts are down:\n$dead"
+			if $USE_BLOCK; then
+				msg="$msg\n\nFuture warning on this host NOT BE SEND"
+				msg="$msg\nuntil host don't remove from list in $HOSTNAME:$BLOCK_FILE\nor host not be up"
+			fi
+			title="down"
+		elif [ "$live" != "" ]; then
+			# udekorowanie wiadomosci
+			msg="$msg\n\nNext $SYSTEM_NAME hosts are up:\n$live"
+			if [ "$title" = "" ]; then title="up"; else title="$title/up"; fi
+		fi
+		
+		if [ "$msg" != "" ]; then
+			# wysylanie wiadomosci
+			send_info "$SYSTEM_NAME: host $title alert" "$msg"
+		fi
+	;;
+	
+	# SPRAWDZANIE CZY DZIAŁAJĄ USŁUGI
+	"services")
+		msg=""
+		for url in $URL_CHECK_LIST; do
+			msg="$msg`check_http_services "$url"`"
+		done
+		
+		for service in $SERVICES_CHECK_LIST; do
+			msg="$msg`check_port_services "$service"`"
+		done
+		
+		if declare -f addional_services_check > /dev/null; then
+			msg="$msg`addional_services_check`"
+		fi
+		
+		if [ "$msg" != "" ]; then
+			# wysylanie wiadomosci
+			send_info "$SYSTEM_NAME: services info/alert" "$msg"
+		fi
+	;;
+	
+	# SPRAWDZANIE CZY HOSTY NIE BYLY RESETOWANE
+	"uptime")
+		mv -f $UPTIME_FILE.new $UPTIME_FILE.old 2>/dev/null
+		:> $UPTIME_FILE
+		
+		live=""; dead=""; msg2=""; recheck=true
+		for addr in $HOSTS; do
+			live=0
+			if ! do_host_remote_cmd $addr "uptime"; then
+				live=`grep "^$addr" $UPTIME_FILE.old | cut -f2 -d' '`
+				if [ "$live" = "" ]; then
+					live=0
+				fi
+			fi
+			# TUTAJ DZIELIMY $live NA POLA
+			
+			# pierwsze pole to uptime w sekundach
+			echo "$addr `echo "$live" | head -n1 | awk '{printf("%s", $1)}'`" >> $UPTIME_FILE
+			
+			# kolejne linie to "status alert"
+			live=`echo "$live" | sed -e "1d"`
+			if [ "$live" != "" ]; then
+				msg2="$msg2$addr:\n$live\n"
+				msg2="$msg2***************************************************************\n\n"
+			fi
+		done
+
+		# sortujemy, zestawiamy i porownujemy nowy wynik z poprzednim
+		sort -f -k1 $UPTIME_FILE > $UPTIME_FILE.new
+		msg=`join -j1 $UPTIME_FILE.new $UPTIME_FILE.old 2>/dev/null | awk '
+			$2==0 {next}
+			$2!=0 && $3==0 {print " * " $1 " (old uptime is 0)"; next}
+			$2 < $3        {print " * " $1}
+		'`
+		
+		if [ "$msg" != "" -o "$dead" != "" -o "$msg2" != "" ]; then
+			[ "$msg" != "" ]  && msg="Next $SYSTEM_NAME hosts are reboot:\n$msg\n\n"
+			[ "$msg2" != "" ] && msg="${msg}Next $SYSTEM_NAME hosts are status alert:\n$msg2\n\n"
+			[ "$dead" != "" ] && msg="${msg}We couldn't test next $SYSTEM_NAME host (SSH problem):\n$dead"
+			send_info "$SYSTEM_NAME: host reboot/status alert" "$msg"
+		fi
+	;;
+	
+	# SPRAWDZANIE STANU HOSTÓW (zajętość dysków, smart, logi)
+	"status"|"raport")
+		live=""; dead=""; recheck=true
+		msg=""
+		for addr in $HOSTS; do
+			if do_host_remote_cmd $addr "$CMD"; then
+				if [ "$live" != "" ]; then
+					msg="$msg$addr:\n$live\n"
+					if [ $CMD != "raport" ]; then
+						msg="$msg***************************************************************\n\n"
+					fi
+				fi
+			fi
+		done
+		
+		if [ $CMD = "raport" ]; then
+			title="raport"
+			msg="$msg\nNext host are ping only:\n$HOSTS_PING_ONLY"
+			msg="$msg\nNext host are in $BLOCK_FILE:\n`while read f; do echo " * $f"; done < $BLOCK_FILE`"
+		else
+			title="status alert"
+		fi
+		
+		if [ "$msg" != "" -o "$dead" != "" ]; then
+			[ "$msg" != "" ]  && msg="Next $SYSTEM_NAME hosts are $title:\n\n$msg\n\n"
+			[ "$dead" != "" ] && msg="${msg}We couldn't test next $SYSTEM_NAME host (SSH problem):\n$dead"
+			send_info "$SYSTEM_NAME: hosts $title" "$msg"
+		fi
+	;;
+	
+	# INSTALACJA / AKTUALIZACJA SYSTEMU
+	# połączenia bazują na ssh użytkownika wywołującego
+	# $2, $2, ... - lista hostów
+	"install"|"update")
+		for addr in $@; do
+			echo $addr
+			
+			[ "$CMD" = "install" ] && echo -e "\\033[34minstaluje SYSMON na $addr\\033[0m" && ssh $addr '
+				cat <<EOF > $HOME/sysmon-install.sh
+#!/bin/bash
+[ "`uname`" = "SunOS" ] && (/usr/sbin/useradd -c "System Monitoring script" -d "'"$system_dir"'" -m -s "/bin/bash" sysmon || echo "ADD sysmon USER ERROR at SunOS")
+[ "`uname`" = "Linux" ] && (adduser --system --disabled-password --gecos "System Monitoring script" --home "'"$system_dir"'" --shell "/bin/bash" sysmon || echo "ADD sysmon USER ERROR at Linux")
+mkdir -p '"$system_dir"'/.ssh/
+echo "command=\"'"$system_dir"'/sysmon_client.sh\",no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty '"`cat $system_dir/.ssh/id_rsa.pub`"'" > '"$system_dir"'/.ssh/authorized_keys
+chown -R sysmon:nogroup '"$system_dir"'
+exit 0
+EOF
+				chmod +x $HOME/sysmon-install.sh
+				if which pfexec >/dev/null; then
+					pfexec $HOME/sysmon-install.sh || sudo $HOME/sysmon-install.sh
+				else
+					sudo $HOME/sysmon-install.sh
+				fi
+				rm $HOME/sysmon-install.sh
+			'
+			echo -e "\\033[34mkopiuje pliki SYSMONa na $addr\\033[0m"
+			scp -p $system_dir/sysmon_server.* $system_dir/sysmon_client.sh $addr:
+			echo -e "\\033[34mumieszczam  pliki SYSMONa w $addr:$system_dir\\033[0m"
+			ssh $addr 'pfexec cp -p $HOME/sysmon_* '"$system_dir"' || sudo cp -p $HOME/sysmon_* '"$system_dir"
+		done
+		echo "dla dzialania kontroli S.M.A.R.T oraz temperatury wymagane jest zainstalowanie odpowiednich narzedzi (hd w Solarisach, smartctl w Linuxach, ipmitool)
+		oraz dodanie do /etc/sudoers odpowiednio
+		sysmon  ALL =NOPASSWD:/usr/bin/hd, /usr/bin/ipmitool
+		sysmon  ALL =NOPASSWD:/usr/sbin/smartctl, /usr/bin/ipmitool"
+	;;
+	"fast-update")
+		for addr in ${@-$HOSTS}; do
+			echo $addr
+			
+			scp -p $system_dir/sysmon_server.* $system_dir/sysmon_client.sh $addr:$system_dir/
+		done
+	;;
+esac
+
+# usuniecie tymczasowego pliku stanowiącego bufor błędów
+rm $ERROR_TMP_FILE 2>/dev/null
+
+# usuniecie pliku blokady uruchomienia
+rm $RUN_FILE

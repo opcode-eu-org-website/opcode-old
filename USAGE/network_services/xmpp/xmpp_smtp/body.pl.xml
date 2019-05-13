@@ -1,0 +1,11 @@
+<article>
+<title>Powiadomienia XMPP/SMTP</title>
+<p>Głównym celem prezentowanego przeze mnie systemu powiadomień XMPP/SMTP jest umożliwienie zapewnienia przepływu informacji o nowych wiadomościach pomiędzy tymi dwoma protokołami. System składa się z 4 skryptów:</p>
+<ul>
+	<li><id_link id="xmpp2smtp.sh">xmpp2email.sh</id_link> - Wysyła powiadomienia o wiadomościach IM otrzymanych w trybie off-line na e-mail, wymaga przechowywania wiadomości off-line w bazie postgres. Jako argument przyjmuje nazwę użytkownika (nie jid) którego wiadomości mają zostać przetworzone. Do parsowania xml'a otrzymanego z bazy danych używany jest arkusz xls <id_link id="xmpp2smtp.xsl">xmpp2email.xls</id_link>. Program pełni rolę podobną do <id_link id="jabber_info_server.c">serwera powiadomień dla mikrokontrolera</id_link>, przy czym tamten korzystał z bazy MySQL serwera jabberd2.</li>
+	<li><id_link id="smtp2xmpp.pl">smtp2xmpp.pl</id_link> - Program wysyłający wiadomość IM z specyficznego adresu (podobny w działaniu do <id_link id="jabber.cpp">jabber.cpp</id_link>, czy też sendxmpp), wiadomość wysyłana jest domyślnie jako headline, dzięki czemu nie powinna być przechowywana w trybie offline.</li>
+	<li><id_link id="mail-bot.pl">mail-bot.pl</id_link> - bot jabberowy udzielający informacji o nowej poczcie, do pobierania informacji o wiadomościach korzysta z "mail2text.sh"</li>
+	<li><id_link id="email2text.sh">mail2text.sh</id_link> - Pomocniczy program odpowiedzialny za konwersję kodowania mailowego znaków non-ascii z 7 lub 8 bitowego w jakiejś stronie kodowej na utf-8. Program oprócz konwersji nagłówków, posiada także funkcjonalność wyciągnięcia treści tekstowej z maila (również z maila typu mime zawierającego część text/plain) i dokonania jej konwersji. Przykład zastosowania razem z smtp2xmpp.pl podany jest w pliku procmailowym <id_link id="notify_to_xmpp">notify_to_xmpp</id_link>.</li>
+</ul>
+<p>Można także pobrać te programy w formie archiwum źródłowego paczki *.deb - <a class="int" href="./xmpp-smtp.tgz">xmpp-smtp.tgz</a>.</p>
+</article>

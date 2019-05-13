@@ -1,0 +1,79 @@
+# czy uzywamy pliku blokad zapobiegajacego wysylaniu wielokrotnych
+# komunikatow o tym samym hoscie
+USE_BLOCK=true
+
+# surfix dla kopi bliku blokad gdy host ozyl ...
+# puste jezeli nie chcemy robic backupu
+BLOCK_BACKUP_SURFIX=".`date +'%FT%T'`"
+
+# czy pomijamy hosty z pliku blokad w opołączeniach SSH
+USE_BLOCK_FOR_SSH=true
+
+# plik blokad
+BLOCK_FILE="$system_dir/block.txt"
+
+
+
+# ile razy prubujemy zanim uznamy za martwego
+RECHECK_RETRY=2
+
+# ile czasu [s] odczekujemy przy ponownych probach
+RECHECK_TIME=30
+
+# czy rechek robic nawet gdy dla poprzedniego hostu nie przyniusl skutku
+RECHECK_ANY=false;
+
+
+
+# nazwa monitorowanej grupy hostow uzywana w powiadomieniach
+SYSTEM_NAME="ICM"
+
+# konfiguracja adresow powiadamiania
+ADMIN_SMTP=""
+ADMIN_XMPP=""
+
+# konfiguracja programow wysylajacych
+SENDEMAIL_OPTIONS="-s localhost"
+MAIL_FROM=""
+SENDXMPP_AUTH_FILE="$system_dir/xmpp.conf"
+
+
+
+# funkcja odpowiedzialna za rzeczywiste wykonanie komendy na zdalnym hoście
+# $1 - host address, $2 - komenda
+RUN_REMOTE() {
+	echo "$2" | ssh -i $system_dir/sysmon.ssh_id $1
+}
+
+
+
+# konfiguracja skladowania informacji o uptime
+UPTIME_FILE="$system_dir/uptime"
+
+# plik tymczasowy przetrzymujący błędy przed ich wysłaniem ...
+ERROR_TMP_FILE="$system_dir/error"
+
+
+# konfiguracja monitorowanych hostow
+HOSTS=""
+
+#  lista pozostalych hostow
+HOSTS_PING_ONLY=""
+
+
+# lista urli do sprawdzania
+URL_CHECK_LIST=""
+
+# lista usług do sprawdzania przez dostępność portu
+SERVICES_CHECK_LIST=""
+
+# czy niedostępność hosta świadczoączego usługę jest błędem usługi (1 = tak, 0 = nie)
+CHECK_FOR_DEAD_SERVICES=0
+
+# czy uzywamy pliku blokad dla sprawdzania usług
+USE_BLOCK_FOR_SERVICES=true
+
+# funkcja w ramach której można definiować własne testy usług
+# (np. sprawdzanie odpowiedzi DNSowej przy pomocy `dig @host pytanie`)
+# jeżeli wyprodukuje cokolwiek na STDOUT zsostanie to przesłane w ramach komunikatu o stanie usług
+# addional_services_check() { : }

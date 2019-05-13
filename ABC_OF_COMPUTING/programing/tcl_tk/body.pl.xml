@@ -1,0 +1,5 @@
+<article>
+<title>Tcl/Tk</title>
+
+<p><wiki pl="Tcl">Tcl</wiki>/<wiki pl="Tk">Tk</wiki> jest skryptowym językiem umożliwiającym budowanie graficznych interfejsów użytkownika (biblioteka Tk). Samo Tcl jest językiem komend tak jak typowe unixowate języki skryptowe takie jak sh. Tk jest z kolei biblioteką odpowiedzialną za interfejs graficzny, jest ona dostępna także dla wielu innych języków programowania, jednak pierwotnie związana jest właśnie z Tcl. Poniżej przedstawiam przykładowy skrypt obrazujący użycie Tlc/Tk. Zobacz w sieci: <doc url="http://www.bin-co.com/tcl/tutorial/contents.php" mirror="programowanie/Tcl/tutorial">Tcl/Tk Tutorial</doc>.</p>
+</article>

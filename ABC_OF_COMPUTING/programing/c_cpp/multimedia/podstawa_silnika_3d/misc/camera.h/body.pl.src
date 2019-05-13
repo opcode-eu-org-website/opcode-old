@@ -1,0 +1,35 @@
+#ifndef CAMERA_H
+#define CAMERA_H
+
+#include "point.h"
+
+class Camera {
+	private:
+		bool is_new; // czy parametry były zmieniane od ostatniego wywołania ustaw_kamere()
+		float calcuate_y(float x, float z);
+		void make_move(float move, float part_x, float part_z);
+	
+	public:
+		Camera();
+		
+		float x, y, z; // punkt z którego patrzymy
+		float rot_xz; // obrót w plaszczyźnie podłogi (przeciwnie do wskazówek zegara)
+		float rot_yz; // pochylanie góra-dół (dodatnie: patrzymy do góry)
+		float rot_xy; // ogólnie możliwy jest także obrót kamery wokół własnej osi (z)
+		float zoom; // kąt widzenia (w y, bo w x zadany przez ratio okna)
+		float ratio; // stosunek szerokośi i wysokości ekranu
+		
+		PointXZ<float> trapezium[4];
+		PointXZY<float> point;
+		
+		// ustawia info że kamera uległa zmianie
+		void change();
+		
+		// funkcja regeneruje macierz GL_PROJECTION
+		void set();
+		
+		// funkcje odpowiedzialne za przesunięcia kamery w kierunku patrzenia
+		void move_forward(float move);
+		void move_laterally(float move);
+};
+#endif

@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# skrypt generuje plik PLA (z liczbą wyjść równą 1) dla podanej formuły boolowskiej
+# formuła ta jest wyrażeniem zapisanym przy pomocy operatorów logiki bitowej:
+#    a AND b  => a & b
+#    a OR b   => a | b
+#    a XOR b  => xor(a,b)
+#    NOT a    => not(a)
+#  argumenty można grupować z wykorzystaniem nawiasów ()
+#  kolejne argumenty nazywane są x0 x1 ... xN
+#  np. "x1 & ( x2 | x0 )" lub "( not(x0 & x1) | x2 ) & x3"
+
+# pliki PLA są wykorzystywane przez systemy minimalizacji takie jak espresso
+
+FORMULA=$1
+
+MAX_X=`echo "$FORMULA" | awk 'BEGIN{FS="[ |&,)(]"; RS="x"; MAX=0} NR>1{if (MAX<$1) MAX=$1} END{print MAX}'`
+
+# definujemy dla calc bitowy not nie dokonujący przeniesienia dla liczb <= 32 bitowych
+CALC="define not(a) {return (0xFFFFFFFF >> (32-digits(a,2))) & ~a};"
+
+# genrujemy skrypt dla calc
+CALC_1=""
+CALC_2="printf(\""
+CALC_3=""
+for i in `seq 0 $MAX_X`; do
+	CALC_1="$CALC_1 for (x$i=0; x$i<=1; x$i++)"
+	CALC_2="$CALC_2%b"
+	CALC_3="$CALC_3 x$i, "
+done
+CALC_2="$CALC_2 %b\n\", $CALC_3 $FORMULA );"
+
+echo .type fr
+echo .i $(( $MAX_X+1 ))
+echo .o 1
+echo .p `calc "2^($MAX_X+1)" | grep -v defined`
+
+calc "$CALC $CALC_1 $CALC_2"
+
+echo .end

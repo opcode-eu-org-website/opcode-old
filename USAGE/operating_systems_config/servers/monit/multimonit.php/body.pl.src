@@ -1,0 +1,85 @@
+<?php
+
+
+$hosts_file = file('/etc/hosts'); 
+if ($hosts_file === false) {
+	echo "Unable to open hosts file.\n";
+	exit;
+}
+ 
+$delim = " \t";
+$HOSTS = array();
+ 
+foreach ($hosts_file as $h) { 
+	if ($pos = strcspn($h, "\r\n#")) { 
+		$h = trim(substr($h, 0, $pos));
+		// mamy usuniete komentarze itp.
+
+		$pos = strcspn($h, "\t ");
+		$ip   = substr($h, 0, $pos);
+		$name = trim(substr($h, $pos+1));
+
+		// usuniecie dodatkowych nazw
+		$pos = strcspn($name, "\t ");
+		if ($pos)
+			$name   = substr($name, 0, $pos);
+
+		if (preg_match('/-mon$/', $name))
+			//$HOSTS["$name"] = $ip;
+			$HOSTS["$name"] = $name;
+	} 
+} 
+
+// lista może być ustawiona lub uzupełniona w tym pliku wpisami do tablicy $HOSTS postaci:
+// $HOSTS["localhost"] = "127.0.0.1";
+// $HOSTS["server1"] = "192.168.0.13";
+
+
+$REQUEST_URI = substr($_SERVER['REQUEST_URI'], 12);
+$pos         = strpos($REQUEST_URI, "/");
+
+if ($pos != "") {
+	$HOST = substr($REQUEST_URI, 0, $pos);
+	$CMD  = substr($REQUEST_URI, $pos+1);
+	$pos  = strcspn($CMD, "/?");
+	if ($pos != "") {
+		$CMD  = substr($CMD, 0, $pos);
+	}
+} else {
+	if($REQUEST_URI == "") {
+		echo "<html><head><title>Monit servers list</title></head><body><h1>Monit servers list:</h1><ul>";
+		while ( list($k, $v) = each($HOSTS) ) {
+			echo "<li><a href=\"$k/\">$k</a></li>";
+		}
+		echo "</ul></body></html>";
+	} else {
+		header( "Location: " . $_SERVER['SCRIPT_URI'] . "/" ) ;
+		echo "Redirect to: ". $_SERVER['SCRIPT_URI'] . "/";
+	}
+	exit;
+}
+
+$IP = $HOSTS[$HOST]; 
+if ($IP == "") {
+	echo "$HOST : Nieznany host";
+	exit;
+}
+
+
+$handle = fopen("http://$IP:2813/$CMD", "rb");
+if ($handle === false) {
+	echo "Unable connect to $IP\n";
+	exit;
+}
+$contents = stream_get_contents($handle);
+fclose($handle);
+
+$contents = ereg_replace(
+	"Running Monit on more than one server. Use <a[^<>]*>[^<>]*</a> to manage all your Monit instances",
+	"<a href=\"../\">List All Monit Servers</a>",
+	$contents
+);
+
+echo $contents;
+
+?>

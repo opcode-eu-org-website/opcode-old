@@ -1,0 +1,17 @@
+<article>
+<title>Główny automat sterujący</title>
+
+<p>Układ ten odpowiedzialny jest za inicjalizację wyświetlacza oraz wysyłanie do niego danych odebranych z UART. W przypadku gdy z UART zostanie odebrany znak DEL (kod 0x7f) wysyłana jest komenda czyszcząca wyświetlacz. Automat posiada następujące stany:</p>
+<ul>
+	<li>IDLE - stan początkowy, przejście do niego na skutek sygnału reset</li>
+	<li>INIT_FS - pierwszy krok inicjalizacji LCD - "Function Set"</li>
+	<li>INIT_OC - drugi krok inicjalizacji LCD - "On-Off Control" - włączenie wyświetlacza i wyłączenie kursora</li>
+	<li>INIT_MS - trzeci krok inicjalizacji LCD - "Mode Set" - automatyczne przesuwanie w prawo przy zapisie</li>
+	<li>WAIT_FOR_DATA - Oczekiwanie na odbiór bajtu z UART</li>
+	<li>CLEAR - Wyczyszczenie wyświetlacza LCD</li>
+	<li>WRITE - Wysłanie odebranego bajtu do wyświetlacza LCD</li>
+	<li>WAIT_TIME - Tryb oczekiwania przez <code>WAIT_CLK_DIV</code> taktów zegara, po nim przejście do stanu wskazanego przez  <code>STAN_AFTER_WAIT</code></li>
+</ul>
+
+<p>Graf stanów automatu:<br /><img_from_src name="automat" type="dia" alt="graf stanów" /></p>
+</article>

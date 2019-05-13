@@ -1,0 +1,12 @@
+Source: xmpp-smtp
+Section: admin
+Priority: optional
+Maintainer: Robert Ryszard Paciorek <rrp@n17.waw.pl>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 3.7.2
+
+Package: xmpp-smtp
+Architecture: any
+Depends: sendemail, mboxgrep, lsmbox, konwert, mew-bin, libnet-xmpp-perl
+Description: XMPP <-> SMTP System
+ System wymiany powiadomień SMTP <-> XMPP

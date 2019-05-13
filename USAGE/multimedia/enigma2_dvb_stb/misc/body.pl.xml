@@ -1,0 +1,43 @@
+<article>
+<title>Uwagi końcowe</title>
+
+<p>Ważne wpisy konfiguracyjne w <kbd class="path">/etc/enigma2/settings</kbd>:</p>
+<pre>
+config.misc.remotecontrol_text_support=false
+config.usage.shutdownNOK_action=standby
+config.usage.boot_action=standby
+config.usage.quickzap_bouquet_change=true
+config.skin.primary_skin=Utopia_HD/skin.xml
+config.misc.epgcachepath=/media/hdd/
+config.usage.allowed_timeshift_paths=['/media/hdd/timeshift/']
+config.usage.allowed_autorecord_paths=['/media/hdd/movie/']
+config.EMC.movie_pathlimit=/media
+config.EMC.movie_homepath=/media/hdd/movie
+config.EMC.movie_trashcan_path=/media/hdd/movie/.Trash
+config.EMC.movie_preview=true
+config.OpenWebif.auth=true
+config.av.policy_43=letterbox
+</pre>
+
+<p>backup miniFS oraz debianowego chroot'a:</p>
+<pre>
+cd / &amp;&amp; echo -e "dev/*\nproc/*\nsys/*" | busybox tar -X - -cf /media/hdd/miniFS.tar bin dev etc lib media proc sbin sys
+cd /debian/ &amp;&amp; echo -e "dev/*\nproc/*\nrun/*\nsys/*" | busybox tar -X - -cf /media/hdd/debian.tar bin dev etc home lib media mnt proc root sbin sys tmp usr var
+</pre>
+
+<p>Gdy nasze skrypty startowe zawiodą możemy odpalić linuxa z <kbd class="path">/bin/sh</kbd> jako init-em. W tym celu należy połączyć się przez port szeregowy (prędkość 115200) i przed startem bootloadera nacisnąć Ctr+C, zobaczymy wtedy:</p>
+<pre>
+BCM97424B2 CFE v3.41, Endian Mode: Little
+Build Date: Sun May 25 23:34:49 CEST 2014 (paul@ini)
+Copyright (C) Broadcom Corporation.
+
+******************************************
+Automatic startup canceled via Ctrl-C
+******************************************
+[...]
+CFE>
+</pre>
+
+<p>W uzyskanym shellu należy wpisać: <code>boot -z -elf nandflash0.kernel: 'ubi.mtd=0 root=ubi0:rootfs rootfstype=ubifs rw bmem=128M@64M bmem=384M@512M memc1=640M init=/bin/sh'</code> i nacisnąć Enter.</p>
+
+</article>

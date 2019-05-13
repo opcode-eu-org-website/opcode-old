@@ -1,0 +1,14 @@
+#include <QThread>
+
+class InfoThread: public QThread {
+Q_OBJECT
+	public:
+		InfoThread(){};
+		~InfoThread(){};
+		void run();
+	private:
+		QString title, info;
+		QWidget* parent;
+	signals:
+		void putNewValue(QString, double);
+};

@@ -1,0 +1,171 @@
+default_domain = "opcode.eu.org"
+local_domains["opcode.eu.org"] = 1
+
+
+-- na potrzeby jingle / gtalk
+extensions["input_for/rrp@voip.opcode.eu.org@opcode.eu.org"] = {
+	s = function()
+		app.goto("input_for/rrp@opcode.eu.org", "s", "1")
+	end;
+}
+
+extensions["input_for/rrp@opcode.eu.org"] = {
+	s = function(context, exten)
+		-- w tym miejscu mogą być umieszczone reguły odpowiedzialne za
+		-- filtrowanie połączaeń oraz wybór wywoływanych linii
+		channel["REAL_DIAL1_TO"] = "SIP/rrp1&SIP/rrp2"
+		channel["REAL_DIAL2_TO"] = ""
+		return app.GoTo("1", 1)
+	end;
+	["1"] = function()
+		app.Verbose(verb, "Do Dial() to " .. channel["REAL_DIAL1_TO"]:get())
+		app.JabberSend("notify",  "rrp@opcode.eu.org",
+		      "Połączenie VoIP od: " .. channel["CALLERID(all)"]:get() )
+		app.Dial(channel["REAL_DIAL1_TO"]:get(), 40, "G(after_dial^s^1)")
+
+		-- jako że Dial() z G() nie wraca w przypadku uzyskania połączenia
+		-- to dojście do tego miejsca oznacza że dzwonienie nie udało się
+		-- realizujemy dzwonienie w drugim wariancie (jeżeli jest ustawione)
+		if channel["REAL_DIAL2_TO"]:get() ~= "" then
+			app.Verbose(verb, "Do (second) Dial() to "
+				.. channel["REAL_DIAL1_TO"]:get())
+			app.Dial(channel["REAL_DIAL2_TO"]:get(), 40, "G(after_dial^s^1)")
+		end
+
+		-- gdy też się nie udało (lub go nie było) to:
+		--  1) ustalamy powód niepowodzenia Dial()
+		--     inormacje o nim zawierają zmienne: DIALSTATUS i HANGUPCAUSE
+		status1 = channel["DIALSTATUS"]:get()
+		status2 = channel["HANGUPCAUSE"]:get()
+		app.Verbose(verb, "Dial end with DIALSTATUS: " .. status1
+			.. " and HANGUPCAUSE: " .. status2)
+
+		if status1 == "CHANUNAVAIL" then
+			-- Żaden telefon nie jest zalogowany.
+			dial_error="unavail"
+		elseif status1 == "NOANSWER" then
+			-- Żadna linia nie została odebrana
+			dial_error="no_answer"
+		elseif status1 == "BUSY" and status2 == "21" then
+			-- Połączenie zostało odrzucone.
+			dial_error="reject"
+		elseif status1 == "BUSY" and status2 == "17" then
+			-- Wszystkie linie są zajęte.
+			dial_error="busy"
+		else
+			-- Połączenie nie może zostać zrealizowane.
+			dial_error="error"
+		end
+
+		channel["Dial_Error"] = dial_error
+
+		--  2) przechodzimy do systemu IVR
+		return app.GoTo("ivr_after_dial", 1)
+	end;
+	["ivr_after_dial"] =function()
+		app.Answer()
+		ivr_play_and_goto(
+			-- Tu numer 222, 443, 895.
+			"rrp/hello"
+			-- {wiadomość określona w oparciu o zmienną Dial_Error}
+			.. "&rrp/dial_".. channel["Dial_Error"]:get()
+			-- Proszę wybrać 1 aby ponowić próbę dzwonienia,
+			-- lub wybrać 2 aby zostawić wiadomość, lub rozłączyć się.
+			.. "&rrp/ivr_intro",
+			6,
+			-- Brak wyboru - rozłączam.
+			"rrp/ivr_hangup"
+		)
+	end;
+	["2"] = function()
+		ivr_play_and_goto(
+			-- Jeżeli akceptujesz zasady kontaktu telefonicznego przedstawione
+			-- pod adresem www.opcode.eu.org/bercik i twoja wiadomość spełnia
+			-- określone tam kryteria proszę wybrać 3.
+			-- Prezentacja zasad dostępna także po wybraniu 9.
+			"rrp/ivr_intro2",
+			6,
+			-- Brak akceptacji zasad - rozłączam.
+			"rrp/ivr_no_recording"
+		)
+	end;
+	["3"] = function()
+		-- Zasady zostały zaakceptowane. Proszę zostawić wiadomość po sygnale.
+		app.Playback("rrp/ivr_recording")
+		app.Voicemail("1001", "s")
+		app.Hangup()
+	end;
+	["9"] = function()
+		-- Preferowanym sposobem kontaktu jest poczta elektroniczna -
+		-- robert@opcode.eu.org. Odbycie rozmowy telefonicznej na żywo możliwe
+		-- jest po wcześniejszym umówieniu się przy pomocy poczty elektronicznej
+		-- (lub jeżeli dopisze szczęście i akurat odbiorę).
+		-- W pozostałych przypadkach (jeżeli sprawa jest ważna / niecierpiąca
+		-- zwłoki a nie masz możliwości wysłania e-mail'a) możliwe jest
+		-- zostawienie wiadomości głosowej:
+		--   * Przedstaw się.
+		--   * Opisz dokładnie sprawę w której dzwonisz (nie zostawiaj informacji
+		--     typu "Proszę o kontakt" bez dodatkowych wyjaśnień / opisu sytuacji
+		--     i tak dalej).
+		--   * Jeżeli oczekujesz kontaktu zwrotnego pozostaw swój adres poczty
+		--     elektronicznej (jest to jedyna forma kontaktu zwrotnego).
+		-- Wiadomości głosowe nie spełniające powyższych kryteriów oraz
+		-- wiadomości głosowe w innych językach niż polski będą ignorowane.
+		app.Playback("rrp/ivr_rules")
+
+		ivr_play_and_goto(
+			-- Jeżeli akceptujesz powyższe zasady i chcesz zostawić wiadomość
+			-- spełniającą określone tam kryteria proszę wybrać 3.
+			"rrp/ivr_intro3",
+			6,
+			-- Brak akceptacji zasad - rozłączam.
+			"rrp/ivr_no_recording"
+		)
+	end;
+	i = function()
+		app.Playback("pbx-invalid")
+		return app.GoTo("ivr_after_dial", 1)
+	end;
+};
+
+extensions["input_for/demoX@opcode.eu.org"] = {
+	include = {"demo_lua"}
+};
+
+extensions["input_from/sipprovider2"] = {
+	s = function()
+		channel["CALLERID(all)"] = channel["CALLERID(name)"]:get()
+			.. " @ sipprovider2 <00" .. channel["CALLERID(num)"]:get() .. ">"
+		return app.goto("input_for/rrp@opcode.eu.org", "s", "1")
+	end;
+}
+
+
+-- konferencje:
+--  tworzenie tylko dla zalogowanych klientów
+--  dołączanie dla każdego kto zna numer i pin
+extensions["local_input_for/7900@opcode.eu.org"] = {
+	s = conference_create;
+};
+
+extensions["addresses"] = {
+	["_77!"] = function()
+		app.Park()
+	end;
+	["_78XX!"] = function(context, exten)
+		app.ParkedCall(string.sub(exten,1,4))
+	end;
+
+	["_79XX@opcode.eu.org"] = function(context, exten)
+		-- przyłączenie do konferencji możliwe jest poprzez numer
+		-- tworzony na zasadzie prefix . numer_konferencji
+		-- w tym wypadku prefixem jest 79,
+		-- a numer konferencji jest zawsze dwu cyfrowy
+		conference_enter(string.sub(exten,3,4))
+	end;
+
+	["_74!"] = function()
+		app.goto("input_for/demoX@opcode.eu.org", "s", "1")
+	end;
+}
+

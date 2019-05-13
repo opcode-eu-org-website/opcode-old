@@ -1,0 +1,55 @@
+<article>
+<title>Puppet czyli centralne zarządzanie</title>
+
+<p>Gdy administrujemy wieloma (zwłaszcza podobnymi) systemami uciąliwe staje się wprowadzanie takich samych bądź podobnych zmian w dziesiątkach (jak nie więcej) plików. Dużym ułatwieniem może okazać się (gdy już przebijemy się przez jego konfigurację) system puppet który umożliwia m.in. rozsyłanie plików konfiguracyjnych, generowanie ich w oparciu o szablony, edycję konfiguracji na zdalnym serwerze z użyciem augeas (augtool), instalację oprogramowania i wiele innych.</p>
+
+<p>Typowo na konfigurację składają się:</p>
+<ul>
+	<li>pliki <kbd class="path">/etc/puppet/manifests/nodes/*.pp</kbd> opisujące poszczególne hosty - zawierają sekcje node opisujące danego hosta (definicje specyficznych dla hosta zmiennych, włączanie klas, plików dziedziczenie, ...). Przykład:
+<pre>node 'moj.serwer.moja.domena' inherits default {
+	# dziedziczymy po node "default"
+	
+	$my_ipaddr = '192.168.0.100'
+	$my_ipaddr = '192.168.0.101'
+
+	# klasa z parametrami
+	class { 'interfaces':
+		# numer vlan'u
+		vlan => '22',
+		
+		# lista adresów ip
+		ipaddrs  => [ $my_ipaddr, $my_ipaddr2 ],
+		
+		# dodatkowy routing (lista zestawów wartości)
+		extra_route => [
+			{ 'net' => '192.168.10.0/24',  'gw' => '192.168.0.10' },
+		]
+	}
+	
+	# włączamy klasę monit
+	include monit
+}</pre></li>
+	<li>pliki klas <kbd class="path">/etc/puppet/manifests/classes/*.pp</kbd> definiujące działania (np. tworzenie pliku konfiguracyjnego z szablonu) Przykład:
+<pre>class apt_source {
+	file { '/etc/apt/sources.list':
+		owner  => root,
+		group  => root,
+		mode   => 644,
+		content => template('sources.list.${::lsbdistcodename}.erb'),
+	}
+}</pre></li>
+	<li>pliki szablonów <kbd class="path">/etc/puppet/templates/etc/*.erb</kbd> mogą kożystać ze zmiennych - w tym poprzez pętle z list - na przykład:
+<pre>
+	# My vlan is &lt;%= vlan %&gt;
+	# Routing table is:
+	&lt;% if ! extra_route.empty? then -%&gt;
+	&lt;% extra_route.each do |host| -%&gt;
+	# &lt;%= host['net'] %&gt; via &lt;%= host['gw'] %&gt;
+	&lt;% end -%&gt;
+	&lt;% end -%&gt;
+	&lt;%= scope.function_template(dodatkowy_szablon_do_wstawienia) %&lt;
+</pre></li>
+</ul>
+
+<p>Zobacz też <a class="int" href="[[!URLPREFIX!]]/archiwum/icm/puppet/">przykładowe moduły puppet'a</a> w dziale "archiwum"</p>
+</article>

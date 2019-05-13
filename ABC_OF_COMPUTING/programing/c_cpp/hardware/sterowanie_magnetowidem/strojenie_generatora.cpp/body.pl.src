@@ -1,0 +1,77 @@
+/*
+ * program wypisuje zmierzone po kazdym nacisnieciu ENTER
+ * czasy trwania stanu wysokiego i stanu niskiego podawanego na ACK
+ *
+ * 2005.05.08
+ *
+ */
+
+#include <stdio.h>
+#include <sys/io.h>
+
+#include "config.h"
+#include "czas.cpp"
+
+int main() {
+
+	iopl (3);
+	outb(1, 0x3f8 +4);
+
+
+	unsigned long long czas_1, czas_2;
+
+	double czasy[ 26 ];
+	for (int i=0; i<26; i++) czasy[i] = 0;
+	double suma_1, suma_2;
+
+	int wartosc, numer_impulsu, poprzednia;
+
+	printf("Program mierzy sredni czas trwania stanow wysokich i niskich na ACK\n");
+	printf("UWAGA: Stan wysoki odpowiada oswietlonemu TF1,\n	ale generatorowi dajacemu zero (nie swiecacej diodzie podlaczonej do generatora) !!!\n\n");
+
+	while(1) {
+		printf("Aby kontynuowac nacisnij ENTER, aby zakonczyc Ctrl C");
+		while (getchar() != 10);
+
+		poprzednia = _ACK_; numer_impulsu = 0; suma_1 = 0; suma_2 = 0;
+
+		asm("cli");
+
+		while(numer_impulsu < 26)
+		{
+			// zczytuje wartosc portu
+			wartosc = ODCZYTAJ;
+
+			// wykrywam nacisniecie BUSY - koniec programu
+			if ( (wartosc & _BUSY_) && !(poprzednia & _BUSY_) ) break;
+
+			// wykrywam zmiane stanu na niski lub wysoki na ACK
+			if ( (!(wartosc & _ACK_) && (poprzednia & _ACK_)) || ((wartosc & _ACK_) && !(poprzednia & _ACK_)) ) {
+				czas_2 = czas();
+
+				// czas od poprzedniej zmiany
+				czasy[numer_impulsu++] = (czas_2-czas_1) / PROCESOR;
+
+				czas_1 = czas_2;
+			}
+
+			// zapamietuje obecny stan portu - reaguje tylko gdy sie zmienil
+			poprzednia = wartosc;
+		}
+
+		asm("sti");
+
+		for (int i=1; i<11; i++) {
+			suma_1 += czasy[2*i];
+			suma_2 += czasy[2*i+1];
+			//printf("1) %.12f\n2) %.12f\n", czasy[2*i], czasy[2*i+1]);
+		}
+
+		if (wartosc & 64) {
+			printf("Czas trwania stanu WYSOKIEGO (ZERA na generatorze): %f\n", suma_1 / 10.0);
+			printf("Czas trwania stamu NISKIEGO (JEDYNKI na generatorze): %f\n", suma_2 / 10.0);
+		} else {
+			printf("ERROR\n");
+		}
+	}
+}

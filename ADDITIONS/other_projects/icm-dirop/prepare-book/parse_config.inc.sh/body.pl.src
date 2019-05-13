@@ -1,0 +1,46 @@
+#!/bin/bash
+
+echo "FUNCTION LIST:
+	set_out_file_number
+		set out_file_number variable based on OUTPUT_FIRST_NUM and selected output subdir
+	control_volume_info
+		if set BOOK_ONE_VOLUME VOLUME_TITLE and VOLUME_URL based on BOOK_TITLE / BOOK_URL
+	rel_to_abs_path
+		convert relative to absolute path (OUTPUT_DIR and INPUT_DIR) based on pwd"
+
+# ustawia wartość zmiennej out_file_number w oparciu o $OUTPUT_FIRST_NUM
+# i podany ($1) katalog wynikowy, jako $2 nalezy podać typ plików z katalogu wynikowego
+set_out_file_number() {
+	# uzyskujemy wartość numeru pierwszego pliku wyniku
+	if [ "$OUTPUT_FIRST_NUM" = "NEXT" ]; then
+		# uzyskujemy nazwę ostatniego pliku tiff w $OUTPUT_DIR
+		last_filename=`cd $1; ls -1 *.$2 | tail -n 1`
+		# wycinamy część numeryczna (przed rozszerzeniem) i zwiększamy o jeden
+		out_file_number=`echo ${last_filename%.$2} | sed -e 's#^0*##g'`
+		if [ "$out_file_number" != "" ]; then
+			out_file_number=$(( $out_file_number + 1))
+		else
+			out_file_number=0
+		fi
+	else
+		out_file_number=$OUTPUT_FIRST_NUM
+	fi
+}
+
+# ustawiamy dane woluminu gdy jednowoluminowa
+control_volume_info() {
+	if $BOOK_ONE_VOLUME; then
+		VOLUME_TITLE="$BOOK_TITLE"
+		VOLUME_URL="$BOOK_URL"
+	fi
+}
+
+# konwersja zmiennych ścieżki bezwzględne
+rel_to_abs_path() {
+	if [ "${OUTPUT_DIR:0:1}" != "/" ]; then
+		OUTPUT_DIR="`pwd`/$OUTPUT_DIR"
+	fi
+	if [ "${INPUT_DIR:0:1}" != "/" ]; then
+		INPUT_DIR="`pwd`/$INPUT_DIR"
+	fi
+}

@@ -1,0 +1,20 @@
+<article>
+<title>Linki</title>
+
+<p>Zachęcam także do zapoznania się z dwoma moimi dokumentami przygotowanymi w LaTeX: <id_link id="cv.tex">Curriculum Vitae</id_link> i <id_link id="wizytowka.tex">wizytówka</id_link>.</p>
+
+<p>Przydatne pakiety i makra: <homepage url="http://www.ctan.org/tex-archive/help/Catalogue/entries/karnaugh.html">tablice Karnaugha</homepage>, <homepage url="http://www.ctan.org/tex-archive/help/Catalogue/entries/dcpic.html">grafy itp</homepage> (pakiet wykorzystałem w dokumentacji do projektu <id_link id="podstawa_silnika_3d">podstawa silnika 3d</id_link> - jego użycie można zobaczyć w plikach tex wchodzących w skład źródeł projektu), <homepage url="http://www.ctan.org/tex-archive/macros/latex/contrib/curve/">CV</homepage>.</p>
+
+<p>Należy także wspomnieć o dodatkowych narzędziach operujących na plikach latexowych takich jak: <code>latex2html</code>, czy też służących do zamiany równań latex'owych na <wiki pl="MathML">MathML</wiki> oraz PNG <homepage url="http://gva.noekeon.org/blahtexml/index.html"><strong>blahtexml</strong></homepage> lub jego pythonowy odpowiednik (tylko MathML) <homepage url="http://www.localghost.at/latex2mathml/">latex2mathml</homepage>.</p>
+
+<p>Zachęcam także do zajrzenia do <doc url="ftp://sunsite.icm.edu.pl/pub/CTAN/help/Catalogue/catalogue.html" mirror="programowanie/LaTeX/Catalogue">The TeX Catalogue Online, CTAN Edition</doc>. Warto również skorzystać z:
+	<wiki en="b:LaTeX">Latex @ Wikibooks</wiki>
+	<doc url="ftp://ftp.gust.org.pl/pub/GUST/doc/gentl-pl.pdf">Łagodne wprowadzenie do TEX-a</doc>
+	<doc url="http://www.immt.pwr.wroc.pl/~myszka/grafika/grafika.pdf" mirror="programowanie/LaTeX/grafika.pdf">Włączanie grafik...</doc>,
+	<doc url="http://www.sapijaszko.net/pedeefy.pdf" mirror="programowanie/LaTeX/pedeefy.pdf">Tworzenie dokumentów PDF przy pomocy LaTeX-a</doc>,
+	<doc url="http://www.tug.org/teTeX/tetex-texmfdist/doc/latex/mwcls/mwclsdoc.pdf">Lepszy skład polsko języczny - mwcls</doc>,
+	<doc url="http://www.fuw.edu.pl/~kostecki/kurs_latexa.pdf">W miare krótki i praktyczny kurs LaTeX-a w e^pi minut</doc>,
+	<doc url="http://www.texample.net/tikz/examples/tag/diagrams">Diagramy w LateX</doc>,
+	<doc url="http://meta.wikimedia.org/wiki/Help:Formula#TeX">Skład wyrażeń matematycznych w LateX</doc>.
+</p>
+</article>

@@ -1,0 +1,7 @@
+<article>
+<title>Programowanie w PHP</title>
+
+<p><wiki pl="PHP">PHP</wiki> jest językiem skryptowym o składni podobnej do C  pomyślanym głównie o zastosowaniach w dynamicznym tworzeniu stron WWW (w zasadzie taka mieszanka C, AWK i Bash'a z dodatkiem sporej gamy funkcji webowych). Pomimo iż skrypty CGI można tworzyć w każdym z języków - konieczne jest tylko wysłanie jako pierwszej linii nagłówka Content-type (np. "Content-type: text/html"), drugiej linii pustej a potem mamy już treść to właśnie  głównie przez te funkcje oraz dobrą integrację z HTML PHP jest do tego chyba najwygodniejszy.</p>
+
+<p>Podobnie jak w AWK nie musimy definiować typu zmiennej, ale możemy uczynić to tak samo jak robiliśmy w C, pętle oraz instrukcje wyboru wyglądają identycznie jak w C, również operatory matematyczne, logiczne, porównania są takie same. Funkcje deklarujemy jak w C. Możemy korzystać z komentarzy C (/* do */), C++ (// do końca linii) oraz shela (# do końca linii). Podobnie jak w AWK mamy tutaj tablice asocjacyjne (oczywiście tablice możemy też indeksować klasycznie liczbami ...):</p>
+</article>

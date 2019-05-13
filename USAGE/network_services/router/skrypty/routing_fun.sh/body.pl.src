@@ -1,0 +1,121 @@
+# generownie priorytetów dla tc filter
+tc_pref_init() {
+	for (( i=0 ; $i<=9 ; i++ )) ; do
+		PREFERENCE[$i]=0;
+	done
+}
+tc_pref_inc() {
+	if eval [ "$1" -le 9 -a "$1" -ge 0 ] $QUITE; then
+		let PREFERENCE[$1]++
+		TC_PREF=`printf "preference %d%03d" $1 ${PREFERENCE[$1]}`
+	else
+		echo "ERROR: make_tc_prefernce: argument ($1) out of range (\$1 >= 0 AND \$1 <= 9)" >&2;
+	fi
+}
+
+# konwersja maski (zapis skrócony) na zapis kropkowo dziesiętny
+short2long_mask() {
+	perl -e '
+		use Socket;
+		my $short_mask = $ARGV[0];
+		if ($short_mask < 0 || $short_mask > 32) {
+			exit; 
+		}
+		if ($short_mask != 0) {
+			$short_mask = 0x0ffffffff << (32-$short_mask);
+		}
+		print inet_ntoa(pack("N*", $short_mask));
+	' $1
+}
+
+# konwersja adresu IP (zapis kropkowo dziesiętny)
+# i maski (skrócony, automatycznie rozwijany na kropkowo dziesiętny)
+# na adres sieci (zapis kropkowo dziesiętny)
+ip_and_mask2network() {
+	perl -e '
+		use Socket;
+		
+		# współcześnie powinno chodzić bez zabawy z tym pack / unpack
+		my $ip = unpack("l*", pack("l*", unpack("N*", inet_aton($ARGV[0]))));
+		my $mask = unpack("l*", pack("l*", unpack("N*", inet_aton($ARGV[1]))));
+		
+		print inet_ntoa(pack("N*", $ip & $mask));
+	' $1 `short2long_mask $2`
+}
+
+# konwersja adresu IPv6 i maski (skrócony) na adres sieci
+ipv6_and_mask2network() {
+	perl -e '
+		use NetAddr::IP::Util qw(:inet :math);
+		
+		my $ip = ipv6_aton($ARGV[0]);
+		my $mask = shiftleft(ipv6_aton("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"),128-$ARGV[1]);
+		
+		print ipv6_n2x($ip & $mask);
+	' $1 $2
+}
+
+# generacja /etc/network/interfaces
+make_interfaces() {
+	OUT="$1"
+	
+	# utworzenie pliku z konfiguracją loopback
+	echo -e 'auto lo\niface lo inet loopback' >$OUT
+	
+	for X in `seq 0 $(( ${#mode[@]} - 1 ))`; do
+		if [ "${mode[$X]}" = "int" ]; then
+			echo "" >>$OUT
+			echo "auto ${name[$X]}" >>$OUT
+			echo "iface ${name[$X]} inet static" >>$OUT
+			
+			echo "  address ${base_ipv4[$X]}" >>$OUT
+			mask=`short2long_mask ${base_maskv4[$X]}`
+			echo "  netmask $mask" >>$OUT
+			
+			if [ "${gatewayv4[$X]}" != "" ]; then
+				echo "  gateway ${gatewayv4[$X]}" >>$OUT
+			fi
+			
+			count1=0;
+			for ip in ${other_ipv4[$X]}; do
+				count1=$(( $count1+1 ))
+				count2=0
+				for mask in ${other_maskv4[$X]}; do
+					count2=$(( $count2+1 ))
+					if [ $count2 = $count1 ]; then
+						break
+					fi
+				done
+				echo "  post-up ip address add broadcast + local $ip/$mask dev ${name[$X]}" >>$OUT
+				echo "  pre-down ip address del $ip/$mask dev ${name[$X]}" >>$OUT
+			done
+			
+			if [ "${base_ipv6[$X]}" != "" ]; then
+				echo "iface ${name[$X]} inet6 static" >>$OUT
+				echo "  address ${base_ipv6[$X]}" >>$OUT
+				echo "  netmask ${base_maskv6[$X]}" >>$OUT
+				if [ "${gatewayv6[$X]}" != "" ]; then
+					echo "  gateway ${gatewayv6[$X]}" >>$OUT
+				fi
+				echo "   # konfiguracja ręczna (wyłączamy automatyczną)" >>$OUT
+				echo "   pre-up  echo 0 > /proc/sys/net/ipv6/conf/${name[$X]}/autoconf" >>$OUT
+				echo "   # zmijszamy MTU 9ważne przy połączeniach tunelowanych)" >>$OUT
+				echo "   pre-up  echo 1280 > /proc/sys/net/ipv6/conf/eth0/mtu" >>$OUT
+				
+				count1=0;
+				for ip in ${other_ipv6[$X]}; do
+					count1=$(( $count1+1 ))
+					count2=0
+					for mask in ${other_maskv6[$X]}; do
+						count2=$(( $count2+1 ))
+						if [ $count2 = $count1 ]; then
+							break
+						fi
+					done
+					echo "  post-up ip address add local $ip/$mask dev ${name[$X]}" >>$OUT
+					echo "  pre-down ip address del $ip/$mask dev ${name[$X]}" >>$OUT
+				done
+			fi
+		fi
+	done
+}

@@ -1,0 +1,30 @@
+<article>
+<title>Sterownik ogrzewania akwariowego</title>
+
+<p><span latex_img_width="192" class="right"><img class="right" src="./wyswietlacz.png" alt="Widok na wyświetlacz i złącze RS232"/></span>Na stronie tej zamieszczam projekt oraz oprogramowanie mikroprocesorowego sterownika ogrzewania akwariowego, opartego na mikrokontrolerze AT90S2313, wykonanego w 2005 roku. Układ posiada dwa niezależne tory sterownicze ("akwarium" i "terrarium") umożliwiające sterowanie dwoma zestawami grzałek z wykorzystaniem dwóch termometrów cyfrowych DS18b20. Informacje o temperaturze i jej odniesieniu do zadanych parametrów podawane są na wyświetlaczu alfanumerycznym LCD (opartym o sterownik HD44780). System umożliwia komunikację (odczyt i zapis konfiguracji oraz odczyt aktualnych parametrów i sterowanie urządzeniem) poprzez port RS232.</p>
+
+<subtitle id="s1">Elektronika</subtitle>
+
+<p>Część elektroniczna składa się z płytki drukowanej, na której umieszczone zostały moduł zasilania (stabilizator +5V), moduł mikrokontrolera, moduł komunikacji z RS232 oraz moduł wykonawczy (przekaźniki) i podłączanej do niej 26 pinową taśmą płytki czołowej na której znajduje się wyświetlacz, złącze RS232, reset i sygnalizator alarmu.<br/><br />
+	<sch_link name="mikrokontroler">schemat płytki obwodów elektronicznych</sch_link><br />
+	<pcb_link name="mikrokontroler">projekt płytki drukowanej PCB</pcb_link><br />
+	<sch_link name="plytka_czolowa">podłączenia płytki czołowej</sch_link>
+</p>
+
+
+<subtitle id="s2">Oprogramowanie</subtitle>
+
+<p>Oprogramowanie składa się z programu głównego dla mikrokontrolera (<id_link id="mikro.c">mikro.c</id_link>) dwóch bibliotek funkcji (<id_link id="lcd.c">lcd.c</id_link> i <id_link id="onewire.c">onewire.c</id_link>) do obsługi wyświetlacza i termometru oraz programu do odczytu numeru ROM termometru (<id_link id="onewire_get_rom.c">onewire_get_rom.c</id_link>). W poniższym archiwum zamieszczone dodatkowo są także wersje PC'owe programów do obsługi termometru i wyświetlacza.</p>
+
+<subtitle id="s3">Fotki</subtitle>
+<p class="center"><img src="./uklad_sterownika.png" alt="Widok na płytkę główna sterownika"/></p>
+<p class="center"><img src="./panel_frontowy.png" alt="Widok panelu frontowego od tyłu, poniżej przełączniki oświetlenia"/></p>
+
+<p class="download"><a class="int" href="./sterownik_ogrzewania.tgz">Pobierz</a></p>
+
+<subtitle id="s4">Kierunki rozwoju</subtitle>
+
+<p>W przyszłości można by zastąpić RS232 poprzez RS485, co umożliwiłoby pracę sterownika w sieci. Rozważyć można także zmianę protokołu komunikacji RS z binarnego na tekstowy, a także zastąpienie przekaźników zestawem triak + optotriak. Możliwe byłoby dodanie do sterownika (raczej po przeportowaniu na Atmega8) funkcji dwu kanałowego sterownika oświetlenia.</p>
+
+<p>Zobacz w Sieci: <homepage url="http://mterm.w.interia.pl/">Wielozadaniowy sterownik akwarystyczny "MTerm"</homepage>, <homepage url="http://skalar.mcten.pl/">Skalar - Mikroprocesorowy Sterownik Akwariowy</homepage>, <homepage url="http://www.elektroda.pl/rtvforum/viewtopic.php?t=589928">Sterownik do akwarium</homepage>.</p>
+</article>

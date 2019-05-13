@@ -1,0 +1,45 @@
+<article>
+<title>Monitoring wizyjny - CCTV, RTSP, detekcja ruchu, nagrywanie</title>
+
+<p>Klasycznym podejściem do cyfrowej rejestracji nagrań z monitoringu wideo była rejestracja w oparciu o dedykowany rejestrator sprzętowy lub komputer wyposarzony w stosowną kartę wejść wideo. Rejestracji takiej mogła toważyszyć detekcja ruchu (nagrywanie tylko wtedy kiedy obraz się zmienia) oraz przesyłanie takiego obrazu przez sieć. Uciążliwością w takim podejściu była konieczność stosowania osobnego okablowania (kabel koncentryczny 75 ohmów) lub specjalych transformatorów do przesyłu obrazu z kamer po skrętce oraz moc obliczeniowa rejestratora potrzebna do kompresji wideo lub konieczność stosowania specjalistycznych kart z kompresją sprzętową.</p>
+
+<p>Od czasu popularyzacji kamer IP scenariusz ten często wygląda inaczej - obraz komperowany jest sprzętowo w samej kamerze i w ten sposób przesyłany poprzez sieć komputerową. Także detekcja ruchu i nagrywanie mogą być realizowane w samej kamerze, niestety jednak kamery które potrafiłyby zapisać filmik w oparciu o detekcję (uwzględniający pre-bufor, czyli jakiś odcinek czasu przed detekcją, a także zakończyć taką rejestrację jakiś czas po ustaniu detekcji ruchu) bezpośrednio na dysku sieciowym (np. NFS) należą do rzadkości (osobiście nie trafiłem na taką). Nawet porządne kiamery dostępne na rynku (np. seria iPolis Samsunga, na której w sporej mierze bazuje ten artykuł) potrafią jedynie wysłać obrazek (pojedyńczą klatkę) na serwer FTP. Wymusza to (jeżeli chemy mieć zdalną rejestrację w postaci filmów) albo ciągłe nagrywanie strumienia RTSP, albo jego dekodowanie i detekcję ruchu z użyciem jakiegoś softu przeznaczonego do tego (np. motion, zoneminder, ...), lbo próbę implementacji tego w oparciu o bufor cylkiczny (jako pre-bufor) i wykorzystanie detekcji opartej o kamerę (informacje te dostępne są z użyciem np. http).</p>
+
+<p>Odbiór/nagrywanie strumienia RTSP można zrealizować na kilka sposobów np.:</p><ul>
+	<li>Z uzyciem live555: <code>openRTSP -i rtsp://admin:4321@192.168.119.49/profile2/media.smp > OUTPUT.avi</code>, niestety biblioteka live555 nie obsługuje obecnie IPv6</li>
+	<li>Z uzyciem VLC: <code>vlc -v "rtsp://admin:4321@192.168.1.100/profile2/media.smp" --rtsp-tcp --sout "file{mux=ts,dst=OUTPUT.mp4}" :sout-keep</code>, niestety VLC obecnie potrafi kożystać z RTSP tylko za pośrednictwem live555, więc ta metoda również nie obsługuje IPv6</li>
+	<li>Z użyciem libav (ffmpeg): <code>avconv -i rtsp://admin:4321@192.168.1.100/profile2/media.smp -vcodec copy -acodec copy -f mp4 OUTPUT.mp4</code> (prostrzy aviocat nie radzi sobie z RTSP, natomiast jest w stanie odbierać strumien http wysyłany przez VLC) niestety libav nie radzi sobie z niektórymi serwerami RTSP (np. z VLC)</li>
+</ul>
+
+<p>W obu wypadkach możemy zamiast zapisywać do zwykłego pliku wysyłać odebrane dane do potoku nazwanego (patrz mkfifo) lub na standardowe wyjście (w szczególności dane odebrane avconv możemy przekazać do VLC w celu np. wyświetlenia, ale nie zawsze się to udaje). Ponaddto w obu wypadkach możemy taki strumień przesyłać ponownie (robić za proxy). Coprawda live555 zawiera w sobie proste proxy rtsp z obsługą wielu strumieni - live555ProxyServer, ale z użyciem VLC możemy robić to przy okazji i dodatkowo wspierając (na wyjściu) IPv6. Takie rozwiązanie daje nam też większe możliwości konfiguracyjne (możemy użyć np. VLM) i zapewnia lepszą stabilność od live555ProxyServer (w prowadzonych testach po jakimś czasie nie można było się do niego podłączyć (vlc zwracał "live555 demux error: no data received in 10s, aborting").</p>
+
+<p>Ogólna koncepcja systemu odpowiedzialnego na rejestrację RTSP w oparciu o detekcję robioną na kamerze może wyglądać następująco:</p><ol>
+	<li>Odbieramy strumień RTSP, retransmitujemy go (np. jako http lub rtsp) celem zdalnego podglądu i równoczesnie przesyłamy do narzędzi odpowiedzialnego za ngrywanie.</li>
+	<li>Narzędzie takie utrzymuje bufor cykliczny (tablica + przeskakujący na jej początek gdy dojdzie do końca wskaźnik - miejsce zapisu) przechowując w nim ostatnie n sekund danych.</li>
+	<li>Narzędzie to samo bada stan detekcji ruchu na kamerze lub dostaje taką informację z zewnatrz (np. poprzez wykrywanie H w <code>wget --quiet -O - 'http://admin:4321@192.168.119.49/cgi-bin/control.cgi?msubmenu=motion&amp;action=monitor'</code>) i w momęcie detekcji dokonuje zapisu buforu do pliku (nazwa tworzona w oparciu o aktualny czas i ajkiś prefix).</li>
+	<li>Od momentu wykrycia detekcji bierzące dane dopisywane są do tego pliku aż do upłynięcia m sekund od zakończenia detekcji. Jeżli w tym czasie zajdze detekcja nie przestajemy dopisywać danych.</li>
+	<li>Po upłynięciu m sekund od zakończenia detekcji kończy pisanie do pliku i zaczyna pisać do bufora cyklicznego.</li>
+</ol>
+
+<!-- to działa, ale ale ma dziwne problemy z gubieniem ramek, niestety <code>-f mpegts</code> (który mógłby być lepszy) nie działa
+<pre>avconv -i rtsp://admin:4321@192.168.1.100/profile2/media.smp -copyts -copytb -codec copy -f h264 - |
+	cvlc - -\-demux=h264  \-sout="#duplicate{dst=http{mux=ts,dst=:8554/kamera},dst=rtp{mux=ts,sdp=rtsp://:5554/kamera},dst=file{mux=ts,dst=/dev/stdout}}" :sout-keep |
+	loop_recording
+</pre>
+
+to działa alepiej ale występuje problem "Application provided invalid, non monotonically increasing dts to muxer in stream" (http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=692876)
+<pre>avconv -i rtsp://admin:4321@192.168.1.100/profile2/media.smp -re -copyts -copytb -codec copy -f ffm - |
+	cvlc - -\-demux=avformat -\-ffmpeg-mux=ffm  -\-sout="#duplicate{dst=http{mux=ts,dst=:8554/kamera},dst=rtp{mux=ts,sdp=rtsp://:5554/kamera},dst=file{mux=ts,dst=aa.mp4}}" :sout-keep
+</pre>
+-->
+
+<p>Do realizacji proxy dla strumieni wideo możemy także wykożystać <a class="ext_homepage" href="http://libav.org/avserver.html">avserver</a>. Umożliwia on sam w sobie realizację timeshiftu opartego na jakiemś rodzaju bufora cyklicznego, dzięki czemu może uprośckić realizację opisanego powyżej nagrywania na skutek detekcji z pre-buforem.</p>
+
+<TODO title="Rozwój systemu monitoringu wizyjnego RTSP" intro="Koncepcje dalszego rozwoju">
+	<li>próba konfiguracja avserver</li>
+	<li>walka z bugami utrudniającymi wzajemną współpracę avconv, vlc, rtsp/h264, ...</li>
+	<li>stworzenie softu implementującego bufor kołowy (wywoływanego <code>cvlc rtsp://admin:4321@192.168.1.100/profile2/media.smp -\-demux=h264  \-sout="#duplicate{dst=http{mux=ts,dst=:8554/kamera},dst=rtp{mux=ts,sdp=rtsp://:5554/kamera},dst=file{mux=ts,dst=/dev/stdout}}" :sout-keep | loop_recording</code>)</li>
+	<li>poszukiwania kamery która potrafiłaby to robić normalnie (zapisywać bezpośrednio na dysk sieciowy)</li>
+</TODO>
+
+</article>

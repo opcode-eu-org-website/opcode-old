@@ -1,0 +1,30 @@
+#include "output_uC.h"
+
+#include <stdlib.h>
+#include <termios.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+int output_uC_init(config_t *config) {
+	int tty_dev;
+	struct termios term;
+	
+	tty_dev = open (config->output_device_name, O_RDWR);
+	if (tty_dev < 0) {
+		perror("Opening serial port");
+		exit(EXIT_FAILURE);
+	}
+	
+	tcgetattr (tty_dev, &term);
+	term.c_iflag = IGNBRK | IGNPAR;
+	term.c_oflag = term.c_lflag = term.c_line = 0;
+	term.c_cflag = CS8 | CREAD |  CLOCAL | HUPCL | tty_device_speed;
+	tcsetattr (tty_dev, TCSAFLUSH, &term);
+	
+	return tty_dev;
+}
+
+void output_uC_write(int tty_dev, signal_t *signal) {
+	if ( write(tty_dev, signal->data, 2*signal->num_of_sample) < 2*signal->num_of_sample )
+		fputs("error in write to serial device", stderr);
+}

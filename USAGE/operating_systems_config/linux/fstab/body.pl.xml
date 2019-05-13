@@ -1,0 +1,35 @@
+<article>
+<title>Kilka sztuczek z /etc/fstab</title>
+
+<p>Plik <kbd class="path">/etc/fstab</kbd> określa punkty montowań dla poszczególnych urządzeń, a także to które urządzenia (partycje, dyski, ...) będą montowane automatycznie przy starcie systemu.</p>
+
+<p>Plik ten można także (podobnie jak bootloader) konfigurować w oparciu o UUID wartości te najłatwiej odczytać z ls -l <code>/dev/disk/by-uuid/</code>). W pliku tym często umieszcza się rzeczy takie jak /proc czy /sys jednak (w odróżnieniu od swap_- <code><var>/dev/swap_dev</var> none swap sw 0 0</code>) nie jest to niezbędne (i tak będą montowane)</p>
+
+<p>W przypadku montowania /var lub /tmp na innej partycji poprzez opcje bind:</p>
+<pre>/home/var          /var       none      bind               0 0
+/home/tmp          /tmp       none      bind,umask=000     0 0</pre>
+<p>warto zapewnić kontrolę poprawności ich zamontowania na wypadek problemów z partycją na której są montowane:</p>
+<pre>#!/bin/bash
+if ! grep home /proc/mounts > /dev/null; then
+	sleep 30
+	mount /home
+	if ! mount | grep home; then
+		echo "Can't mount /home - PLESE FIX THIS"
+		env TMOUT=120 bash
+	fi
+	mount /tmp
+	mount /var
+fi</pre>
+
+<p>W tym miejscu warto wsponieć także o możliwości montowania plików jak urządzeń (<code>dd if=/dev/zero bs=1M count=100 of=/tmp/plik; mkfs.ext2 /tmp/plik; mount -o loop /tmp/plik /mnt</code>), a także możliwości tworzenia takich plików z całym układem partycji w środku:</p><pre>
+losetup /dev/loop1 /mnt/dom0.img
+fdisk /dev/loop1
+losetup -o 32256 /dev/loop2 /dev/loop1
+mkfs.xfs /dev/loop2
+mount /dev/loop2 /mnt/1
+# ...
+umount /mnt/1/
+losetup -d /dev/loop2
+losetup -d /dev/loop1
+</pre>
+</article>

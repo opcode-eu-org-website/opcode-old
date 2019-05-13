@@ -1,0 +1,567 @@
+# Katalog źródeł i skryptu (lub dowiązania do niego)
+SRC_DIR="${SRC_DIR-/srv/WebPage/}"
+
+# Katalog w którym będzie generowana strona
+WORK_DIR="${WORK_DIR-$HOME/WebPage/}"
+
+# Katalog w którym znajdują się pliki silnika WWW
+ENGINE_DIR=$(dirname $(dirname ${BASH_SOURCE[0]}))
+
+########################################
+#    FUNKCJE KONFIGURACYJNE SILNIKA    #
+########################################
+
+# funkcja ustalająca zmienne konfiguracyjne
+set_variable() {
+	WWW_LANG='pl'
+	
+	# tryb wyjściowy - "xhtml" lub "latex", "latex-nopdf", "latex-onepdf"
+	OUT_MODE='xhtml'
+	# domyślny tytuł strony (dla <title />)
+	STD_TITLE='OpCode - elektronika, telekomunikacja, komputery, ...'
+	# URL strony głównej
+	PAGE_URL='http://www.opcode.eu.org/'
+	# opcjonalny prefiks do katalogu strony w URL
+	BASE_URL_PREFIX=''
+	# domysne lata w notach (C)
+	STD_YEAR="1999-2019"
+	# czas dla katalogów i plików LICENCE w plikach tar
+	TAR_TIME="200609010000"
+	# katalog z mapą strony
+	SITE_MAP_DIR="site/map"
+	
+	# nazwa pliku do którego będą odnosiły się linki do katalogu
+	# (puste gdy linki mają trafiać w katalog a nie odrazu w plik)
+	LINK_PAGE_FILE=''
+	
+	# domyślny tryb menu STATIC lub DYNAMIC (dla menu autoukrywanego)
+	DEFAULT_MENU_MODE="STATIC"
+	
+	# ścieżka do pliku zawierającego mapę strony
+	MENU_FILE="$SRC_DIR/OpCode_menu.xml"
+	# skrypt parsujący mapę strony
+	PARSE_MENU_AWK="$ENGINE_DIR/engine-parse_menu.awk/body.pl.src"
+	# skrypty konwertujące pliki pcb, sch i dia do pdf i png
+	SCH2PDF="/usr/local/bin/sch2pdfpng.sh"
+	PCB2PDF="/usr/local/bin/pcb2pdf.sh"
+	DIA2PDF="$SRC_DIR/USAGE/toolbox4electronic/software/dia/dia2pdf.sh/body.pl.src"
+
+
+	# katalogi z wersją wynikową oraz źródłami względem katalogu skryptu
+	PAGE_DIR="$WORK_DIR/out-online"
+	# katalog "DOWNLOAD"
+	DOWNLOAD_DIR="$WORK_DIR/out-download/"
+	# katalog z cache'm generowanych obrazków
+	CACHE_DIR="$WORK_DIR/out-cache"
+	# katalog tymczasowy
+	TMP_DIR="/tmp/OpCode-$USER"
+	
+	# nazwa pliku z archiwum źródeł strony w dziale download (jeżeli pusta nie jest generowane)
+	SOURCE_ARCHIVE_NAME="OpCode-source.tgz"
+	SOURCE_ARCHIVE_NAME=""
+	# linki do materiałów wyłączonych z archiwizacji źródeł umieszczane
+	# na stronie działu download (względem $PAGE_DIR)
+	NO_TAR_LINK=""
+	# ścieżki plików wylaczonych z archiwizacji zrodel (względem $SRC_DIR)
+	NO_TAR="
+		ARCHIVE*
+		
+		USAGE/operating_systems_config/linux/sortowanie/i18n-locales-pl_PL
+	"
+
+	# nazwa pliku z archiwum off-line strony w dziale download (jeżeli pusta nie jest generowane)
+	OFFLINE_ARCHIVE_NAME="OpCode-offline.tgz"
+	
+	# lista plików tar.gz / .tgz z których budowane powinny być paczki deb
+	MAKE_DEB=""
+	
+	# lista plików latex z których powinny być tworzone pliki pdf
+	# jedn plik w linii, po spacji można podać wymaganą liczbę powtórzeń pdflatex (domyślnie 1)
+	MAKE_PDF="
+		bercik/wizytowka.tex/wizytowka.tex
+		bercik/cv.tex/cv.tex
+	"
+	
+	# plik z okienkiem wyszukiwarki
+	SEARCH_BOX="$ENGINE_DIR/_google/body.pl.xml"
+	
+	# plik z bazą oprogramowania
+	SOFTWARE_DB="USAGE/software_db/software.db.xml"
+	
+	# katalog w drzewie wynikowym zawierający galerie i zdjęcia linkowane przez <photo_link/>
+	PHOTO_DIR="/inne/photo/"
+	
+	
+	# gdy domyślny tryb konfigu usuwamy current.cfg
+	if [ "$1" = "default" ]; then
+		rm -f "$TMP_DIR/current.cfg"
+	# w przeciwnym razie włączenie tymczasowego konfigu (gdy istnieje)
+	elif [ -f "$TMP_DIR/current.cfg" ]; then
+		. "$TMP_DIR/current.cfg"
+	fi
+}
+
+
+# informacja o niestandardowch opcjach i działaniach skryptu
+usage_conf() {
+		echo "USAGE for build:" >&2
+		echo "   $script_name -b" >&2
+		echo "   $script_name --build" >&2
+		echo
+		echo "USAGE for build WWW:" >&2
+		echo "   $script_name -w" >&2
+		echo "   $script_name --web" >&2
+		echo
+		echo "USAGE for build MIRRORS dir:" >&2
+		echo "   $script_name -m" >&2
+		echo "   $script_name --mirrors" >&2
+		echo
+		echo "USAGE for build DOWNLOAD dir:" >&2
+		echo "   $script_name -d" >&2
+		echo "   $script_name --downloads" >&2
+		echo
+		echo "USAGE for build PDF:" >&2
+		echo "   $script_name -p" >&2
+		echo "   $script_name --pdf" >&2
+		echo
+		echo "USAGE for upload webpage:" >&2
+		echo "   $script_name -u" >&2
+		echo "   $script_name --upload" >&2
+		echo
+		
+		# jeżeli jest zdeklarowana funkcja rozszerzająca działanie bierządzej to ją wykonyujemy
+		if declare -f usage_conf2 > /dev/null; then usage_conf2; fi
+}
+
+# niestandardowe opcje i działania skryptu
+run_conf() {
+	# zamiana argumentów na zmienne sterujące (pozwala na podawanie argumentów w dowolnej kolejności)
+	WEB=false; PDF=false; DOWNLOADS=false; MIRRORS=false; UPLOAD=false;
+	for a in $opcje; do
+		case "$a" in
+			# budowanie
+			"-b" | "--build")
+				WEB=true; LOCALUPLOAD=true; #DOWNLOADS=true; PDF=true
+				;;
+			"-w" | "--web")
+				WEB=true
+				;;
+			"-m" | "--mirrors")
+				MIRRORS=true
+				;;
+			"-d" | "--downloads")
+				DOWNLOADS=true
+				;;
+			"-p" | "--pdf")
+				PDF=true
+				;;
+			# upload
+			"-u" | "--upload")
+				UPLOAD=true
+				;;
+		esac
+	done
+
+	###################
+	#   GENEROWANIE   #
+	###################
+	if $WEB; then
+		echo -e "\\033[1mGenerowanie wersji ON-LINE\\033[0m"
+		
+		set_variable default
+		
+		rm -fr "$PAGE_DIR"
+		debug build_out_tree "$MENU_FILE"
+	fi
+	
+	if $DOWNLOADS; then
+		echo -e "\\033[1mGenerowanie katalogu ~DOWNLOAD\\033[0m"
+		
+		set_variable default
+		
+		# generowanie archiwum źródeł oraz paczek deb i dokumentow pdf wraz z katalogiem ~DOWNLOAD
+		debug build_download_dir
+	fi
+
+	if $PDF; then
+		echo -e "\\033[1mGenerowanie wersji PDF\\033[0m"
+		
+		set_variable default
+		echo "OUT_MODE='latex'" > "$TMP_DIR/current.cfg"
+		echo "PAGE_DIR='$WORK_DIR/LaTeX-PDF'" >> "$TMP_DIR/current.cfg"
+		. "$TMP_DIR/current.cfg"
+		
+		rm -fr "$PAGE_DIR"
+		debug build_out_tree "$MENU_FILE"
+		
+		# przeniesienie do ~DOWNLOAD
+		cp -f "$PAGE_DIR/page.pdf" "$DOWNLOAD_DIR/OpCode-book.pdf"
+	fi
+	
+	##############
+	#   UPLOAD   #
+	##############
+	if $LOCALUPLOAD; then
+		cd "$PAGE_DIR"
+		rsync -rLc --delete -v . ../out-online-no-symlink
+	fi
+	if $UPLOAD; then
+		echo -e "\\033[1mUpload przygotowanych wcześniej wersji ON-LINE (dir), OFF-LINE (tar), PDF (pdf)\\033[0m"
+		
+		set_variable default
+		
+		# upload_web_page
+		cd "$PAGE_DIR"
+		rsync -rLc --delete -v -e "ssh -p 22 -l rrp" . www.opcode.eu.org:/srv/WebPages/old
+		
+		# generate_sitemap
+		#ssh rrp@www.opcode.eu.org 'cd /srv/SERVICES/www/site;
+		# find -type f -exec chmod 644 {} +; find -type d -exec chmod 755 {} +;
+		# bash usage_and_config/toolbox4computer/www_engine/generate_google_sitemap.sh/generate_google_sitemap.sh > sitemap.xml'
+	fi
+	
+	# jeżeli jest zdeklarowana funkcja rozszerzająca działanie bierządzej to ją wykonyujemy
+	if declare -f run_conf2 > /dev/null; then run_conf2; fi
+}
+
+# Opcje dla funkcji zarzadzania repozytoriami
+repo_do_case() {
+	case $* in
+	"H hostname1")
+		push_$ACTION "up-host" "/up-path/$REPO_PATH" "$LOCAL_HOSTNAME" "$LOCAL_REPOPATH"
+		;;
+	"HA hostname1 alias1")
+		if [ "$ACTION_DIR" != "from" ]; then
+			# hostname1-spec-cmd
+			push_$ACTION "alias-up-host" "/up-path/$REPO_PATH" "$LOCAL_HOSTNAME" "$LOCAL_REPOPATH"
+		fi
+		;;
+	"A alias1")
+		push_$ACTION "alias-up-host" "/up-path/$REPO_PATH" "$LOCAL_HOSTNAME" "$LOCAL_REPOPATH"
+		;;
+	*)
+		return 2
+		;;
+	esac
+	return 0
+}
+
+
+
+###################################################
+#    ZMIENNE NAPISOWE WYKORZYSTYWANE W SILNIKU    #
+###################################################
+
+# domyślny posiadacz praw autorskich, typ licencji itp.
+COPYRIGHT_LINE="Robert Paciorek (http://www.opcode.eu.org/), BSD/MIT-type license"
+COPYRIGHT_LINE_XHTML="Robert Paciorek (http://www.opcode.eu.org/), <a class=\"Wikipedia\" href=\"http://pl.wikipedia.org/wiki/Licencja_BSD\">BSD</a>/<a class=\"Wikipedia\" href=\"http://pl.wikipedia.org/wiki/Licencja_X11\">MIT</a>-type license"
+COPYRIGHT_LINE_LATEX="Robert Paciorek (\url{http://www.opcode.eu.org/}), \href{http://pl.wikipedia.org/wiki/Licencja_BSD}{BSD}\footnote{http://pl.wikipedia.org/wiki/Licencja\_BSD}/\href{http://pl.wikipedia.org/wiki/Licencja\_X11}{MIT}\footnote{http://pl.wikipedia.org/wiki/Licencja\_X11}-type license"
+
+# licencja PL i EN
+LICENCE_1="Redystrybucja wersji źródłowych i wynikowych, po lub bez dokonywania
+modyfikacji JEST DOZWOLONA, pod warunkiem zachowania niniejszej informacji o
+prawach autorskich. Autor NIE ponosi JAKIEJKOLWIEK odpowiedzialności za skutki
+użytkowania tego dokumentu/programu oraz za wykorzystanie zawartych tu informacji."
+LICENCE_2="This text/program is free document/software. Redistribution and use in
+source and binary forms, with or without modification, ARE PERMITTED provided
+save this copyright notice. This document/program is distributed WITHOUT any
+warranty, use at YOUR own risk."
+
+# dodatkowe info odnośnie licencji dołączane do każdego głównego pliku lICENCE w archiwach TAR
+TAR_COPYRIGHT_INTRO="Jeżeli jawnie nie podano inaczej wszystkie pliki w archiwum
+dystrybuowane są na następującej licencji:\n
+All file in this archive (except when copyright in file say otherwise)
+is distributed on following licence:\n\n"
+
+# funkcja wypisująca dodatkowe info w stopce XHTML katalogow notar
+# argumenty:
+#  $1 = "URL do pliku tar",
+notar_copyright_intro() {
+	echo "<p>Strona jest częścią serwisu <a href=\"$PAGE_URL\">OpCode</a>. Strona prezentuje rozpakowaną wersję archiwum dostępnego pod adresem <a href=\"$1\">$1</a>. Po szczegóły dotyczące prezentowanego materiału zapraszam do katalogów nadrzędnych.</p>"
+	echo "</p><p>Jeżeli jawnie nie podano inaczej wszystkie pliki w archiwum dystrybuowane są na następującej licencji:<br />
+	All file in this archive (except when copyright in file say otherwise) is distributed on following licence:</p>"
+}
+
+# funkcja wypisująca dodatkowe info w stopce XHTML
+# argumenty:
+#  $1 = "URL dokumentu",
+#  $2 = "URL strony",
+#  $3 = "data modyfikacji",
+#  $4 = "prefix URL strony"
+xhtml_fotter_addons() {
+	echo '<p class="fotter"><a href="http://validator.w3.org/check/referer">
+	<img src="/valid-xhtml11.png" alt="Valid XHTML 1.1" class="right noprint" height="31" width="88" /></a>
+	Dokument ten (URL: '$1')
+	należy do serwisu <a href="'$2'">OpCode</a>. Autorem tej strony jest <a href="'$4'/bercik/">Robert Paciorek</a>,
+	wszelkie uwagi proszę kierować na adres e-mail serwisu: <a href="mailto:webmaster@opcode.eu.org">webmaster@opcode.eu.org</a>.
+	<br />Data ostatniej modyfikacji artykulu: '$3' (data ta może być zafałszowana niemerytorycznymi modyfikacjami artykułu).</p>'
+}
+
+# informacja na stronie DOWNLOAD dodawana odpowiednio przed i po liście $NO_TAR_LINK (jeżeli $DOWNLOAD_README_1 puste lub nie ustawione nie jest generowane README.xhtml)
+#DOWNLOAD_README_1="<p>Archiwum <a href=\"./OpCode-source.tgz\">OpCode-source.tgz</a> zawiera całość źródeł strony poza <a href=\"/archiwum/\">archiwum</a>, galeriami <a href=\"/photo/\">zdjęć</a> i działem DOWNLOAD (pliki nie stanowiące integralnego elementu mojej strony) oraz następującymi materiałami których nie jestem wyłącznym autorem (są to głównie modyfikacje istniejących programów oraz plików konfiguracyjnych/skryptów Debiana; pliki te są dystrybuowane na innych warunkach niż całość serwisu):</p>"
+#DOWNLOAD_README_2="<p>Wszystkie pliki serwisu mojego autorstwa, zamieszczone w archiwum dystrybuowane są na zasadach licencji typu BSD, chyba że wyraźnie zastrzeżono inaczej.</p><p>Archiwum <a href=\"./OpCode-offline.tgz\">OpCode-offline.tgz</a> zawiera całość serwisu (poza <a href=\"/archiwum/\">archiwum</a>, galeriami <a href=\"/photo/\">zdjęć</a> i działem DOWNLOAD) do przeglądania w trybie off-line. Plik <a href=\"./OpCode-book.pdf\">OpCode-book.pdf</a> zawiera \"książkową\" (format A4) wersję wybranych artykułów/materiałów z serwisu.</p>"
+
+
+
+####################################################################
+#     SZABLONY TEKSTOWE WYKORZYSTYWANE W SILNIKU (FUNKCJE BASH)    #
+####################################################################
+
+# funkcja komentuje każdą linijkę podanego tekstu ($2) zadanym napisem ($1)
+comments_line() {
+	echo -e "$2" | while read l; do
+		echo "$1 $l";
+	done
+}
+
+# wypisuje standardową informacje o prawach autorskich i licencji
+# $1 okresla typ wypisywania, $2 podaje informacje o dacie, $3  współautorzy
+#  $4 (opcjonalny) - dodatkowe informacje Copyright
+std_copyright() {
+	case $1 in
+		c | cpp | php | h | css | js)
+			# komentarze w stylu C
+			echo -e "/**"
+			comments_line " *" "Copyright (c) $2, $COPYRIGHT_LINE"
+			comments_line " *" "$3"
+			echo -e " *"
+			comments_line " *" "$LICENCE_1"
+			echo -e " *"
+			comments_line " *" "$LICENCE_2"
+			comments_line " *" "$4"
+			echo -e "**/\n"
+			;;
+		tex | latex)
+			# komentarze TeX/LaTeX
+			comments_line "%" "Copyright (c) $2, $COPYRIGHT_LINE"
+			comments_line "%" "$3"
+			echo -e "%"
+			comments_line "%" "$LICENCE_1"
+			echo -e "%"
+			comments_line "%" "$LICENCE_2"
+			comments_line "%" "$4"
+			;;
+		ini)
+			# komentarze plików typu ini (np. konf. Asterisk'a)
+			comments_line ";" "Copyright (c) $2, $COPYRIGHT_LINE"
+			comments_line ";" "$3"
+			echo -e ";"
+			comments_line ";" "$LICENCE_1"
+			echo -e ";"
+			comments_line ";" "$LICENCE_2"
+			comments_line ";" "$4"
+			;;
+		lua|vhd|vhdl)
+			# komentarze plików typu ini (np. konf. Asterisk'a)
+			comments_line "--" "Copyright (c) $2, $COPYRIGHT_LINE"
+			comments_line "--" "$3"
+			echo -e "--"
+			comments_line "--" "$LICENCE_1"
+			echo -e "--"
+			comments_line "--" "$LICENCE_2"
+			comments_line "--" "$4"
+			;;
+		htm | html | xhtml)
+			# kodowanie html
+			echo -e "Copyright (c) $2, $COPYRIGHT_LINE_XHTML
+				<br />$3<br /><br />$LICENCE_1<br /><br />$LICENCE_2<br />$4"
+			;;
+		latex-nocomment)
+			# kodowanie TeX/LaTeX
+			echo '\chapter{Copyright}'
+			echo "\noindent Copyright (c) $2, $COPYRIGHT_LINE_LATEX\\"
+			echo "$3\\ \\"
+			echo "$LICENCE_1\\ \\"
+			echo "$LICENCE_2\\ \\"
+			echo "$4"
+			;;
+		txt)
+			# bez komentarzy
+			echo -e "Copyright (c) $2, $COPYRIGHT_LINE"
+			echo -e "$3"
+			echo -e ""
+			echo -e "$LICENCE_1"
+			echo -e ""
+			echo -e "$LICENCE_2"
+			echo -e ""
+			echo -e "$4"
+			;;
+		*)
+			# komentarze shellowe
+			comments_line "#" "Copyright (c) $2, $COPYRIGHT_LINE"
+			comments_line "#" "$3"
+			echo -e "#"
+			comments_line "#" "$LICENCE_1"
+			echo -e "#"
+			comments_line "#" "$LICENCE_2"
+			comments_line "#" "$4"
+			;;
+	esac
+}
+
+# wypisuje niestandardową informacje o prawach autorskich i licencji
+# $1 okresla typ wypisywania, $2 niestandardowe informacje Copyright
+special_copyright() {
+	case $1 in
+		c | cpp | php | h | css | js)
+			# komentarze w stylu C
+			echo -e "/**"
+			comments_line " *" "$2"
+			echo -e "**/\n"
+			;;
+		tex | latex)
+			# komentarze TeX/LaTeX
+			comments_line "%" "$2"
+			;;
+		ini)
+			# komentarze plików typu ini (np. konf. Asterisk'a)
+			comments_line ";" "$2"
+			;;
+		lua|vhd|vhdl)
+			# komentarze plików typu ini (np. konf. Asterisk'a)
+			comments_line "--" "$2"
+			;;
+		htm | html | xhtml)
+			# kodowanie html
+			echo -e "$4"
+			;;
+		latex-nocomment)
+			# kodowanie TeX/LaTeX
+			echo '\chapter{Copyright}'
+			echo "\noindent $4"
+			;;
+		txt)
+			# bez komentarzy
+			echo -e "$4"
+			;;
+		*)
+			# komentarze shellowe
+			comments_line "#" "$4"
+			;;
+	esac
+}
+
+# funkcja generuje nagłówk XHTML
+# $1 - tytyl $2 - prefix url dla włączanyh plików css $3 - layout mode $4 - inhead
+std_xhtml_header() {
+	echo '<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl">
+<head>
+	<meta http-equiv="ContentType" content="application/xhtml+xml; charset=utf-8" />
+	<title>' "$1" '</title>
+	<link rel="stylesheet" href="'"$2"'/base.css" type="text/css" />
+	<link rel="stylesheet" href="'"$2"'/layout_'"$3"'.css" type="text/css" />
+	<link rel="stylesheet" href="'"$2"'/highlight.css" type="text/css" />
+	<link rel="home" title="Strona główna" href="'$PAGE_URL'" />
+	'$4'
+</head><body><div class="tresc">'
+	echo -e "\n";
+}
+
+# funkcja generuje stopkę XHTML
+# $1 - sciezka do dokumentu $2 - data aktualizacji $3 - menu $4 - nagłówek menu
+# $5 - prefix url dla linków itp.
+# $6 - lata dla Copyright $7 - współautorzy dla Copyright
+# $8 (opcjonalne) - dodatkowe informacje Copyright w formie xhtml
+std_xhtml_fotter() {
+	echo -e "\n<hr /></div>"
+	if [ "$3" != "no" ] ; then
+		echo -e "\n<div class=\"menu\"><p class=\"menu_info\">M<br />E<br />N<br />U</p>\n\n";
+		echo "$4"
+		echo '<ul class="menu_link">'
+		cat "$3"
+		echo '</ul>'
+		if [ $OUT_MODE = "xhtml" -a $SEARCH_BOX != "" ]; then
+			cat $SEARCH_BOX
+		fi
+		echo -e "\n</div>";
+	fi
+	
+	echo -e '\n<div class="tresc"><hr />\n<p class="fotter">'
+	std_copyright htm "$6" "$7" "$8"
+	echo '</p>'
+	xhtml_fotter_addons \
+		"$PAGE_URL`echo "$1" | awk -v FS="$PAGE_DIR" '{if ($2!="") print $2; else print $1 }'`" \
+		"$PAGE_URL" "$2" "$5"
+	echo '</div>'
+	
+	echo -e '\n\n</body></html>'
+}
+
+
+std_latex_header() {
+	echo '\documentclass[a4paper, portrait, 110pt]{mwrep}
+	\usepackage{fontspec,polski}
+	\usepackage[a4paper,tmargin=2.2cm,bmargin=2.2cm,lmargin=2.2cm,rmargin=2.2cm]{geometry}
+	\usepackage[unicode=true,pdfpagemode=UseOutlines,colorlinks=true,linkcolor=black,urlcolor=blue]{hyperref}
+	\usepackage{graphics,color,floatflt,wrapfig,adjustbox}
+	\usepackage{fancyhdr,lastpage,url}
+	\usepackage[iso]{isodateo}
+	\usepackage{scalefnt,relsize,soul,soulutf8,ulem}
+	\usepackage{amsmath,amssymb}
+	\usepackage{array,longtable,tabu,multirow,hhline}
+	\usepackage[final=false]{minted}
+	
+	\pdfimageresolution=150
+	\DeclareGraphicsExtensions{.pdf,.mps,.png,.jpg}
+	\hypersetup{pdfauthor={Robert Paciorek, http://www.opcode.eu.org/},pdftitle={Komputerologia dla każdego}}
+	\setmainfont[BoldFont=* Bold]{Linux Libertine O}\defaultfontfeatures{Ligatures=TeX}
+	\setminted{breaklines=true, breakanywhere=true, breakafter=-/.()}
+	
+	% obsługa kolorowanego kodu
+	\usepackage{marvosym}
+	\input{highlight.sty}
+	
+	% przypisy na koncu dokumentu bez własnego tytułu
+	\usepackage{endnotes} \let\footnote=\endnote \renewcommand{\notesname}{}
+	
+	% wszystko (także subsubsection) w spisie treści, brak numeracji
+	\setcounter{tocdepth}{6}\setcounter{secnumdepth}{-2}
+	
+	% korekta formatowania nagłówków
+	\SetSectionFormatting{part}          {2.8em} {\centering\Huge\textbf{\HeadingText}}  {2em}
+	\SetSectionFormatting{chapter}       {2.5em} {\Huge\textbf{\textsc{\HeadingText}}}   {1.6em}
+	\SetSectionFormatting{section}       {2.2em} {\huge\textbf{\textsc{\HeadingText}}}   {.9em}
+	\SetSectionFormatting{subsection}    {1.9em} {\LARGE\textbf{\textsc{\HeadingText}}}  {.8em}
+	\SetSectionFormatting{subsubsection} {1.6em} {\Large\textbf{\textsc{\HeadingText}}}  {.7em}
+	\SetSectionFormatting{paragraph}     {1.3em} {\large\textbf{\textsc{\HeadingText}}}  {.6em}
+	\SetSectionFormatting{subparagraph}  {1em}   {\textbf{\HeadingText}}                 {.5em}
+	
+	\sloppy
+	
+	% strona tytułowa, spis tresci, ...
+	\begin{document}
+		\thispagestyle{empty}
+		\vspace*{5cm}
+		\begin{center}{\Large \bf Robert Paciorek}\end{center}
+		\vspace*{1.5cm}
+		\begin{center}{\scalefont{3.3} \bf Komputerologia dla każdego}\end{center}
+		\vspace*{0.5cm}
+		\begin{center}{\large \url{http://www.opcode.eu.org/}}\end{center}
+		\vspace*{8cm}
+		\begin{center}\today\end{center}
+		\pagebreak
+		
+		\tableofcontents\newpage
+		
+		\setlength{\parindent}{3em}
+'
+}
+
+std_latex_fotter() {
+	std_copyright latex-nocomment "$1" "$2" "$3"
+	echo "\chapter{Przypisy}\theendnotes\end{document}"
+}
+
+
+
+##############################################
+#    WCZYTANIE POZOSTAŁYCH PLIKÓW SILNIKA    #
+##############################################
+. $ENGINE_DIR/engine-generate.sh/body.pl.src
+. $ENGINE_DIR/engine-parse_in.sh/body.pl.src
+. $ENGINE_DIR/engine-parse_out.sh/body.pl.src
+. $ENGINE_DIR/engine-edit_help.sh/body.pl.src
+. $ENGINE_DIR/engine-base.sh/body.pl.src
+

@@ -1,0 +1,24 @@
+-- PEERNAME
+extensions["input/PEERNAME"] = {
+	include = {"incoming_from_auth_user"};
+};
+extensions["output/PEERNAME"] = {
+	[any_ext] = call_local_address;
+
+	["_0X."] = function(context, exten)
+		exten2 = string.sub(exten, 2)
+		
+		app.Verbose(2, "Dial via sipprovider2 to " .. exten2 )
+		app.Dial("SIP/" .. exten2 .. "@sipprovider2")
+		
+		if channel["DIALSTATUS"]:get() == "BUSY" then
+			return app.Busy()
+		else
+			return app.Hangup()
+		end
+	end;
+
+	["demo"] = function()
+		app.Goto("demo_lua", "s", "1")
+	end;
+};

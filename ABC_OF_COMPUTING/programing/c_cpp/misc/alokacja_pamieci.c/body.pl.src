@@ -1,0 +1,93 @@
+/*
+ * plik ma na celu prezentację metod ręcznego zarządzania pamięcią
+ * oraz możliwości korzystania z plików mapownych na obszary pamięci
+ *
+ */
+
+
+#include <stdio.h>
+#include <stdlib.h> /* for malloc itp */
+#include <string.h> /* for memcpy */
+#include <fcntl.h> /* for open */
+#include <sys/mman.h> /* for mmap */
+
+int main (int argc, char *argv[]) {
+	/// ręczna alokacja pamięci
+	/// na ogół podobny efekt można uzyskać deklarując tablica[jakas_zmienna]
+	/// ale to nie działa w starszych implementacjach C
+	/// zobacz: http://pl.wikibooks.org/wiki/C/Wskaźniki#Dynamiczna_alokacja_pami.C4.99ci
+	/// ponadto metoda tablica[wartosc] narzuca ograniczenie na ich rozmiar związane
+	/// z ograniczeniem rozmiaru stosu, dlatego lepiej duże tablice alokować dynamicznie
+
+	
+	// wskaźnik na naszą tablicę
+	char * tab = NULL;
+	// rozmiar naszej tablicy
+	int tab_size = 15;
+	// aloakcja pamięci dla naszej tablicy + nadanie poprawnej wartości wskażźnikowi na nią
+	// podobnie działa calloc z tym że dodatkowo zarezerwowany obszar zapisuje zerami
+	tab = malloc(sizeof(*tab) * tab_size );
+	
+	/// wppisanie czegoś do naszej tablicy
+	memcpy(tab, "Ala ma kota", 12); // długość napisu + 1 bo null-end string
+	
+	// sprawdzenie
+	printf("%s - %c\n", tab, tab[4]);
+	
+	// ustalenie nowego rozmiaru i inne pomocnicze
+	// aby zobaczyć że następuje przeniesienie należy program wywołać z dwoma argumentem
+	// stanowić on będzie rozmiar nowej tablicy oraz zpowoduje zajęcie pamięci za naszą tablicą
+	// użyicie rozmiaru
+	if (argc > 1) {
+		tab_size = atoi(argv[1]);
+		char *tab2 = malloc(sizeof(*tab) * 1000 );
+		printf("%s\n\n", tab2);
+	} else {
+		tab_size = 40;
+	}
+	char *old_tab = tab;
+	
+	/// zwiększenie rozmiaru naszej tablicy
+	// jeżeli nie jest możliwe zwiększenie obecnego rozmiaru (musi to być obszar ciągły)
+	// alokowany jest nowy obszar, a dane są kopiowane
+	// w związku z powyższym zwrócony wskaźnik może się różnić od podanego !!!
+	tab = realloc(tab, sizeof(*tab) * tab_size);
+	
+	if (old_tab == tab)
+		puts("nieprzeniesione");
+	else
+		puts("przeniesione");
+	
+	// sprawdzenie
+	printf("%s - %c\n", tab, tab[25]);
+	memcpy(tab, "Ala ma kota. Kot ma Ale. Czyzby ...", tab_size);
+	printf("%s - %c\n", tab, tab[25]);
+	
+	/// usuwamy naszą tablice
+	free(tab); // zwalniamy ten obszar pamięci
+	tab = NULL; // kasuję wartośc wskaźnika (bo obszar zwolniony)
+	
+	/// zamapowanie fragmentu pliku (lub urządzenia) do pamięci
+	int deskryptor = open( "/etc/passwd", O_RDONLY ); // zobacz unix.c
+	
+	tab = mmap(NULL, 50, PROT_READ, MAP_SHARED, deskryptor, 0);
+	// mapujemy 50 bajtów z przesunięciem 0 (musi być ono być wielorotnośią
+	// wartości PAGESIZE - zobacz getpagesize()) z pliku określonego przez
+	// deskryptor na wspólny dla wszystkich kożytsających z pliku (MAP_SHARED)
+	// obszar pamięci do odczytu w przypadku zapisów ważne jest wykonanie
+	// msync (synchronizacji)lub munmap (odmapowania); ilość wczytanych danych
+	// jest zaokrąglana w górę do całkowitej wielokrotności PAGESIZE
+	//
+	// właśnie w przypadku MAP_SHARED jest to wygodny mechanizm współdzielenia pamięci
+	// przez kilka procesów, jeżeli chemy mieć włany bufor należy skorzystać z MAP_PRIVATE
+	
+	// sprawdzenie
+	printf("%s\n", tab);
+	
+	/// odmapowanie
+	munmap(tab, 20);
+	tab=NULL;
+	
+	// na koniec warto wspomniec takze o mozliwosci zablokowania wyswapowywania
+	// pamięci naszego procesu lub jej części przy pomocy funkcji mlock lub mlockall
+}

@@ -1,0 +1,11 @@
+<article>
+<title>NutOS Jabber Notify Pack</title>
+
+<p>Jest to zestaw klienta i <id_link id="jabber_info_server.c">serwera</id_link> (opartego o mechanizm wyświetlania wiadomości wykorzystywany w bramce web), który pobiera z mysql dane o wiadomnościach jabbera i przsyła je do <id_link id ="jabber_info.c">klienta</id_link> - opartego na Mmnet02 i NutOSie. Okresowo wysyłany jest komunikat UDP o ilości wiadomości, natomiast po nawiązaniu połączenia przez klienta wysyłane są kolejne wiadomości.</p>
+
+<p class="download"><a class="int" href="./nutos_jabber.tgz">POBIERZ</a></p>
+
+<p>Więcej na temat Mmnet02 i NutOSie w <id_link id="programowalne:avr:nutos">układy programowalne</id_link>.</p>
+
+<p>O C API dla MySQL więcej można znaleźć w <doc url="http://www.linuxfocus.org/Polish/September2003/article304.shtml" mirror="programowanie/MySQL_C_API">API MySQL C na LinuxFocus</doc></p>
+</article>

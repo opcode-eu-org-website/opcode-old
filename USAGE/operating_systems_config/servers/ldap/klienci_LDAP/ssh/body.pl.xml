@@ -1,0 +1,32 @@
+<article>
+<title>Klucze publiczne SSH z LDAP</title>
+
+<p>W przypadku korzystania z SSH dostęp w oparciu o hasło PAMowe to nie wszystko. Wielu użytkowników wręcz preferuje dostęp oparty o klucze publiczne SSH przechowywane standardowo w <kbd class="path">$HOME/.ssh/authorized_keys</kbd>. Kuszącym jest możliwość umieszczania tych kluczy również w bazie LDAP (dotyczy to zwłaszcza systemów mających centralną autoryzacje opartą o LDAP, a nie mających wspólnego <kbd class="path">/home</kbd>). Istnieje stosowny patch do serwera SSH umożliwiający taką integrację - <homepage url="http://openssh-lpk.googlecode.com/">openssh-lpk</homepage>. Niestety w chwili obecnej nie jest on włączony ani do samego serwera OpenSSH ani do paczki Debianowej, zatem konieczne jest jego samodzielne nałożenie. W tym celu:</p>
+
+<pre>aptitude install devscripts libldap-dev
+aptitude build-dep openssh-server
+
+svn checkout http://openssh-lpk.googlecode.com/svn/trunk/ openssh-lpk-read-only
+apt-get source openssh-server
+
+cd openssh-5.1p1/
+# dodac w debian/rules w okolicy innych confflags:
+# confflags += --with-libs="-lldap" --with-ldflags="-L/usr/lib" --with-cppflags="-I/usr/include -DWITH_LDAP_PUBKEY"
+vi debian/rules
+
+patch -p1 &lt; ../openssh-lpk-read-only/patch/contrib/contrib-openssh-lpk-5.1p1-0.3.10.patch
+debchange -i "openssh-lpk path"
+dpkg-buildpackage -rfakeroot</pre>
+
+
+<p>Użycie patcha sprowadza się do dodania do <kbd class="path">/etc/ssh/sshd_config</kbd>:</p><pre>
+UseLPK yes
+LpkLdapConf /etc/pam_ldap.conf
+LpkForceTLS no</pre>
+
+<p>Po stronie serwera LDAP konieczne jest pobranie i zainstalowanie odpowiedniego schema:</p><pre>
+cd /etc/ldap/schema &amp;&amp; wget http://openssh-lpk.googlecode.com/files/openssh-lpk_openldap.schema
+echo "include         /etc/ldap/schema/openssh-lpk_openldap.schema" >> /etc/ldap/slapd.conf
+/etc/init.d/slapd restart
+</pre>
+</article>

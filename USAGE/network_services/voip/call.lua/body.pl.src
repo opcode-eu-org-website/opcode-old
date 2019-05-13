@@ -1,0 +1,204 @@
+-- pomocnicza funkcja sprawdzajaca czy istnieje podany context
+-- i zapisujaca info do logu
+function context_exists(name)
+	if channel["DIALPLAN_EXISTS("..name..")"]:get() == "1" then
+		app.Verbose(verb, "Context " ..name.. " exists")
+		return true
+	else
+		app.Verbose(verb, "Context " ..name.. " don't exist")
+		return false
+	end
+end
+
+-- pomocnicza funkcja realizująca dzwonienie enum
+function call_enum(exten)
+	for i,net in ipairs(enum_networks) do
+		app.Verbose(verb, "Trying ".. exten .." in enum network: ".. net)
+		cnt = channel["ENUMLOOKUP(+".. exten ..",ALL,c,,".. net ..")"]:get()
+		for j=cnt, 0, -1 do
+			uri = channel["ENUMLOOKUP(+".. exten ..",ALL,,".. j ..","
+				.. net ..")"]:get()
+			pos = string.find(uri, ":")
+			if pos ~= nil then
+				proto = string.sub(uri, 0, pos-1)
+				addr = string.sub(uri, pos+1)
+				app.Verbose(verb, "Find proto=".. proto .." addr=".. addr)
+				if proto == "sip" then
+					app.Dial("SIP/" .. addr, nil, "G(after_dial^s^1)")
+				elseif proto == "iax2" then
+					app.Dial("IAX2/" .. addr, nil, "G(after_dial^s^1)")
+				elseif proto == "h323" then
+					app.Dial("H323/" .. addr, nil, "G(after_dial^s^1)")
+				end
+				if channel["DIALSTATUS"]:get() == "ANSWER" then
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+
+-- funkcja aktywująca nagrywanie (generuje nazwę pliku i wywołuje Monitor())
+function call_record(user, way)
+	if channel["is_recording_for_" .. user]:get() ~= "1" then
+		channel["is_recording_for_" .. user] = "1"
+
+		filename = "/home/voip/" .. way .. "/" .. user .. "/"
+			.. os.date("%Y-%m-%d_%H:%M:%S_")
+			.. string.gsub(channel["CHANNEL"]:get(), "/", "_")
+
+		app.Verbose(verb, "Start recording for " .. user
+			.. " as " .. way .. " dial, to filename " .. filename)
+
+		--app.MixMonitor(filename .. ".wav");
+		app.Monitor("gsm",filename);
+	end
+end
+
+
+
+-- funkcja realizująca dzwonienie pod lokalne adresy
+-- z rozróżnieniem publiczności lub nie tych adresów
+function call_local_address(context, exten, call_type, domain, channel_type)
+	-- parametry nieobowiazkowe i ich wartosci domyslne
+	if channel_type == nil then
+		channel_type = channel["CHANNEL(channeltype)"]:get()
+	end
+	if domain == nil and channel_type == "SIP" then
+		domain       = channel["SIPDOMAIN"]:get()
+	end
+	if domain == nil then
+		domain       = default_domain
+	end
+	if call_type == nil then
+		-- zakładamy że konteksty użytkownika mają postać typ/username[@domain]
+		--   typ == input_for  => rozmowy przychodzące do usera
+		--   typ == input      => rozmowy przychodzące od usera
+		--   typ == output     => rozmowy wychodzące od usera
+		local pos = string.find(context, "/")
+		if pos ~= nil and string.sub(context, 0, pos-1) == "output" then
+			call_type = "local"
+		else
+			call_type = "public"
+		end
+	end
+
+	app.Verbose(verb, "incoming_call type=" .. call_type ..
+		" to=" .. exten .. "@" .. domain .. " via=" .. channel_type)
+
+	-- aby działało nagrywanie (a w niektórych przypadkach samo połączenie)
+	-- niestety musimy odebrać kanał który wykonuje Dail()
+	--
+	-- najprościejbyłoby to robić przed wykonaniem Dial(), ale:
+	-- 1. przy rozmowach wychodzących od naszych klientów to nie problem
+	--    (i wtedy tak robimy)
+	-- 2. przy przychodzących to mało szczęścliwe rozwiązanie
+	--    (powoduje niespójną sygnalizację u dzwoniącego - połączenie
+	--    jest odebrane a sygnał dzwonienia jest generowany sztucznie
+	--    oraz nalizczanie opłat za czas oczekiwania na połączenie)
+	--
+	--    w tym celu wywołujemy:
+	--	app.Dial("SIP/NASZ_PEER", nil, "G(after_dial^s^1)")
+	--
+	--    macro after_diall zdefiniowane jest w: extensions.ael
+	--    (gdyż Lua nie wspiera priorytetów)
+	--    odpowiada ono za odebranie kanałów i ich bridgowanie 
+	--
+	--    wymaga to uprzedniego ustawienia zmiennej CALLING_CHANNEL
+	--    na potrzeby after_dial jako zmiennej dziedziczonej:
+	channel["_CALLING_CHANNEL"] = channel["CHANNEL"]:get()
+
+	-- na potrzeby tranferów potrzebujemy także zachować informację o adresacie
+	channel["_CALL_TO_USER"] = exten .. "@" .. domain
+
+
+	if call_type == "local" then
+		-- sprawdzamy istnienie niepublicznego adresu pasującego do tego wywołania
+		-- a jeżeli istnieje to aktywujemy nagrywanie i przechodzimy do niego
+		local address = "local_input_for/" .. exten .. "@" .. domain
+		if context_exists(address) then
+			call_record(exten .. "@" .. domain, "incoming")
+			return app.goto(address, "s", "1")
+		end
+	end
+
+	-- jeżeli istnieje żądany adres (w odpowiedniej domenie) to
+	-- aktywujemy nagrywanie i przechodzimy do niego
+	local address = "input_for/" .. exten .. "@" .. domain
+	if context_exists(address) then
+		call_record(exten .. "@" .. domain, "incoming")
+		return app.goto(address, "s", "1")
+	end
+
+	-- wygodnie jest mieć też możliwość definiowania adresów jako
+	-- kolejnych extentions w ramach jednego kontekstu ...
+	channel["CALL_TYPE"] = call_type
+	return app.goto("addresses", exten .. "@" .. domain, "1")
+
+	-- jeżeli tam także nie będzie takiego adresu to zostanie wywołany z exten "i"
+	-- hangup(1) zwracający informację "nie ma takiego numeru"
+end
+
+-- funkcja realizująca dzwonienie pod podany adres (dla zalogowanych userów)
+-- bezpośrednie w przypadku pełnego adresu SIP lub rekordu ENUM
+-- w pozostałych przypadkach poprzez kontekst output/username
+function call_addres(context, exten, check_enum, from, domain, channel_type)
+	-- parametry nieobowiazkowe i ich wartosci domyslne
+	if channel_type == nil then
+		channel_type = channel["CHANNEL(channeltype)"]:get()
+	end
+	if domain == nil and channel_type == "SIP" then
+		domain       = channel["SIPDOMAIN"]:get()
+	end
+	if domain == nil then
+		domain       = default_domain
+	end
+	if from == nil then
+		-- zakładamy że funkcja wywoływana z kontekstu użytkownika
+		-- mającego postać input/username
+		from         = string.sub(context, string.find(context, "/")+1)
+	end
+	if check_enum == nil then
+		-- domyślnie sprawdzamy enum dla numerów złożonych wyłącznie z cyfr
+		-- i dłuższych niż 4 cyfry
+		if string.find(exten, "^[0-9]*$") ~= nil and string.len(exten) > 4 then
+			check_enum = true
+		else
+			check_enum = false
+		end
+	end
+
+	app.Verbose(verb, "call_addres from=" .. from ..
+		" to=" .. exten .. "@" .. domain .. " via=" .. channel_type)
+
+	-- aktywacja nagrywania rozmowy wychodzącej od usera
+	call_record(from, "outcoming")
+
+	-- zapamiętanie kanału wywołującego Dial() ... patrz uwagi w call_local_address()
+	channel["_CALLING_CHANNEL"] = channel["CHANNEL"]:get()
+
+	-- na potrzeby tranferów potrzebujemy także zachować informację
+	-- o tym kto wywołuje Dial()
+	channel["_CALL_FROM_USER"] = from
+
+
+	-- zdalny adres SIP lub gtalk/jingle
+	if local_domains[domain] == nil then
+		app.Verbose(verb, "remote SIP / JINGLE address")
+		return app.Dial("SIP/" .. exten .. "@" .. domain .. "&" ..
+		                "Gtalk/" .. from .. "/" .. exten .. "@" .. domain,
+			nil, "G(after_dial^s^1)")
+	end
+
+	-- ENUM
+	if check_enum then
+		call_enum(exten)
+	end
+
+	-- lokalny exten, zdefiniowany w kontekście połączeń wychodzących
+	-- user'a podanego w from
+	app.Verbose(verb, "goto exten: " .. exten .. " in: " .. "output/" .. from)
+	return app.Goto("output/" .. from, exten, "1")
+end
+

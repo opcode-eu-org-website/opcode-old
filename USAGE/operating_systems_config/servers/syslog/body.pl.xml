@@ -1,0 +1,12 @@
+<article>
+<title>Logi systemowe - syslog-ng i logrotate</title>
+
+<p>Kuszącą wizją jest zbieranie logów z wszystkich usług poprzez jeden program, który umożliwiłby ich zapisywanie czy też przesyłanie do zdalnej maszyny. Jest to możliwe z wykorzystaniem odpowiedniej konfiguracji usług (problemem mogą być "młode usługi" jak voip czy xmpp) i np. syslog-ng. Zamieszczam przykładową <id_link id="USAGE:operating_systems_config:servers:syslog:syslog-ng.conf">konfigurację</id_link> dla syslog-ng oraz stosowny plik konfiguracyjny dla <id_link id="USAGE:operating_systems_config:servers:syslog:syslog-ng">logrotate</id_link> (należy umieścić go w <kbd class="path">/etc/logrotate.d/</kbd> i usunąć lub zmodyfikować z tamtąd pliki które obsługiwałyby te same logi)</p>
+
+<p>Konfiguracja większości usług do korzystania z logowania przez syslog zaprezentowana jest wraz z opisami tych usług (głównie w <id_link id="USAGE:network_services">Konfiguracja serwerów sieciowych</id_link>), poniżej prezentuję uwagi konfiguracyjne dotyczące oprogramowania tam nie opisanego:</p>
+<ul>
+	<li>w <kbd class="path">postgresql.conf</kbd> ustawiamy <code>log_destination = 'syslog'</code></li>
+	<li>w <kbd class="path">/etc/clamav/clamd.conf</kbd> ustawiamy <code>LogSyslog true</code>, <code>LogTime false</code> i usuwamy <code>LogFile</code></li>
+	<li>w <kbd class="path">/etc/clamav/freshclam.conf</kbd> ustawiamy <code>LogSyslog true</code>, <code>LogTime false</code> i usuwamy <code>LogFile</code> oraz <code>UpdateLogFile</code></li>
+</ul>
+</article>

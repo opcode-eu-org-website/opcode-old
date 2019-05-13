@@ -1,0 +1,249 @@
+/**
+ * plik ma na celu prezentację podstawowych zagadnień z programowania w języku C / C++
+ * prezentuje korzystanie z pamięci współdzielonej SHM oraz semaforów POSIXowych
+ *
+ * kompilacja gcc -lrt semafory_posix.c
+**/
+
+#include <sys/stat.h>
+
+#include <fcntl.h>
+#include <sys/mman.h>
+
+#include <semaphore.h>
+#include <time.h>
+
+#include <mqueue.h>
+
+#include <signal.h>
+
+#include <aio.h>
+
+#include <errno.h>
+#include <stdio.h>
+
+void sig_usr(int sig) {}
+
+int main(int argc, char *argv[]) {
+	/// pamięć dzielona przez shm i mmap (wiecej man 7 shm_overview)
+	// mozna także przez mmap i zwykły plik - patrz alokacja_pamieci.c
+	int fd=shm_open("moja_pamiec", O_RDWR|O_CREAT, 0770);
+	int size=ftruncate(fd,sizeof(int), SEEK_SET);
+	void *addr=mmap(0,sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+	
+	int *licznik = (int*) addr;
+	// jeżeli więcej jakiś danych to najlepiej w tablicy lub w strukturze
+	// no chyba że ktoś lubi liczyć ręcznie offsety ...
+	
+	printf("Licznik (1): %d\n", (*licznik)++);
+	printf("Licznik (2): %d\n", (*licznik)++);
+	// tak na prawdę to należałoby operacje na tym liczniku pozabezpieczać semaforami ...
+	
+	sleep(5);
+	
+	munmap(addr,sizeof(int));
+	close(fd);
+	shm_unlink("moja_pamiec");
+	
+	
+	/// semafory POSIX (wiecej man 7 sem_overview)
+	sem_t *semafor;
+	
+	// otwieramy semafor nazwany
+	// zamiast tego mozemy po prostu uzyc struktury typy sem_t
+	// w takim wytpadku przed pierszym uzyciem musimy wykonac na niej sem_init
+	// a po zakonczeniu uzywania przez ostatni proces sem_unlink
+	semafor = sem_open("/moj_semafor", O_CREAT, 0770, 1);
+	// flaga O_CREAT powoduje ze semafor zostanie utworzony gdy nie istnieje
+	// oraz wymusza podanie dwoch dodatkowych argumentow funkcji ...
+	// dodanie O_EXCL w flagach spowodowaloby ze funkcja zworci blad
+	// gdy semafor o takiej nazwie istnieje
+	//
+	// eleganckim wydaje się używanie
+	// sem_open("moj_semaforek", O_CREAT|O_EXCL, ...); w procesie glownym
+	//  wraz z obsluga tworzenia innej nazwy gdy dostaniemy EEXIST
+	// a w "klientach" sem_open("moj_semaforek", 0);
+	
+	if (semafor == SEM_FAILED) {
+		perror("sem_open");
+		return -1;
+	}
+	
+	
+	if (sem_trywait(semafor)) {
+		puts("Nie udało się opóścić semaforu");
+		perror("sem_trywait");
+		
+		struct timespec timeout;
+		clock_gettime(CLOCK_REALTIME, &timeout);
+		// funkcja o dzialaniu zblizonym do gettimeofday ..
+		
+		// zwiekszamy aktualny czas o 5s
+		timeout.tv_sec+=5;
+		
+		if (sem_timedwait(semafor, &timeout)) {
+			perror("sem_timedwait");
+			// zamykamy semafor - nie bedziemy z niego korzystac
+			sem_close(semafor);
+			goto kolejki;
+		}
+	}
+	// jest tez oczywiscie sem_wait która czeka do skutku ...
+	
+	// śpimy, to nieładnie spać w sekcji krytycznej, ale to tylko demo ...
+	puts("jesteśmy w sekcji krytycznej");
+	sleep(10);
+	
+	// podnosimy semafor
+	sem_post(semafor);
+	
+	puts("wyszliśmy z sekcji krytycznej");
+	
+	// usuwamy semafor nazwany, ma to wplyw na wszystkie procesy z niego korzystajace
+	sem_unlink("/moj_semafor");
+	
+	
+	
+	/// kolejki wiadomosci POSIX (wiecej man 7 mq_overview)
+	mqd_t kolejka;
+	
+	struct mq_attr atrybuty;
+kolejki:
+	atrybuty.mq_maxmsg=3; // pojemność kolejki - 3 wiadomości
+	atrybuty.mq_msgsize=20; // po 20 bajtów każda
+	
+	// otwarcie kolejki
+	// dla kolejki o domyślnych parametrach można podać NULL jako ostatni argument
+	// w drugim argumencie można podać
+	//  O_NONBLOCK można podać aby kolejka była nie blokująca
+	//  O_EXCL - działanie takie samo jak w sem_open()
+	// trzeba podać tryb (read, write, read+write)
+	kolejka = mq_open("/moja_kolejka", O_CREAT | O_RDWR, 0777, &atrybuty);
+	if (kolejka == (mqd_t) -1) {
+		perror("mq_open");
+		return -1;
+	}
+	
+	char buf[100]; // mogly byc 20 bo tyle wynosi mq_msgsize, ale potem sie nam przyda ...
+	unsigned priorytet;
+	struct timespec timeout;
+	clock_gettime(CLOCK_REALTIME, &timeout);
+	timeout.tv_sec+=1;
+	
+	// odbieramy wiadomość z timeoutem ...
+	size = mq_timedreceive(kolejka, buf, 100, &priorytet, &timeout);
+	// mamy także możliwość odbioru bez timeoutu bądź zarządania powiadomienia
+	// o wpisaniu pierwszej wiadomości do niepustej kolejki - mq_notify()
+	if (size > 0)
+		printf("odebralem %d bajtow z priotytetem %d: %s\n", size, priorytet, buf);
+	else
+		perror("mq_timedreceive");
+	
+	// wysyłamy wiadomość do kolejki
+	// funkcja ta zawiesi proces gdy nie ma miejsca w kolejce która nie jest
+	// otwarta z O_NONBLOCK, istnieje też wariant z timeoutem
+	mq_send(kolejka, "Ala ma kota", 12, 9);
+	// kolejka moze miec zarowno wielu producentow jak i odbiorcow
+	// raz odebrana wiadomosc znika z kolejki
+	//
+	// wiadomosci odbierane beda w kolejnosci priorytetow
+	// a w ramach jednego priorytetu w kolejnosci wysylania
+	//
+	// w przypadku braku miejsca w kolejce procesy wysyłające są zawieszane
+	
+	sleep(5);
+	
+	mq_unlink("/moja_kolejka");
+	
+	
+	
+	/// timery POSIX (wiecej man timer_settime)
+	// przygotowujemy strukture opisujaca zdarzenie zwiazane z tyknięciem timera
+	// taki sam mechanizm zdarzen wykorzystywany jest w spomnianej wcześniej mq_notify()
+	struct sigevent zdarzenie_timera;
+	zdarzenie_timera.sigev_notify = SIGEV_SIGNAL; // zostaniemy poinformowani sygnałem
+	// może być także SIGEV_THREAD wtedy w sigev_notify_function podajemy funkcje
+	// ktora ma utworzyc nowy watek, w sigev_notify_attributes atrybuty wątku a w
+	// sigev_value.sival_ptr argument funkcji wątku ... przyklad w man 3 mq_notify
+	zdarzenie_timera.sigev_signo = SIGPWR; // będzie to sygnał SIGPWR
+	zdarzenie_timera.sigev_value.sival_int = 13; // wartość sygnału
+	
+	// musimy zglosic ze jestesmy zainteresowania obsluga SIGPWR
+	signal(SIGPWR, &sig_usr);
+	
+	// tworzymy timer
+	timer_t licznik_czasu;
+	timer_create(CLOCK_REALTIME, &zdarzenie_timera, &licznik_czasu);
+	// gdyby zamiast zdarzenie_timera podać NULL to jestesmy budzeni sygnałem SIGALRM
+	
+	// konfiguryujemy i uruchamiamy timer
+	struct itimerspec zaleznosci_czasowe;
+	// pierwsze wykonanie timera po 100ms
+	zaleznosci_czasowe.it_value.tv_sec=0;
+	zaleznosci_czasowe.it_value.tv_nsec=100000000;
+	// kolejne co 1s
+	zaleznosci_czasowe.it_interval.tv_sec=1;
+	zaleznosci_czasowe.it_interval.tv_nsec=0;
+	timer_settime(licznik_czasu, 0, &zaleznosci_czasowe, NULL);
+	// warto zwrocic uwage na flage TIMER_ABSTIME umozliwiajaca ustawienie timera
+	// na czas absolutny (a nie okres czasu)
+	// jezeli it_interval bedzie wyzerowane to timer wykona się tylko raz
+	char i=0;
+	do {
+		struct itimerspec pozostalo_do_timera;
+		timer_gettime(licznik_czasu, &pozostalo_do_timera);
+		printf("do timera posostalo: %dns\n", pozostalo_do_timera.it_value.tv_nsec);
+		pause(); // czekamy na timer
+		printf("aktualna liczba utracionych tykniec timera wynosi %d\n",
+			timer_getoverrun(licznik_czasu));
+	} while(i++<4);
+	// powyzsza metoda gwarantuje rozpoczynanie w rownych odstepach czasu ...
+	// w przypadku checi zastosowania sleep() należałoby obliczac czas ktory sie
+	// wykonywalismy i odejmowac go od czasu ktory podajemy do sleep()
+	
+	// robimy sobie drzemmke ...
+	struct timespec drzemka, pobudka;
+	drzemka.tv_sec=2;
+	drzemka.tv_nsec=100000000;
+	// chemy spac 2.1s ale obudzi nas timer
+	// to ile zesmy niedospali zostanie zapisane w pobudka
+	if (nanosleep(&drzemka, &pobudka)<0 && errno == EINTR)
+		printf("niedospalismy: %ds i %dns\n", pobudka.tv_sec, pobudka.tv_nsec);
+	
+	// usuniecie timera
+	timer_delete(licznik_czasu);
+	
+	
+	
+	/// asynchroniczne IO
+	struct aiocb opis_aio;
+	opis_aio.aio_fildes = open( "/etc/passwd", O_RDONLY); // czytamy plik
+	opis_aio.aio_offset = 0; // od poczatku
+	opis_aio.aio_buf = (void *) buf; // do bufora buf
+	opis_aio.aio_nbytes = 100; // ile czytamy
+	opis_aio.aio_sigevent.sigev_notify = SIGEV_NONE;
+	// nie korzystamy z powiadomienia o koncu
+	// jest to taki sam mechanizm jak dla timerow ...
+	opis_aio.aio_reqprio = 1; // priorytet operacji
+	
+	if (aio_read(&opis_aio))
+		perror("aio_read");
+	
+	// czekamy na koniec operacji io
+	// w ogolnosci mozemy podac cala liste operacji io
+	// - funkcja wychodzi gdy ktorakolwiek sie z nich zakonczy
+	struct aiocb *lista_aio[1];
+	lista_aio[0] = &opis_aio;
+	aio_suspend(&lista_aio, 1, NULL);
+	
+	// odbieramy stan zakonczenia
+	size = aio_error(&opis_aio);
+	if (size == 0) {
+		size = aio_return(&opis_aio);
+		
+		buf[99]='\0';
+		printf("Wczytałem %d bajtów: %s\n", size, buf);
+	} else {
+		printf("aio_error return %d\n", size);
+	}
+}

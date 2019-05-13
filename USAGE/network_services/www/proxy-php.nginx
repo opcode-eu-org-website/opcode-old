@@ -1,0 +1,47 @@
+log_format combined_proxy '$http_x_real_ip $http_x_real_port - $remote_user '
+                          '[$time_local]  "$request" $status $body_bytes_sent '
+                          '"$http_referer" "$http_user_agent"';
+
+server {
+	server_name  example.org;
+	listen	   [::]:8888;
+
+	root	     /srv/;
+	index	    index.php index.html index.htm index.html.en;
+
+	access_log  /var/log/nginx/access.log combined_proxy;
+
+	location ~ ^/+([^/]+)/+(.*)$ {
+		try_files $uri $uri/ $http_x_proxy_prefix/index.php?id=$2&$args;
+
+		location ~ ^/+([^/]+)/+(.+\.php)(.*)$ {
+			fastcgi_pass   unix:/var/run/php5-fpm.sock;
+			fastcgi_index  index.php;
+
+			fastcgi_intercept_errors        on;
+			fastcgi_ignore_client_abort     off;
+			fastcgi_connect_timeout 60;
+			fastcgi_send_timeout 180;
+			fastcgi_read_timeout 180;
+			fastcgi_buffer_size 128k;
+			fastcgi_buffers 4 256k;
+			fastcgi_busy_buffers_size 256k;
+			fastcgi_temp_file_write_size 256k;
+
+			include fastcgi_params;
+
+			fastcgi_param	REMOTE_ADDR	$http_x_real_ip;
+			fastcgi_param	REMOTE_PORT	$http_x_real_port;
+
+			fastcgi_param	HTTP_HOST	$http_x_proxy_host;
+			fastcgi_param	SERVER_ADDR	$http_x_proxy_addr;
+			fastcgi_param	SERVER_PORT	$http_x_proxy_port;
+			fastcgi_param	SERVER_NAME	$http_x_proxy_name;
+			fastcgi_param	REQUEST_URI	/$2$3?$args;
+			fastcgi_param	DOCUMENT_URI	/$2$3;
+			fastcgi_param	SCRIPT_NAME	/$2;
+
+			fastcgi_param	DOCUMENT_ROOT	$document_root/$1;
+		}
+	}
+}

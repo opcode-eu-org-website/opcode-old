@@ -1,0 +1,7 @@
+<article>
+<title>Zdalny pulpit</title>
+
+<p>Oprócz możliwości odpalenia zdalnych programów na lokalnym X-serwerze (np. przez ssh z opcją -X), odpalenia programu na sesji innego użytkownika (gdy zezwolił nam na to poprzez xhosts) czy też podłączenia się do zdalnego serwera X'ów i odpalenia na nim sesji (X-terminale), mamy także możliwość zdalnego podłączenia się do sesji X-serwrera. W tym celu po stronie zdalnej należy uruchomić serwer vnc (w wariancie x11vnc), np. przy pomocy komendy <code>x11vnc -passwd 123 -forever --display :0</code>. Po stronie lokalnej potrzebować będziemy klienta vnc - <code>vncviewer -encodings Hextile IP.lubdomena.strony.zdalnej:5900</code>. Zobacz też <wiki pl="VNC">VNC</wiki>, <wiki pl="NX">NX</wiki>.</p>
+
+<p>Niekiedy wystarczającym rozwiązaniem może okazać się współdzielenie klawiatury i myszy poprzez sieć - można do tego użyć programu <homepage url="http://synergy-foss.org/">synergy</homepage>.</p>
+</article>

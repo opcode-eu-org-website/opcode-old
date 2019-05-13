@@ -1,0 +1,18 @@
+/*
+ * program slużący do testowania komunikacji przez COM
+ *
+ *
+ * 2005-05-04
+ *
+ */
+ 
+ #include <stdio.h>
+#include <sys/io.h>
+#include <unistd.h>
+#include <string.h>
+
+int main(int argv, char *argc[]) {
+	iopl (3);
+	// nadajemy 2 ...
+	outb(2, 0x3f8 +4);
+} 

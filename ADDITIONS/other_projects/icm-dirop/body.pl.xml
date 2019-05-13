@@ -1,0 +1,14 @@
+<article>
+<title>System obsługi DIRopu</title>
+
+<p>System ten składający się z dwóch części:</p>
+<ul>
+	<li>opartego na skryptach shellowych systemu przygotowania publikacji</li>
+	<li>opartego na php systemu prezentacji publikacji</li>
+</ul>
+<p>został opracowany na potrzeby projektu <a class="ext" href="http://dir.icm.edu.pl/pl/">DIROP</a> prowadzonego w <a class="ext" href="http://www.icm.edu.pl/">ICM</a> <a class="ext" href="http://www.uw.edu.pl/">UW</a>.</p>
+
+<p>Zamieszczam <a class="int" href="./icm-dirop-web.tgz">archiwum</a> z skryptami php do prezentacji starodruków (<a class="int" href="./icm-dirop-web.notar">wersja rozpakowana</a>) oraz <a class="int" href="./icm-dirop-prepare-book.tgz">archiwum</a> ze skryptami do przygotowania pozycji dodawanych do systemu prezentacji starodruków (<a class="int" href="./icm-dirop-prepare-book.notar">wersja rozpakowana</a>).</p>
+
+<p>Dodatkowo uzupełnieniem systemu jest skrypt generujący informacje dla wystawienia OAI-PMH poprzez system wydany przez "Virginia Polytechnic Institute and State University" na licencji typu MIT/X11 dostępnych na <homepage>http://www.dlib.vt.edu/projects/OAI/software/xmlfile/xmlfile.html</homepage> - <id_link id="generate-oai-pmh-dc.php">generate-oai-pmh-dc.php</id_link> oraz drobny <a class="int" href="./OAI-XMLFile-rrp.patch">patch</a> do tego systemu poprawiający drobny błąd w tym systemie (wychodzący przy testowaniu takiego repo)</p>
+</article>

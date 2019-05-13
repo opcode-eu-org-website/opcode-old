@@ -1,0 +1,9 @@
+<article>
+<title>Obwody prądu zmiennego</title>
+
+<p>Celem łatwiejszego obliczania obwodów prądu zmiennego możemy rozdzielać je na część dla prądu stałego (DC) i zmiennego (AC). Dla prądu stałego: źródło napięcia zmiennego i cewka jest zwarciem, kondensator jest przerwą w obwodzie. Dla prądu zmiennego: źródło napięcia stałego jest zwarciem, źródło prądu stałego jest rozwarciem, kondensator (jeżeli ma bardzo dużą / "nieskończoną" pojemność) jest zwarciem. Należy szczególną uwagę zwrócić na powstające po zastosowaniu takich trików łączenia elementów - często łączenia wyglądające na szeregowe są łączeniami równoległymi. Należy także pamiętać o powstającej "drugiej gałęzi" prowadzącej również do masy.</p>
+
+<p>Stałą czasową <eq_latex>\tau = RC</eq_latex> wyznacza pojemność kondensatora i jego oporowe otoczenie (rezystory które "widzi" kondensator i to w jaki sposób je "widzi" - w szczególności rezystory położone po obu stronach kondensatora mogą być połączone szeregowo poprzez masę). <eq_latex>1/\tau</eq_latex> odpowiada dolnej lub górnej (zależnie od układu) częstotliwości granicznej filtra górno lub dolno przepustowego. Należy mieć świadomość że dla prądu stałego każdy (sprawny) kondensator zachowuje się jak rozwarcie oraz że dla odpowiednio dużych częstości (zależnych od pojemności kondensatora - im większa tym niższe te częstotliwości) kondensator przewodzi prąd zmienny praktycznie bez strat.</p>
+
+<p>Zobacz w Sieci: <wiki pl="Teoria obwodów">Teoria obwodów</wiki> <wiki en="Network analysis (electrical circuits)">Teoria obwodów (en)</wiki>, <doc url="http://teoriaobwodow.edu.pl" mirror="elektronika/teoriaobwodow.edu.pl">Metody analizy obwodów liniowych (Teoria obwodów) - dr inż. Wojciech Meller</doc>.</p>
+</article>

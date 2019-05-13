@@ -1,0 +1,14 @@
+<article>
+<title>Biblioteki .so i .a</title>
+
+<p>Przy problemach z linkowaniem przydatne może być wyświetlenie symboli które zawiera konkretna biblioteka. Możemy to zrobić poleceniami:</p>
+<pre>
+#listowanie symboli w pliku .so:
+	nm -g       PLIK.so
+	nm -gC      PLIK.so  # for C++ libs
+	readelf -Ws PLIK.so  # for ELF libs
+
+#listowanie symboli w pliku .a:
+	nm          PLIK.a
+</pre>
+</article>

@@ -1,0 +1,13 @@
+network={ 
+ ssid="my-wifi"
+
+ proto=WPA2              # standard: WPA lub WPA2
+ key_mgmt=WPA-EAP        # sposób zarządzania kluczami głównymi: WPA-EAP, WPA-PSK, ...
+ pairwise=CCMP           # metoda szyfrowania dla unicast: CCMP (AES), TKIP (RC4), ...
+ group=CCMP              # metoda szyfrowania dla transmisji grupowej: CCMP (AES), TKIP (RC4), ...
+ eap=TTLS                # metoda protokołu EAP: TLS (certyfikaty), PEAP (tunelowany w TLS EAP), TTLS  (tunelowany w TLS EAP lub PAP/CHAP/MSCHAP/MSCHAPV2)
+ 
+ phase2="auth=PAP"       # metoda protokołu EAP używana wewnątrz tunelu TLS: PAP (Password Autentication Protocol), ...
+ identity="login"        # identyfikator dla PAP:
+ password="tajne_hasło"  # hasło dla PAP:
+}

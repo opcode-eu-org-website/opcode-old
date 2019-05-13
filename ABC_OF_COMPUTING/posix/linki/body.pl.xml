@@ -1,0 +1,18 @@
+<article>
+<title>Linki</title>
+
+<p>Zobacz także: <code>man <samp>nazwa-polecenia</samp></code> i/albo <code>info <samp>nazwa-polecenia</samp></code> i/albo <code><samp>nazwa-polecenia</samp> --help</code>.</p>
+
+<p>Zachęcam też do zapoznania się z artykułemi o <id_link id="ABC_OF_COMPUTING:networks:IP:konfiguracja_sieci">konfiguracji sieci IP</id_link>, <id_link id="ABC_OF_COMPUTING:networks:IP_network_services">podstawowych usługach w sieciach komputerowych</id_link>, <id_link id="software_db">bazą przydatnych programów</id_link>, <id_link id="multimedia">obróbce multimediów</id_link>, <id_link id="USAGE:operating_systems_config">poradami konfiguracyjnymi</id_link>.</p>
+
+<p>Zobacz w Sieci: 
+	<doc url="https://www.debian.org/doc/manuals/debian-handbook/" mirror="oprogramowanie/Debian/debian-handbook">The Debian Administrator's Handbook</doc>,
+	<doc url="http://tldp.org/guides.html" mirror="oprogramowanie/www.tldp.org">The Linux Documentation Project - Guides</doc>,
+	<doc url="https://www.debian.org/doc/manuals/refcard/refcard.pl.pdf" mirror="oprogramowanie/Debian/refcard.pl.pdf">Debian refcard</doc>,
+	<doc url="http://cb.vu/unixtoolbox.xhtml" mirror="oprogramowanie/UnixToolbox">Unix Toolbox</doc>,
+	<doc url="http://www.linuxdlafirm.pl/linux_podstawy/instalacja_urzadzen_pod_linuksem/identyfikacja_i_testowanie_sprzetu_pc_pod_linuksem.html">Identyfikacja i testowanie sprzętu PC pod Linuksem</doc>,
+	<wiki en="b:A Quick Introduction to Unix">A Quick Introduction to Unix</wiki>, <wiki en="b:Guide to Unix">Guide to Unix</wiki>, <wiki en="b:Guide to X11">Guide to X11</wiki>,
+	<wiki en="b:FOSS Network Infrastructure and Security">FOSS Network Infrastructure and Security</wiki></p>
+
+<p>Warty uwagi jest także <homepage url="http://www.commandlinefu.com/">commandlinefu.com</homepage> - serwis gromadzący przykłady użycia różnych komend unixowych. Aby wykodnie kożystać z poziomu powłoki możemy w jej pliku startowym zdefiniować funkcję wyświetlającą przykłady dla danego polecenia - np.: <code>fu() { wget -O - "http://www.commandlinefu.com/commands/matching/$@/$(echo -n $@ | openssl base64)/plaintext" 2>/dev/null; };</code></p>
+</article>

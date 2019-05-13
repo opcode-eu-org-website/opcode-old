@@ -1,0 +1,51 @@
+# słuchamy na wszystkich interfejsach w IPv6 i IPv4
+# niestety w tej wersji jest wlaczony IPV6_V6ONLY, wiec robimy to osobno :-(
+listen = *, [::]
+
+# logi do sysloga
+log_path = syslog
+syslog_facility = mail
+
+# grupa pocztowa
+#mail_access_groups = mail
+
+# certyfikaty SSL serwera
+ssl_cert = </etc/ssl/server.crt
+ssl_key = </etc/ssl/server.key
+
+# automatycznie tworzymy brakujace skrzynki
+lda_mailbox_autocreate = yes
+
+# nagłówek zawierający odbiorcę kopertowego
+lda_original_recipient_header = "Envelope-to"
+
+# adres nadawcy dla zwrotek itp
+postmaster_address = postmaster@example.org
+
+# obslugiwane protokoly: IMAP (takze imaps) oraz SIEVE
+protocols = "imap sieve"
+
+# w sieve sluchamy i na nowym i na starym standardzie
+service managesieve-login {
+  inet_listener sieve {
+    port = 4190
+  }
+
+  inet_listener sieve_deprecated {
+    port = 2000
+  }
+}
+
+plugin {
+  sieve = ~/.dovecot.sieve
+  sieve_dir = ~/.sieve
+}
+
+protocol lda {
+  mail_plugins = $mail_plugins sieve
+}
+
+# poczte trzymamy w $HOME/MAIL/ w formacie maildir, inbox jest w $HOME/MAIL/INVBOX
+# pliki wewntrze dovecot'a trzymamy w $HOME/MAIL/.dovecot
+mail_location = maildir:~/MAIL:INBOX=~/MAIL/INBOX:LAYOUT=fs:CONTROL=~/MAIL/.dovecot:INDEX=~/MAIL/.dovecot
+

@@ -1,0 +1,29 @@
+<article>
+<title>Konfiguracja usług sieciowych</title>
+
+<p>Na wstpępie zachęcam do zapoznania się z ogólnymi wiadomościami dotyczącymi <id_link id="ABC_OF_COMPUTING:networks:IP_network_services">usług sieciowych</id_link> oraz samych sieci <id_link id="ABC_OF_COMPUTING:networks:IP">TCP/IP</id_link> i ich konfiguraji.</p>
+
+<p>Zawsze w przypadku instalowania i konfiguracji jakiejś usługi należy zapoznać się i ewentualnie poprawić plik konfiguracyjny (domyślne ustawienia najczęściej są OK, ale też prawie zawsze trzeba coś dostosować ...). Dalej przedstawię kilka uwag odnośnie konfiguracji niektórych z ważniejszych usług. Do najistotniejszych usług zaliczyłbym (w nawiasie przykładowe programy będące serwerem danej usługi): SSH/SCP/SFTP (sshd), DNS (bind), pocztę (exim), WWW (apache); warto też znaleźć miejsce na bramkę mail-www (squirrelmail), system bazodanowy (mysql) oraz webowy interfejs jego obsługi (phpmyadmin). Bardzo istotną kwestią jest także routing i podział łącza.</p>
+
+<p>Niestety konfiguracja wielu (zwłaszcza tych młodszych) usług nie sprowadza się wyłącznie do przygotowania plików konfiguracyjnych - często zachodzi potrzeba przygotowania własnej kompilacji programu (z nałożonymi odpowiednimi łatkami) - ma to miejsce m.in. w przypadku ejabberd'a czy squirrelmail'a (szczegóły poniżej). Problemy nastręczają także próby utrzymania wspólnej bazy użytkowników dla wszystkich usług (konta shell, poczta, www, jabber, sip); niestety dodatkowo wiele z bardziej współczesnych programów ignoruje tradycyjny unixowy charakter kont (jedno konto w systemie, tradycyjne aliasy pocztowe, konfiguracja przechowywana w $HOME, ...) - zobacz poniżej informacje o zmaganiach z konfiguracją <id_link id="USAGE:network_services:xmpp">ejabberd'a</id_link> i <id_link id="USAGE:network_services:voip">asterisk'a</id_link>. W przypadku serwerów wielo-użytkownikowych dochodzi jeszcze problem przekazania maksymalnej kontroli nad konfiguracją swoich usług w ręce użytkowników (zobacz <id_link id="USAGE:network_services:user_config">poniżej</id_link>), ewentualnie jakiś panel przez nich zarządzany. Kolejnym problemem jest często obsługa vhostów i aliasingu domen (na serwerze konta kilku firm, i niektóre z nich chcą jeszcze aby wszystko było widoczne w obu ich domenach).</p>
+
+<p>Generalnie w usługach serwerowych podobnie jak i w budowie sieci można wyróżnić kilka skal wielkości:</p>
+<ul>
+	<li>siec wewnętrzna (firmowa, mieszkaniowa) - dystrybucja głównie pozioma, brak konieczności przekazywania dużej władzy w ręce poszczególnych użytkowników, rzadko kiedy potrzebne silne rozróżnienie usług w oparciu o nazwy domen (vhosty)</li>
+	<li>siec budynkowa (w pojedynczym budynku mieszkalnym lub biurowym, ewentualnie niewielkiej grupie takich budynków) - dystrybucja najczęściej doprowadzająca sygnał do lokalu/biura, w dużej mierze pionowa, warto przekazywać dużą kontrolę nad usługami serwerowymi użytkownikom, na ogół konieczne rozbudowane vhosty</li>
+	<li>siec osiedlowa - dystrybucja pozioma (pomiędzy budynkami) i pionowa (w ramach budynków), usług serwerowych brak lub ograniczony ich zakres lub sytuacja jak w sieci budynkowej</li>
+	<li>duży ISP - dystrybucja pozioma na dużych obszarach, usług serwerowych brak lub ograniczony ich zakres, rzadko rozwinięte vhosty, częściej serwering dedykowany</li>
+</ul>
+<p>Na wstępie przedstawię też przykład organizacji kont w sieci kamienicznej (jest to chyba najtrudniejszy organizacyjnie przypadek):</p>
+<ul>
+	<li>grupy tworzone w oparciu o lokale - nazwa, oraz GID w jakiś sposób zgodna z numeracja lokali (np. dla lokalu nr. 23A - nazwa "23a", GUID 123+1000 = 1123, dla lokalu 23 "23" i 23+1000=1023)</li>
+	<li>numeracja (klas) ip zgodna w jakiś sposób zgodna z numeracja grup (np. GID - 1000)</li>
+	<li>konta umieszczane w grupach wg lokalu do którego przypisywany użytkownik</li>
+	<li>nazwa konta odpowiada najkrótszemu aliasowi</li>
+	<li>numeracja telefoniczna (podstawowe konto) tworzone w oparciu o UID posiadacza (prefix + UID - 1000)</li>
+	<li>do konta 3 niezależne konfiguracje aliasów (mail, jabber, voip)</li>
+	<li>warto tworzyć aliasy SIP generowane w oparciu o numer lokalu, przypisane do konta (podstawowego numeru) głównego użytkownika i dzwoniące na wszystkie telefony w lokalu (odpowiednie  wywołanie <code>Macro(call_user|<var>konto_glowne</var>|<var>telefony</var>)</code> z moich przykładów konfiguracji asteriska)</li>
+</ul>
+
+<p>Ogólnie na dużych systemach często dobrym pomysłem jest wyłączenie tworzenia indywidualnych grup dla każdego użytkownika i umieszczanie użytkowników w grupach w bardziej przemyślany sposób (patrz opcje <code>USERGROUPS</code> i <code>USERS_GID</code> w <kbd class="path">/etc/adduser.conf</kbd>).</p>
+</article>

@@ -1,0 +1,17 @@
+#ifndef BALL_H
+#define BALL_H
+
+template <typename T> struct Ball {
+	T r;
+	T x;
+	T y;
+	T z;
+	Ball(T r, T x, T y, T z){
+		this->r = r;
+		this->x = x;
+		this->y = y;
+		this->z = z;
+	}
+	Ball(){}
+};
+#endif

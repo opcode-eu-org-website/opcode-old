@@ -1,0 +1,11 @@
+<article>
+<title>SNMP-BACnet gateway</title>
+
+<p>Jest to konfigurowalna bramka pomiędzy <wiki pl="Simple Network Management Protocol">SNMP</wiki> a <wiki pl="BACnet">BACnet</wiki>. Bramka służy do udostępniania informacji z urządzeń korzystających z SNMP (wersja 1 i 2c) w sieci BACnetowej - stroną nawiązującą połączenia (odpytującą) jest BACnet.</p>
+
+<p>Obsługa SNMP oparta jest na bibliotece <homepage url="http://net-snmp.sourceforge.net/">libnetsnmp</homepage>, natomiast obsługa BACnetu oparta jest na <homepage url="http://bacnet.sourceforge.net/">BACnet Stack</homepage> (testowane z wersją 0.5.5).</p>
+
+<p class="download"><a class="int" href="./snmp-bacnet_gateway.tgz">POBIERZ</a></p>
+
+<p>W <a href="[[!URLPREFIX!]]/archiwum/icm/snmp-bacnet_gateway_bacnet-stack-0.5.5.tgz">archiwum</a> dostępna jest pełna wersja źródeł - zawierająca stos BACnet'owy oraz linkowane statycznie pliki biblioteki libnetsnmp oraz bibliotek powiązanych.</p>
+</article>

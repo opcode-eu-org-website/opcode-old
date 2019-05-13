@@ -1,0 +1,7 @@
+<article>
+<title>Generowanie kluczy SSH</title>
+
+<p>SSH umożliwia także opcję nawiązywania połączeń bez potrzeby podawania hasła - wykorzystuje się do tego klucze asymetryczne. Aby je wygenerować korzystamy z komendy <code>ssh-keygen -t rsa</code> (możemy także wybrać inny typ klucza - dsa), jeżeli zależy nam na uniknięciu podawania hasła generujemy klucze niezabezpieczone hasłem (bezpieczniej jest używać kluczy z hasłem i <code>ssh-agent</code> aby podawać je tylko raz ...). Wygenerowane klucze znajdą się w <kbd class="path">~/.ssh/id_rsa</kbd> - prywatny, <kbd class="path">~/.ssh/id_rsa.pub</kbd> - publiczny. Klucz publiczny należy przekopiować na komputer z którym chcemy się łączyć (np[. przy pomocy scp) i dopisać do <kbd class="path">~/.ssh/authorized_keys</kbd> - <code>cat id_rsa.pub >> ~/.ssh/authorized_keys</code>.</p>
+
+<p>Możliwa jest także konwersja pomiędzy formatem kluczy openssh a ssh2: <code>ssh-keygen -e -f id_dsa.pub > id_dsa_ssh2.pub</code> i w drugą stronę: <code>ssh-keygen -i -f id_dsa_ssh2.pub > id_dsa.pub</code></p>
+</article>

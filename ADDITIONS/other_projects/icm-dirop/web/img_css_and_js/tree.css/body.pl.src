@@ -1,0 +1,49 @@
+/** LISTA NAWIGACJI **/
+ul.navigation {
+	list-style: none;
+	padding-left: 1.2em;
+	margin: 0;
+}
+ul.navigation ul {
+	list-style: none;
+	padding-left: 1.2em;
+	margin: 0.1em;
+}
+
+/* wyglądy poszczególnych pozycji */
+ul.navigation li.nav_entry_link {
+	list-style: url(dot.gif);
+}
+/* dzięki stosowaniu ":before -> content" zamist "list-style" obrazki regują na onclic w JS */
+ul.navigation li.nav_collapsed > span:before {
+	margin-right: 0.5em;
+	content: url(minus.gif);
+}
+ul.navigation li.nav_uncollapsed > span:before {
+	margin-right: 0.5em;
+	content: url(plus.gif);
+}
+ul.navigation li span {
+	cursor: pointer;
+}
+ul.navigation li span:hover {
+	background-color: #ffffff;
+}
+/* aby nie było problemów z wyłączonym JS robimy to w skrypcie
+ul.navigation li.nav_collapsed ul {
+	display: none;
+}*/
+span#nav_conttent_current {
+	font-weight: bold;
+}
+
+p#navtree_func {
+	text-align: right;
+}
+p#navtree_func span {
+	/*color: #06c;*/
+	cursor: pointer;
+}
+p#navtree_func span:hover {
+	background-color: #ffffff;
+}

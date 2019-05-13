@@ -1,0 +1,9 @@
+\section{Ogólne elementy silnika}
+
+W skład silnika wchodzą m.in. 4 klasy odpowiedzialne za ogólne funkcjonowanie gry:
+\begin{itemize}
+	\item obsługę sterowania
+	\item obsługę kamery
+	\item obsługę przechowywania i udostępniania danych konfiguracyjnych (wymaga napisania mechanizmu składowania danych w pliku konfiguracyjnym)
+	\item przechowywanie zmiennych globalnych
+\end{itemize}

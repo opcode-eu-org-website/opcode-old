@@ -1,0 +1,8 @@
+<article>
+<title>Kompilacja (programów w C dla AVR):</title>
+<p>Kompilujemy i linkujemy: <code>avr-gcc -mmcu=atmega128 -Os -ggdb <var>plik_zrodlowy.c</var> -o <var>plik_wynikowy.o</var></code><br />
+Tworzymy plik hex:<code>avr-objcopy -O ihex <var>plik_wejsciowy.elf</var> <var>plik_wynikowy.hex</var></code></p>
+<!--Kompilujemy pliki źródłowe: <code>avr-gcc -ggdb -mmcu=atmega128 -Os -c <var>plik_zrodlowy.c</var> -o <var>plik_wynikowy.o</var></code>
+Linkujemy: <code>avr-gcc -ggdb -mmcu=atmega128 -o <var>plik_wynikowy.elf</var> <var>plik_wejsciowy.o</code> kiedyś: avr-ld - -section-start .init=0 -o prog.elf prog.o /usr/avr/lib/crts2313.o -->
+
+</article>

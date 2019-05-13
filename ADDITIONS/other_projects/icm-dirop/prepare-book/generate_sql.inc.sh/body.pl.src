@@ -1,0 +1,314 @@
+#!/bin/bash
+
+echo "FUNCTION LIST:
+	print_sql_file_head
+		print initial sql header
+	sql_add_book
+		insert new book to SQL
+	sql_add_volume
+		insert new volume to SQL
+	sql_add_pages TXT_FILE_DIR
+		insert pages to SQL from dir/*.txt
+	content2sql INPUT_FILE
+		this function conwert content tablle in INPUT_FILE to sql on STDOUT
+		before start this function must be set VOLUME_ID 
+	update_sql_page_title TXT_FILE_DIR
+		generate sql UPDATE for page titles
+		before start this function must be set VOLUME_ID and START_NORMAL, START_ROMAN
+		if TXT_FILE_DIR directory not exist use numerical counter from 0 to MAX_PAGE_NO
+		if MAX_PAGE_NO is not set use 1000
+	update_info INPUT_CONFIG_FILE
+		generate sql UPDATE for volume info from bash input file
+	update_info_from_table
+		generate sql UPDATE for volume info from sql output table* input file
+		*) results of SELECT volume_id, b.title, v.title, dc_title, dc_creator, dc_subject_and_keywords, dc_description,
+		                     dc_contributor, dc_publisher, dc_date, info_category FROM book AS b JOIN volume AS v ON
+		                     v.book_id=b.book_id ORDER BY volume_id;"
+
+
+
+# funkcja odpowiedzialne za przygotowanie zmiennych
+VARIABLE_IS_PREPARED=false
+sql_prepare_variable() {
+	if ! $VARIABLE_IS_PREPARED; then
+		VARIABLE_IS_PREPARED=true
+		BOOK_URL=`echo $BOOK_URL | konwert UTF8-ascii | tr ' ' '_'`
+		if [ "$BOOK_ID" = "" ]; then
+			BOOK_ID="(SELECT book_id FROM book WHERE url='$BOOK_URL')"
+		fi
+		
+		VOLUME_URL=`echo $VOLUME_URL | konwert UTF8-ascii | tr ' ' '_'`
+		if [ "$VOLUME_ID" = "" ]; then
+			VOLUME_ID="(SELECT volume_id FROM volume WHERE book_id=$BOOK_ID AND url='$VOLUME_URL')"
+		fi
+	fi
+}
+
+# funkcja wypisuje nagłówek dla pliku SQL (polecenia głośności i przerywania gdy błędy)
+print_sql_file_head() {
+	echo '\set ECHO all'
+	echo '\set ON_ERROR_STOP'
+	echo -e "\n\n"
+}
+
+# funkcja dodająca książkę
+sql_add_book() {
+	sql_prepare_variable
+	if $BOOK_ONE_VOLUME; then
+		book_one_volume_tmp='-1'
+	else
+		if $BOOK_SEARCH_VOLUME_DEFAULT; then
+			book_one_volume_tmp='-2'
+		else
+			book_one_volume_tmp='-3'
+		fi
+	fi
+	echo "INSERT INTO book (title, url, single_vid) VALUES ('$BOOK_TITLE', '$BOOK_URL', $book_one_volume_tmp);"
+	echo -e "\n\n"
+}
+
+# funkcja dodająca volumin
+sql_add_volume() {
+	sql_prepare_variable
+	echo "INSERT INTO volume (book_id, title, url, dc_title, dc_creator, dc_subject_and_keywords, dc_description, 
+		dc_contributor, dc_publisher, dc_date, info_category, info_status)
+		VALUES ($BOOK_ID, '$VOLUME_TITLE', '$VOLUME_URL', '$DC_Title', '$DC_Creator', '$DC_Subject_and_Keywords',
+		        '$DC_Description', '$DC_Contributor', '$DC_Publisher', '$DC_Date', '$INFO_Category', 0);"
+	echo -e "\n\n"
+}
+
+# funkcja generującazbiorczy plik SQL (stdout) w oparciu o pliki txt z zadanego ($1) katalogu
+sql_add_pages() {
+	sql_prepare_variable
+	for f in "$1/"*.txt; do
+		# kolejny numer strony
+		page_no=`basename $f`
+		page_no=${page_no%.txt}
+		page_no=`echo $page_no |numconv`
+		
+		# napisowy numer strony
+		if [ $page_no = $INFO_PAGE ]; then
+			page_str="info"
+		elif [ $page_no -lt $START_ROMAN ]; then
+			page_str=`special_num $page_no`
+		elif [ $page_no -lt $START_NORMAL ]; then
+			page_str=`echo "$(($page_no + 1 - $START_ROMAN))" | numconv -t Roman_Upper`
+		else
+			page_str="$(($page_no + 1 - $START_NORMAL))"
+		fi
+		
+		# pełen tekst
+		full_text=`sed -e "s#'#\&apos;#g" < $f`
+		# tekst indeksu - łączymy linie, zamieniamy na male litery, pozbywamy się łączników w wyrazach,
+		#  pozbywamy się przecinków i kropek, kompersujemy ciągi białych znaków
+		search_text=`tr '\n' ' ' < $f | trs -f ${DIROP_SYSTEM_DIR}to_lower.trs |
+			sed -e "s#'##g" -e "s#- *##g" -e "s#[,.]# #g" -e "s#[ \n\t ]\{2,\}# #g"`
+		# uwaga: te dwie spacje w ostatniej podmianie sed'a to różne znaki !!!
+		
+		echo "INSERT INTO page (volume_id, page_no, title) VALUES ($VOLUME_ID, $page_no, '$page_str');"
+		if [ "$search_text" != "" -a "$full_text" != 0 ]; then
+			echo "INSERT INTO fulltext (page_id, fulltext_s, fulltext) VALUES (currval('page_id_seq'), '$search_text', '$full_text');"
+		fi
+		echo -e "\n"
+	done
+}
+
+# funkcja przygotowuje informację o spisie treści w SQL na podstawie podanego pliku tekstowego
+content2sql() {
+	sql_prepare_variable
+	iconv -f cp1250 -t utf8 "$1" | tr -d '\r' | sed -e 's%\t%_%g' | awk '
+		BEGIN { FS="_" }
+		{
+			# znajdujemy poziom zagłebienia
+			j=1
+			while ($j == "") j++
+			
+			# znajdujemy numer strony
+			if (match($NF, "^[0-9IVXivx— -]+$")) {
+				pageNo = gensub(" *[—-].*", "", "g", $NF)
+				title_end=NF-1
+			} else {
+				pageNo = ""
+				title_end=NF
+			}
+			
+			# znajdujemy tytuł strony
+			title = $j
+			for (i=j+1; i<=title_end; i++)
+				title = sprintf("%s %s", title, $i)
+			
+			# zapamietujemy informacje rodzicielskie
+			parent_title[j] = title
+			parent_pageNo[j] = pageNo
+			
+			# wypisujemy SQL
+			printf("INSERT INTO content (title, volume_id, page_title, parent_id) ")
+			if (j==1) {
+				printf("VALUES('"'%s', $VOLUME_ID, '%s'"', NULL);\n", title, pageNo)
+			} else {
+				# rodzic nie jest NULL - bierzemy go z podzapytania
+				printf("VALUES('"'%s', $VOLUME_ID, '%s'"', (SELECT content_id FROM content WHERE ", title, pageNo)
+				# warunek na rodzica
+				printf("volume_id='"$VOLUME_ID AND page_title='%s' AND title='%s'"' ", parent_pageNo[j-1], parent_title[j-1])
+				# zabezpieczenie przed zduplikowanym wpisem - rodzicem powinien być ostatni taki wpis
+				printf("ORDER BY content_id DESC LIMIT 1));\n")
+			}
+		}
+	'
+}
+
+update_sql_content() {
+	sql_prepare_variable
+	# kasowanie poprzednich
+	echo "UPDATE content AS c SET page_no=NULL WHERE c.volume_id=$VOLUME_ID;"
+	# ustawianie w oparciu o tabele page
+	echo "UPDATE content AS c SET page_no=(SELECT page_no FROM page AS p WHERE p.volume_id=c.volume_id AND p.title=c.page_title) WHERE c.volume_id=$VOLUME_ID;"
+	# ustalanie dla nie mających wpisu w page (na podstawie pierwszego nastepnwgo)
+	echo "UPDATE content AS c SET page_no=(SELECT page_no FROM content AS c2 WHERE c2.content_id>c.content_id AND c2.page_no IS NOT NULL AND c2.volume_id=c.volume_id ORDER BY c2.content_id LIMIT 1) WHERE page_no IS NULL AND c.volume_id=$VOLUME_ID;"
+}
+
+# funkcja generuje komendy SQL aktualizujące numeracje stron w oparciu o pliki txt z zadanego ($1) katalogu
+update_sql_page_title() {
+	sql_prepare_variable
+	
+	if [ -d "$1" ]; then
+		for_in="$1/*.txt"
+	elif [ "$MAX_PAGE_NO" != "" ]; then
+		for_in=`seq 0 $MAX_PAGE_NO`
+	else
+		for_in=`seq 0 1000`
+	fi
+		
+	for f in $for_in; do
+		# kolejny numer strony
+		page_no=`basename $f`
+		page_no=${page_no%.txt}
+		page_no=`echo $page_no |numconv`
+		
+		# napisowy numer strony
+		if [ $page_no = $INFO_PAGE ]; then
+			page_str="info"
+		elif [ $page_no -lt $START_ROMAN ]; then
+			page_str=`special_num $page_no`
+		elif [ $page_no -lt $START_NORMAL ]; then
+			page_str=`echo "$(($page_no + 1 - $START_ROMAN))" | numconv -t Roman_Upper`
+		else
+			page_str="$(($page_no + 1 - $START_NORMAL))"
+		fi
+
+		echo "UPDATE page SET title='$page_str' WHERE volume_id=$VOLUME_ID AND page_no=$page_no;"
+	done
+}
+
+
+
+update_info() {
+	{ sed -e 's/#.*$//g' $1 |
+	  trs '\n ;;' |
+	  sed -e 's/;;;*/; /g' -e 's/BOOK_ID=/\n\nBOOK_ID=/g' -e 's/VOLUME_ID=/\n\nVOLUME_ID=/g' -e '$i\ ';
+	 echo;
+	 echo;
+	} | while read line; do
+		echo $line > /tmp/$PPID.in.txt
+		. ${DIROP_SYSTEM_DIR}config.inc.sh
+		VOLUME_TITLE="$VOLUME_TITLE_BCK"; VOLUME_URL="$VOLUME_URL_BCK"
+		. /tmp/$PPID.in.txt
+		if [ "$BOOK_ID" != "" ]; then
+			BOOK_URL=`echo $BOOK_URL | konwert UTF8-ascii | tr ' ' '_'`
+			echo -n "UPDATE book SET "
+			
+			if [ "$BOOK_TITLE" != "" ]; then
+				echo -n "title='$BOOK_TITLE', ";
+				if $BOOK_ONE_VOLUME; then
+					VOLUME_TITLE_BCK="$BOOK_TITLE"
+				fi
+			else
+				echo -n "title=NULL, ";
+			fi
+			
+			if [ "$BOOK_URL" != "" ]; then
+				echo -n "url='$BOOK_URL', ";
+				if $BOOK_ONE_VOLUME; then
+					VOLUME_URL_BCK="$BOOK_URL"
+				fi
+			else
+				echo -n "url=NULL, ";
+			fi
+			
+			if $BOOK_ONE_VOLUME; then
+				echo -n "single_vid=-1 "
+			else
+				if $BOOK_SEARCH_VOLUME_DEFAULT; then
+					echo -n "single_vid=-2 "
+				else
+					echo -n "single_vid=-3 "
+				fi
+			fi
+			
+			echo "WHERE book_id=$BOOK_ID;"
+		elif [ "$VOLUME_ID" != "" ]; then
+			VOLUME_URL=`echo $VOLUME_URL | konwert UTF8-ascii | tr ' ' '_'`
+			echo -n "UPDATE volume SET "
+			if [ "$DC_Title" != "" ]; then echo -n "dc_title='$DC_Title', ";
+				else echo -n "dc_title=NULL, "; fi
+			if [ "$DC_Creator" != "" ]; then echo -n "dc_creator='$DC_Creator', ";
+				else echo -n "dc_creator=NULL, "; fi
+			if [ "$DC_Subject_and_Keywords" != "" ]; then echo -n "dc_subject_and_keywords='$DC_Subject_and_Keywords', ";
+				else echo -n "dc_subject_and_keywords=NULL, "; fi
+			if [ "$DC_Description" != "" ]; then echo -n "dc_description='$DC_Description', ";
+				else echo -n "dc_description=NULL, "; fi
+			if [ "$DC_Contributor" != "" ]; then echo -n "dc_contributor='$DC_Contributor', ";
+				else echo -n "dc_contributor=NULL, "; fi
+			if [ "$DC_Publisher" != "" ]; then echo -n "dc_publisher='$DC_Publisher', ";
+				else echo -n "dc_publisher=NULL, "; fi
+			if [ "$DC_Date" != "" ]; then echo -n "dc_date='$DC_Date', ";
+				else echo -n "dc_date=NULL, "; fi
+			if [ "$INFO_Category" != "" ]; then echo -n "info_category='$INFO_Category', ";
+				else echo -n "info_category=NULL, "; fi
+			if [ "$VOLUME_TITLE" != "" ]; then echo -n "title='$VOLUME_TITLE', ";
+				else echo -n "title=NULL, "; fi
+			if [ "$VOLUME_URL" != "" ]; then echo -n "url='$VOLUME_URL' ";
+				else echo -n "url=NULL "; fi
+			echo "WHERE volume_id=$VOLUME_ID;"
+		fi
+		echo "";
+	done
+	rm -f /tmp/$PPID.in.txt
+}
+
+update_info_from_table() {
+	awk '
+		BEGIN {
+			FS=" *[|+] *"
+			printf ("\\set ECHO all\n");
+			printf ("\\set ON_ERROR_STOP\n");
+		}
+		
+		{
+			printf ("UPDATE volume SET ");
+	
+			if ($4 !="") printf ("dc_title='"'%s'"', ", $4);
+				else printf ("dc_title=NULL, ");
+			if ($5 !="") printf ("dc_creator='"'%s'"', ", $5);
+				else printf ("dc_creator=NULL, ");
+			if ($6 !="") printf ("dc_subject_and_keywords='"'%s'"', ", $6);
+				else printf ("dc_subject_and_keywords=NULL, ");
+			if ($7 !="") printf ("dc_description='"'%s'"', ", $7);
+				else printf ("dc_description=NULL, ");
+			if ($8 !="") printf ("dc_contributor='"'%s'"', ", $8);
+				else printf ("dc_contributor=NULL, ");
+			if ($9 !="") printf ("dc_publisher='"'%s'"', ", $9);
+				else printf ("dc_publisher=NULL, ");
+			if ($10 !="") printf ("dc_date='"'%s'"', ", $10);
+				else printf ("dc_date=NULL, ");
+			if ($11 !="") printf ("info_category='"'%s'"', ", $11);
+				else printf ("info_category=NULL, ");
+	
+			volume_id = gensub("^[- ]*", "", "g", $1);
+			if (volume_id != "volume_id" && volume_id != "" )
+				printf ("volume_id=volume_id WHERE volume_id=%s;\n\n", volume_id);
+			else
+				printf ("volume_id=volume_id WHERE volume_id IS NULL;\n\n");
+		}
+	' $1
+}

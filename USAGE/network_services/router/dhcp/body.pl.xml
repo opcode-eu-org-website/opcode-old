@@ -1,0 +1,58 @@
+<article>
+<title>DHCP</title>
+
+<p>Zamieszaczam przykładowe konfigi dla DHCP zarówno w wersji dla IPv4 - <kbd class="path">/etc/dhcp3/dhcpd.conf</kbd> (konfig przystosowany jest do współpracy z <id_link id="USAGE:network_services:user_config:dhcp">systemem konfiguracji przez użytkownika</id_link>):</p>
+<pre>default-lease-time 600;
+max-lease-time 7200;
+authoritative;
+option classless-static-route code 121 = array of { integer 8, ip-address, ip-address };
+option classless-static-route-win code 249 = array of { integer 8, ip-address, ip-address };
+
+subnet 192.168.0.0 netmask 255.255.0.0 {
+	range 192.168.28.1 192.168.28.100;
+	option subnet-mask 255.255.0.0;
+	option broadcast-address 192.168.255.255;
+	option routers 192.168.0.1;
+	option domain-name-servers 192.168.0.1;
+	# przydatne gdy w sieci lokalnej mamy adresy prywatne i publiczne
+	option classless-static-route MASKA_KROTKA IP_SIECI_PUB 0.0.0.0;
+	option classless-static-route-win 32 ADRES_HOSTA_PUB ADRES_HOSTA_PRIV, 32 ADRES_HOSTA_PUB ADRES_HOSTA_PRIV;
+}
+
+# konfiguracja centralna ...
+host h1{
+	hardware ethernet XX:XX:XX:XX:XX:XX; 
+	fixed-address YYY.YYY.YYY.YYY;
+}
+
+# konfiguracja generowana z plików użytkowników
+include "/var/user_config/dhcpd.conf";
+</pre>
+
+<p>A także dla IPv6 - <kbd class="path">/etc/wide-dhcpv6/dhcp6s.conf</kbd>:</p>
+<pre>
+option domain-name-servers 2001:db8:1000:3a::1000;
+option domain-name "n17.waw.pl"
+
+# jako klient najprzyjemniejszy wydaje się dibbler-client
+# ale serwer wide-dhcpv6 jest bardziej elegancki w konfiguracji (zwłaszcza stały adres dla wskazanego hosta)
+
+host robert {
+	duid unik:alnyident:yfika:tor:dhcp;
+	# UWGA: nie jest to MAC adres !!!
+	# jest on stały dla systemu a nie katrty sieciowej (czyli w większości wypadków mniej stały niż MAC)
+	address 2001:db8:1000:3a::2 infinity;
+	# z jakiś przyczyn adres zostanie przyjęty jako pochodzący z sieci /64 i na ddatek nie ma niestyety:
+	# * jawnej mozliwości rozgłaszania długości prefiksu :-(
+	# * rozgłaszania konfiguracji routingu
+};
+
+interface eth0 {
+	address-pool pool1 3600;
+};
+
+pool pool1 {
+	range 2001:db8:1000::1 to 2001:db8:1000::100 ;
+};
+</pre>
+</article>

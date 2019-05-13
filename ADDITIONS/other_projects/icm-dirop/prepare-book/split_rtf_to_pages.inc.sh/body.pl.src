@@ -1,0 +1,32 @@
+#!/bin/bash
+
+TMP_FILE="/tmp/page_from_rtf.$PPID.tmp.rtf"
+
+echo "USAGE:
+	page_from_rtf_init INPUT_RTF_FILE
+		this function set RTF_PAGE_MAX with last page number
+	page_from_rtf PAGE_TOEXPORT > OUTPUT_RTF_FILE
+	all_page_from_rtf INPUT_RTF_FILE
+		this function export all pages from rtf to {oginal_name}_PAGE_{number}.rtf"
+
+# $1 plik rtf do przetworzenia
+page_from_rtf_init() {
+	sed 's#\\sbkpage#\n#g' < $1 > $TMP_FILE
+	RTF_PAGE_MAX=`wc -l < $TMP_FILE | cut -f1 -d' '`
+}
+
+# $1 strona którą chcemy wydzielić
+page_from_rtf() {
+	echo '{\rtf1\ansi \ansicpg1250'
+	head -n $1 < $TMP_FILE | tail -n 1
+	echo '}'
+}
+
+# $1 plik rtf do przetworzenia
+all_page_from_rtf() {
+	page_from_rtf_init $1
+	file_name=`basename "$1"`
+	for (( i=1 ; $i<=$RTF_PAGE_MAX ; i++ )) ; do
+		page_from_rtf $i > $file_name_PAGE_$i.rtf
+	done
+}

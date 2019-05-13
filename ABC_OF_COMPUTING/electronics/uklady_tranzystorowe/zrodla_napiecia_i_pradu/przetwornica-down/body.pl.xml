@@ -1,0 +1,7 @@
+<article>
+<title>Przetwornica step-down</title>
+
+<p><img_from_src name="step_down" type="sch" alt="schemat ideowy prztwornicy obniżającej" /></p>
+
+<p>Działanie przedstawionej przetwornicy opiera się na takiej samej zasadzie jak ściemniacze elektroniczne, czyli na załączaniu i wyłączaniu obwodu na odpowiednie jednostki czasu, aby obniżyć wartość średniego napięcia wyjściowego do zadanej. Sterowanie takie nadaje się bez problemowo do urządzeń takich jak grzałki, żarówki itp. Zastosowanie takiego mechanizmu do zasilania elementów o małej bezwładności (układów elektronicznych) wymaga jednak wygładzenia skoków napięcia (nie możemy robić przerw w zasilaniu tylko musimy uśrednić wartość tego napięcia. Wymaga to dodania kondensatora filtrującego C1, jego dodanie powoduje niestety trudności z sterowaniem Q1 jako klucza nasyconego - stąd L1 i D1. Przetwornica tego typu przy prądzie poniżej założonego będzie miała wyższe napięcie na wyjściu od założonego (może osiągnąć nawet napięcie zasilania). <eq_latex>U_{WY} = U_{WE}{t_1 \over t_1 + t_2}</eq_latex></p>
+</article>

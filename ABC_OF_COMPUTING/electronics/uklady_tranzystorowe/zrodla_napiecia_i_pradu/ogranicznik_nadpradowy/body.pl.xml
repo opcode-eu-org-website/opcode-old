@@ -1,0 +1,9 @@
+<article>
+<title>Ogranicznik nadprądowy</title>
+<p>Istotnym aspektem układów zasilania jest ich zabezpieczenie przed poborem zbyt dużego prądu (funkcjonalność bezpiecznika elektronicznego). Układ taki można zrealizować np. w następujący sposób (nadmierny prąd powoduje nadmierny spadek na <eq_latex>R = {0.6\rm{V} \over I_{max}}</eq_latex>, co prowadzi do otwarcia Q2 i odciągania prądu z bazy Q1 - zakładamy że Q1 sterowany z jakiegoś źródła o niewielkiej wydajności prądowej - wzmacniacza błędu):</p>
+
+<p class="center"><img_from_src name="ogranicznik_nadpradowy" type="sch" alt="schemat ideowy ogranicznika nadprądowego" /></p>
+
+<p>Poniższy schemat przedstawia typowe realizacje samodzielnych <wiki en="Current limiting">ograniczników prądowych</wiki> włączanych od strony masy (na tranzystorach NPN) lub od strony zasilania (na PNP):</p>
+<p class="center"><img_from_src name="ogranicznik_nadpradowy2" type="sch" alt="schemat ideowy ogranicznika nadprądowego" /></p>
+</article>

@@ -1,0 +1,80 @@
+#!/bin/bash
+
+DI_action0() {
+	printf "X: 0x%x 0x%x\n" $1 $2
+	if [ $(( $1 & 0x4)) -ne 0 ]; then		# zmiana była na 0x4
+		if [ $(( $2 & 0x4)) -ne 0 ]; then	#   został aktywowany
+			if [ $(( $2 & 0x2)) -ne 0 ]; then
+				roleta up
+			else
+				roleta down
+			fi
+		else                             	#   został dezaktywowany
+			roleta stop
+		fi
+	fi
+}
+
+DI_action1() {
+	printf "A: 0x%x\n" $1
+	[ $(( $1 & 0x120)) -ne 0 ]    && swiatlo "pokoj1" switch
+	[ $(( $1 & 0x1000)) -ne 0 ]   && gniazdko "komputer" 1
+}
+DI_action2() {
+	printf "B: 0x%x\n" $1
+	[ $(( $1 & 0x20)) -ne 0 ]     && swiatlo "pokoj2" switch
+	[ $(( $1 & 0x1000)) -ne 0 ]   && echo "unused"
+}
+DI_action3() {
+	printf "C: 0x%x\n" $1
+	[ $(( $1 & 0x1000)) -ne 0 ]   && gniazdko "komputer" 0
+}
+DI_action4() {
+	printf "D: 0x%x\n" $1
+}
+DI_action_verbose() {
+	printf "INPUT: 0x%x\n" $1
+	[ $(( $1 & 0x1)) -ne 0 ]      && echo " przycisk 1 modul Atmega"
+	[ $(( $1 & 0x200000)) -ne 0 ] && echo " przycisk 1 modul 1wire"
+	[ $(( $1 & 0x800000)) -ne 0 ] && echo " przycisk 2 modul 1wire"
+}
+
+
+verbose_read_tmperature() {
+	function t() {
+		echo -n "$1"
+		shift 1
+		./one_wire/read_temp $@ | grep TEMP | cut -f2- -d:
+	}
+	# kabel nr 5 - temperatura w racku
+	set_onewire 0
+	t "rack dolny front:             " 0x28 0x34 0x8B 0x58 0x02 0x00 0x00 0x1F
+	t "rack dolny tył:               " 0x28 0xFA 0x52 0x58 0x02 0x00 0x00 0x3E
+	set_onewire 3
+	t "rack górny tył:               " 0x28 0x8A 0x39 0x72 0x02 0x00 0x00 0xAC
+	t "rack górny front:             " 0x28 0xC7 0xB3 0x71 0x02 0x00 0x00 0x6D
+}
+
+verbose_read_analog() {
+	DEV_ADDR=0x10
+	i2cset -y $BUS_ADDR $DEV_ADDR 0xAf 0xf3;
+	echo -n "POTENCJOMETR: "; i2cget -y $BUS_ADDR $DEV_ADDR 0xA0;
+	echo -n "PIR 1 "; i2cget -y $BUS_ADDR $DEV_ADDR 0xA1;
+	echo -n "DYM 1  "; i2cget -y $BUS_ADDR $DEV_ADDR 0xA2;
+}
+
+
+verbose_read_input() {
+	if invalA=`i2cget -y $BUS_ADDR 0x20 $GPIO`; then
+		[ $(( $invalA & 0x20)) -eq 0 ] && echo "przycisk 1 modul 1wire"
+		[ $(( $invalA & 0x80)) -ne 0 ] && echo "przycisk 2 modul 1wire"
+	else
+		echo "ERROR: A"
+	fi
+	if invalB=`i2cget -y $BUS_ADDR 0x10 0x99`; then
+		[ $(( $invalB & 0x01)) -ne 0 ] && echo "przycisk 1 modul Atmega"
+	else
+		echo "ERROR: B"
+	fi
+}
+

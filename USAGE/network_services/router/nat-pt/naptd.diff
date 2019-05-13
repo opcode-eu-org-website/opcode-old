@@ -1,0 +1,311 @@
+diff -cr naptd-0.4/Makefile naptd-0.4-Debian-SID/Makefile
+*** naptd-0.4/Makefile	2005-08-16 22:31:00.000000000 +0200
+--- naptd-0.4-Debian-SID/Makefile	2008-06-12 01:27:25.000000000 +0200
+***************
+*** 1,4 ****
+! MAKE = gmake
+  MFLAGS = -C
+  SUBDIRS = src
+  
+--- 1,4 ----
+! MAKE = make
+  MFLAGS = -C
+  SUBDIRS = src
+  
+diff -cr naptd-0.4/src/alg_dns.cc naptd-0.4-Debian-SID/src/alg_dns.cc
+*** naptd-0.4/src/alg_dns.cc	2006-01-28 18:14:33.000000000 +0100
+--- naptd-0.4-Debian-SID/src/alg_dns.cc	2008-06-12 02:47:03.000000000 +0200
+***************
+*** 307,333 ****
+  		
+  		dns->input_ptr += name_length;
+  
+! 		u16	rr_type, rr_class, out_rr_type;
+  		u32	rr_ttl;
+  
+! 		GETSHORT(rr_type, dns->input_ptr);
+  		GETSHORT(rr_class, dns->input_ptr);
+  		GETLONG(rr_ttl, dns->input_ptr);
+  #ifdef _DEBUG_
+! 	printf("rr_type(%u) rr_class(%u)\n", rr_type, rr_class);
+  #endif // _DEBUG_
+! 		out_rr_type = rr_type;
+  		
+  		if (rr_class == C_IN) {
+  			if (dns->direction == IPPROTO_IP) {
+! 				switch (rr_type) {
+  					case T_A:
+  						if (dns->mapping->v6_seq_offset != T_A)
+! 							out_rr_type = T_AAAA;
+  					break;
+  					
+  					case T_AAAA:
+! 						out_rr_type = T_A;
+  					break;
+  					
+  					case T_PTR:
+--- 307,334 ----
+  		
+  		dns->input_ptr += name_length;
+  
+! 		/* problem with preprocesor (??) when this variable is named rr_type */
+! 		u16 rr_tXXype, rr_class, out_rr_tXXype;
+  		u32	rr_ttl;
+  
+! 		GETSHORT(rr_tXXype, dns->input_ptr);
+  		GETSHORT(rr_class, dns->input_ptr);
+  		GETLONG(rr_ttl, dns->input_ptr);
+  #ifdef _DEBUG_
+! 	printf("rr_tXXype(%u) rr_class(%u)\n", rr_tXXype, rr_class);
+  #endif // _DEBUG_
+! 		out_rr_tXXype = rr_tXXype;
+  		
+  		if (rr_class == C_IN) {
+  			if (dns->direction == IPPROTO_IP) {
+! 				switch (rr_tXXype) {
+  					case T_A:
+  						if (dns->mapping->v6_seq_offset != T_A)
+! 							out_rr_tXXype = T_AAAA;
+  					break;
+  					
+  					case T_AAAA:
+! 						out_rr_tXXype = T_A;
+  					break;
+  					
+  					case T_PTR:
+***************
+*** 339,347 ****
+  					break;
+  				}
+  			} else if (dns->direction == IPPROTO_IPV6) {
+! 				switch (rr_type) {
+  					case T_AAAA:
+! 						out_rr_type = T_A;
+  					break;
+  				
+  					case T_PTR:
+--- 340,348 ----
+  					break;
+  				}
+  			} else if (dns->direction == IPPROTO_IPV6) {
+! 				switch (rr_tXXype) {
+  					case T_AAAA:
+! 						out_rr_tXXype = T_A;
+  					break;
+  				
+  					case T_PTR:
+***************
+*** 368,374 ****
+  		if (dns->buffer_remaining < sizeof(u16) * 3 + sizeof(u32))
+  			return false;
+  		
+! 		PUTSHORT(out_rr_type, dns->output_ptr);
+  		PUTSHORT(rr_class, dns->output_ptr);
+  		PUTLONG(rr_ttl, dns->output_ptr);
+  
+--- 369,375 ----
+  		if (dns->buffer_remaining < sizeof(u16) * 3 + sizeof(u32))
+  			return false;
+  		
+! 		PUTSHORT(out_rr_tXXype, dns->output_ptr);
+  		PUTSHORT(rr_class, dns->output_ptr);
+  		PUTLONG(rr_ttl, dns->output_ptr);
+  
+***************
+*** 381,387 ****
+  
+  		u16 out_rr_rdlength(rr_rdlength);
+  		
+! 		if (!translate_rdata(dns, out_rr_type, &out_rr_rdlength))
+  			return false;
+  
+  		if (out_rr_rdlength != rr_rdlength)
+--- 382,388 ----
+  
+  		u16 out_rr_rdlength(rr_rdlength);
+  		
+! 		if (!translate_rdata(dns, out_rr_tXXype, &out_rr_rdlength))
+  			return false;
+  
+  		if (out_rr_rdlength != rr_rdlength)
+***************
+*** 394,400 ****
+  	return true;
+  }
+  
+! bool translate_rdata(dns_query *dns, u16 rr_type, u16 *rr_rdlength)
+  {
+  #ifdef _DEBUG_
+  	printf("translate_rdata() called\n");
+--- 395,401 ----
+  	return true;
+  }
+  
+! bool translate_rdata(dns_query *dns, u16 rr_tXXype, u16 *rr_rdlength)
+  {
+  #ifdef _DEBUG_
+  	printf("translate_rdata() called\n");
+***************
+*** 405,414 ****
+  	u32 serial, refresh, retry, expire, minimum;
+  	u8 *start_pos = dns->output_ptr;
+  	
+! 	switch (rr_type) {
+  		case T_AAAA:
+  #ifdef _DEBUG_
+! 	printf("rr_type == T_A\n");
+  #endif // _DEBUG_
+  			if (dns->buffer_remaining < 16)
+  				return false;
+--- 406,415 ----
+  	u32 serial, refresh, retry, expire, minimum;
+  	u8 *start_pos = dns->output_ptr;
+  	
+! 	switch (rr_tXXype) {
+  		case T_AAAA:
+  #ifdef _DEBUG_
+! 	printf("rr_tXXype == T_A\n");
+  #endif // _DEBUG_
+  			if (dns->buffer_remaining < 16)
+  				return false;
+Tylko w naptd-0.4-Debian-SID/src: alg_dns.o
+Pliki binarne naptd-0.4/src/alg-dns.so i naptd-0.4-Debian-SID/src/alg-dns.so się różnią
+Tylko w naptd-0.4-Debian-SID/src: alg_ftp.o
+Pliki binarne naptd-0.4/src/alg-ftp.so i naptd-0.4-Debian-SID/src/alg-ftp.so się różnią
+Tylko w naptd-0.4-Debian-SID/src: alg.o
+diff -cr naptd-0.4/src/arp_handler.cc naptd-0.4-Debian-SID/src/arp_handler.cc
+*** naptd-0.4/src/arp_handler.cc	2006-01-28 18:14:33.000000000 +0100
+--- naptd-0.4-Debian-SID/src/arp_handler.cc	2008-06-12 01:29:25.000000000 +0200
+***************
+*** 23,28 ****
+--- 23,29 ----
+   */
+  
+  #include <errno.h>
++ #include <string.h>
+  #include <net/if_arp.h>
+  #include <net/route.h>
+  #include "arp_handler.h"
+Tylko w naptd-0.4-Debian-SID/src: arp_handler.o
+diff -cr naptd-0.4/src/ataga.cc naptd-0.4-Debian-SID/src/ataga.cc
+*** naptd-0.4/src/ataga.cc	2006-01-28 18:14:33.000000000 +0100
+--- naptd-0.4-Debian-SID/src/ataga.cc	2008-06-12 01:30:39.000000000 +0200
+***************
+*** 23,28 ****
+--- 23,29 ----
+   */
+   
+  #include <errno.h>
++ #include <stdlib.h>
+  #include <signal.h>
+  #include <linux/if_packet.h>
+  #include "ataga.h"
+Tylko w naptd-0.4-Debian-SID/src: ataga.o
+Tylko w naptd-0.4-Debian-SID/src: conf_maker.o
+diff -cr naptd-0.4/src/dns_helper.cc naptd-0.4-Debian-SID/src/dns_helper.cc
+*** naptd-0.4/src/dns_helper.cc	2006-01-28 18:14:33.000000000 +0100
+--- naptd-0.4-Debian-SID/src/dns_helper.cc	2008-06-12 01:54:48.000000000 +0200
+***************
+*** 23,28 ****
+--- 23,29 ----
+   */
+  
+  #include "ataga.h"
++ #include <string.h>
+  #include "dns_helper.h"
+  #include "nat-mngr.h"
+  
+Tylko w naptd-0.4-Debian-SID/src: dns_helper.o
+Tylko w naptd-0.4-Debian-SID/src: log.o
+Tylko w naptd-0.4-Debian-SID/src: naptd
+Tylko w naptd-0.4-Debian-SID/src: naptd-confmaker
+diff -cr naptd-0.4/src/nat-mngr.cc naptd-0.4-Debian-SID/src/nat-mngr.cc
+*** naptd-0.4/src/nat-mngr.cc	2006-01-28 18:14:33.000000000 +0100
+--- naptd-0.4-Debian-SID/src/nat-mngr.cc	2008-06-12 02:03:10.000000000 +0200
+***************
+*** 23,28 ****
+--- 23,29 ----
+   */
+  
+  #include <pthread.h>
++ #include <string.h>
+  #include "ataga.h"
+  #include "nat-mngr.h"
+  
+Tylko w naptd-0.4-Debian-SID/src: nat-mngr.o
+diff -cr naptd-0.4/src/ndisc.cc naptd-0.4-Debian-SID/src/ndisc.cc
+*** naptd-0.4/src/ndisc.cc	2006-01-28 18:14:33.000000000 +0100
+--- naptd-0.4-Debian-SID/src/ndisc.cc	2008-06-12 02:04:16.000000000 +0200
+***************
+*** 23,28 ****
+--- 23,29 ----
+   */
+  
+  #include <errno.h>
++ #include <stdlib.h>
+  #include <netinet/if_ether.h>
+  #include <net/route.h>
+  #include "ndisc.h"
+Tylko w naptd-0.4-Debian-SID/src: ndisc.o
+diff -cr naptd-0.4/src/settings.h naptd-0.4-Debian-SID/src/settings.h
+*** naptd-0.4/src/settings.h	2006-01-28 18:14:34.000000000 +0100
+--- naptd-0.4-Debian-SID/src/settings.h	2008-06-12 02:05:42.000000000 +0200
+***************
+*** 50,55 ****
+--- 50,57 ----
+  #define _SETTINGSMANAGER_H_
+  
+  #include <stdio.h>
++ #include <string.h>
++ #include <stdlib.h>
+  #include <vector>
+  #include <map>
+  #include <cassert>
+Tylko w naptd-0.4-Debian-SID/src: settings.o
+diff -cr naptd-0.4/src/v4_handler.cc naptd-0.4-Debian-SID/src/v4_handler.cc
+*** naptd-0.4/src/v4_handler.cc	2006-01-28 18:14:34.000000000 +0100
+--- naptd-0.4-Debian-SID/src/v4_handler.cc	2008-06-12 02:10:49.000000000 +0200
+***************
+*** 584,590 ****
+  					break;
+  				
+  				case ICMP_UNREACH_SRCFAIL:
+! 					*code = ICMP6_DST_UNREACH_NOTNEIGHBOR;
+  					break;
+  				
+  				case ICMP_UNREACH_NET_UNKNOWN:
+--- 584,591 ----
+  					break;
+  				
+  				case ICMP_UNREACH_SRCFAIL:
+! 					//*code = ICMP6_DST_UNREACH_NOTNEIGHBOR;
+! 					*code = ICMP6_DST_UNREACH_NOROUTE;
+  					break;
+  				
+  				case ICMP_UNREACH_NET_UNKNOWN:
+Tylko w naptd-0.4-Debian-SID/src: v4_handler.o
+diff -cr naptd-0.4/src/v6_handler.cc naptd-0.4-Debian-SID/src/v6_handler.cc
+*** naptd-0.4/src/v6_handler.cc	2006-01-28 18:14:34.000000000 +0100
+--- naptd-0.4-Debian-SID/src/v6_handler.cc	2008-06-12 02:11:46.000000000 +0200
+***************
+*** 424,432 ****
+  					*code = ICMP_UNREACH_HOST_PROHIB;
+  					break;
+  				
+! 				case ICMP6_DST_UNREACH_NOTNEIGHBOR:
+! 					*code = ICMP_UNREACH_SRCFAIL;
+! 					break;
+  				
+  				case ICMP6_DST_UNREACH_ADDR:
+  					*code = ICMP_UNREACH_HOST;
+--- 424,432 ----
+  					*code = ICMP_UNREACH_HOST_PROHIB;
+  					break;
+  				
+! //				case ICMP6_DST_UNREACH_NOTNEIGHBOR:
+! //					*code = ICMP_UNREACH_SRCFAIL;
+! //					break;
+  				
+  				case ICMP6_DST_UNREACH_ADDR:
+  					*code = ICMP_UNREACH_HOST;
+Tylko w naptd-0.4-Debian-SID/src: v6_handler.o

@@ -1,0 +1,11 @@
+<article>
+<title>inne ...</title>
+
+<p>Oczywiście wyżej przedstawione systemy nie wyczerpują całej gamy systemów operacyjnych (nawet jeżeli brać pod uwagę tylko te POSIXowate lub tylko te typu FLOS). Z systemów o których uważam że trzeba tu wspomnieć są jeszcze dwa systemy wywodzące się z architektury PPC (stare Mac'i) - są to Haiku (dawniej OpenBeOS) oraz Darwin.</p>
+
+<p><wiki pl="Haiku (system operacyjny)">Haiku</wiki> jest będącym ciągle w (dość wczesnej) fazie rozwojowej wolnym (na licencji MIT X11) klonem BeOSa. Sam BeOS był posixowym systemem operacyjnym, wyposarzonym w środowisko graficzne, ale bez X-serwera. Oprócz dobrego wsparcia dla multimediów system charakteryzował się interesującym systemem plików z bardzo rozbudowanymi atrybutami (np. wszystkie dane książki adresowej były przechowywane jako atrybuty pustych (!!) plików). W serwisie tym kiedyś było trochę więcej na temat tego systemu - zainteresowanych zapraszam do archiwum oraz działu o C/C++. System pomimo swojej unixowatości odbiegał jednak dość znacznie (np. strukturą katalogów) od powszechnie spotykanych unixów - programy były przechowywane np. w katalogach <kbd class="path">/boot/beos/bin</kbd> i <kbd class="path">/boot/home/config/bin</kbd>, ten drugi miał wyższy priorytet w ścieżce wyszukiwania, konfiguracja umieszczona była w <kbd class="path">/boot/home/config/settings/</kbd>, a za autostart odpowiadał skrypt bashowy <kbd class="path">/boot/home/config/boot/UserBootscript</kbd>, sam basz natomiast był dostępny tylko jako <kbd class="path">/bin/sh</kbd> (a nie jako <kbd class="path">/bin/bash</kbd>).</p>
+
+<p><wiki pl="Darwin (system operacyjny)">Darwin</wiki> jest unixowatym systemem operacyjnym, stanowiącym podstawę dla <wiki pl="OS X">Mac OS X</wiki>. Swoimi korzeniami sięga systemów z rodziny BSD.</p>
+
+<p>Jeszcze innym, niekiedy bardzo przydatnym system operacyjnym FLOS jest <homepage url="http://www.freedos.org/">FreeDOS</homepage>, warta uwagi jest także jego odmiana w formie bootującej dyskietki - <homepage url="http://www.finnix.org/Balder">Balder</homepage>.</p>
+</article>

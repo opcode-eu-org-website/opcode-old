@@ -1,0 +1,55 @@
+%.o: %.cpp $(PROJECTPATH)/Makefile.config
+	gcc -c $(CFLAGS) $<
+
+# cele wymienione w $(OBJ_FROM_CPP_H) wymagają pliku CPP i H
+$(OBJ_FROM_CPP_H): %.o: %.cpp %.h
+
+# reguła określająca sposób postepowania dla wszystkich
+# celów podanych w zmiennej $(SUBDIR) gdy trzeba zdobyć ten cel
+# (jest zależnością robionego celu lub jest jawnie podany w argumencie make)
+$(SUBDIR):
+	@ $(MAKE) -C $@
+
+%.pdf: %.tex
+	cat $(PROJECTPATH)/head.tex doc.tex > build.tex
+	echo "\end{document}" >> build.tex
+	pdflatex build.tex
+	mv build.pdf doc.pdf
+
+help:
+	@echo "UŻYCIE:"
+	@echo "  make -> budowanie całości projektu (gdy w katalogu głównym) lub kompilacja dla wszystkich *.o"
+	@echo "  make SUBDIR -> kompilacja wskazanego podkatalogu"
+	@echo "  make PLIK.o -> kompilacja dla wskazanego pliku obiektowego"
+	@echo ""
+	@echo "  make doc-all -> budowa dokumentacji dla całego projektu"
+	@echo "  make NAME.pdf -> budowa dokumentacji z pliku NAME.tex z użyciem odpowiednich nagłówków"
+	@echo ""
+	@echo "  make clean -> czyszczenie z plików build.* (budowa dokumentacji) oraz *.o (kompilacja)"
+	@echo "  make clean-full -> podobnie jak clean ale kasuje też plik wykonywalny i doc.pdf"
+	@echo "  make clean-subdir -> podobnie jak clean ale rekurencyjnie dla podkatalogów"
+	@echo "  make clean-subdir-full -> podobnie jak clean-full ale rekurencyjnie dla podkatalogów"
+
+doc-all:
+	cat $(PROJECTPATH)/head.tex > build.tex
+	@ for d in $(SUBDIR); do cat $(PROJECTPATH)/$$d/doc.tex >> build.tex; done
+	echo "\end{document}" >> build.tex
+	pdflatex build.tex
+	mv build.pdf doc.pdf
+
+clean:
+	rm -f *.o
+	rm -f build.aux build.log build.out build.pdf build.tex
+
+clean-subdir: clean
+	@ for d in $(SUBDIR); do make -C $$d clean; done
+
+clean-full: clean
+	rm -f $(PROJECTNAME)
+	rm -f doc.pdf
+
+clean-subdir-full: clean-full
+	@ for d in $(SUBDIR); do make -C $$d clean-full; done
+
+# reguły wykonywane zawsze (zawsze nieaktualne)
+.PHONY: $(SUBDIR) help doc-all clean clean-subdir clean-full clean-subdir-full

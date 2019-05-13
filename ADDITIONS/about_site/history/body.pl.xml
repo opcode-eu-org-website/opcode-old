@@ -1,0 +1,225 @@
+<article>
+<title>Historia strony</title>
+<p>2019-03-21</p><ul><li>biblioteka symboli, footprintów oraz narzędzi dla gEDA/gschem i pcb-rnd przeniesiona do <a href="https://bitbucket.org/RPaciorek/EDA-libs">dedykowanego repozytorium git</a></li><li>likwidacja działów archiwum, mirrors, download i galerii zdjęć</li><li>inne poprawki, uzupełnienia i aktualizacje</li></ul>
+<p>2017-09-01</p><ul><li>udostępnienie "<a href="http://vip.opcode.eu.org/">Vademecum informatyki praktycznej</a>"</li><li>trochę więcej o git i gdb</li><li>inne poprawki i uzupełnienia</li></ul>
+<p>2016-05-03</p><ul><li>aktualizacja bazy symboli gEda / gschem</li><li>systemd i tworzenie katalogow w /run</li><li>montowanie obrazu typu dd</li><li>inne poprawki i uzupełnienia</li></ul>
+
+<p>2015-10-20</p><ul><li>zmiana struktury strony (dawny dział ABC na głównym poziomie)</li><li>przywrócenie wersji PDF</li><li>aktualizacja artykułu o LaTeX</li><li>aktualizacja artykułu Komputery oraz opisu procesu startu systemu w dziale POSIX (grub2, uefi, systemd)</li><li>aktualizacja i rozbudowa poradnika Blender-owego</li><li>kilka słów o konfiguracji pilotów IR oraz konfiguracji WiFi</li><li>skrypt mirroringu mediawiki w dziale o python'ie</li><li>bardziej szczegółowy opis tworzenia liveUSB z Debianem</li><li>weryfikacja i aktualizacja linków zewnętrznych</li><li>dostępne lokalne mirrory wybranych serwisów zewnętrznych</li><li>inne poprawki i uzupełnienia</li></ul>
+
+<p>2014-12-31</p><ul><li><id_link id="add_md5_to_pdf.sh">skrypt nadrukowujący dodatkowe informacje na pdf-ach</id_link></li><li>uzupełnienia galerii fotek</li><li>skrypt userbouquet-names.sh wspomagający manuala edycje list programów w Enigma2</li><li>drobne poprawki i uzupełnienia</li></ul>
+<p>2014-08-26, 2014-08-27</p><ul><li>drobne poprawki i uzupełnienia</li></ul>
+<p>2014-08-21</p><ul><li>artykuł na temat <a href="/more_advanced/multimedia/enigma2_dvb_stb/">linuxowych STB DVB</a> - w oparciu o Xpeed LX3 i Enigma2</li><li>inne poprawki i uzupełnienia</li></ul>
+
+<p>2013-12-23</p><ul><li>program do obsługi czytnika kontroli dostępu</li><li>oprogramowanie do obsługi wyświetlacza LED RGB</li><li>inne poprawki i uzupełnienia</li></ul>
+<p>2013-11-17</p><ul><li>reorganizacje artykułów dotyczących instalacji elektrycznych, monitoringu i systemów bezpieczeństwa</li><li>scalenie działów głównych - "Pomysły, koncepcje, komentarze itp", "Ciekawsze zagadnienia z komputerologii" oraz "Użytkowanie i konfiguracja" stanowią teraz jeden dział "Bardziej zaawansowane zagadnienia"</li><li>inne poprawki i uzupełnienia</li></ul>
+<p>2013-10-18</p><ul><li>poprawki i uzupełnienia w projektach elektronicznych "inteligentnego domu"</li><li>modbus dla AVR</li><li>modyfikacja obsługi virtusertable w eximie</li><li>nowe symbole dla gEDA</li><li>uzupełnienia w artykule "Instalacje i budynki, czyli cyfrowy dom"</li><li>kilka słów o IP-CCTV i RTSP</li><li>inne poprawki i uzupełnienia</li></ul>
+<p>2013-02-06</p><ul><li>poprawki i uzupełnienia w opisie konfiguracji linuxowego środowiska pracy</li><li>uzupełnienia w artykule "Instalacje i budynki, czyli cyfrowy dom"</li></ul>
+<p>2013-02-01</p><ul><li>aktualizacje projektów elektronicznych (inteligentny dom i okolice)</li><li>uzupełnienia na temat geda i pcb (w tym poprawki symboli gschem)</li><li>inne poprawki i aktualizacje</li></ul>
+<p>2012-12-21</p><ul><li><a href="/~rrp/Avtech_KPD674_DVR_firmware/">Opis ratowania zablokowanego po aktualizacji firmware KPD674</a> - to może być całkiem ciekawa zabawka z wbudowanym linuxem ...</li><li>inne poprawki i aktualizacje</li></ul>
+<p>2012-12-13, 2012-12-15</p><ul><li>poprawki i uzupełnienia w opisie konfiguracji linuxowego środowiska pracy</li></ul>
+<p>2012-12-11</p><ul><li>poprawki i uzupełnienia w opisie konfiguracji linuxowego środowiska pracy oraz w projekcie sterownika oświetlenia</li></ul>
+<p>2012-12-07</p><ul><li>reorganizacja i aktualizacja artykułu "Instalacje i budynki, czyli cyfrowy dom" (dawniej "elektroniczny dom")</li><li>spore zmiany w <id_link id="USAGE:smart_home">projektach związanych z inteligentnym domem</id_link></li><li>artykuł opisujący ewolucję koncepcji projektów inteligentnego domu</li><li>poprawki i aktualizacje w konfigach ejabberda, exima, asteriska</li><li>aktualizacja xmpp2smtp i smtp2xmpp</li><li>poprawki i uzupełnienia w galerii zdjęć</li><li>inne poprawki i aktualizacje</li></ul>
+<p>2012-06-29</p><ul><li>nowa konfiguracja asteriska</li><li>aktualizacja konfiguracji usług pocztowych</li><li>poprawki konfiguracji tmux'a</li><li>poprawki i aktualizacje w "Monitoring systemów"</li><li>uzupełnienia galerii fotek</li><li>inne poprawki i aktualizacje</li></ul>
+<p>2012-05-15</p><ul><li>konfiguracja tmux'a</li><li>lepsza konfiguracja vim'a</li><li>uzupełnienia galerii fotek</li><li>zmiany w The Game</li><li>inne poprawki i aktualizacje</li></ul>
+<p>2012-04-19</p><ul><li>aktualizacje oprogramowania dla NPE (systemy monitoringowe)</li><li>inne poprawki i aktualizacje</li></ul>
+
+<p>2011-12-23</p><ul><li>kilka słów o gpt, debian-bsd, puppet, monit, fail2ban</li><li>aktualizacje w dziale polecane</li><li>nowe fotki</li><li>inne poprawki i uzupełnienia</li></ul>
+<p>2011-06-30</p><ul><li>poprawki w silniku strony i jego dokumentacji</li><li>aktualizacja <id_link id="set_station.sh">set_station.sh</id_link> i <id_link id="tv.vlc.sh">tv.vlc.sh</id_link></li><li>artykuł o systemach kontroli wersji</li><li>inne poprawki i uzupełnienia</li></ul>
+
+<p>2011-05-23</p><ul><li>zmiany strukturalne (głównie dział "Użytkowanie i konfiguracja")</li><li><id_link id="zabbix">kilka słów o Zabbixie</id_link> oraz przykłady skryptów dla niego</li><li><id_link id="modbus_rtu">system odczytywania rejestrów modbusowych</id_link> dla platformy NPE i systemu Zabbix</li><li><id_link id="smtp2sms">system powiadomień SMSowych</id_link> dla platformy NPE</li><li><id_link id="vlc">kilka słów o VLC</id_link> oraz trochę użytecznych konfigów i skryptów z nim związanych</li><li>poprawki i uzupełnienia w silniku strony</li><li>nowe fotki w galerii</li><li>poprawki w The Game</li><li>inne poprawki i uzupełnienia</li></ul>
+
+<p>2010-09-06</p><ul><li>bramka BACnet-SNMP</li><li>troche więcej o LDAP</li><li>trochę więcej o sieciach przemysłowych</li><li>trochę informacji dotyczących prac budowlanych, systemów zabezpieczeń itd</li><li>uzupełnienia listy przydatnych programów</li><li>poprawki i reorganizacja "The Game"</li><li>poprawki w silniku strony</li><li>uzupełnienie galerii zdjęć</li><li>inne poprawki i uzupełnienia</li></ul>
+
+<p>2010-03-01</p><ul><li>opis konfiguracji systemu centralnej autoryzacji w oparciu o LDAP</li><li>kilka słów o algorytmach i strukturach danych</li><li>kilka słów o znakach nie ASCII w URL</li><li>parę słów o CPLD, FPGA itp</li><li>porządki w dziale foto</li><li>inne uzupełnienia i aktualizacje</li></ul>
+
+<p>2010-02-19</p><ul><li>trochę więcej o DSP</li><li>Sterownik LCD z komunikacją RS232 w VHDL</li><li>inne uzupełnienia i aktualizacje</li></ul>
+
+<p>2010-01-11</p><ul><li>uwagi dotyczące projektowania instalacji elektrycznych i automatyki</li><li>poprawki w SysMon</li><li>poprawki w CommonsConfig</li><li>poprawki w silniku strony - m.in. generacja pdf'ów i nowe tagi</li><li>poprawki i wnioski wdrożeniowe dla projektów związanych z centralka alarmową</li><li>kilka słów o DSP</li><li>uzupełnienie galerii zdjęć</li></ul>
+
+<p>2009-10-16</p><ul><li>nowa wersja CommonsConfig</li><li>poprawki w elektroniczny dom</li><li>lepsza organizacja galerii zdjęć</li><li>poprawki w silniku</li><li>poprawki w projekcie systemu alarmowego</li><li>poprawki sysmona poprawki sysmona</li></ul>
+
+<p>2009-10-16</p><ul><li>zastąpienie serwer-config-switch poprzez odświeżone opisy konfiguracji usług</li><li>aktualizacja opisu konfiguracji Xen'a do 3.2</li><li>aktualizacja sposobów dostrajania initrd</li><li>poprawki w "The Game"</li><li>nowe zdjęcia</li><li>porządki w archiwum</li><li>aktualizacja silnika - nowy system klasyfikacji mirrorów, nowe tagi, ...</li></ul>
+
+<p>2009-09-10</p><ul><li>układ łagodnego startu transformatora</li><li>kilka słów o: RTSP, XSL, zabezpieczeniach przepięciowych, sekwencjach sterujących terminalem, directfb, kontroli zasobów w Solarisie, sztuczkach konfiguracyjnych dla Solarisa, o tym jak działa bramka CMOS, o tym jak przywrócić Alt+Ctrl+Backspace</li><li>skrypt do konwersji dia na pdf i png</li><li>system monitoringu serwerów</li><li>uzupełnienia i reogranizacje w dziale z zdjęciami</li><li>aktualizacje sterownika oświetlenia (gasiki RC, modyfikacja komunikacji przez port szeregowy - nowy my_rs485.c)</li><li>stroboskop LED</li><li>szyfrator i centralka dla systemu alarmowego</li><li>nowa wersja skryptu do rejestracji i transmisji sygnału RTV</li><li>poprawka konwertera RS (dioda na pcb była skierowana przeciwnie niż na schemacie)</li><li>poprawki silnika www (podział galerii na strony, wyróżnienie kolorem tła wstawek kodu, ...)</li><li>poprawki redakcyjne w arykule o LaTeX</li><li>inne drobne poprawki i uzupełnienia</li></ul>
+
+<p>2009-08-17</p><ul><li>(z okazji 10-tej rocznicy rozpoczęcia prac nad serwisem) spore zmiany strukturalne w organizacji strony - lepszy podział na działy i artykuły</li><li>moduły jądra dla obsługi termometru 1wire przez przejściówkę usb-8bit FTDI</li><li>opis uruchomienia gunze w CF-M34 i IX250</li><li>mirroring systemu z wykorzystaniem tar i ssh</li><li>poprawka asound.conf dla działającego popprawnie 5.1 w VLC</li><li>poprawki w silniku strony</li><li>inne drobne poprawki i uzupełnienia</li></ul>
+
+<p>2009-06-13</p><ul><li>drobne poprawki</li><li>silnik lepiej dostosowany do korzystania z bzr</li><li>uzupełnienia o oprogramowaniu dla inżyniera</li><li>system galerii oraz trochę nowych fotek (ix250 oraz automaticon 2009)</li></ul>
+<p>2009-05-04</p><ul><li>VHDL</li><li>semafory POSIX</li><li>więcej o pthread</li><li>wyrażenia regularne w C++</li><li>kolejki sygnałów POSIX</li><li>kilka słów więcej o FreeBSD i OpenBSD</li><li>kilka słów o PLD</li><li>kilka słów więcej o routingu (w tym BGP i multicast)</li></ul>
+
+<p>2009-04-27</p><ul><li>lepszy mechanizm generowania strony (wykorzystanie XSL, wspólne generowanie wersji off- i on-line)</li><li>LaTeX i czcionki TTF</li><li>język skryptowy Lua</li><li>Asterisk i Jingle (gtalk)</li><li>kilka słów o LDAP</li><li>kilka słów o wysokiej dostępności</li><li>kilka słów o narzedzich programistycznych takich jak automake, scons, gprof, ...</li><li>inne poprawki i uzupełnienia</li></ul>
+
+<p>2009-04-03</p><ul><li>drobne poprawki</li></ul>
+<p>2009-04-02</p><ul><li>modyfikacja układu strony na oparty na divach z dynamicznie wysuwanym menu (możliwy jest wybór wersji z statycznym menu)</li><li>poprawki w generacji PDFu</li><li>poprawki w silniki - cachowanie generowanych plików graficznych, początek migracji przetwarzania xml na szablony xsl i xalan, obsługa repozytorium bzr</li><li>duże poszerzenia w dziale elektronika</li><li>trochę o programowaniu z wykorzystaniem OpenMP</li><li>przykład wykorzystania OpenAL</li><li>wielomonitoring w xorg</li><li>kilka słów o teorii informatyki i konstruowaniu automatów z układów elektronicznych</li><li>inne drobne poprawki</li></ul>
+
+<p>2009-02-28</p><ul><li>poprawki w silniki - podział na moduły, automatyczne generowanie plików graficznych z schematów elektronicznych oraz równań LaTeXowych</li><li>inne drobne poprawki</li></ul>
+
+<p>2009-02-21 - 2009-02-22</p><ul><li>projekt 16 kanałowego sterownika oświetlenia z funkcją regulacji jasności</li><li>słów kilka o libVLC</li><li>kilka przykładów programowania w OpenGL oraz "podstawa silnika 3d"</li><li>parę słów "od mikrokontrolera do komputera" o klasyfikacji systemów wbudowanych</li><li>trochę na temat gnuplot'a i octave</li><li>sztuczki konfiguracyjne z screenem, lvm, multipath, ...</li><li>porcja nowych fotek</li><li>inne poprawki i uzupełnienia</li></ul>
+
+<p>2009-02-17 - 2009-02-19</p><ul><li>aktualizacja "elektroniczny dom" - system dystrybucji zasilania i sterowania oświetleniem w standardzie 19"</li><li>aktualizacja spisu programów przydatnych elektronikowi</li><li>publikacja skryptów gsch2pdf.sh i pcb2pdf.sh</li><li>publikacja projektu konwertera różnych standardów UART i pomocniczych konwerterów (poziomy TTL 5V-3.3V i USB-UART)</li><li>inne poprawki i uzupełnienia</li></ul>
+
+<p>2009-02-16</p><ul><li>aktualizacja "elektroniczny dom"</li><li>opis uruchamiani postgres'a</li><li>uwagi o konfiguracji układu klawiatury</li><li>skrypt do archiwizacji mysql</li><li>inne poprawki i uzupełnienia</li></ul>
+
+<p>2009-02-15</p><ul><li>połączenie artykułów "elektroniczny dom" i "instalacje kablowe"</li><li>opis uruchomienia "restricted-sftp" i logowania połączeń sftp do lastlogu</li><li>drobne poprawki w silniku</li><li>inne poprawki i uzupełnienia</li></ul>
+
+<p>2009-02-05</p><ul><li>porcja aktualizacji i uzupełnień dotyczących systemu LaTeX</li><li>trochę nowych informacji na temat OpenSolarisa</li></ul>
+
+<p>2008-09 - 2009-01</p><ul><li>kilka drobnych poprawek</li></ul>
+
+<p>2008-07-15</p><ul><li>mniejsze i większe poprawki i uzupełnienia (m.in. trochę o svn)</li></ul>
+<p>2008-07-11</p><ul><li>aktualizacja "wstępu do komputerologii" oraz strony "o autorze"</li></ul>
+
+<p>2008-07-03 - 2008-07-05</p><ul><li>słów kilka o Solarisie i jego konfiguracji</li><li>nowa wersja skryptu rotującego (kolejka priorytetowa)</li><li>NAT-PT pomiędzy IPv6 a IPv4 oraz kilka uwag o IPv6</li><li>kilka artykulików z teorii informatyki (bazy danych, systemy operacyjne, sztuczna inteligencja)</li><li>kilka słów o silnikach gier i graficznych</li><li>poprawki w konfiguracji asteriska i migracja do wersji 1.4</li><li>inne poprawki i uzupełnienia</li></ul>
+
+<p>2008-05-27 - 2008-05-30</p><ul><li>konfig exima z filtrowaniem antyspamowym i antywirusowym na etapie kopertowym oraz greylistą</li><li>skrypt współdzielenia konfiguracji pomiędzy wieloma hostami</li><li>skrypt prostego serwera "fake" SMTP</li><li>liczne inne poprawki i uzupełnienia</li></ul>
+
+<p>2008-04-21 - 2008-04-22</p><ul><li>automatycznie budowane (przy aktualizacjach) paczki deb dla niektórych programów udostępnianych na stronie do pobrania w dziale download</li><li>wsparcie dla dzwonienia ENUM w konfiguracji asteriska</li><li>inne poprawki i uzupełnienia</li></ul>
+<p>2008-04-11</p><ul><li>drobne poprawki w SerwerConfigSwitch</li></ul>
+<p>2008-04-07</p><ul><li>drobne poprawki w SerwerConfigSwitch</li><li>więcej na temat współpracey ebtables i iptables</li><li>system generacji menu i skojarzeń plików</li><li>kompilacja patch'owanego jądra</li><li>zasięg zmiennych w bashu</li><li>inne drobne poprawki i uzupełnienia</li></ul>
+
+<p>2008-02-20 - 2008-02-22</p><ul><li>przebudowany skrypt routingu i podziału łącza (m.in. dodany obkomentowany plik konfiguracyjny, skrypt podzielony na funkcje, dodana obsługa argumentów start/stop/restart, automatyczne uzyskiwanie adresu sieci IPv6, poprawione kolejkowanie - obsługa IPv6 i IPv4 w tc filter)</li><li>inne drobne poprawki w SerwerConfigSwitch (w tym poprawki obsługi logów)</li><li>inne drobne poprawki i uzupełnienia</li></ul>
+
+<p>2008-03-08 - 2008-03-10</p><ul><li>strona "O serwisie" + modyfikacja strony głównej</li><li>VLAN, bridge i port trunking</li><li>kilka słów o xen'ie</li><li>kilka słów o ipmi</li><li>pierwsze wersje skryptów do dodawnia MAC adresów dla DHCP przez WWW</li><li>różne poprawki i uzupełnienia</li></ul>
+
+<p>2008-02-03</p><ul><li>drobne poprawki w SerwerConfigSwitch</li></ul>
+<p>2008-01-28</p><ul><li>drobne poprawki i uzupełnienia</li></ul>
+<p>2007-12-08</p><ul><li>zmiana formy działu "archiwum"</li></ul>
+<p>2007-12-07</p><ul><li>drobne poprawki i uzupełnienia</li></ul>
+
+<p>2007-11-07</p><ul><li>przykładowe programy w Qt4</li><li>inne poprawki i uzupełnienia</li></ul>
+
+<p>2007-10-23</p><ul><li>programy dla sterowników systemu alarmowego opartych na mikrokontrolerach (na razie w stadium alfa)</li><li>uporządkowanie/aktualizacja projektów biblioteczek dla avr</li><li>projekt przejściówki USB → RS232/RS485/8bit/OneWire/I2C/SPI</li><li>inne poprawki i uzupełnienia</li></ul>
+
+<p>2007-10-11</p><ul><li>kilka słów i przykładów dotyczących programowania w: Perl, Python, Ruby, Tcl/Tk</li><li>inne poprawki i uzupełnienia</li></ul>
+
+<p>2007-09-14</p><ul><li>projekt manipulatora dla systemu alarmowego</li><li>skrypty generujące konfigurację SIP i DHCP w oparciu o pliki w $HOME</li><li>system aliasów JID (ejabberd)</li><li>programowanie w PHP oraz SQL połączone z ogólnym artykułem o programowaniu</li><li>kilka słów o programowaniu w erlangu</li><li>inne poprawki i uzupełnienia</li></ul>
+
+<p>2007-09-11</p><ul><li>aktualizacja projektu sterownika oświetlenia</li><li>przykłady konfiguracji PBX Asterisk</li><li>drobne porządki w dziale o programowaniu w C/C++</li><li>programy demonstrujące malloc, realloc, mmap, STL</li><li>poprawki w silniku strony</li><li>opis sposobu generacji PDF przez silnik strony</li><li>spore zmiany w działach "instalacje kablowe" i "elektroniczny dom"</li><li>inne poprawki i uzupełnienia</li></ul>
+
+<p>2007-08-26</p><ul><li>symbole dla gschem i pcb</li><li>aktualizacja skryptu vlc_ser_RTV.sh (przyjmowanie parametrów z liinii poleceń)</li><li>linki w dziale gry</li><li>inne aktualizacje i poprawki</li></ul>
+
+<p>2007-07-22 - 2007-07-25</p><ul><li>poprawki silnika (generowanie wersji off-line, ...)</li><li>modyfikacja silnika PHP oraz zaprezentowanie jego kodu</li><li>drobne poprawki w różnych artykułach</li></ul>
+
+<p>2007-07-16 - 2007-07-17</p><ul><li>drobne poprawki, w dziale <i>Download</i> umieszczona wersja PDF</li></ul>
+
+<p>2007-07-03</p><ul><li>drobne aktualizacje dotyczące okablowania i systemów sterowania instalacją elektryczną</li></ul>
+<p>2007-05-26</p><ul><li>poprawki silnika strony i inne drobne korekty</li></ul>
+<p>2007-04-13</p><ul><li>program demonstrujący korzystanie z libusb</li><li>inne poprawki i aktualizacje</li></ul>
+<p>2007-04-12</p><ul><li>porady konfiguracyjne dla ejabberd</li><li>system powiadomień XMPP-SMTP</li><li>skrypt do konwersji maili na tekst</li></ul>
+<p>2007-04-11</p><ul><li>część "In Archive" zawierająca starsze projekty programistyczne i porady konfiguracyjne</li><li>działy o grach "Cabela's Off-Road Adventure 3" i "Just Cause"</li><li>inne poprawki i aktualizacje</li></ul>
+
+<p>2007-03-01</p><ul><li>programowanie obiektowe w C++ oraz kalkulator IPv6</li></ul>
+
+<p>2007-02-15</p><ul><li>poprawki w silniku mające na celu usprawnienie generacji zbiorczych PDF'ów</li></ul>
+<p>2007-02-13</p><ul><li>drobne poprawki w "dydaktyka"</li></ul>
+
+<p>2007-01-30</p><ul><li>reorganizacje struktury serwisu</li><li>aktualizacje materiałów dotyczących konfiguracji usług sieciowych</li><li>aktualizacje i poprawki w innych artykułach (dydaktyka, komputery, ...)</li></ul>
+
+<p>2007-01-22</p><ul><li>dodany artykuł o SQL</li></ul>
+<p>2007-01-20</p><ul><li>zmienne tablicowe i operacje na napisach w bashu</li><li>inne drobne poprawki</li></ul>
+<p>2007-01-18</p><ul><li>dodane menu artykułu (nad tytułem zawierające linki wewnętrzne)</li></ul>
+
+<p>2006-12-26</p><ul><li>poprawki silnika strony - możliwość generowania menu artykułu, pełniejsza obsługa opcji w stylu unixowym</li></ul>
+<p>2006-12-18</p><ul><li>poprawki i uaktualnienia</li></ul>
+<p>2006-11-25</p><ul><li>drobne poprawki i uaktualnienia</li><li>aktualizacja programu sterownika oświetlenia (rozwiązująca problem zawieszania guzików lokalnych)</li></ul>
+
+<p>2006-11-19</p><ul><li>duża reorganizacja serwisu - zrezygnowałem z "dużych" działów (za wyjątkiem "moje projekty" i "gry"), na rzecz bardziej płaskiej struktury, artykuły w menu zostały ułożone w tematyczne ciągi i w ten sposób pogrupowane (ale na płaskiej strukturze, przy pomocy poziomych linii w menu)</li><li>przebudowane i poszerzone artykuły o bashu, usługach sieciowych</li><li>przebudowane artykuły o konfiguracji i użytkowaniu linuxa, programowaniu</li></ul>
+
+
+<p>2006-10-01</p><ul><li>Kolejne zamiany w strukturze strony:<ul><li>"Podstawy elektroniki" (w miejsce dotychczasowego wstępu do elektroniki i wstępu do elektroniki cyfrowej) w dziale "artykuły"</li><li>"Mikrokontrolery" (d. "Wstęp do mikrokontrolerów") w dziale "Artykuły"</li><li>dział "Projekty" gromadzący strony moich projektów programistycznych i elektronicznych</li></ul></li><li>Zmiany i uaktualnienia w artykule "komputer"</li></ul>
+<p>2006-10-30</p><ul><li>nowa wersja programu sterownika oświetlenia (zmieniony sposób wykorzystania łącza szeregowego - wprowadzona adresacja urządzeń)</li><li>dział "Telekomunikacja" został połączony z działem "Artykuły"</li><li>drobne poprawki (także poprawki silnika)</li></ul>
+
+
+<p>2006-10-01</p><ul><li>Kolejne zamiany w strukturze strony:<ul><li>"Podstawy elektroniki" (w miejsce dotychczasowego wstępu do elektroniki i wstępu do elektroniki cyfrowej) w dziale "artykuły"</li><li>"Mikrokontrolery" (d. "Wstęp do mikrokontrolerów") w dziale "Artykuły"</li><li>dział "Projekty" gromadzący strony moich projektów programistycznych i elektronicznych</li></ul></li><li>Zmiany i uaktualnienia w artykule "komputer"</li></ul>
+<p>2006-10-30</p><ul><li>nowa wersja programu sterownika oświetlenia (zmieniony sposób wykorzystania łącza szeregowego - wprowadzona adresacja urządzeń)</li><li>dział "Telekomunikacja" został połączony z działem "Artykuły"</li><li>drobne poprawki (także poprawki silnika)</li></ul>
+
+<p>2006-10-08</p><ul><li>drobne poprawki</li></ul>
+<p>2006-09-27</p><ul><li>uzupełnienia i poprawki (m.in. ładne fonty w X'ach)</li></ul>
+<p>2006-09-26</p><ul><li>uzupełnienia linków</li><li>poprawki silnika</li></ul>
+
+<p>2006-09-22</p><ul><li>kilka słów na stronie głównej o nazwie serwisu</li><li>parę słów o asound.conf, konfiguracji grub'a</li><li>program demonstrujący alokację pamięci</li><li>trochę nowych linków w różnych artykułach i działach</li></ul>
+<p>2006-09-21</p><ul><li>zmiana podstawowej domeny na opcode.eu.org</li></ul>
+<p>2006-09-20</p><ul><li>strona generowana jest w oparciu nowy silnik (nad którym prace rozpoczęły się w pierwszej połowie sierpnia)</li><li>większe i mniejsze uzupełnienia, poprawki, reorganizacje w różnych artykułach</li></ul>
+
+
+
+<p>2006-07-31</p><ul><li>drobne poprawki w "dydaktyka komputerologii"</li></ul>
+<p>2006-07-20</p><ul><li>różne drobne poprawki i uzupełnienia</li></ul>
+
+<p>2006-07-14 - 2006-07-16</p><ul><li>drobne poprawki i uzupełnienia w różnych artykułach</li><li>trochę więcej o XMPP</li><li>rozwinięcie działu "elektroniczny dom" i materiałów powiązanych</li></ul>
+<p>2006-07-10 - 2006-07-12</p><ul><li>aktualizacje i uzupełnienia linków</li><li>aktualizacje i uzupełnienia bazy programów</li><li>inne uzupełnienia i poprawki</li></ul>
+<p>2006-07-06 - 2006-07-08</p><ul><li>spis przykładowych zagadnień do "omawiania" w "dydaktyka komputerologii"</li><li>koncepcja rozdzielnic elektrycznych opartych na systemie aparatury 19"</li><li>ustawianie wielkości czcionki w LaTeXu</li><li>program obrazujący korzystanie z asound (ALSA) oraz implementujący działanie dsp.c na tej bibliotece - <i>alsa_copy.c</i></li><li>system do powiadomień o IM Jabbera poprzez mikrokontroler - "<i>NutOS Jabber Notify Pack</i>"</li><li>kilka słów na temat konfiguracji udev</li><li>inne drobne poprawki</li></ul>
+<p>2006-06-29</p><ul><li>kilka uzupełnień w artykule o LaTeXu</li><li>reorganizacja artukułów w dziale telekomunikacja</li><li>inne drobne poprawki i uzupełnienia</li></ul>
+
+<p>2006-05-26 - 2006-05-27</p><ul><li>prace nad systemem kolorowania kodu programów i skryptów</li></ul>
+
+<p>2006-05-23</p><ul><li>drobne poprawki w kodzie i silniku strony związane z "dostępnością"</li></ul>
+<p>2006-05-21</p><ul><li>nowy artykuł - Dydaktyka "komputerologii"</li></ul>
+<p>2006-05-17</p><ul><li>poprawki w silniku strony związane z obsługą linków</li></ul>
+<p>2006-05-05</p><ul><li>drobne poprawki i uzupełnienia</li></ul>
+<p>2006-04-30 - 2006-05-01</p><ul><li>krótki opis DCOP wraz z przykładowym programem</li><li>opis kopiowania systemu na inny dysk oraz instalacji przez debootstrap</li><li>drobne poprawki i uzupełnienia</li><li>poprawki i uzupełnienia w kilku programach w dziale programowanie w C/C++</li><li>w dziale programowanie w C/C++ dodane nowe programy obrazujące korzystanie z UDP i TCP</li></ul>
+
+<p>2006-04-04</p><ul><li>poprawki i uzupełnienia w kilku programach w dziale o programowaniu w C/C++ oraz w bramce webowej dla jabber'a</li></ul>
+<p>2006-03-31</p><ul><li>poprawki we wstępie (m.in. przykładowy schemat elektroniczny)</li><li>uzupełnienia w artykule o porogramach dla elektroników i elektryków</li></ul>
+<p>2006-03-19</p><ul><li>poprawki we wstępie (m.in. przykładowy programik w C)</li></ul>
+<p>2006-03-12</p><ul><li>wstępna strona o projekcie dotyczącym mikrokontrolerów ARM</li><li>schemat mieszkania dla projektu "elektroniczny dom"</li><li>inne drobne poprawki i uzupełnienia</li></ul>
+
+<p>2006-03-02</p><ul><li>zapoczątkowanie projektu "<i>elektroniczny dom</i>"</li><li>opublikowanie wstępnych informacji o projekcie cyfrowego sterownika oświetlenia</li><li>wiele drobnych poprawek i uzupełnień (m.in. w przykładowych programach)</li></ul>
+
+<p>2006-02-11 - 2006-02-13</p><ul><li>dzięki zmianom w CSS przy drukowaniu dokumentu do linków automatycznie dodawane są ich adresy URL oraz ukrywane jest menu nawigacyjne</li><li>nowa wersja banera strony</li><li>zreorganizowana strona główna</li><li>serwis spełnia warunki poprawności składniowej XHTML 1.1</li></ul>
+<p>2006-02-04 - 2006-02-05</p><ul><li>uzupełnienia i aktualizacje linków</li><li>opis generowania certyfikatów SSL dla stron WWW w poradnik linuxowy (2)</li><li>porady dotyczące modyfikowania NFS3 i NFS6</li><li>inne drobne poprawki</li></ul>
+
+<p>2006-01-28 - 2006-02-01</p><ul><li>poprawki w kodzie i silniku strony (m.in. początek wdrożenia CSS)</li></ul>
+
+<p>2006-01-25</p><ul><li>poszerzenie i poprawki redakcyjne we <i>wstępie</i></li><li>drobne poprawki w różnych dokumentach</li></ul>
+
+<p>2006-01-14</p><ul><li>nowe wersje opracowań o sieciach IP i ethernecie</li><li>uaktualniona wersja skryptu router.sh w "poradnik linuxowy (2)"</li><li>w "poradnik linuxowy (2)" dodany opis tego jak skonfigurować router IPv6</li><li>w "poradnik linuxowy (2)" dodany opis przerobienia polskiego sortowania</li><li>opublikowanie zestawu <i>symboli elektrycznych</i> (dla projektowania rozdzielnic nn) dla QCad'a</li></ul>
+<p>2006-01-12</p><ul><li>reorganizacja działów "poradniki liuxowe"</li></ul>
+
+<!--
+<p>2006-01-02</p><ul><li>strona dostępna także poprzez IPv6: http://[2001:16b0:1002::1]/~rrp/</li></ul>
+
+<p>2005-12-31</p><ul><li>wygenerowana i umieszona została mapa strony</li><li>strona "linki" została przeniesiona do działu artykuły</li></ul>
+<p>2005-12-30</p><ul><li>serwis uzyskał (w miejsce dotychczasowej, roboczej nazwy "Technika @ NewWorld") własną nazwę - OpCode (czyli kod operacji ... zlecanej na przykład CPU), równocześnie pozostała część serwisu NewWorld została całkowicie zamrożona i dostępna jest poprzez domenę tego serwisu - http://robert.n17.waw.pl/~OldHomePage/</li></ul>
+<p>2005-12-14</p><ul><li>dzięki kilku poprawkom w silniku i kodzie strona dostępna także nie poprzez vhosta i DNS ;-) - pod adresem: <i>http://213.134.140.18/~rrp/</i>; dotychczasowa zawartość tego katalogu dostępna jest pod adresem http://213.134.140.18/~rrp/~rrp/ lub http://robert.n17.waw.pl/~rrp/</li></ul>
+<p>2005-12-05</p><ul><li>strona poświęcona <i>modom do Emergency 3</i>, a na niej poradnik do skryptów misji oraz "Development Demo Mod".</li><li><i>kilka słów</i> o gEDA (gschem + ...) i pcb</li></ul>
+<p>2005-12-02</p><ul><li>rozważania o (braku) przyszłości telewizji cyfrowej w wersji DVB: <i>DVB - czy to ma przyszłość?</i></li><li>publikacja programu do detekcji radiometeorytów</li><li><i>sterownik ogrzewania akwariowego</i></li><li><i>tunelowanie połączeń przez SSH</i></li></ul>
+<p>2005-11-30</p><ul><li>publikacja systemu <i>User DB</i></li><li>aktualizacje w dziale gry</li></ul>
+
+<p>2005-09-25</p><ul><li>publikacja modu do GTA:SA (port modu z VC)</li><li>publikacja modów do SimCity 4</li><li>inne drobniejsze poprawki na stronie</li></ul>
+
+<p>2005-08-14 - 2005-08-16</p><ul><li>poprawki i rozszerzenia (więcej o KDE w poradnik linuxowy 2, więcej o IPv6, ...)</li><li>uzupełnienia linków</li><li>aktalizacja bazy programów</li></ul>
+<p>2005-08-13</p><ul><li>dalsze zmiany w linkach na stronie</li><li>zmiana organizacji strony głównej</li></ul>
+<p>2005-08-12</p><ul><li>kilka zmian i poprawek w silniku i kodzie strony</li><li>reorganizacja systemu linków - większość linków znajduje się teraz w powiązanych artykułach w części: "zobacz w Sieci"</li><li>linki do haseł Wikipedii PL</li></ul>
+
+<p>2005-07-31</p><ul><li>kilka poprawek i uzupełnień (m.in. w: "Podstawowe polecenia Unix'a", "Poradnik linuxowy (2) - porady konfiguracyjne Debiana")</li><li>drobne zmiany w dziale download</li></ul>
+<p>2005-07-30</p><ul><li>reorganizacja struktury strony (utworzenie dużych działów "telekomunikacja", "elektronika")</li><li>zmiana podstawowej licencji serwisu z dualnej GNU GPL/FDL na licencję typu BSD (oraz tam gdzie to możliwe programów mojego autorstwa z GPL na typu BSD)</li></ul>
+
+<p>2005-07-13</p><ul><li>poprawki w "wstęp do techniki"</li><li>zmiany w wersjach pdf artykułów</li><li>aktualizacja archiwum z źródłami strony</li><li>poprawki silnika związane z generacją stopek</li></ul>
+<p>2005-07-07</p><ul><li>reorganizacja w dziale artykuły</li></ul>
+<p>2005-07-06</p><ul><li>kwestie niebezpieczeństw związanych z PHP w Poradnik linuxowy (2)</li><li><i>shell login for phpMyAdmin</i> - czyli logowanie "shelowe" do phpMyAdmin</li><li>uzupełniania artykułów o elektronice - jak działa bramka logiczna, tyrystory i coś więcej o tranzystorach</li></ul>
+<p>2005-07-05</p><ul><li>poprawki do "Bramka WWW dla Jabbera"</li></ul>
+<p>2005-07-02, 2005-07-03</p><ul><li>drobne poprawki i uzupełnienia</li></ul>
+<p>2005-07-01</p><ul><li>mod do GTA:VC mojego autorstwa - <i>http://technika.newworld.n17.waw.pl/gry/gta/supercar_mod/</i></li></ul>
+
+<p>2005-06-19</p><ul><li>programy pokazujące korzystanie z funkcji obróbki opcji oraz semaforów w Programowanie - C/C++</li><li>projekt poświęcony sterowaniu magnetowidem w dziale Programowanie</li><li>poprawki w kodzie i silniku strony (m.in. historia strony)</li></ul>
+
+<p>2005-05-16</p><ul><li>kilka zmian w organizacji i kodzie strony</li><li>utworzony został dział download zawierający materiały, które są do pobrania na różnych stronach serwisu oraz źródła strony</li></ul>
+
+<p>2005-05-10</p><ul><li>strona dołączyła do systemu wymiany banerów "Bannerion"</li></ul>
+
+<p>2005-05-09</p><ul><li>pełne wydzielenie działu Technika z NewWorld</li><li>informacja o ostatnich zmianach i okienko wyszukiwarki Google na stronie głównej</li><li>wykonany został baner strony</li><li>wkrótce kolejne zmiany ...</li></ul>
+-->
+
+<p>prehistoria, czyli początki:</p><ul>
+	<li>1999-08 - początek prac nad własną stroną www</li>
+	<li>2000-04-13 - publikacja "strony domowej Roberta Paciorka"</li>
+	<li>2001-02-15 - w miejsce "strony domowej" rozpoczyna działalność serwis World-2001 (http://www.world-2001.prv.pl/, później http://robert.n17.waw.pl/)</li>
+	<li>2003-08-25 - zmiana nazwy na "NewWorld" (pod-domeny w newworld.n17.waw.pl i w robert.n17.waw.pl/)</li>
+	<li>2005-05-09 - pełne wydzielenie działu Technika z serwisu "NewWorld" (http://technika.newworld.n17.waw.pl/)</li>
+	<li>2005-07-30 - zmiana podstawowej licencji używanej w serwisie na licencję typu BSD</li>
+	<li>2005-12-30 - zmiana nazwy "Technika@NewWorld" na OpCode (graficzny baner, http://opcode.eu.org)</li>
+	<li>2005-12-30 - całkowite zamrożenie pozostałych działów serwisu "NewWorld" (w rzeczywistości martwe od ponad 1.5 roku, <a href="[[!URLPREFIX!]]/archiwum/OLD_TEXT/OldHomePage/">archiwa serwisu</a>)</li>
+	<li>2006-01-02 - serwis dostępny także poprzez IPv6</li>
+</ul>
+</article>

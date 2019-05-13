@@ -1,0 +1,11 @@
+#!/bin/bash
+
+savelog -m 640 -c 7 mysql.dump
+mysqldump --defaults-extra-file="/etc/my.backu.acess.cfg" --all-databases > mysql.dump
+# gdzie /root/.my.backu.acess.cfg:
+# 	[client]
+# 	host=localhost
+# 	user=backup
+# 	password=mysecret
+# 	#database=
+# oczywiście plik ten powinien mieć odpowiednie prawa dostępu

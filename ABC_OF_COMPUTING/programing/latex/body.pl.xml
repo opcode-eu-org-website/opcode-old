@@ -1,0 +1,15 @@
+<article>
+<title>TeX i LaTeX - porady</title>
+
+<p>TeX jest komputerowym systemem profesjonalnego składu drukarskiego. Głównym elementem systemu jest oczywiście sam program TeX, który zajmuje się przetwarzaniem instrukcji umieszczonych w tworzonym dokumencie. Podstawowy zestaw poleceń jest dość ubogi, jednak pozwala (co prawda nie zawsze w prosty sposób ...) zrobić niemalże wszystko co byśmy chcieli (w odróżnieniu od innych systemów DTP nie ogranicza on nas ...). Dużym ułatwieniem są tutaj makra, które możemy tworzyć zarówno sami, jak również skorzystać z gotowych zestawów takich LaTeX, czy ConTeXt.</p>
+
+<p>Oprócz klasycznego kompilatora tworzącego pliki <wiki pl="DVI (plik TeX)">dvi</wiki> jakim jest <code>tex</code> (<code>latex</code>) powtały także inne, nowocześniejsze kompilatory (La)TeX'a takie jak <code>pdflatex</code> (tworzący bezpośrednio pliki pdf), <code>xelatex</code> (natywna obsługa pełnego unicode i czcionek <wiki pl="OpenType">OpenType</wiki>, generowanie plików xdv), <code>lualatex</code> (natywna obsługa pełnego unicode i czcionek <wiki pl="OpenType">OpenType</wiki>, bezpośrednie generowanie plików pdf)</p>
+
+<p>Poniżej przedstawiam:</p><ul>
+	<li>przykłądową klasę dokumentu - <id_link id="office.cls">office.cls</id_link>, która oprócz ustawień związanych z dokumentem dostarcza makra ułatwiające tworzenie odwołań do punktów w ramach list numerowanych "easylist" oraz tworzenie tabel z wyrównywanymi w pionie i poziomie komórkami</li>
+	<li><id_link id="office-demo.tex">office-demo.tex</id_link> - demonstracyjny dokument bazujący na office.cls demonstrujący niktóre z możliwości systemu LaTeX wraz z wybranymi pakietami makr.</li>
+</ul>
+
+<p>Efekt kompilacji office-demo.tex można zobaczyć <a class="int" href="http://www.opcode.eu.org/~rrp/office-demo.pdf">tutaj</a>. Po bardziej szczegółowe omówienia odsyłam do: <doc url="ftp://ftp.gust.org.pl/TeX/info/lshort/polish/lshort2e.pdf" mirror="programowanie/LaTeX/Nie_za_krótkie_wprowadzenia_do_systemu_LaTeX_2e/">Nie za krótkie wprowadzenia do systemu LaTeX 2e</doc>, dokumentacji poszczególnych pakietów i innych źródeł.</p>
+
+</article>

@@ -1,0 +1,14 @@
+<article>
+<title>Manipulator do systemu alarmowego</title>
+
+<p>Jest to projekt manipulatora dla <id_link id="centralka_nie_tylko_alarmowa">systemu alarmowego</id_link>. Manipulator wyposażony jest w klawiaturę 4x4, wyświetlacz LCD, dwie diody sygnalizacyjne, buzer. Komunikacja z jednostką centralną odbywa poprzez RS485, z wykorzystaniem protokołu MODBUS RTU. Manipulator wyłącznie przesyła dane o wprowadzonym kodzie do centralki oraz reaguje na polecenia otrzymywane od niej (w szczególności dotyczące sterowania wyświetlaczem LCD). Konstrukcja szyfratora umożliwia montaż klawiatury po jednej stronie ściany a płytki z mikrokontrolerem po drugiej. Rozwiązanie takie stanowi dodatkowe zabezpieczenie manipulatora przed próbami niepowołanego dostępu.</p>
+
+<ul>
+	<li><sch_link name="manipulator">schemat ideowy</sch_link> oraz <pcb_link name="manipulator">projekt płytki</pcb_link> manipulatora</li>
+	<li>schemat <sch_link name="manipulator-klawiatura">ideowy układu klawiatury</sch_link></li>
+	<li><id_link id="manipulator.c">program sterujący praca manipulatora</id_link></li>
+	<li>projekt wymaga fragmentów kodu oraz modułu elektronicznego z Atmega8 z <id_link id="libs4avr">biblioteczki dla uC</id_link></li>
+</ul>
+
+<p class="download"><a class="int" href="./manipulator_alarmowy.tgz">Pobierz</a></p>
+</article>

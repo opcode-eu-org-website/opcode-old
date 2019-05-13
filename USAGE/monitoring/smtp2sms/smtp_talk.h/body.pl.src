@@ -1,0 +1,7 @@
+#ifndef SMTP_TALK_H
+#define SMTP_TALK_H
+
+void copy_and_clear(char * out, char * in, int len);
+int smtp_talk(int sh2, char *hostname, struct sockaddr *ipfrom);
+
+#endif

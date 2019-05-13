@@ -1,0 +1,13 @@
+<article>
+<title>Nie tylko Debian</title>
+
+<p>Poniżej przedstawię kilka zagadnień administracyjnych specyficznych dla niedebianopodobnych dystrybucji (używaną dystrybucję możemy sprawdzić zaglądając do <kbd class="path">/etc/issue</kbd>).</p>
+
+<p>W Fedora Core konfiguracja sieci znajduje się w plikach <kbd class="path">/etc/sysconfig/network-scripts/ifcfg-<var>INTERFEJS</var></kbd> (dane konfiguracyjne interfejsu) i <kbd class="path">/etc/sysconfig/network</kbd> (nazwa hosta, włączenie sieci oraz bramka domyślna). pliki te mają składnie bashową (deklarowanie zmiennych) i wykorzystywane są przez skrypt <kbd class="path">/etc/init.d/network</kbd> (w razie problemów z startem sieci warto zwrócić uwagę czy jest on uruchamiany w aktualnym runlevelu (domyślny to 3). Usługi oprócz skryptów w <kbd class="path">/etc/init.d/</kbd> mogą być kontrolowane przez <code>service <var>usluga</var> <var>komenda</var></code>. Oprogramowanie możemy instalować poprzez <code>yum</code> (wskazany pakiet z rozwijaniem zależności) lub <code>rpm</code> (wskazany plik, może być wskazany URL np. na HTTP). Strefę czasową możemy ustawić np. przy pomocy cp - <code>cp /usr/share/zoneinfo/Europe/Warsaw /etc/localtime</code>.</p>
+
+<p>W SUSE do zarządzania systemem, a przede wszystkim instalowania oprogramowania służy <code>yast</code> i <code>yast2</code>.</p>
+
+<p>Dość interesującym systemem jest PLD. Elementami go wyróżniającymi jest przedewszystkim bardzo wygodny menager pakietów - podek oraz ich znaczne rozdrobnienie. Najistotniejsza konfiguracja znajduje się w plikach <kbd class="path">/etc/sysconfig/interfaces</kbd>, <kbd class="path">/etc/sysconfig/network</kbd> i pozostałe <kbd class="path">/etc/sysconfig/*</kbd> a także <kbd class="path">/etc/sysctrl.conf</kbd>. System (w odróżnieniu np. od Ubuntu korzystającego z <doc url="http://www.linux.com/feature/125977">event-based init daemon</doc>) posiada standardowy init (<kbd class="path">/etc/inittab</kbd>, <kbd class="path">/etc/rc*</kbd>, <kbd class="path">/etc/init.d/*</kbd>).</p>
+
+<p>Praktycznie każdy linux umożliwia obok standardowych <wiki pl="System plików">systemów plików</wiki> - <wiki pl="Ext2">ext2</wiki>/<wiki pl="Ext3">ext3</wiki> używać systemów takich jak <wiki pl="XFS">XFS</wiki> czy <wiki pl="ReiserFS">ReiserFS</wiki>, a nawet tak specyficzne rozwiązania jak klastrowy system plików <wiki pl="Lustre (system plików)">Lustre</wiki>.</p>
+</article>

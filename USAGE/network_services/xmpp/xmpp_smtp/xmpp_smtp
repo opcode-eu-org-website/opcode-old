@@ -1,0 +1,23 @@
+#! /bin/sh
+
+PATH=/bin:/sbin:/usr/sbin:/bin:/usr/bin
+
+
+case "$1" in
+    start)
+        xmpp2smtp &
+        mail-bot &
+        ;;
+    stop)
+        killall xmpp2smtp
+        killall mail-bot
+        ;;
+    restart)
+        $0 stop
+        $0 start
+        ;;
+    *)
+        echo "Usage: $0 start|stop|restrar" >&2
+        exit 3
+        ;;
+esac

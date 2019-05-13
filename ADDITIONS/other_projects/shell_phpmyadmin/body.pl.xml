@@ -1,0 +1,10 @@
+<article>
+<title>Shell login for phpMyAdmin</title>
+
+<p>Jest to prosty skrypt umożliwiający logowanie się do systemu phpMyAdmin z wykorzystaniem loginu i hasła do konta shelowego na którym jest plik .my.cnf zawierający dane niezbędne do uzyskania dostępu do MySQL. Plik należy umieścić tak aby był wykonywany jako skrypt CGI (i aby użytkownicy z niego korzystali ...), w skrypcie należy ustawić URL do systemu phpMyAdmin.</p>
+
+<p><em>Uwaga:</em> Jest to nieoficjalny patch mojego autorstwa. Autor nie ponosi żadnej odpowiedzialności za szkody powstałe w skutek wykorzystania zawartych tu poprawek.</p>
+
+<p class="download"><a class="int" href="./index.php">POBIERZ</a></p>
+
+</article>

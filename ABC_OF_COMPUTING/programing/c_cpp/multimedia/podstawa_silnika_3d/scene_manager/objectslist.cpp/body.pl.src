@@ -1,0 +1,42 @@
+#include "objectslist.h"
+
+void ObjectsList::delete_content(ObjectsList *obj) {
+	for(list<SceneObject*>::iterator iter = obj->content.begin(); iter != obj->content.end(); ++iter) {
+		delete *iter;
+	}
+}
+
+void ObjectsList::copy_content(ObjectsList *dst, ObjectsList *obj) {
+	for(list<SceneObject*>::iterator iter = obj->content.begin(); iter != obj->content.end(); ++iter) {
+		dst->content.push_back(*iter);
+	}
+}
+
+void ObjectsList::render_content(ObjectsList *obj) {
+	// po wskanikach - zapewniamy unikalnosc obiektow
+	obj->content.sort();
+	obj->content.unique();
+	// po odleglosciach - zapewniamy odpowiednia kolejnosc renderingu
+	obj->content.sort(SceneObject::compare);
+	for(list<SceneObject*>::iterator iter = obj->content.begin(); iter != obj->content.end(); ++iter) {
+		(*iter)->render(*iter);
+	}
+}
+
+bool ObjectsList::check_collisions_with_content(ObjectsList *obj, float x, float y, float z) {
+	for(list<SceneObject*>::iterator iter = obj->content.begin(); iter != obj->content.end(); ++iter) {
+		if ( (*iter)->check_collisions(*iter, x, y, z) )
+			return true;
+	}
+	return false;
+}
+
+void ObjectsList::load_content(ObjectsList *obj) {
+	for(list<SceneObject*>::iterator iter = obj->content.begin(); iter != obj->content.end(); ++iter) {
+		(*iter)->load(*iter);
+	}
+}
+
+void ObjectsList::set_eye(PointXZY<float> eye) {
+	SceneObject::eye = eye;
+}

@@ -1,0 +1,24 @@
+<article>
+<title>Sterownik LED RGB / Sterownik linii DC</title>
+
+<p>Sterownik oparty jest na magistrali i2c i umożliwia sterowanie wieloma diodami (lub zespołami diód) RGB, w taki sposób że możliwe jest wyświetlanie z ich pomocą płynnej animacji w 12bitowej palecie kolorystycznej (4096 odcieni). Jako master przewidziane zostało zastosowanie kontrolera z interfejsem ethernetowym (do sterowania nim) i i2c (do sterowania modułami wykonawczymi) opartego na procesorze ARM i systemie Linux. Na pojedynczej magistrali i2c jesteśmy w stanie podłączyć bezproblemowo 64 diody LED RGB (np. jakiś wyświetlacz 8x8). Przy założonych 16 poziomach PWM na kolor podstawowy (co daje 12 bitową przestrzeń kolorystyczną), prędkości magistrali i2c 100kHz (ograniczenie PCF8574), koszcie transmisji jednego bajtu wynoszącym 20 cykli zegara i 4*(6+1) urządzeń do wysterowania (cztery linie za multiplekserem po 6 układów + sterowanie multiplekserem) daje nam to częstotliwość odświeżania obrazu: 100000 / (16 * 20 * (6+1)*2) = 22 Hz. Jeżeli chcemy wysterować 64 diody przy zachowaniu rozsądnego odświeżania 
+musimy użyć dwóch magistral i2c lub zamienić PCF8574 na PCA9554 (posiada identyczny pin-out, ale może pracować z szyną 400kHz, koszt transmisji jednego bajtu to 28 cykli). Przy PCA9554 i 4 pod magistralach za multiplekserem odświeżanie wynosić będzie 400000 / (16 * 28 * (6+1)*4) = 31Hz.</p>
+
+<p class="download"><a class="int" href="./sterownik_LED_RGB.tgz">Pobierz</a></p>
+
+<p>Na projekt sterownika składają się:</p><ul>
+	<li>moduł złożony z pojedynczego zestawu 8 tranzystorów NPN (driver prądowego ULN2803APG z 8 układami darlingtona albo realizacja na osobnych tranzystorach NPN) oraz 8mio wyjściowego expandera GPIO szyny I2C (PCF8574/PCA9554 albo MCP23008) wraz z elementami towarzyszącymi:<ul>
+		<li>wersja z ULN2803APG i PCF8574/PCA9554 - <sch_link name="modul-i2c-uln2803a-pcf8574">schemat ideowy</sch_link>, <pcb_link name="modul-i2c-uln2803a-pcf8574">projekt PCB</pcb_link></li>
+		<li>wersja z ULN2803APG i MCP23008 - <sch_link name="modul-i2c-uln2803a-mcp23008">schemat ideowy</sch_link>, <pcb_link name="modul-i2c-uln2803a-mcp23008">projekt PCB</pcb_link></li>
+		<li>wersja z <id_link id="tranzystory:klucz">kluczem MOSFET-NPN</id_link> (opartym o MOSFET i ULN2803APG) i MCP23008 - <sch_link name="modul-i2c-mosfet-uln2803a-mcp23008">schemat ideowy</sch_link>, <pcb_link name="modul-i2c-mosfet-uln2803a-mcp23008">projekt PCB</pcb_link></li>
+		<li>wersja z osobnymi tranzystorami i PCF8574/PCA9554 - <sch_link name="modul-i2c-8npn-pcf8574">schemat ideowy</sch_link>, <pcb_link name="modul-i2c-8npn-pcf8574">projekt PCB</pcb_link></li>
+		<li><a class="int" href="./modul-i2c-8npn.sym">symbol</a> do wykorzystania przy tworzeniu projektu zbiorczego</li>
+	</ul></li>
+	<li>projekt płytki z multiplexerem magistrali i2c: <sch_link name="multiplexer_i2c">schemat ideowy</sch_link> i <pcb_link name="multiplexer_i2c">projekt PCB</pcb_link></li>
+	<li><id_link id="sterownik_LED_RGB:wyswietlacz.c">program sterujący wyświetlaczem</id_link></li>
+</ul>
+
+<sch_show name="modul-i2c-uln2803a-mcp23008" />
+<sch_show name="modul-i2c-8npn-pcf8574" />
+
+</article>

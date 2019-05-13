@@ -1,0 +1,214 @@
+/*
+ * Program sluzacy do automatycznej detekcji radiometerow z
+ * zarejestrowanych nagran audio (w postaci CDDA lub RAW LE)
+ *
+ * program stworzony na potrzeby Koła Naukowego Astronomów przy Uniwersytecie Warszawskim
+ * (http://www.astrouw.edu.pl/~nalezyty/knastr/dokonania/radiometeory/)
+ * 
+ * wersja: beta 2005-08-11
+ *
+ */
+
+/*
+	wav2cdr --inwav --tocdr $f > $f.cdr_in
+	for f in *.cdr; do wav2cdr --towav --incdr $f > $f.wav; done;
+*/
+
+
+/********************
+ *                  *
+ *   KONFIGURACJA   *
+ *                  *
+ ********************/
+// konfiguracja parametrow porownania
+#define _WAGA_POROWNANIA_ 1.45
+
+/** gdy dane na wejsciu jest mono zakomentowac zdefiniowanie _STEREO_ **/
+#define _STEREO_ 1
+/** gdy stereo odkomentowac ponizsze aby brac PRAWY kanal (standardowo brany LEWY) **/
+//#define _RIGHT_ 1
+
+/** odkomentowac gdy progrm ma zapisywac probki **/
+#define _SAVE_AUDIO_
+
+/** odkomentowac gdy progrm ma sprawdzac po przesunieciu o 1/2 _OKRES_PROBKOWANIA_ **/
+/** pomocne gdy meteoryt ukryl sie na zmianie okresow probkowania **/
+//#define _SEEK_
+
+/** odkomentowac aby wprowadzic odrzucanie zbyt malych wartosci przy liczeniu sumy **/
+//#define _MINIMALNA_ 2000
+
+/** _OKRES_PROBKOWANIA_ * _MNOZNIK_CZASU_ = czestotliwosc propkowania pliku wejsciowego **/
+/** _OKRES_PROBKOWANIA_ musi byc podzielny przez 2 bez reszty **/
+#define _OKRES_PROBKOWANIA_ 4410
+#define _MNOZNIK_CZASU_ 10
+#define _MNOZNIK_SREDNIEJ_ 1
+
+
+
+/****************
+ *              *
+ *   NAGLOWKI   *
+ *              *
+ ***************/
+#include <stdio.h>
+#include <math.h>
+
+
+
+/***************
+ *             *
+ *   FUNKCJE   *
+ *             *
+ ***************/
+int print_help() {
+	printf("POMOC\n");
+
+	return 0;
+}
+
+
+
+/***************
+ *             *
+ *   PROGRAM   *
+ *             *
+ ***************/
+int main(int argv, char *args[]) {
+
+	FILE	*ifp, *ofp;
+	
+	short nat=0, tmp1=0, tmp2=0, tmp3=0; // naderzenia dzwieku ...
+	int suma=0, suma_sr=0;
+	long poz=0, poz_tmp=0;
+	long i=0, j=0, k=0, l=0, m=0, czas=0, last_czas=-1024; // liczniki
+	int _SZUM_ = 14000000;
+	
+	i = strlen(args[1]); char plik[i];
+	i += 15; char nazwa_pliku_out[i]; i = 0;
+
+	// analiza argumentow i otwieranie pliku wejsciowego
+	if ( argv == 2 ){
+		if ( !strcasecmp(args[1],"--help") || !strcasecmp(args[1],"-h") ) {
+			print_help();
+			return 0;
+		}
+		
+		sprintf(plik, "%s", args[1]);
+		ifp = fopen(plik, "r");
+		if (ifp == NULL) {
+			fprintf( stderr, "\nBłąd otwarcia pliku wejściowego - %s\n\n" , args[1]);
+			return -1;
+		}
+//	} else if ( argv == 1 ) {
+//		ifp = stdin;
+	} else {
+		print_help();
+		return -1;
+	}
+
+
+	/** czytanie pliku **/
+#ifdef _SEEK_
+#  ifdef _STEREO_
+#    ifdef _RIGHT_
+	fseek(ifp, _OKRES_PROBKOWANIA_ + 2, SEEK_CUR);
+#    else
+	fseek(ifp, _OKRES_PROBKOWANIA_, SEEK_CUR);
+#    endif /* _RIGHT_ */
+#  else 
+	fseek(ifp, _OKRES_PROBKOWANIA_ / 2, SEEK_CUR);
+#  endif /* _STEREO_ */
+#else
+#  ifdef _STEREO_
+#    ifdef _RIGHT_
+	fseek(ifp, 2, SEEK_CUR);
+#    endif /* _RIGHT_ */
+#  endif /* _STEREO_ */
+#endif /*  _SEEK_ */
+
+
+	while (fread(&tmp1, 1, 1, ifp) && fread(&tmp2, 1, 1, ifp)){
+		/**
+		   LE -> BE
+		   w CDDA jest MSB,LSB (czyli low-endian)
+		   a procesor oczekuje LSB,MSB (czyli big-endian)
+		**/
+		nat = (tmp2 << 8) | tmp1;
+
+		i++;
+#ifdef _MINIMALNA_
+		nat = abs(nat);
+		if (nat > _MINIMALNA_)
+			suma += nat;
+#else
+		suma += abs(nat);
+#endif
+		if (i == _OKRES_PROBKOWANIA_) {
+			if (suma > _WAGA_POROWNANIA_ * _SZUM_) {// wykryto dzwiek
+				j++;
+			} else if (j>0) {// dzwiek zakonczyl sie
+				j *= _OKRES_PROBKOWANIA_; // dlugosc w ms
+				poz = ftell(ifp); // aktualna pozycja w pliku
+				sprintf(nazwa_pliku_out, "%s_%d.cdr", plik, czas);
+				
+				/** WYPISZ: plik_IN czas[s] xxxx plik_OUT **/
+				fprintf(stdout, "%s %f %d %s\n", plik, czas/60.0, k, nazwa_pliku_out);
+				
+#ifdef _SAVE_AUDIO_		/** ZAPIS AUDIO **/
+				if (czas - last_czas > 10) {
+					ofp = fopen(nazwa_pliku_out, "w");
+	
+					/* ustalenie dlugosci nagrania (j) i punktu startu (poz_tmp) */
+					j = 2*_OKRES_PROBKOWANIA_*_MNOZNIK_CZASU_;
+#ifdef _STEREO_
+					j *= 2;
+#endif /* _STEREO_ */
+					poz_tmp = poz - j;
+					if (poz_tmp<0) poz_tmp=0;
+					j *= 2;
+					
+					/* cofamy do punktu startu przepisywania */
+					fseek(ifp, poz_tmp, SEEK_SET);
+					/*  przepisywanie */
+					for (l=0; l<j; l++){
+						fread(&tmp3, 2, 1, ifp);
+						fwrite(&tmp3, 2, 1, ofp);
+					}
+					/* cofamy do konca detekcji */
+					fseek(ifp, poz, SEEK_SET);
+				} else {
+					printf("  nie zapisuje\n");
+				}
+#endif /* _SAVE_AUDIO_ */
+				j = 0;
+				last_czas = czas;
+				
+			}
+			
+			i=0; k++; m++;
+			suma_sr += suma;
+			suma = 0 ;
+			
+			if ( m == _MNOZNIK_SREDNIEJ_ ) {
+				_SZUM_ = suma_sr / _MNOZNIK_SREDNIEJ_;
+				suma_sr = 0;
+				m = 0;
+//					printf("_SZUM_ = %i\n", _SZUM_);
+			}
+			
+			if (k == _MNOZNIK_CZASU_ ) { // co 1 sekunde
+				k=0; czas++;
+				fprintf(stderr, ".");
+			}
+		}
+#ifdef _STEREO_
+		fseek(ifp, 2, SEEK_CUR);
+#endif /* _STEREO_ */
+	}
+
+	fprintf(stderr, "\n");
+	/** zakonczenie programu **/
+	fclose (ifp);
+	return 0;
+}

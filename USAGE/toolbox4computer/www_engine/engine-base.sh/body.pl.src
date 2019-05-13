@@ -1,0 +1,166 @@
+#!/bin/bash
+
+debug() {
+	base_filter() {
+		grep --line-buffered -v "Reading input document from stdin"
+	}
+	if [ "$VERBOSE" = "1" ]; then
+		"$@" 2>&1 | base_filter | grep --line-buffered -B1 -v "^"`echo -e "\\033"`"\\[34m" | grep --line-buffered -v "^--"
+	elif [ "$VERBOSE" = "0" ]; then
+		"$@" 2>&1 | base_filter | grep --line-buffered -B1 -v "^"`echo -e "\\033"`"\\[3[234]m" | grep --line-buffered -v "^--"
+	else
+		"$@" 2>&1 | base_filter
+	fi
+}
+
+usage() {
+		echo "USAGE for exec script function:" >&2
+		echo "   $script_name -f func_name func_args" >&2
+		echo "   $script_name --function func_name func_args" >&2
+		echo
+		echo "You can specify multipe options, for example:" >&2
+		echo "   -buc OR -b -u -c OR --build --upload --copy" >&2
+		echo "In multipe options can't use -f OR --function" >&2
+		echo
+		echo -ne "INCOMPLETE FUNCTIONS LIST (full list and documentation in source of script):\n" >&2
+		echo "$FUNCTIONS_HELP" >&2
+		echo
+		echo "For verbose mode use -v (--verbose) OR -vv (--more-verbose) for more verbose" >&2
+		echo "For don't remove temporary files use -V" >&2
+		echo "This not work with -h or -f options" >&2
+}
+
+unload_config_and_exit() {
+	# usuniecie zmiennych konfiguracyjnych
+	export -n SRC_DIR PAGE_DIR TMP_DIR SCRIPT SITE_MAP_DIR OUT_MODE
+	exit ${RETURN_CODE-2}
+}
+
+############################
+#     WYWOLANIE SKRYPTU    #
+############################
+
+# jezeli skrypt wywolany lub includowany z wywolanego skryptu
+# a nie includowany bezposrednio z powloki interaktywnej
+if [ "$0" != "/bin/bash" ]; then
+	EXIT="exit"
+
+	# sciezka wywołania do skryptu
+	if [ -x "$0" ]; then
+		SCRIPT="\"$0\""
+	else
+		SCRIPT="bash \"$0\""
+	fi
+	
+	# wykonanie funkcji ustalającej zmienne konfiguracyjne
+	set_variable
+	
+	# eksport najważniejszych zmiennych konfiguracyjnych
+	export SRC_DIR PAGE_DIR TMP_DIR SCRIPT SITE_MAP_DIR OUT_MODE
+	
+	# utowrzenie katalogu tymczasowego
+	mkdir -p "$TMP_DIR"
+	
+	# użycie źródłowych wersji skryptów *2pdf.sh gdy nie ma w systemie
+	if ! which gsch2pdf.sh > /dev/null; then
+		gsch2pdf.sh() { bash $SCH2PDF "$@"; }
+	fi
+	if ! which pcb2pdf.sh > /dev/null; then
+		pcb2pdf.sh() { bash $PCB2PDF "$@"; }
+	fi
+	if ! which dia2pdf.sh > /dev/null; then
+		dia2pdf.sh() { bash $DIA2PDF "$@"; }
+	fi
+
+	# pomoc pełna (z informacjmi z konfiguracji)
+	if [ "$1" = "-h" -o "$1" = "--help" ] ; then
+		check_programs
+		script_name=`basename "$0"`
+		usage_conf
+		usage
+		unload_config_and_exit
+	fi
+	
+	# opcja wywolania pojedynczej funkcji z pliku
+	if [ "$1" = "-f" -o "$1" = "--function" ] ; then
+		shift
+		"$@"
+		unload_config_and_exit
+	fi
+	
+	# zamaiana argumentów postaci -xyz na -x -y -z dla potrzeb dalszego parsowania
+	# wypisywanie x zabezpiecza gdy opcja jest opcją echo
+	opcje=`echo $@ | awk '
+	BEGIN {
+		RS=" "
+		FS="";
+	}
+	$1=="-" && $2!="-" {
+		for(i=2; i<=NF; i++)
+			printf("-%s ", $i)
+		next
+	}
+	$1=="-" && $2=="-" {
+		printf("--")
+		for(i=3; i<=NF; i++)
+			printf("%s", $i)
+		printf(" ")
+		next
+	}
+	{
+		print $0
+	}
+	'`
+	
+	# utworzenie tablicy argumentów nie będaćych opcjami (nie zaczynającyh się od -)
+	i=0; li=-1;
+	for a in $opcje; do
+		if [ "${a:0:1}" != "-" ]; then
+			if [ $li != $i ]; then
+				argumenty[i]="$a"
+				li=$i
+			else
+				argumenty[i]="${argumenty[i]} $a"
+			fi
+		else
+			i=$(( $li+1 ))
+		fi
+	done
+	
+	# zamiana argumentów na zmienne sterujące (pozwala na podawanie argumentów w dowolnej kolejności)
+	# tutaj tylko poziom głośności itp - pozostałe w analogicznej pętli w run_conf()
+	VERBOSE=0;
+	REMOVE_XML="true";
+	for a in $opcje; do
+		if [ "$a" = "-v" ] ; then
+			VERBOSE=$(( $VERBOSE + 1 ))
+		elif [ "$a" = "--verbose" ] ; then
+			VERBOSE=1;
+		elif [ "$a" = "--more-verbose" ] ; then
+			VERBOSE=2;
+		fi
+		if [ "$a" = "-V" ] ; then
+			REMOVE_XML="false";
+		fi
+	done
+
+
+	# przejscie do katalogu z zrodlami
+	cd "$SRC_DIR"
+	
+	# kontrola
+	if ! check_programs; then unload_config_and_exit; fi
+	#if ! check_dir_names; then unload_config_and_exit; fi
+	#if ! check_file_names; then unload_config_and_exit; fi
+	#if ! check_file_names2; then unload_config_and_exit; fi
+	#if ! check_section_names; then unload_config_and_exit; fi
+
+	# wywołanie funkcji działania zdefiniowanej w pliku konfiguracyjnym
+	run_conf
+
+
+	# zakonczenie
+	unload_config_and_exit
+else
+	EXIT=""
+fi

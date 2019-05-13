@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <fcntl.h>
+#include <termios.h>
+#include <sqlite3.h>
+
+#define NO_USE_SYSLOG
+#include "error_reporting.h"
+
+#define DATABESE_FILE "/tmp/sms_spool.db"
+
+int main(int argc, char **argv) {
+ 	if (argc != 4) {
+ 		LOG_PRINT_CRIT("USAGE: %s PRIORITY PHONE MESSAGE", argv[0]);
+ 		exit(-1);
+ 	}
+	
+	// open or create database
+	sqlite3 *db;
+	if ( sqlite3_open(DATABESE_FILE, &db) ) {
+		LOG_PRINT_CRIT("Can't open database: %s", sqlite3_errmsg(db));
+		sqlite3_close(db);
+		exit(-1);
+	}
+	
+	char buf[255];
+	snprintf(buf, 255, "INSERT INTO queue (time, pri, tel, msg) VALUES (%d, %s, %s, '%s');",
+		(int)time(NULL), argv[1], argv[2], argv[3]);
+	
+	// putting SMS to queue
+	sqlite3_stmt *stmt;
+	int ret;
+	if ( ( ret = sqlite3_prepare_v2(db, buf, -1, &stmt, NULL) ) != SQLITE_OK ) {
+		LOG_PRINT_CRIT("Can't add SMS to queue - sqlite3_prepare_v2() exit with code %d", ret);
+		sqlite3_close(db);
+		exit(-1);
+	}
+	
+	while ( ( ret = sqlite3_step(stmt) ) == SQLITE_BUSY ) {
+		LOG_PRINT_WARN("Waiting for delete SMS from queue");
+		usleep( 1000 );
+	}
+	if ( ret != SQLITE_DONE ) {
+		LOG_PRINT_CRIT("Can't add SMS to queue - sqlite3_step() exit with code %d", ret);
+		sqlite3_close(db);
+		exit(-1);
+	}
+	
+	if ( sqlite3_finalize(stmt) ) {
+		LOG_PRINT_CRIT("Adding SMS to queue ERROR - sqlite3_step() exit with code %d", ret);
+		sqlite3_close(db);
+		exit(-1);
+	}
+	
+	// clean up
+	sqlite3_close(db);
+	return 0;
+}

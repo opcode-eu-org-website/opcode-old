@@ -1,0 +1,21 @@
+# plik Makefile służący do budowy modułów w katalogu poza drzewem jądra ...
+# plik zainspirowany przykładem z "Linux Device Driver"
+
+# wywolanie zwyczajne
+ifeq ($(KERNELRELEASE),)
+
+KERNELDIR=/lib/modules/$(shell uname -r)/build
+PWD=$(shell pwd)
+
+modules:
+	make -C $(KERNELDIR) M=$(PWD) modules
+
+clean:
+	rm -rf *.o *.ko *.mod.c .tmp_versions *.cmd
+
+# wywolanie przez Makefile z $(KERNELDIR)
+else
+
+obj-m := modul.o
+
+endif

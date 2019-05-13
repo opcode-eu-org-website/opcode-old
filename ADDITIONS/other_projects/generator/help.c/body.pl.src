@@ -1,0 +1,25 @@
+#include "help.h"
+
+#include <stdlib.h>
+#include <stdarg.h> 
+
+void print_help(FILE *output, char *name, int code) {
+	fprintf(output, "USAGE:\n");
+	fprintf(output, "%s -o dsp|alsa|uC -r val [-d disp_file] config_file\n", name);
+	fprintf(output, "  -o dsp|alsa|uC     Output mode\n");
+	fprintf(output, "  -O device          Output device\n");
+	fprintf(output, "  -r val             sampling Rate in Hz\n");
+	fprintf(output, "  -d disp_file       write data to Display file\n");
+	fprintf(output, "  config_file is a text file contains signal description\n");
+	fprintf(output, "\n");
+	fprintf(output, "Format of config_file:\n");
+	fprintf(output, "TIME number_of_periods time_of_one_period\n");
+	fprintf(output, "MACRO_NAME macro_parametr\n");
+	exit(code);
+}
+
+void print_parse_error(int line, const char *info) {
+	fprintf(stderr, "ERROR: Unparsable line %d in config file\n", line);
+	if (info != NULL) fputs(info, stderr);
+	exit(-1);
+}

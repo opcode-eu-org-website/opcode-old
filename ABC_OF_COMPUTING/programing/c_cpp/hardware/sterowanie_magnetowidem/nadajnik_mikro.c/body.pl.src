@@ -1,0 +1,251 @@
+/*
+ * program jest nadajnikiem opartym na układzie mikrokontrolera
+ * dane dotyczące standardu implementowanych funkcji
+ * włączane są podczas kompilacji z pliku "pilot.dat"
+ *
+ * 2004.01.04
+ *
+ */
+
+/*
+ * w chwili obecnej prorgam ten nie dizala poprawnie
+ * (lub na mojej wersji kompilatora nie jest kompilowany poprawnie)
+ *
+ * poniżej przedstawiam porownanie funkcji OFF wyemitowanej
+ * przez orginalnego pilota i przez uklad mikrokontrolera:
+ * mikrokontroler: 0.002414, 0.000590, 0.001217, 0.000585, 0.000618, 0.000585, 0.001218, 0.000586, 0.000616,
+ *                 0.000585, 0.001218, 0.000585, 0.000618, 0.000585, 0.000616, 0.000585, 0.001217, 0.000586,
+ *                 0.001218, 0.000586, 0.000615, 0.000586, 0.001218, 0.000585, 0.000618, >5.0
+ * pilot:          0.002401, 0.000599, 0.001202, 0.000600, 0.000601, 0.000599, 0.001200, 0.000601, 0.000600,
+ *                 0.000599, 0.001201, 0.000599, 0.000601, 0.000600, 0.000600, 0.000599, 0.001202, 0.000599,
+ *                 0.001201, 0.000600, 0.000602, 0.000599, 0.001201, 0.000599, 0.000602, 0.024624
+ * szczegulną uwagę zwraca systematyczne zawyżenie czasu trwania jedynki i skrócenie zera
+ * natomiast nieistotny (po przeprowadzeniu stosownyh prob) wydaje sie byc czas trwania koncowego zera
+ *
+ * niestety w chwili obecnejnie jestem w stanie dokonać analogicznego
+ * porównania z sygnalem emitowanym przez nadajnik oparty na asm
+ * (ze wzgledu na koniecznosc wykorzystania 2 komputerow)
+ *
+ * bardziej prawdopodobne wydaje sie to iz wina lezy w kompilacji (i optymilizacji kodu)
+ * gdyz teoretycznie czasy miedzy poczatkiem rozpatrywania if'a (z pojedynczym warunkiem)
+ * i wykonaniem pierwszej instrukcji w nim
+ * a wykonaniem pierwszej instrukcji po nim (gdy warunek nie jest prawdziwy)
+ * nie powinny prowadzic do az takich rozbierznosci
+ */
+
+/*
+ * na podobnej zasadzie mozna by oprzec modul jadra
+ * gdzie zrodlem przerwan bylby port szeregowy
+ * niestety nie zostal on jeszcze przeze mnie zrealizowany
+ * ze wzgledu na problemy uniemozliwiajace jego testowanie
+ * oraz brak czasu na ich przezwycierzenie
+ */
+
+#include <io.h>
+#include <interrupt.h>
+#include <sig-avr.h>
+
+#include "pilot.dat"
+
+
+// numery aktualnie nadawanej funkcji (zczyrtany przez ACK) oraz odliczacz nadawania
+char funkcja = 0, nadajemy = 0;
+
+// zmienne kontrolujace dlugosc nadawanego sygnalu
+char dugosc_sygnalu = 0;
+
+// nadawany sygnal
+long sygnal = 0;
+
+// tablica wypisywania na wyswietlaczu
+char num_tab[ 11 ] = { 237, 72, 117, 93, 216, 157, 189, 73, 253, 221, 249 };
+
+
+SIGNAL( SIG_OUTPUT_COMPARE1A )
+{
+	if ( nadajemy-- > 0 ) {
+		sbi (PORTD, PD1);
+		return;
+	}
+
+	cbi (PORTD, PD1);
+
+	// w innych standardach muglby byc tu jakis if
+	nadajemy = (sygnal & 1)!=0 ? CZAS_DLUGI : CZAS_KROTKI ;	// jako 1 kodujemy CZAS_DLUGI jako 0 CZAS_KROTKI
+	sygnal = sygnal >> 1;
+
+	if (--dugosc_sygnalu == 0)
+		outp( 0 , TCCR1B ); // stop timer
+}
+
+/* MEMORY MAP:
+			0x00800060                funkcja
+			0x00800061                nadajemy
+			0x00800062                dugosc_sygnalu
+			0x00800063                sygnal
+			0x00800067                num_tab
+*/
+
+
+int main() {
+
+	// sbi(PORT, BIT) - ustawia bit BIT na porcie PORT
+	// DDRX - ustalenie kierunku dla portu X: ustawiony - wyjście, skasowany - wejście
+	sbi (DDRD, PD1);
+	cbi (PORTD, PD1);
+
+	sbi (DDRD, PD5);
+	sbi (PORTD, PD5);
+
+	outp (0xFF, DDRB);
+	outp (0, PORTB);
+
+	// zapisujemy na port bez ustawionego kierunku (bedziemy mogli tez z niego czytac)
+	// ustawienia stanu wysokiego na tym porcie (tak jak ma komputer w pinach LPT nie będących masą)
+	// wymagaja ULN2003AN z naszej plytki aby poprawnie dzialac
+	// - zastepowac go niskim gdy na swoim wejsciu maja wysoki (w przeciwnym razie nie zmieniac go ...)
+	sbi (PORTD, PD0);
+	sbi (PORTD, PD6);
+
+	// zmienna (logiczna) kontrolujaca trzymanie wcisnietego ACK
+	char bylo_ack = 0;
+
+	// start programu z stanem niskim na PD0
+	// (wcisniete ACK) spowoduje pracę w trybie echa
+	if ( bit_is_set (PIND, PD0) ) {
+
+		outp (num_tab[0], PORTB);
+
+		while (1) {
+
+
+			// USTAWIENIA
+
+			// gdy nasisnelismy ACK zwiekszamy licznik o 1
+			if ( bit_is_clear (PIND, PD0) ) {
+				if ( !bylo_ack ) {
+					bylo_ack = 1;
+
+					funkcja++;
+
+					if (funkcja > 10) funkcja=0;
+
+					outp( num_tab[funkcja], PORTB );
+					// moznaby bawic sie z obsluga kilku cyfr wyswietlacza jednak przy tak niewielkiej liczbie sygnalow
+					// nie ma to wiekszgo sensu, prosciej zastosowac jedna cyfre w trybie szesnastkowym
+				}
+			} else {
+				bylo_ack = 0;
+			}
+
+			// nie interesuje nas dalsza czesc petli gdy nie naciskamy BUSY
+			if ( bit_is_set (PIND, PD6) ) continue;
+
+
+			// WYSYLANIE
+
+			// inicjacja zmiennych dla nadawanego sygnału
+			nadajemy = CZAS_POCZATKU;
+			switch (funkcja) {
+				case 0:
+					//ON_OFF:
+					sygnal = ON_OFF_S ;
+					dugosc_sygnalu = ON_OFF_L + 1; // +1 bo nadajemy tez sygnal poczatkowy
+				break;
+				case 1:
+					//PLAY:
+					sygnal = PLAY_S ;
+					dugosc_sygnalu = PLAY_L + 1;
+				break;
+				case 2:
+					//CH+:
+					sygnal = CH_UP_S ;
+					dugosc_sygnalu = CH_UP_L + 1;
+				break;
+				case 3:
+					//CH-:
+					sygnal = CH_DOWN_S ;
+					dugosc_sygnalu = CH_DOWN_L + 1;
+				break;
+				case 4:
+					//PAUSE:
+					sygnal = PAUSE_S ;
+					dugosc_sygnalu = PAUSE_L + 1;
+				break;
+				case 5:
+					//STOP:
+					sygnal = STOP_S ;
+					dugosc_sygnalu = STOP_L + 1;
+				break;
+				case 6:
+					//FF:
+					sygnal = FF_S ;
+					dugosc_sygnalu = FF_L + 1;
+				break;
+				case 7:
+					//REW:
+					sygnal = REW_S ;
+					dugosc_sygnalu = REW_L + 1;
+				break;
+				case 8:
+					//IFF:
+					sygnal = IFF_S ;
+					dugosc_sygnalu = IFF_L + 1;
+				break;
+				case 9:
+					//IREW:
+					sygnal = IREW_S ;
+					dugosc_sygnalu = IREW_L + 1;
+				break;
+				case 10:
+					//REC:
+					sygnal = REC_S ;
+					dugosc_sygnalu = REC_L + 1;
+				break;
+			}
+
+			// tryb pracy licznika (porównywanie)
+			outp( 64 , TCCR1A ); // przełączączenie bitu OC1A gdy wartosci pasuja
+			outp( 8 + 1 , TCCR1B ); // zliczanie pojedyńczych taktów (CS10), zerowanie po porównaniu (CTC1)
+//outp( 8 + 4 , TCCR1B );
+
+			// jako że jest nam potrzebne jedno co CZAS_PODSTAWOWY,
+			// czyli 1/CZAS_PODSTAWOWY [s] przerwan na sekunde
+			// a nasz mikrokontroler taktowany jest z czestoscia 7372800 Hz
+			// to musimy ustalic zakres licznika na 7372800 / przerwan na sekunde
+
+			// ustalam zakres pracy licznika
+			// układ porównywać będzie odpowiednie bity licznika z zadanymi wartosciami
+			// TUTAJ zaczyna sie odliczanie (po tej instrukcji)
+			outp( (int)(CZAS_PODSTAWOWY * 7.3728) / 256 , OCR1H );
+			outp( (int)(CZAS_PODSTAWOWY * 7.3728) % 256 , OCR1L );
+//outp( 14400 / 256, OCR1H ); outp( 14400 % 256, OCR1L ); // okres = 1s
+
+			// przerwanie zegarowe z OCIE1A
+			sbi( TIMSK, OCIE1A );
+
+			// wlaczam obsługe przerwan
+			sei();
+
+			//while ( dugosc_sygnalu > 0 ); // czekamy na koniec nadawania
+			while ( 1 );
+		}
+
+	} else {
+
+		outp (16, PORTB);
+
+		// ten mało estetyczny programistycznie element jakim jest pętla nieskończona jest tutaj wręcz nieodzowny
+		while ( 1 ) {
+			// bit_is_set(PORT, BIT) - zwraca 1 gdy bit BIT jest ustawiony na porcie PORT, w przeciwnym razie 0
+			// PINX - czytanie z portu X
+			if ( bit_is_set (PIND, PD0) )
+				// PORTX - zapis na port X
+				sbi (PORTD, PD1);
+			else
+				// cbi(PORT, BIT) - kasuje bit BIT na porcie PORT
+				cbi (PORTD, PD1);
+		}
+	}
+}
+

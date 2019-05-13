@@ -1,0 +1,67 @@
+<article>
+<title>obliczanie układu typu wspólny emiter</title>
+<p>Ustalanie punktu pracy (bipolarny, stały prąd bazy):</p>
+<ol>
+	<li><eq_latex>I_B = I_{CQ} / \beta</eq_latex></li>
+	<li><eq_latex>R_B = {U_{CC} - U_{BE} \over I_B}</eq_latex></li>
+	<li><eq_latex>R_C = {U_{CC} - U_{CEQ} \over I_{CQ}}</eq_latex></li>
+	<li>rozrzut <eq_latex>\beta</eq_latex> załatwiamy licząc dla średniej i sprawdzając czy dla maksymalnej nie prowadzi do nasycenia</li>
+</ol>
+
+<p>Obliczenie punktu pracy i parametrów układu (bipolarny, stały prąd bazy):</p>
+<ol>
+	<li><eq>U<sub>RB</sub> = U<sub>CC</sub> - U<sub>BE</sub></eq></li>
+	<li><eq_latex>I_B = {U_{RB} \over  R_B}</eq_latex></li>
+	<li><eq_latex>I_C = \beta I_B</eq_latex></li>
+	<li><eq>U<sub>CE</sub> = U<sub>CC</sub> - R<sub>C</sub> I<sub>C</sub></eq></li>
+	<li><eq>R<sub>WE</sub> = R<sub>B</sub> || r<sub>b'e</sub></eq></li>
+	<li><eq>R<sub>WY</sub> = R<sub>C</sub></eq></li>
+	<li><eq_latex>k_{u} = {U_{WY} \over U_{WE}} = g_m (R_C || R_O) = \frac{I_C}{\varphi_{_T}} \frac{R_C R_O}{R_C + R_O}</eq_latex></li>
+	<li><eq_latex>k_{us} = k_u \frac{R_{WE}}{R_{WE} + R_G}</eq_latex></li>
+	<li><eq_latex>k_{i} =  k_{u} \frac{R_{WE}}{R_{0}}</eq_latex></li>
+	<li><eq_latex>k_{is} = \frac{I_O}{I_G} = \frac{U_O/R_O}{U_G/R_G} = k_{uS} \frac{R_{G}}{R_{0}}</eq_latex></li>
+	<li><eq>k<sub>ps</sub> = 4 k<sub>is</sub> k<sub>us</sub></eq></li>
+</ol>
+
+<p>Ustalanie punktu pracy (bipolarny, opornik emiterowy):</p>
+<ol>
+	<li>przyjmujemy założenie o spadku napięcia na <eq>U<sub>RE</sub></eq></li>
+	<li><eq_latex>R_E = {U_{RE} \over I_{CQ}}</eq_latex></li>
+	<li><eq>U<sub>RC</sub> = U<sub>CC</sub> - U<sub>CEQ</sub> - U<sub>RE</sub></eq></li>
+	<li><eq_latex>R_C = {U_{RC} \over I_{CQ}}</eq_latex></li>
+	<li>dzielnik - napięcie wyjściowe <eq>U<sub>B</sub> = U<sub>RE</sub> + U<sub>BE</sub></eq></li>
+	<li>obliczamy dla sztywnego dzielnika (spadek napięcia wyjściowego związany z prądem bazy &lt; 0.1V)</li>
+	<li>weryfikacja dzielnika - obliczenie <eq>U<sub>BE</sub></eq> z <eq>E<sub>BZ</sub> = I<sub>B</sub> R<sub>BZ</sub> + U<sub>BE</sub> + I<sub>E</sub> R<sub>E</sub></eq>, gdzie <eq_latex>E_{BZ} = U_{CC}\frac{R_{B2}}{R_{B1} + R_{B2}} \approx 2.7\rm{V}</eq_latex></li>
+	<li>warto sprawdzić także czy dzielnik nie jest zbyt sztywny (nie wybija sygnału)</li>
+</ol>
+
+<p>Obliczenie punktu pracy i parametrów układu (bipolarny, opornik emiterowy):</p>
+<ol>
+	<li><eq>R<sub>BZ</sub> = R<sub>B1</sub> || R<sub>B2</sub></eq></li>
+	<li><eq_latex>E_{BZ} = U_{CC}\frac{R_{B2}}{R_{B1} + R_{B2}}</eq_latex></li>
+	<li><eq_latex>U_{RE} = E_{BZ} - U_{BE}</eq_latex> (zakładamy tutaj sztywny dzielnik - spadek na <eq>R<sub>BZ</sub></eq> pomijalnie mały)</li>
+	<li><eq_latex>I_C \approx I_E = {U_{RE} \over R_E}</eq_latex></li>
+	<li>znając <eq_latex>I_B = {I_E \over \beta +1}</eq_latex> weryfikujemy założenie o sztywności dzielnika licząc spadek napięcia na <eq>R<sub>BZ</sub></eq> - <eq>U<sub>RBZ</sub> = R<sub>BZ</sub> I<sub>B</sub></eq></li>
+	<li><eq>U<sub>C</sub> = U<sub>CC</sub> - U<sub>RC</sub></eq></li>
+	<li><eq>U<sub>CE</sub> = U<sub>C</sub> - U<sub>E</sub></eq></li>
+	<li><eq_latex>R_{WE} = R_{BZ} || (r_{b'e} + \beta R_E)</eq_latex> lub <eq>R<sub>WE</sub> = R<sub>BZ</sub> || r<sub>b'e</sub></eq> (gdy mamy <eq>C<sub>E</sub></eq>)</li>
+	<li>pozostałe parametry (<eq>R<sub>WY</sub></eq>, <eq>k<sub>u</sub></eq>, <eq>k<sub>us</sub></eq>, <eq>k<sub>i</sub></eq>, <eq>k<sub>is</sub></eq>, <eq>k<sub>ps</sub></eq>) obliczamy tak samo jak przy "stałym prądzie bazy"</li>
+</ol>
+
+<p>Przy obliczaniu pojemności uwzględniamy ich otoczenie rezystorowe - <eq>R<sub>WE</sub> + R<sub>G</sub></eq> dla kondensatora wejściowego, <eq>R<sub>WY</sub> + R<sub>O</sub></eq> dla kondensatora wyjściowego oraz <eq_latex>R_E || \left(\frac{R_G||R_{BZ}}{\beta_{AC} + 1} + r_{eb'} \right)</eq_latex> dla kondensatora emiterowego.</p>
+
+<p>Ustalanie punktu pracy i parametrów układu (JFET):</p>
+<ol>
+	<li><eq_latex>\beta = {I_{DSS} \over U_T^2}</eq_latex></li>
+	<li>obliczamy <eq>U<sub>GS</sub></eq> w oparciu o zależności: <eq_latex>\beta (U_{GS} - U_T)^2 = - U_{GS} / R_S</eq_latex> (przyjmujemy założenie o zakresie pentodowym)</li>
+	<li><eq>I<sub>D</sub> = - U<sub>GS</sub> / R<sub>S</sub></eq></li>
+	<li><eq>U<sub>RD</sub> = I<sub>D</sub> R<sub>D</sub></eq></li>
+	<li><eq>U<sub>RS</sub> = I<sub>D</sub> R<sub>S</sub></eq></li>
+	<li><eq>U<sub>DS</sub> = V<sub>DD</sub> - U<sub>RD</sub> - U<sub>RS</sub></eq></li>
+	<li>sprawdzamy czy zakres pentodowy - <eq_latex>U_{GS} \ge U_T</eq_latex> i <eq_latex>U_{DS} \ge U_{GS} - U_T</eq_latex></li>
+	<li><eq>R<sub>WY</sub> = R<sub>D</sub></eq></li>
+	<li><eq>R<sub>WE</sub> = R<sub>B</sub></eq></li>
+	<li><eq>k<sub>u</sub> = -g<sub>m</sub> R<sub>L</sub></eq> (tak samo jak w bipolarnym, ale inne <eq_latex>g_m = {dI_D \over dU_{GS}}</eq_latex> - dla zakresu pentodowego <eq_latex>g_m=2 \beta (U_{GS} - U_T)</eq_latex>)</li>
+	<li>pozostałe parametry (<eq>k<sub>us</sub></eq>, <eq>k<sub>i</sub></eq>, <eq>k<sub>is</sub></eq>, <eq>k<sub>ps</sub></eq>) obliczamy w oparciu o powyższe <eq>R<sub>WE</sub></eq>, <eq>R<sub>WY</sub></eq>, <eq>k<sub>u</sub></eq>, tak samo jak przy bipolarnym</li>
+</ol>
+</article>

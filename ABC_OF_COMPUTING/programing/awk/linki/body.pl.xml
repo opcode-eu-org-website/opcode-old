@@ -1,0 +1,11 @@
+<article>
+<title>Linki i moje projekty</title>
+
+<p>Zamieszczam tutaj krótki skrypcik który usuwa zadany katalog ze zmiennej systemowej PATH - <code>PATH=`echo $PATH | awk 'BEGIN {RS=":"; FS="\n"} $1!="/sciezka/katalogu/do/usuniecia" {printf("%s:",$1)}'`</code>, a także przykłady skryptów bashowych wykorzystujących AWK:</p>
+<ul>
+	<li><id_link id="beos_mail2mbox.sh">beos_mail2mbox.sh</id_link> - konwersja skrzynki pocztowej z BeOSa do standardowego mbox'u</li>
+	<li><id_link id="net_stat.sh">net_stat.sh</id_link> - statystyki transferu na zadanym interfejsie sieciowym</li>
+	<li><id_link id="smtp.sh">smtp.sh</id_link> - prosty serwer SMTP (wykorzystujący do nasłuchu netcat'a), umożliwia sterowanie (wykonywanie zdalnych poleceń przy pomocy odpowiednio spreparowanych maili (jest wymagającym w teorii tylko busybox'a zastępnikiem jakiegoś serwera, pocztowego który otrzymane maile przekazuje do skryptu wyciągającego z nich potrzebne dane przy pomocy grep/cut/awk)</li>
+	<li><id_link id="engine-parse_menu.awk">engine-parse_menu.awk</id_link>, <id_link id="engine-generate.sh">engine-generate.sh</id_link> - dość rozbudowany skrypt bash'owo-awk'owy obsługującego moją stronę www (więcej <id_link id="www_engine">strona projektu</id_link>)</li>
+</ul>
+</article>

@@ -1,0 +1,95 @@
+#include <Application.h>
+
+#include "MyWindow.h"
+
+// zmienna kontrolna z ktorej pozniej skorzystamy
+bool	wybrano_drugie_menu=0;
+
+/***** Constructor ****/
+MyWindow::MyWindow(BRect frame,const char *title,window_look look,window_feel feel,uint32 flags,uint32 workspace)
+: BWindow(frame,title,look,feel,flags,workspace) {
+	//	funkcja: BRect(gorny_lewy_rog_X, gorny_lewy_rog_Y, dolny_prawy_rog_X, dolny_prawy_rog_Y)
+	// - pozycjonuje i nadaje rozmiar obiektowi
+
+	// dodaje punkty menu rozwijanego
+	// na poczatku pojawi sie tekst "wpisywana nazwa menu"
+	select_menu = new BMenu("wpisywana nazwa menu");
+	select_menu->AddItem(new BMenuItem("opcja 1", new BMessage(MSG_SELECT_1)));
+	select_menu->AddItem(new BMenuItem("opcja 2", new BMessage(MSG_SELECT_2)));
+	
+	// to "zaklecie" pozwoli nam na wybieranie opcji w menu
+	select_menu->SetLabelFromMarked(true);
+	// mozemy tez wybrac opcje ktora bedzie wybrana na poczatku
+	// jednak wtedy bez znaczenia jest polecenie: BMenu("wpisywana nazwa menu")
+	// gdyz na starcie bedzie widoczna ta ustalona ponizej wartosc domyslna
+	//(select_menu->ItemAt(0))->SetMarked(true);
+
+	// tworzymy i umieszczamy menu rozwijane
+	select = new BMenuField(BRect(15, 45, 300, 55), "Menu", "Wyswietlana etykieta menu:", select_menu);
+	AddChild(select);
+
+
+	// dodaje przysisk - przekazuje on komunikat zdefiniowany w MSG_PRZYSISK_1
+	AddChild( new BButton( BRect(15, 10, 100, 40), "Przycisk", "Nazwa przycisku",
+		new BMessage( MSG_PRZYSISK_1 ) ) );
+}
+
+// okreslam reakcje na przekazywane komunikaty
+void MyWindow::MessageReceived(BMessage *message)
+{
+	int wynik;
+	
+	switch (message->what){
+	// gdy zostal odebrany komunikat zdefiniowany w MSG_PRZYSISK_1
+	case MSG_PRZYSISK_1:
+		
+		// wyswietl komunikat BAlert:
+		// ponizej jest B_IDEA_ALERT z trzema przyciskami - ulozone w rownych odstepach: B_EVEN_SPACING
+		alert_1 = new BAlert("", "wybierz rodzaj komunikatu:", "alert", "warning", "info",
+			B_WIDTH_AS_USUAL, B_EVEN_SPACING, B_IDEA_ALERT);
+		wynik = alert_1->Go();
+		// mozna by to zapisac krocej: wynik = (new BAlert("", "wybierz rodzaj komunikatu:",
+			"alert", "warning", "info", B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_IDEA_ALERT) )->Go();
+		
+		// moga byc tez B_STOP_ALERT z dwoma przysiskami
+		if (wynik==0)
+			(new BAlert("", "treść komunikatu", "OK 1", "OK 2", NULL, B_WIDTH_AS_USUAL,
+				B_OFFSET_SPACING, B_STOP_ALERT))->Go();
+		// albo B_WARNING_ALERT z trzema
+		if (wynik==1)
+			(new BAlert("", "treść komunikatu", "OK 1", "OK 2", "OK 3", B_WIDTH_AS_USUAL,
+				B_OFFSET_SPACING, B_WARNING_ALERT))->Go();
+		// i najprostrzy - - standardowy (B_INFO_ALERT)
+		if (wynik==2)
+			(new BAlert("", "treść komunikatu", "OK"))->Go();
+		
+		// BAlert z dwoma guzikami moze wygladac tez tak (wyswietli sie gdy wybierzemy druga opcje menu):
+		if (wybrano_drugie_menu) (new BAlert("", "wybrałeś opcję nr 2", "OK 1", "OK 2", NULL,
+			B_WIDTH_AS_USUAL, B_EVEN_SPACING, B_STOP_ALERT))->Go();
+		
+		// koncze instrukcje case
+		break;
+	
+	// gdy wybrana zostanie pierwsza pozycja menu
+	case MSG_SELECT_1:
+		wybrano_drugie_menu =0;
+		break;
+		
+	// gdy wybrana zostanie pierwsza pozycja menu
+	case MSG_SELECT_2:
+		wybrano_drugie_menu =1;
+		break;
+		
+	default:
+		BWindow::MessageReceived(message);
+		break;
+	}
+}
+
+/***** QuitRequested ****/
+bool MyWindow::QuitRequested()
+{
+	// przekazuje sygnal nakazujacy zakonczenie - takie rozwiazanie wymaga #include <Application.h>
+	be_app->PostMessage(B_QUIT_REQUESTED);
+	return(true);
+}

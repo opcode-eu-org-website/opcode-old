@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# skrypt jest próbą zautomatyzowania wykonywania i pobierania zdjęcia z aparatu cyfrowego
+# zabezpieczoną przed błędami transmisji (każde z poleceń wykonuje się do skutku)
+
+if [ -f /tmp/kamera.sh_pracuje ]; then
+	echo "Skrypt tworzacy fotki aktualnie dziala"
+	exit
+fi
+
+:> /tmp/kamera.sh_pracuje
+
+echo " Przygotowywuje katalog roboczy"
+	katalog=/tmp/`date +%s`/
+	mkdir $katalog
+	cd $katalog
+
+echo " Robie fotke"
+	while ( ! gphoto2 --capture-image ) do
+		sleep 2;
+	done
+
+echo " Pobieram fotki"
+	while ( ! gphoto2 --get-all-files ) do
+		sleep 2;
+	done
+
+echo " Kasuje fotki"
+	while ( ! gphoto2 --delete-all-files ) do
+		sleep 2;
+	done
+
+rm -f /tmp/kamera.sh_pracuje
+

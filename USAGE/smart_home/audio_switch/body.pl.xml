@@ -1,0 +1,7 @@
+<article>
+	<title>Przełącznik sygnałów audio</title>
+	
+	<p>Chcąc używać jednego zestawu głośnikowego z kilkoma źródłami sygnału zachodzi potrzeba zastosowania przełącznika takich sygnałów. Niestety ciężko (w odróżnieniu np. od przełączników hdmi) kupić odpowiedniego gotowca. Zamieszam tutaj prosty projekt dwu kanałowego switcha sygnałów audio (jeżeli potrzebny jest switch 6-ścio kanałowy to wystarczy pod wspólne sterowanie podłączyć 3 takie moduły): <sch_link name="switch_audio">schemat ideowy</sch_link>. W zależności od potrzeb możliwe jest stosowanie na wejściach, wyjściach mogą być stosowane gniazda minijack, chinch lub kable przyłączeniowe.</p>
+	
+	<TODO title="Testy przełącznika audio">Projekt w fazie koncepcyjnej - wymaga przeprowadzenia testów poprawności działania</TODO>
+</article>

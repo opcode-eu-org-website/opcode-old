@@ -1,0 +1,29 @@
+<article>
+<title>Odświeżanie listy urządzeń SCSI</title>
+
+<p>W przypadku korzystania z urządzeń SCSI hot-plug (np. dysków hot-swap) zachodzi niekiedy potrzeba odświeżenia wykazu urządzeń w systemie, możemy to wykonać w następujący sposób:</p>
+<pre>odświeżenie listy urządzeń (utworzenie plików w /dev, ...)
+	echo - - - >/sys/class/scsi_host/<var>HOST</var>/scan  #<var>HOST</var> określa który konroler poddawany jest ponownemu skanowaniu
+</pre>
+
+<p>Często bywa tez potrzebne odświerzenie informacji o wielkości istniejącego urządzenia (np. zmiana rozmiaru LUNa na macierzy). Uzyskać to możemy przy pomocy komend:</p>
+<pre>
+	# reskan urządzenia (niekiedy wymagane dla ścieżek multipath-owych)
+	echo 1 > /sys/block/<var>/dev/sda</var>/device/rescan
+	
+	# odświeżenie informacji o wielkości urządzenia
+	blockdev --rereadpt <var>/dev/sda</var>
+	# wielkość możemy sprawdzić komendą (uwaga wynik w blokach 0.5kB):
+	blockdev --getsz <var>/dev/sda</var>
+	
+	# zmiana rozmiaru urządzenia multipath-owego
+	multipathd -k"resize map <var>360a980006467435a6c5a6441686d5652</var>"
+</pre>
+
+<p>Dla sieciowej odmiany SCSI (iscsi) odświeżenie rozmiaru zasobu wykonujemy poleceniem <code>iscsiadm -m node -R</code></p>
+
+<p>Dodatkowo przydatne mogą być polecenia postaci:</p>
+<pre>lsscsi
+echo 'scsi-add-single-device    HOST CHAN DEV LUN' > /proc/scsi/scsi
+echo 'scsi-remove-single-device HOST CHAN DEV LUN' > /proc/scsi/scsi</pre>
+</article>

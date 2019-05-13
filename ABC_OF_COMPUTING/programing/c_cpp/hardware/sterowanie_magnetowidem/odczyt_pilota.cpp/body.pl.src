@@ -1,0 +1,358 @@
+/*
+ * program zczytuje kod pilota przy pomocy FT1 na płytce doświadczalnej
+ * przetwarza go do różnych postaci, wykonuje test jego poprawnosci
+ * i dopisuje informacje o nim do pliku wynikowego "pilot_kody.dat"
+ *
+ * 2005.05.08
+ *
+ */
+
+#include <stdio.h>
+#include <sys/io.h>
+#include <unistd.h>
+#include <math.h> //w tym: bits/nan.h - aby w skutek bledu zwracany byl NaN
+
+#include "config.h"
+#include "czas.cpp"
+
+
+/*
+ * funkcja ustala okres fali nośnej
+ * na podstawie średniej z 10 odczytów
+ *
+ */
+double zczytaj_okres_fali_nosnej(double *czas_jedynki, double *czas_zera) {
+	unsigned long long czas_1, czas_2;
+
+	double czasy[ 26 ];
+	double suma_1 = 0, suma_2 = 0;
+
+	int wartosc, numer_impulsu = 0, poprzednia = _ACK_;
+	// poprzednia = _ACK_ - zapewnia nie znajdywanie ACK zaraz po starcie programu
+
+	while(1)
+	{
+		// zczytuje wartosc portu
+		wartosc = ODCZYTAJ;
+
+		// wykrywam nacisniecie BUSY - koniec programu
+		if ( (wartosc & _BUSY_) && !(poprzednia & _BUSY_) ) break;
+
+		// wykrywam zmiane stanu na niski lub wysoki na ACK
+		if ( (!(wartosc & _ACK_) && (poprzednia & _ACK_)) || ((wartosc & _ACK_) && !(poprzednia & _ACK_)) ) {
+			czas_2 = czas();
+
+			// czas od poprzedniej zmiany
+			czasy[numer_impulsu++] = (czas_2-czas_1) / PROCESOR;
+
+			// wykrywam przepelnienie buforu
+			if (numer_impulsu >= 26) break;
+
+			czas_1 = czas_2;
+		}
+
+		// zapamietuje obecny stan portu - reaguje tylko gdy sie zmienil
+		poprzednia = wartosc;
+	}
+
+	for (int i=1; i<11; i++) {
+		suma_1 += czasy[2*i];
+		suma_2 += czasy[2*i+1];
+		//printf("1) %.12f\n2) %.12f\n", czasy[2*i], czasy[2*i+1])
+	}
+
+	if (wartosc & _ACK_) {
+		*czas_jedynki = suma_1 / 10.0; // stan wysoki
+		*czas_zera = suma_2 / 10.0; // stan niski
+	} else {
+		return NAN; // blad
+	}
+
+	return *czas_jedynki + *czas_zera;
+}
+
+
+/*
+ * funkcja zczytuje kod z pilota z uwzględnieniem fali nośnej
+ * funkcja zczytuje kod pilota jako ciąg naprzemiennych jedynek i zer
+ * (na ACK rejesrtujemy stan WYSOKI (jedynke) gdy FT1 jest oswietlony)
+ * do przekazanej tablicy zapisuje czasy kolejnych sygnałów
+ *
+ */
+int zczytaj(double czasy[], int czasy_size, double okres_fali_nosnej) {
+	unsigned long long czas_1 = czas();
+	unsigned long long czas_2;
+
+	double podczas;
+	double okres_blokady = 1.1 * okres_fali_nosnej;
+
+	int wartosc, numer_impulsu = 0, poprzednia = _ACK_;
+	// poprzednia = _ACK_ - zapewnia nie znajdywanie ACK zaraz po starcie programu
+
+	while(1)
+	{
+		// zczytuje wartosc portu
+		wartosc = ODCZYTAJ;
+
+		// wykrywam nacisniecie BUSY - koniec programu
+		if ( (wartosc & 128) && !(poprzednia & 128) ) break;
+
+		// wykrywam stan wysoki na ACK
+		if ( (wartosc & _ACK_) && !(poprzednia & _ACK_) ) {
+			czas_2 = czas();
+
+			// czas od poprzedniej zmiany
+			podczas = (czas_2-czas_1) / PROCESOR;
+
+			// czas od poprzedniego stanu wysokiego jest wiekszy od okresu fali nosnej
+			// zatem poprzednio bylo zero
+			if (podczas > okres_blokady) {
+				czasy[numer_impulsu++] += okres_fali_nosnej;
+				czasy[numer_impulsu++] = podczas - okres_fali_nosnej;
+				// zamieszanie z jednym okresem fali nosnej wynika z natury procesu zczytywania ...
+			// w przeciwnym razie trwa modulowana jedynka
+			} else {
+				czasy[numer_impulsu] += podczas;
+			}
+
+			// wykrywam przepelnienie buforu
+			if (numer_impulsu >= czasy_size) break;
+
+			czas_1 = czas_2;
+		}
+
+		// zapamietuje obecny stan portu - reaguje tylko gdy sie zmienil
+		poprzednia = wartosc;
+	}
+//	czasy[2] += okres_fali_nosnej; // ze wzgledu na specyfike zczytywania z pierwszego impulsu tracimy jeden okres
+	return numer_impulsu;
+}
+
+
+/*
+ * funkcja w tablicy zapisanej przez powyższą funkcje wyszukuje powtórzenia
+ * przyjęta metoda działać będzie w wielu standardach
+ * (w tym w standardzie którym praktycznie się zajmuję - Sony)
+ * jednak niestety nie we wszystkich (nie zadziała np. w: Philips, Sharp, być może w ITT)
+ * dla tamtych standardów należałoby zmodyfikować funkcje do mniej wydajnej
+ * (jenak bardziej uniwersalnej) postaci lub skorzystać z informacji ile bitowy jest protokół
+ *
+ * jezeli w ciagu wykrylismy kod poczatku (unikalny kod informujacy odbiornik o poczatku transmisji)
+ * - pierwszy istotny znak, czyli czasy[2], gdyz dwa pierwsze pomiary nalezy odrzucic,
+ * (mozliwebyloby unikniecie ich rejestracji, jednak za bardzo skomplikowalo by to program ...)
+ * a na dodatek nastepny znak jest taki sam jak znak czwarty to zakladam ze znalazlem poczatek powtorzenia
+ *
+ * zwracam indeks powtorzenia - interesuje nas zakres od czasy[2] (wlacznie) do czasy[i-1] (wlacznie),
+ * czasy[i-1] sa przerwa pomiedzy powtorzeniami (w tym "zerem" po ostatnim sygnale)
+ * twierdzenie powyzsze bedzie prawdziwe rownierz w przypadku gdy pilot raz nadal sygnal
+ * (wtedy i == liczba_zczytanych + 1)
+ *
+ */
+int znajdz_powtorzenie(double czasy[], int liczba_zczytanych, double okres_fali_nosnej) {
+	int i;
+	for (i=4; i<=liczba_zczytanych; i++)
+		if ( (czasy[i] < czasy[2] + okres_fali_nosnej && czasy[i] > czasy[2] - okres_fali_nosnej)
+		    &&  (czasy[i+1] < czasy[3] + okres_fali_nosnej && czasy[i+1] > czasy[3] - okres_fali_nosnej) ) break;
+	return i;
+}
+
+
+// funkcja służąca do wysyłania zczytanego kodu, głównie w celu spawdzenia jego poprawności
+void wyslij(double czasy[], int ograniczenie) {
+
+	unsigned long long czas_n;
+
+	for (int i=1; i<=(ograniczenie-2)/2; i++) {
+		// nadawanie jedynki
+		NADAJ_JEDYNKE;
+		czas_n = czas();
+		//while(czasy[2*i] > (czas()-czas_n) / PROCESOR);
+		while(czasy[2*i] > (czas()-czas_n));
+
+		// nadawanie zera
+		NADAJ_ZERO;
+		czas_n = czas();
+		//while(czasy[2*i+1] > (czas()-czas_n) / PROCESOR);
+		while(czasy[2*i+1] > (czas()-czas_n));
+	}
+}
+
+/*
+ * funkcja główna programu ...
+ * zastosowalem tryb interaktywny, gdyz bardziej wymusza kontrole nad naciskaniem pilota
+ * (np. funkcja znajdz_powtorzenie zaklada ze kod zaczytany byl od poczatku)
+ * rowniez trudno wyobrazic sobie prace tego programu w trybie wsadowym
+ *
+ */
+int main() {
+	iopl (3); //ioperm (LPT_PORT,1,1);
+
+
+	// DEKLARACJE WSTEPNE
+	// zmienne pomocnicze
+	int i; 	char c; char bufor[35];
+
+	// zmienne wykorzystywane przy zczytywaniu
+	double okres_fali_nosnej, czas_jedynki, czas_zera;
+	int liczba_zczytanych, ograniczenie;
+
+	// zmienne z wynikami
+	double liczba; int dlugosc_liczby;
+
+	// tablica czasow i jej rozmiar
+	int czasy_size = 50;
+	double* czasy = new double [ czasy_size ];
+	// powinenem kiedys zwolnic ta pamiec ...
+	// jak sie okazlo taka deklaracja jest potrzebna aby ta tablice muc przekazac do funkcji,
+	// gdy "double czasy [ czasy_size ]" dzialalo tylko dla odwolan w main()
+START_1:
+
+
+	// WYPISUJEMY INFORMACJE O DZIALANIU PROGRAMU I OCZEKUJEMY POTWIERDZENIA
+	printf("Program zczyta dane z pilota za pomoca FT1.\n");
+	printf("Zworke ACK nalezy ustawic w pozycji FOTOTR.\n");
+	printf("Pomiar zakonczy sie po zapelnieniu buffora lub po wcisnieciu przycisku BUSY.\n");
+	printf("UWAGA: w trakcie dzialania programu komputer nie bedzie reagowac\n");
+	printf("       na jakiekolwiek polecenia ani wykonywac jakichkolwiek innych czynosci !!!\n");
+	printf("\nAby kontynuowac nacisnij ENTER. (aby przerwac - Ctrl C)\n");
+	printf("Nastepnie nacisnij dowolny przycisk na pilocie.\n");
+	while (getchar() != 10);
+
+
+	// ZCZYTUJEMY OKRES FALI NOŚNEJ
+	asm("cli"); // wylacza przerwania
+		okres_fali_nosnej =  zczytaj_okres_fali_nosnej(&czas_jedynki, &czas_zera);
+	asm("sti"); // wlacza przerwania
+START_2:
+
+
+	// ZEROWANIE ZMIENNYCH
+	// wyczyszczenie tablicy "czasy"
+	for (i=0; i<= czasy_size ; i++)
+		czasy[i] = 0;
+
+	// zerowanie innych zmiennych
+	liczba = 0; dlugosc_liczby = 0;
+
+
+	// WYPISUJEMY INFO (w tym zczytany okres fali nosnej) I OCZEKUJEMY POTWIERDZENIA
+	printf("\nUstalono ze okres fali nosnej wynosi: %.2f [us]\n      (przy czym czas jedynki (stanu wysokiego) = %.2f [us] i czas zera (stanu niskiego) = %.2f [us]).\n", okres_fali_nosnej, czas_jedynki, czas_zera);
+	printf("Aby rozpoczosc zczytywanie kodu nacisnij ENTER. (aby przerwac - Ctrl C)\n");
+	printf("Nastepnie nacisnij przycisk na pilocie ktory chcesz zczytac.\n");
+	while (getchar() != 10);
+
+
+	// ZCZYTUJEMY KOD
+	asm("cli"); // wylacza przerwania
+		liczba_zczytanych = zczytaj(czasy, czasy_size, okres_fali_nosnej);
+	asm("sti"); // wlacza przerwania
+
+
+	// ZNAJDUJEMY KONIEC PIERWSZEGO SYGNALU W ZCZYTANYM CIAGU
+	ograniczenie = znajdz_powtorzenie(czasy, liczba_zczytanych, okres_fali_nosnej);
+	if (ograniczenie == liczba_zczytanych + 1)
+		printf("OSTRZEZENIE: Mozliwe ze nie udalo sie zczytac calego kodu pilota\n");
+
+
+	// WYPISUJEMY WYNIK
+	printf("Zarejestrowane byly nastepujace czasy trwania stanow wysokich i niskich\n");
+	printf("(na przemian w podanej kolejnosci):\n");
+	for (i=2; i<=ograniczenie-2; i++) printf("%.2f [us]\n",czasy[i]);
+
+	// i w wersji przydatnej programiscie
+	printf("double czasy[] = {");
+	for (i=2; i<=ograniczenie-2; i++) printf("%f, ", czasy[i]);
+	printf("%f}; int ograniczenie = %d;\n", czasy[i], ograniczenie);
+
+	/*
+	 * zakladajac wiedze o standardzie dekoduje zczytane dane do numeru funkcji pilota -> przeznaczone glownie dla Sony
+	 * informacje o uzywanym standardzie pilota (Sony) wykorzystywane w dalszej czesci programu ...
+	 *
+	 * generalie rozwiazanie takie jak zaprezentowane tutaj bedzie nadawalo sie do dowolnego standardu
+	 * ewentualnie z drobnymi zmianami dotyczacymi nadawania kodu poczatku
+	 * i warunku przejscia ze stanu niskiego do nastepnego impulsu,
+	 * a w przypadku ITT rownierz wiekszych zmian dotyczacych piku rozpoczynajacego kazdy z impusow
+	 *
+	 */
+	#define NO_PILOT_KODY_DAT
+	#include "pilot.dat"
+
+	for (i=0; i<=(ograniczenie-6)/2; i++) {
+		// pomijamy imuls poczatkowy
+		// nie interesujaca nas przerwa (po impulsie kodujacym bit)
+		if ( (czasy[2*i+4] < CZAS_PODSTAWOWY * CZAS_DLUGI * 1.1) && (czasy[2*i+4] > CZAS_PODSTAWOWY * CZAS_DLUGI * 0.9) ) {
+			liczba += pow(2, i);
+		} else if ( (czasy[2*i+4] < CZAS_PODSTAWOWY * CZAS_KROTKI * 1.1) && (czasy[2*i+4] > CZAS_KROTKI * CZAS_KROTKI * 0.9) ) {
+			; // instrukcja pusta czyli 'liczba += 0;'
+		} else {
+			// blad
+			liczba = NAN;
+			break;
+		}
+		dlugosc_liczby++;
+	}
+	printf("Numer funkcji (z adresem) dziesietnie: %f\n", liczba);
+
+	printf("oraz binarnie: ");
+	int liczba_b = (int) liczba;
+	for(int j=0;j<=31;j++)
+	{
+			c = (liczba_b & (0x80000000 >> j))!=0 ? '1':'0';
+			printf("%c",c);
+	}
+	printf("\n");
+
+
+	// WYPISUJEMY INFO I OCZEKUJEMY POTWIERDZENIA
+	printf("Aby rozpoczosc testowanie kodu wpisz t i nacisnij ENTER,\n  aby powtorzyc czytanie wpisz p i nacisnij ENTER,\n  aby zakonczyc wpisz k i nacisnij ENTER\n");
+	while (c = getchar()){
+		getchar(); // wczytuje ENTER
+		if (c=='t')
+			break;
+		if (c=='p')
+			goto START_2;
+		if (c=='k')
+			return 0;
+	}
+
+
+	// TESTUJEMY KOD
+	for (i=2; i<=ograniczenie-1; i++) czasy[i] *= PROCESOR;
+	asm("cli"); // wylacza przerwania
+		for (i=0; i<10; i++)
+			wyslij(czasy, ograniczenie);
+	asm("sti"); // wlacza przerwania
+
+
+	// ZAPIS DO PLIKU WYNIKOWEGO
+	printf("Podaj nazwe dla zczytanej funkcji (do 35 znakow), jezeli chcesz powtorzyc zczytywanie zostaw pusta.\n");
+	fgets(bufor, 35, stdin);
+
+	// widac cos poszlo nie tak
+	if (bufor[0] == 10 && bufor[1] == 0) goto START_1; // jestem swiadom ze jest to (instrukcja goto) niezbyt zalecane rozwiazanie, jednak tutaj ze wzgledu na dwa mozliwe punkty powrotu wydaje sie uzasadnione
+
+	// usuniecie znaku nowej linii
+	for (i=1; i<35; i++)
+		if (bufor[i] == 10) {
+			bufor[i] = 0;
+			break;
+		}
+
+	// obsluga zapisu
+	FILE *plik;
+	plik = fopen("pilot_kody.dat","a");
+
+	fprintf(plik, "//%s:\n#define %s_S %d\n#define %s_L %d\n\n", bufor, bufor,(int)liczba, bufor, dlugosc_liczby);
+
+	fclose(plik);
+	printf("Zebrane dane zostaly dopisane do pliku \"pilot.dat\"\n");
+
+	printf("Aby zczytać kolejny kod wpisz p, aby zakończyć wpisz k\n");
+	while (c = getchar()){
+		getchar(); // wczytuje ENTER
+		if (c=='p')
+			goto START_2;
+		if (c=='k')
+			return 0;
+	}
+}

@@ -1,0 +1,41 @@
+#!/bin/bash
+
+echo "FUNCTION LIST:
+	move_files
+		rename lost file
+		before start this function must be set OFFSET_FROM, OFFSET_VALUE 
+		
+	move_page_in_sql
+		generate SQL update who moves pages in SQL and insert lost pages
+		after use this function recomendet is use update_sql_page_title
+		before start this function must be set OFFSET_FROM, OFFSET_VALUE and VOLUME_ID"
+
+# funkcja zmieniająca nazwy plików o nazwach kończących się $2 znajdującyh się w katalogu $1
+# pliki o nowych nazwach umieszczane są w katalogu określonym przez $3
+move_files() {
+	pushd $1
+	mkdir -p $3
+	for filename in *$2; do
+		in_file_number=`echo ${filename%$2} | sed -e 's#^0*##g'`
+		if [ $in_file_number -gt $OFFSET_FROM ]; then
+			out_file_number=$(( $in_file_number + $OFFSET_VALUE ))
+			out_file=`printf "%04d$2" $out_file_number`
+			mv "$filename" "$3/$out_file"
+		fi
+	done
+	if [ -f "$4" ]; then
+		for out_file_number in `seq $(( $OFFSET_FROM + 1 )) $(( $OFFSET_FROM + $OFFSET_VALUE ))`; do
+			out_file=`printf "%04d$2" $out_file_number`
+			cp "$4" "$1/$3/$out_file"
+		done
+	fi
+	popd
+}
+
+# funkcja generująca aktualizację bazy danych
+move_page_in_sql() {
+	echo "UPDATE page SET page_no=page_no+$OFFSET_VALUE WHERE volume_id=$VOLUME_ID AND page_no>$OFFSET_FROM;"
+	for f in `seq $(( $OFFSET_FROM + 1 )) $(( $OFFSET_FROM + $OFFSET_VALUE ))`; do
+		echo "INSERT INTO page (volume_id, page_no, title) VALUES ($VOLUME_ID, $f, 'tmp_$f');"
+	done
+}

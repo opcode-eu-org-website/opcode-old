@@ -1,0 +1,80 @@
+#!/bin/bash
+
+LOG=/tmp/rc.rrp.log
+log() {
+	echo "[`date +"%F %T"`] $1" >> $LOG;
+	logger -i -t $0 "$1"
+}
+fix_interface() {
+	IF=$1
+	IP=$2
+	CMD=$3
+
+	if ! ping -c 1 $IP > /dev/null; then
+		log "PROBLEM with $IF:"; ifconfig $IF >> $LOG
+	
+		if [ "$CMD" != "" ]; then
+			$CMD pre
+		fi
+
+		cp /run/network/ifstate /run/network/ifstate.bck
+		grep -v $IF=$IF /run/network/ifstate.bck > /run/network/ifstate
+		ifconfig $IF up 0.0.0.0
+		ifup $IF
+	
+		log "FIX $IF DONE:"; ifconfig $IF >> $LOG
+
+		if [ "$CMD" != "" ]; then
+			$CMD post
+		fi
+		return 1
+	else
+		return 0
+	fi
+}
+
+log "(RE)START ntp:"
+/etc/init.d/ntp stop &>> $LOG
+ntpdate-debian >> $LOG
+/etc/init.d/ntp start &>> $LOG
+log "FIX ntp DONE"
+
+fix_interface eth0 192.168.29.1
+
+hostap() {
+	case "$1" in
+		"pre"|"stop")
+			log "STOP hostapd and dnsmasq:"
+			/etc/init.d/hostapd stop &>> $LOG
+			/etc/init.d/dnsmasq stop &>> $LOG
+			;;
+		"post"|"start")
+			log "START hostapd and dnsmasq:"
+			/etc/init.d/hostapd start &>> $LOG
+			sleep 1
+			/etc/init.d/dnsmasq start &>> $LOG
+			;;
+	esac
+}
+hostap start
+hostap stop
+hostap start
+for i in 1 2 3 4; do
+	fix_interface wlan0 192.168.186.1 hostap && break
+	sleep 3
+done;
+
+dnsmasq() {
+	case "$1" in
+		"pre"|"stop")
+			log "STOP dnsmasq:"
+			/etc/init.d/dnsmasq stop &>> $LOG
+			;;
+		"post"|"start")
+			log "START dnsmasq:"
+			/etc/init.d/dnsmasq start &>> $LOG
+			;;
+	esac
+}
+fix_interface wlan0 192.168.186.1 dnsmasq
+

@@ -1,0 +1,75 @@
+/*
+ * plik ma na celu prezentację podstawowych zagadnień z programowania w języku C / C++
+ * prezentuje ustalanie nice oraz priorytetów czasu rzeczywistego
+ *
+ * program z oczywistych wzgledów powinien być uruchamiany z prawami root'a ...
+ *
+ */
+
+
+#include <sched.h>
+#include <sys/resource.h>
+#include <sys/types.h>
+#include <errno.h>
+
+int main ()
+{
+	// nice = -20
+	// ta funkcja działa tylko na bierzącym procesie - nie pobiera PIDu
+	// tak naprawde wywolywanie jeje w tym programie nie ma sensu
+	// gdyz zaraz zmienimy polityke kolejkowania (i ststyczny priorytet) na niebslugujaca nice'a
+	setpriority (PRIO_PROCESS, 0, -20);
+	
+	
+	
+	/// priorytet statyczny (rt_priority), priorytet czasu rzeczywistego
+	
+	// deklaracje zmiennych
+	pid_t pid;
+	struct sched_param sp;
+	
+	
+	pid = getpid(); // pobranie identyfikatora biezacego procesu
+	sp.sched_priority = sched_get_priority_max(SCHED_FIFO);
+	// uwaga: przy wysokim priorytecie (tak jak w tym przykladzie)
+	//        moze nie byc mozliwe zabicie programu
+	// przy nizszych prirorytetach proces powinno dac sie zabic kombinacja Ctrl+C ...
+	
+	// ustawienie trybu szeregowania oraz priorytetu
+	// funkcja ta moze byc wykorzystana do nadawania priorytetu dowolnemu procesowi
+	// (nie tylko biezacemu), wystarczy ze znamy jego PID
+	if ( sched_setscheduler(pid, SCHED_RR, &sp) ) {
+		perror("ERROR");
+		return -1;
+	}
+	// w tym miejscu warto wpomnieć o metodach szeregowania:
+	// * SCHED_RR jest to proste szeregowanie z kwantem czasu (proces dostaje czas,
+	//   a po jego wykorzystaniu lub oddaniu procesora brany jest kolejny
+	//   a ten idzie na koniec kolejki)
+	// * SCHED_FIFO podobnie do SCHED_RR tyle że jedynym powodem dla którego proces może
+	//   przestać być wykonywany jest to iż sam zrezygnuje (jego kwant czasu jest nieskonczony)
+	// * SCHED_OTHER zależy od systemu, najczęsciej podobnie do SCHED_RR tyle że miejsce
+	//   na którym ląduje w kolejce zalezy od tego jak dużo używał CPU (im więcej tym dalej)
+	// * SCHED_SPORADIC (nie implementowana aktualnie w Linuxie) jest polityką szeregowania
+	//   typu serwera sporadycznego (procesy mogą chodzić z wysokim priorytetem przez zadany
+	//   kwant czasu potem - do czasu odnowienia priorytetu serwera sporadycznego ich
+	//   priorytet jest obniżany)
+	//
+	// warto zauważyć iż SCHED_FIFO wraz z sched_yield() pozwala na implementowanie szeregowania
+	// powodującego przełączanie zadań tylko gdy ione tego sobie rzyczą (podobnie jak w PicOSie ...)
+	//
+	// oczywiście dla każdego z priorytetów istnieje osobna kolejka i dopóki są gotowe zadania
+	// w kolejce o wyższym priorytecie, kolejka o niższym nie ma nic do powuiedzenia
+	
+	
+	// metoda ta wydaje sie rownie skuteczna jak opisane w zawieszacz.c wylaczanie przerwan,
+	// przy czym jest rozwiazaniem elegantrzym
+	// oraz umozliwiajacym korzystanie z wielu funkcji ktore uniewaznialy tamta metode
+	
+	
+	// zastapienieaktualnie wykonywanego programu przez program ktory chcemy tak uruchomic ...
+	execlp("ps", "ps", "-l", "-A", 0);
+	
+	// wiecej o szertegowaniu procesow pod Linuxem:
+	// http://www.localnet.pl/man/man2/sched_setscheduler.2.html
+}

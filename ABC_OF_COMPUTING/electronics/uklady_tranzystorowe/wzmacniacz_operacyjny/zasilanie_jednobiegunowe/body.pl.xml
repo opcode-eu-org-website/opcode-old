@@ -1,0 +1,6 @@
+<article>
+<title>Problem zasilania jednobiegunowego</title>
+<p>W przypadku konieczności zasilenia wzmacniacza operacyjnego jedno biegunowo, należy zadbać o dodanie odpowiedniej wartości stałej do sygnału wejściowego na wzmacniacz oraz takiej samej wartości do sygnału podawanego na drugie wejście wzmacniacza. Poniżej pokazane zostały rozwiązania układowe umożliwiające realizację tego wymogu (metodę prostego uzyskania "masy wirtualnej" dla takich rozwiązań (w tym wypadku 6V) przedstawiono poniżej):</p>
+
+<p class="center"><img_from_src name="wzmacniacz_operacyjny_jednobiegunowo" type="sch" alt="schemat ideowy jednobiegunowego zasilania wzmacniacza operacyjnego" /></p>
+</article>

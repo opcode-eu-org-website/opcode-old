@@ -1,0 +1,585 @@
+#!/bin/bash
+
+# skrypt konfigurujący routing i podział pasma
+# pozwala na wykorzystanie NAT, podziału w oparciu o kolejkę prioryttową oraz htb
+#
+# wydaje się że skrypt można dość łatwo rozszerzyć na przypadek dwuch łącza poprzez
+# powielenie całości kodu kodu htb, należy oczywiście zadbać o odpowiednią konfigurację
+# routingu taką jak opisana w rozdziale 4.2 HOWTO Kształtowanie Ruchu i Zaawansowany Routing
+# http://linuxreviews.org/howtos/networking/lartc/pl/x271.html
+#
+# tunel ipv6 może potencjalnie wywoływać problem polegający na podwójnym liczeniu jego
+# ruchu (jako ruchu wewnątrz tunelowego jak i ruchu ipv4 tunelu), jego rozwiązaniem
+# byłoby wyfiltrowanie ruchu ipv4 tunelu (puszczenie go w klasie nielimitowanej)
+#
+# ogólnie należy zaznaczyć iż tunele i kolejkowanie to "chore" pomysly (lepiej natywne łącze i na tyle szerokie
+# aby nie trzebabyło kolejkować, a priorytetyzacje ruchu realizować w oparciu o vlany)
+
+
+
+# włączanie zbioru przydatnych funkcji
+. /usr/local/lib/routing_fun.sh
+
+# włączanie pliku konfiguracyjnego
+. /etc/routing.conf
+
+##################
+##     IPv6     ##
+##################
+
+start_ipv6() {
+	# będziemy używać tuneli (zwykłych)
+	modprobe ip6_tunnel
+	
+	# nie korzystamy natomiast z tuneli typu sit
+	rmmod sit
+	
+	# usuwamy routing z interfejsu zewnętrznego
+	eval ip -6 route del ff00::/8 dev ${name[$ext_conf]} $QUITE
+	eval ip -6 route del fe80::/64 dev ${name[$ext_conf]} $QUITE
+	
+	# nie korzystamy z adresów link-scope (experimental ;-) )
+	for dev in `ip link sh | grep mtu | cut -f2 -d' ' | tr -d ':' | cut -f1 -d'@'`; do
+		if [ "$dev" != "${name[$int_conf]}" ]; then # radvd wymaga adresu link-scope
+			ip=`ip addr sh dev $dev | grep 'inet6 .* scope link' | awk '{print $2}'`;
+			if [ "$ip" != "" ]; then ip addr del $ip dev $dev; fi;
+		fi
+	done;
+	
+	for X in `seq 0 $(( ${#mode[@]} - 1)) `; do
+		if [ "${mode[$X]}" = "sit" ]; then
+			# konfigurujemy tunel
+			ip tunnel add ${name[$X]} mode sit remote ${remote[$X]} local ${local[$X]}
+			ip link set ${name[$X]} up
+			ip addr add ${base_ipv6[$X]}/${base_maskv6[$X]} dev ${name[$X]}
+			# uwaga tunel moze wymagac zmniejszenia mtu na komputerach klienckich:
+			#  ifconfig eth0 mtu 1280
+			# celem poprawnego dzialania niektorych stron WWW itp. - np. www.ripe.net
+			
+			# usuwamy routing locallink z interfejsu tunelu
+			eval ip -6 route del fe80::/64 dev ${name[$X]} $QUITE
+			
+			# dodajemy trasę domyślną dla tunelu
+			ip -6 route add ::/0 metric 256 dev ${name[$X]}
+		elif [ "${mode[$X]}" = "int" ]; then
+			# usuwamy trasę domyślną z interfejsów (poza tunelami)
+			eval ip -6 route del ::/0 dev ${name[$X]} $QUITE
+		fi;
+	done;
+	
+	# dodajemy routing na interfejsie wewnętrznym
+	if [ "${base_ipv6[$int_conf]}" != "" ]; then
+		ip -6 route add `ipv6_and_mask2network ${base_ipv6[$int_conf]} ${base_maskv6[$int_conf]}`/${base_maskv6[$int_conf]} \
+			metric 64 dev ${name[$int_conf]}
+	fi
+}
+
+stop_ipv6() {
+	for tun in `ip tunnel sh | awk 'BEGIN{ FS="[: \t]+"} $2=="ipv6/ip" && $1!="sit0" {print $1}'`; do
+		ip tunnel del $tun
+	done
+	if [ "${base_ipv6[$int_conf]}" != "" ]; then
+		ip -6 route del `ipv6_and_mask2network ${base_ipv6[$int_conf]} ${base_maskv6[$int_conf]}`/${base_maskv6[$int_conf]} \
+			dev ${name[$int_conf]}
+	fi
+}
+
+
+###################
+##    ROUTING    ##
+###################
+
+start_routing() {
+	# włączenie IP forwarding
+	echo "1" > /proc/sys/net/ipv4/conf/all/forwarding
+	echo "1" > /proc/sys/net/ipv6/conf/all/forwarding
+	
+	# przekazywanie multicastu IPv4
+	route add -net 224.0.0.0 netmask 240.0.0.0 dev ${name[$int_conf]}
+}
+
+stop_routing() {
+	# wyłączenie przekazywania multicastu IPv4
+	route del -net 224.0.0.0 netmask 240.0.0.0 dev ${name[$int_conf]}
+	
+	# wyłączenie IP forwarding
+	echo "0" > /proc/sys/net/ipv4/conf/all/forwarding
+	echo "0" > /proc/sys/net/ipv6/conf/all/forwarding
+}
+
+
+####################
+##    IPTABLES    ##
+####################
+
+start_ip6tables() {
+	# blokady portów
+	for port in $block_ports; do
+		ip6tables -A INPUT   -i ${name[$extv6_conf]} -p tcp --dport $port -j REJECT
+		ip6tables -A FORWARD -i ${name[$extv6_conf]} -p tcp --dport $port -j REJECT
+	done;
+	
+	# zezwalamy na przekazywanie pakietow z naszej sieci na zewnatrz i z zewnatrz do naszej sieci
+	# (przez odpowiednie uzadzenia) - określone w konfiguracji adresy IP
+	for ip in `echo "$forwarding_ip" | cut -s -f2 -d'|' | tr ' ' '\n'`; do
+		ip6tables -A FORWARD -i ${name[$int_conf]} -s $ip -o ${name[$extv6_conf]} -d 0.0.0.0/0 -j ACCEPT
+		ip6tables -A FORWARD -i ${name[$extv6_conf]} -s 0.0.0.0/0 -o ${name[$int_conf]} -d $ip -j ACCEPT
+	done
+	ip6tables -A FORWARD -i ${name[$int_conf]} -o ${name[$extv6_conf]} -j REJECT
+	ip6tables -A FORWARD -i ${name[$extv6_conf]} -o ${name[$int_conf]} -j REJECT
+	
+	# logowanie połączeń przychodzących z sieci wewnętrznej (do serwera i sieci zewnętrznych)
+	ip6tables -A PREROUTING  -t mangle -i ${name[$int_conf]} -m state --state NEW \
+		-j LOG --log-level debug --log-prefix "FROM-INTv6: "
+	
+	# logowanie połączeń przychodzących z sieci zewnętrznej (do serwera i sieci wewnętrznych)
+	ip6tables -A PREROUTING  -t mangle -i ${name[$extv6_conf]} -m state --state NEW \
+		-j LOG --log-level debug --log-prefix "FROM-EXTv6: "
+	
+	# logowanie połączeń wychodzących do sieci zewnętrznych
+	#ip6tables -A POSTROUTING -t mangle -o ${name[$extv6_conf]} -m state --state NEW \
+		-j LOG --log-level debug --log-prefix "TO-EXTv6: "
+	ip6tables -A OUTPUT -o ${name[$extv6_conf]} -m state --state NEW \
+		-j LOG --log-level debug --log-prefix "TO-EXTv6: "
+}
+
+stop_ip6tables() {
+	# wykasowanie dotychczasowych regół + wszystko czego nie zabronimy puszczamy
+	ip6tables -F -t filter
+	ip6tables -F -t mangle
+	ip6tables -F -t raw
+	ip6tables -P INPUT ACCEPT
+	ip6tables -P OUTPUT ACCEPT
+	ip6tables -P FORWARD ACCEPT
+}
+
+start_iptables() {
+	# blokady portów
+	for port in $block_ports; do
+		iptables -A INPUT   -i ${name[$extv_conf]} -p tcp --dport $port -j REJECT
+		iptables -A FORWARD -i ${name[$extv_conf]} -p tcp --dport $port -j REJECT
+	done;
+	
+	# kontrola ToS
+	iptables -A PREROUTING -s ! $voip_host_ipv4 -d ! $voip_host_ipv4 -t mangle -j TOS --set-tos 0x00
+	
+	# zezwalamy na przekazywanie pakietow z naszej sieci na zewnatrz i z zewnatrz do naszej sieci
+	# (przez odpowiednie uzadzenia) - multicast oraz określone w konfiguracji adresy IP
+	for ip in "224.0.0.0/4" `echo "$forwarding_ip" | cut -f1 -d'|' | tr ' ' '\n'`; do
+		iptables -A FORWARD -i ${name[$int_conf]} -s $ip -o ${name[$ext_conf]} -d 0.0.0.0/0 -j ACCEPT
+		iptables -A FORWARD -i ${name[$ext_conf]} -s 0.0.0.0/0 -o ${name[$int_conf]} -d $ip -j ACCEPT
+	done
+	# pozostały forwarding blokujemy
+	iptables -A FORWARD -i ${name[$int_conf]} -o ${name[$ext_conf]} -j REJECT
+	iptables -A FORWARD -i ${name[$ext_conf]} -o ${name[$int_conf]} -j REJECT
+	
+	# logowanie połączeń przychodzących z sieci wewnętrznej (do serwera i sieci zewnętrznych)
+	iptables -A PREROUTING  -t mangle -i ${name[$int_conf]} -m state --state NEW \
+		-j LOG --log-level debug --log-prefix "FROM-INT: "
+	
+	# logowanie połączeń przychodzących z sieci zewnętrznej (do serwera i sieci wewnętrznych)
+	iptables -A PREROUTING  -t mangle -i ${name[$ext_conf]} -m state --state NEW \
+		-j LOG --log-level debug --log-prefix "FROM-EXT: "
+	
+	# logowanie połączeń wychodzących do sieci zewnętrznych
+	#iptables -A POSTROUTING -t mangle -o ${name[$ext_conf]} -m state --state NEW \
+		-j LOG --log-level debug --log-prefix "TO-EXT: "
+	iptables -A OUTPUT -o ${name[$ext_conf]} -m state --state NEW -j LOG --log-level debug --log-prefix "TO-EXT: "
+	
+	# generowane powyżej logi można wykorzystać np. do wychwycenia wirusów rozsyłających spam
+	# (duża ilość połączeń z zewn. SMTP) przy pomocy koemndy:
+	# grep ' DPT=25 ' /var/log/kernel-debug.log | grep ' OUT=eth1 ' | grep ' FROM-INT: ' | 
+	# awk 'BEGIN{FS="[= ]+"} {tablica[$11]++} END{for (INDEX in tablica) printf("%s %s\n", INDEX, tablica[INDEX])}' | 
+	# sort -n -k2
+	
+	# SNAT lub MASQUERADE dla adresow z $nat_network
+	if [ "$nat_mode" = "SNAT" ]; then
+		iptables -A POSTROUTING -t nat -o ${name[$ext_conf]} -s $nat_network -d 0.0.0.0/0 \
+			-j SNAT --to-source ${base_ipv4[$ext_conf]}
+	elif [ "$nat_mode" = "MASQUERADE" ]; then
+		iptables -A POSTROUTING -t nat -o ${name[$ext_conf]} -s $nat_network -d 0.0.0.0/0 -j MASQUERADE
+	fi
+}
+
+stop_iptables() {
+	# wykasowanie dotychczasowych regół + wszystko czego nie zabronimy puszczamy
+	iptables -F -t filter
+	iptables -F -t nat
+	iptables -F -t mangle
+	iptables -F -t raw
+	iptables -P INPUT ACCEPT
+	iptables -P OUTPUT ACCEPT
+	iptables -P FORWARD ACCEPT
+}
+
+
+###################################
+##    TrafficControl - UPLOAD    ##
+###################################
+
+start_tc_up() {
+	if $use_imq; then
+		# ładujemy moduł imq
+		modprobe imq
+		
+		# kirujemy ruch do urządzenia IMQ
+		if [ "$ext_conf" != ""  -a  "${name[$ext_conf]}" != "" ]; then
+			iptables -t mangle -A FORWARD -i ${name[$int_conf]} -o ${name[$ext_conf]} -j IMQ --todev 0
+			iptables -t mangle -A OUTPUT -o ${name[$ext_conf]} -j IMQ --todev 0
+		fi
+		if [ "$extv6_conf" != ""  -a  "${name[$extv6_conf]}" != "" ]; then
+			ip6tables -t mangle -A FORWARD -i ${name[$int_conf]} -o ${name[$extv6_conf]} -j IMQ --todev 0
+			ip6tables -t mangle -A OUTPUT -o ${name[$extv6_conf]} -j IMQ --todev 0
+		fi
+		
+		# ustawiamy że tc chodzi na imq0
+		tc_up_dev=imq0
+		# włączamy urządzenie imq
+		ip link set $tc_up_dev up
+		
+		set_mtu="mtu 16500"
+		# zapobiega segmentowaniu pakietów UDP, co prowadzić by mogło do nietrzymania kolejek w IMQ,
+		# (wystąpienie tego problemu można zaobserować po niezerowej wartości "giants" w tc -s class show dev imqX)
+	else
+		set_mtu=""
+		tc_up_dev=${name[$ext_conf]}
+	fi
+	
+	
+	## kolejeki podstawowe
+	if $use_prio_queue; then
+		# tworzymy kolejke glowna PRIO dla naszego interfejsu wewnetrznego (identyfikowana przez 5:0)
+		tc qdisc add dev $tc_up_dev root handle 5:0 prio bands 2 priomap 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1
+		# domyślnym jest :2 ... do :1 wpuszczamy z ToS == 0x14 oraz na podstawie poniżsyzych filtrów
+		# tos jest ograniczany do voip_host poprzez iptables
+		
+		# sprawiedliwy dostęp do kabla wielu jednoczesnych połączeń w kolejce priorytetowej
+		# (identyfikowana przez 5:1)
+		tc qdisc add dev $tc_up_dev parent 5:1 sfq perturb 10
+		
+		# kolejka htb dla połączeń nie priorytetowych, klasa na której jest tworzona
+		# jest wskazana w "tc qdisc add ... prio ..." (identyfikowana przez 5:2)
+		htb_handle="6"
+		tc qdisc add dev $tc_up_dev parent 5:2 handle $htb_handle:0 htb default 7
+	else
+		# tworzymy kolejke glowna HTB dla naszego interfejsu wewnetrznego (identyfikowana przez 1:0)
+		htb_handle="5"
+		tc qdisc add dev $tc_up_dev root handle $htb_handle:0 htb default 7
+	fi
+	
+	# tworzymy klase HTB odpowiadajaca predkosci naszego łącza
+	# (identyfikowana przez $htb_handle:4 bo :1,:2 jest zarezerwowane - priorytety)
+	tc class add dev $tc_up_dev parent $htb_handle:0 classid $htb_handle:4 htb \
+		rate $full_speed_up ceil $full_speed_up $set_mtu
+	
+	# gdy HTB podstawową kolejką tworzymy w niej klasę ruchu priorytetowego
+	# (identyfikowana przez 5:1)
+	if [ $htb_handle = 5 ]; then
+		# pożycza ona pasmo od innych (borrow), nie udostępnia pasma (isolated)
+		tc class add dev $tc_up_dev parent $htb_handle:4 classid $htb_handle:1 htb \
+			rate $pri_speed_up ceil $full_speed_up prio 1
+		# sprawiedliwy dostęp do kabla wielu jednoczesnych połączeń
+		tc qdisc add dev $tc_up_dev parent $htb_handle:1 sfq perturb 10
+	fi
+	
+	# tworzymy klase HTB dla ruchu generowanego przez użytkowników (identyfikowana przez $htb_handle:2)
+	tc class add dev $tc_up_dev parent $htb_handle:4 classid $htb_handle:2 htb \
+		rate $speed_up ceil $speed_up burst 12k quantum 2000
+	
+	
+	# filtry kolejeki ruchu priorytetowego (identyfikowanej przez 5:1)
+	if [ "$voip_host_ipv4" != "" ]; then
+		# filtracja w oparciu o port - IAX2 na wybranym hoscie
+		tc_pref_inc 3; tc filter add dev $tc_up_dev protocol ip   $TC_PREF parent 5:0 u32 \
+			match ip  sport 4569 0xffff match ip  src $voip_host_ipv4 flowid 5:1
+		tc_pref_inc 3; tc filter add dev $tc_up_dev protocol ip   $TC_PREF parent 5:0 u32 \
+			match ip  dport 4569 0xffff match ip  src $voip_host_ipv4 flowid 5:1
+		
+		# filtracja voipu (w oparciu o ToS) na wybranym hoscie
+		tc_pref_inc 3; tc filter add dev $tc_up_dev protocol ip   $TC_PREF parent 5:0 u32 \
+			match ip  tos 0x14 0xff match ip  src $voip_host_ipv4 flowid 5:1
+	fi
+	if [ "$voip_host_ipv6" != "" ]; then
+		# filtracja w oparciu o port - IAX2 na wybranym hoscie
+		tc_pref_inc 3; tc filter add dev $tc_up_dev protocol ipv6 $TC_PREF parent 5:0 u32 \
+			match ip6 sport 4569 0xffff match ip6 src $voip_host_ipv6 flowid 5:1
+		tc_pref_inc 3; tc filter add dev $tc_up_dev protocol ipv6 $TC_PREF parent 5:0 u32 \
+			match ip6 dport 4569 0xffff match ip6 src $voip_host_ipv6 flowid 5:1
+		
+		# filtracja voipu (w oparciu o ToS) na wybranym hoscie
+		tc_pref_inc 3; tc filter add dev $tc_up_dev protocol ipv6 $TC_PREF parent 5:0 u32 \
+			match ip  tos 0x14 0xff match ip6 src $voip_host_ipv6 flowid 5:1
+	fi
+	
+	
+	# klasa ruchu niepriorytetowego - serwery (identyfikowana $htb_handle:8)
+	tc class add dev $tc_up_dev parent $htb_handle:2 classid $htb_handle:8 htb \
+		rate $serw_speed_up ceil $speed_up burst 12k quantum 2000 prio 3
+	# uzyskanie adresów sieci serwerowej - konfiguracja z interfejsu wewnetrznego NIE jest pomyłką
+	# sieć serwerowa siedzi wewnątrz i jest podstawową siecią wewnętrzną
+	net_addr=`ip_and_mask2network ${base_ipv4[$int_conf]} ${base_maskv4[$int_conf]}`
+	tc_pref_inc 5
+	tc filter add dev $tc_up_dev protocol ip $TC_PREF parent $htb_handle:0 u32 \
+		match ip src $net_addr/${base_maskv4[$int_conf]} flowid $htb_handle:8
+	tc qdisc add dev $tc_up_dev parent $htb_handle:8 sfq perturb 10
+	
+	
+	# klasa ruchu niepriorytetowego - reszta (identyfikowana $htb_handle:7)
+	# jest ona wskazana w parametrze "default" w "tc qdisc add ... htb"
+	tc class add dev $tc_up_dev parent $htb_handle:2 classid $htb_handle:7 htb \
+		rate $lan_speed_up ceil $speed_up burst 12k quantum 2000 prio 5
+	tc qdisc add dev $tc_up_dev parent $htb_handle:7 sfq perturb 10
+}
+
+stop_tc_up() {
+	# kasujemy poprzednie ustawienia kolejek, filtrów, ...
+	eval tc qdisc del root dev ${name[$int_conf]} $QUITE
+	eval tc qdisc del root dev imq0 $QUITE
+}
+
+
+#####################################
+##    TrafficControl - DOWNLOAD    ##
+#####################################
+
+start_tc_down() {
+	if $use_imq; then
+		# ładujemy moduł imq
+		modprobe imq
+		
+		# kirujemy ruch do urządzenia IMQ
+		if [ "$ext_conf" != ""  -a  "${name[$ext_conf]}" != "" ]; then
+			iptables -t mangle -A FORWARD -i ${name[$ext_conf]} -o ${name[$int_conf]} -j IMQ --todev 1
+			iptables -t mangle -A INPUT -i ${name[$ext_conf]} -j IMQ --todev 1
+		fi
+		if [ "$extv6_conf" != ""  -a  "${name[$extv6_conf]}" != "" ]; then
+			ip6tables -t mangle -A FORWARD -i ${name[$extv6_conf]} -o ${name[$int_conf]} -j IMQ --todev 1
+			ip6tables -t mangle -A INPUT -i ${name[$extv6_conf]} -j IMQ --todev 1
+		fi
+		
+		# ustawiamy że tc chodzi na imq1
+		tc_down_dev=imq1
+		# włączamy urządzenie imq
+		ip link set $tc_down_dev up
+		
+		set_mtu="mtu 16500"
+	else
+		set_mtu=""
+		tc_down_dev=${name[$int_conf]}
+	fi
+	
+	
+	## kolejeki podstawowe
+	if $use_prio_queue; then
+		# tworzymy kolejke glowna PRIO dla naszego interfejsu wewnetrznego (identyfikowana przez 1:0)
+		tc qdisc add dev $tc_down_dev root handle 1:0 prio bands 2 priomap 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+		# domyślnym jest :2 ... do :1 na podstawie poniżsyzych filtrów
+		
+		# sprawiedliwy dostęp do kabla wielu jednoczesnych połączeń w kolejce priorytetowej
+		# (identyfikowana przez 1:1)
+		tc qdisc add dev $tc_down_dev parent 1:1 sfq perturb 10
+		
+		# kolejka htb dla połączeń nie priorytetowych, klasa na której jest tworzona
+		# jest wskazana w "tc qdisc add ... prio ..." (identyfikowana przez 1:2)
+		htb_handle="2"
+		tc qdisc add dev $tc_down_dev parent 1:2 handle $htb_handle:0 htb default 7
+	else
+		# tworzymy kolejke glowna HTB dla naszego interfejsu wewnetrznego (identyfikowana przez 1:0)
+		htb_handle="1"
+		tc qdisc add dev $tc_down_dev root handle $htb_handle:0 htb default 7
+	fi
+		
+	# tworzymy klase HTB odpowiadajaca predkosci naszego interfejsu wewnetrznego (identyfikowana przez 2$htb_handle:6)
+	tc class add dev $tc_down_dev parent $htb_handle:0 classid $htb_handle:6 htb \
+		rate ${interface_speed[$int_conf]} ceil ${interface_speed[$int_conf]} burst 12k quantum 2000 $set_mtu
+	
+	# tworzymy klase HTB dla ruchu wewnętrznego (identyfikowana przez $htb_handle:5)
+	tc class add dev $tc_down_dev parent $htb_handle:6 classid $htb_handle:5 htb \
+		rate $int_speed_down ceil $int_speed_down burst 12k quantum 2000
+	# sprawiedliwy dostęp do kabla wielu jednoczesnych połączeń
+	tc qdisc add dev $tc_down_dev parent $htb_handle:5 sfq perturb 10
+	
+	# tworzymy klase HTB odpowiadajaca predkosci naszego łącza
+	# (identyfikowana przez $htb_handle:4 bo :1,:2 jest zarezerwowane - priorytety)
+	tc class add dev $tc_down_dev parent $htb_handle:0 classid $htb_handle:4 htb \
+		rate $full_speed_down ceil $full_speed_down
+	
+	# gdy HTB podstawową kolejką tworzymy w niej klasę ruchu priorytetowego
+	# (identyfikowana przez 1:1)
+	if [ $htb_handle = 1 ]; then
+		# pożycza ona pasmo od innych (borrow), nie udostępnia pasma (isolated)
+		tc class add dev $tc_down_dev parent $htb_handle:4 classid $htb_handle:1 htb \
+			rate $pri_speed_down ceil $full_speed_down burst 12k quantum 2000 prio 1
+		# sprawiedliwy dostęp do kabla wielu jednoczesnych połączeń
+		tc qdisc add dev $tc_down_dev parent $htb_handle:1 sfq perturb 10
+	fi
+		
+	# tworzymy klase HTB dla ruchu generowanego przez użytkowników (identyfikowana przez $htb_handle:2)
+	tc class add dev $tc_down_dev parent $htb_handle:4 classid $htb_handle:2 htb \
+		rate $speed_down ceil $speed_down burst 12k quantum 2000
+	
+	
+	# filtry kolejki ruchu wewnętrznego
+	for ip in ${base_ipv4[@]} ${other_ipv4[@]}; do
+		tc_pref_inc 1
+		tc filter add dev $tc_down_dev protocol ip   $TC_PREF parent $htb_handle:0 u32 \
+			match ip  src $ip flowid $htb_handle:5
+	done
+	for ip in ${base_ipv6[@]} ${other_ipv6[@]}; do
+		tc_pref_inc 1
+		tc filter add dev $tc_down_dev protocol ipv6 $TC_PREF parent $htb_handle:0 u32 \
+			match ip6 src $ip flowid $htb_handle:5
+	done
+	
+	# filtry kolejeki ruchu priorytetowego
+	if [ "$voip_host_ipv4" != "" ]; then
+		# filtracja w oparciu o port - IAX2 na wybranym hoscie
+		tc_pref_inc 3; tc filter add dev $tc_down_dev protocol ip   $TC_PREF parent 1:0 u32 \
+			match ip  sport 4569 0xffff match ip  dst $voip_host_ipv4 flowid 1:1
+		tc_pref_inc 3; tc filter add dev $tc_down_dev protocol ip   $TC_PREF parent 1:0 u32 \
+			match ip  dport 4569 0xffff match ip  dst $voip_host_ipv4 flowid 1:1
+		
+		# filtracja voipu (w oparciu o ToS) na wybranym hoscie
+		tc_pref_inc 3; tc filter add dev $tc_down_dev protocol ip   $TC_PREF parent 1:0 u32 \
+			match ip  tos 0x14 0xff match ip  dst $voip_host_ipv4 flowid 1:1
+	fi
+	if [ "$voip_host_ipv6" != "" ]; then
+		# filtracja w oparciu o port - IAX2 na wybranym hoscie
+		tc_pref_inc 3; tc filter add dev $tc_down_dev protocol ipv6 $TC_PREF parent 1:0 u32 \
+			match ip6 sport 4569 0xffff match ip6 dst $voip_host_ipv6 flowid 1:1
+		tc_pref_inc 3; tc filter add dev $tc_down_dev protocol ipv6 $TC_PREF parent 1:0 u32 \
+			match ip6 dport 4569 0xffff match ip6 dst $voip_host_ipv6 flowid 1:1
+		
+		# filtracja voipu (w oparciu o ToS) na wybranym hoscie
+		tc_pref_inc 3; tc filter add dev $tc_down_dev protocol ipv6 $TC_PREF parent 1:0 u32 \
+			match ip  tos 0x14 0xff match ip6 dst $voip_host_ipv6 flowid 1:1
+	fi
+	
+	
+	# ustawienia uzytkownikow
+	numerek=9
+	echo "$forwarding_ip" | while read line; do
+		curr_speed=`echo "$line" | cut -s -f3 -d'|'`
+		if [ "$curr_speed" = "" ]; then
+			curr_speed=$user_speed_down
+		fi
+		curr_speed_max=`echo "$line" | cut -s -f4 -d'|'`
+		if [ "$curr_speed_max" = "" ]; then
+			curr_speed_max=$speed_down
+		fi
+		#zwiekszamy numerek klasy
+		numerek=$(( $numerek+1 ))
+	
+		# podzial pasma dostepu do sieci zewnetrznej (klasy identyfikowanej przez $htb_handle:2) na uzytkownikow
+		tc class add dev $tc_down_dev parent $htb_handle:2 classid $htb_handle:$numerek htb \
+			rate $curr_speed ceil $curr_speed_max
+		
+		# filtr ...
+		for ip in `echo "$line" | cut -f1 -d'|'`; do
+			tc_pref_inc 7
+			tc filter add dev $tc_down_dev protocol ip   $TC_PREF parent $htb_handle:0 u32 \
+				match ip  dst $ip flowid $htb_handle:$numerek
+		done;
+		for ip in `echo "$line" | cut -s -f2 -d'|'`; do
+			tc_pref_inc 7
+			tc filter add dev $tc_down_dev protocol ipv6 $TC_PREF parent $htb_handle:0 u32 \
+				match ip6 dst $ip flowid $htb_handle:$numerek
+		done;
+		
+		# sprawiedliwy dostęp do kabla wielu jednoczesnych połączeń
+		tc qdisc add dev $tc_down_dev parent $htb_handle:$numerek sfq perturb 10
+	done
+	
+	
+	# klasa ruchu niepriorytetowego - to czego gdzieindziej niezakwalifikujemy
+	# (identyfikowana $htb_handle:7)
+	# jest ona wskazana w parametrze "default" w "tc qdisc add ... htb"
+	tc class add dev $tc_down_dev parent $htb_handle:2 classid $htb_handle:7 htb \
+		rate 10kbit ceil 50kbit prio 10
+	tc qdisc add dev $tc_down_dev parent $htb_handle:7 sfq perturb 10
+}
+
+stop_tc_down() {
+	# kasujemy poprzednie ustawienia kolejek, filtrów, ...
+	eval tc qdisc del root dev ${name[$ext_conf]} $QUITE
+	eval tc qdisc del root dev imq1 $QUITE
+}
+
+
+#########################
+##    INIT.D SCRIPT    ##
+#########################
+
+start_all() {
+	# akceptacja pingów
+	echo "0" > /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts
+	echo "0" > /proc/sys/net/ipv4/icmp_echo_ignore_all
+	
+	# tunele IPv6 i wstęp do routingu
+	if [ "$extv6_conf" != ""  -a  "${name[$extv6_conf]}" != "" ]; then
+		start_ipv6
+	fi
+	start_routing
+	
+	# ustawienia tymczasowe
+	router_tmp
+	
+	# firewall, NAT i kolejkowanie
+	if [ "$ext_conf" != ""  -a  "${name[$ext_conf]}" != "" ]; then
+		start_iptables
+	fi
+	if [ "$extv6_conf" != ""  -a  "${name[$extv6_conf]}" != "" ]; then
+		start_ip6tables
+	fi
+	if $use_tc_down; then
+		tc_pref_init
+		start_tc_down
+		tc_filter_tmp_down
+	fi
+	if $use_tc_up; then
+		tc_pref_init
+		start_tc_up
+		tc_filter_tmp_up
+	fi
+}
+
+stop_all() {
+	stop_tc_up
+	stop_tc_down
+	stop_iptables
+	stop_ip6tables
+	stop_routing
+	stop_ipv6
+}
+
+# parametry skryptu
+
+# DEBUG or NOT DEBUG ?
+# aby to działało komendy w których wykorzystujemy to przekierowanie (zmienną $QUITE) muszą być poprzedzone eval
+QUITE=" 2> /dev/null"
+if [ "$2" = "debug" -o "$2" = "moredebug" ]; then
+	exec 2>&1
+	if [ "$2" = "moredebug" ]; then
+		QUITE=""
+	fi
+	set -x
+fi
+
+# START, STOP or RESTART
+case "$1" in
+	start)
+		start_all
+		;;
+	stop)
+		stop_all
+		;;
+	restart)
+		stop_all
+		start_all
+		;;
+	*)
+		echo "Usage: $0 start|stop|restart [debug|moredebug]" >&2
+		echo "e.g. $0 restart debug | grep -B 3 'RTNETLINK'"  >&2
+		exit 3
+		;;
+esac

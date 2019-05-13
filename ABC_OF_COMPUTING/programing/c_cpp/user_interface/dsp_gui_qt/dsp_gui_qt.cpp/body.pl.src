@@ -1,0 +1,138 @@
+/*
+ * plik ma na celu prezentację podstawowych zagadnień z programowania w języku C / C++
+ * prezentuje bardzo popularną bibliotekę tworzenia GUI, wykorzystywaną m.in. w KDE - Qt
+ *
+ * jest jednocześnie użytecznym interfejsem dla programu dsp.c, który implementuje
+ * software'ową pętlę pomiędzy wejściem liniowym a wyjściem głośnikowym (dla układów CMI9880)
+ *
+ *
+ * kompilacja (w Debianie 3.1): g++ plik_zrodlowy.cpp -o plik_wynikowy -I/usr/include/qt3/ -lqt-mt
+ * jednak gdy chcemy tworzyć własne funkcje obsługi sygnałów to musimy skorzystać też z programu "moc"
+ * i wtedy lepszym rozwiązaniem wydaje się być załączony Makefile
+ *
+ * zachecam do zapoznania się z tutorialem oraz dokumentacją na: http://www.jtz.org.pl/Inne/QT-Tutorial/
+ * oraz tutorialem na: http://free.of.pl/q/qtmoux/
+ * warto też zapoznaść się z środowiskiem "Qt designer" (designer),
+ * przydatnym przy większych projektach oraz do odnalezienia tego co nam akurat potrzeba ...
+ *
+ */
+ 
+// nalezy ustawic sciezke i nazwe na ktora skompilowany jest dsp.c
+#define DSP_PROG_PATH "/home/rrp/audio-video/tuner_tv_azx_unmute"
+#define DSP_PROG_NAME "tuner_tv_azx_unmute"
+
+#include <unistd.h> // dla: fork(), execl(), execlp()
+#include <signal.h> // dla: kill()
+
+// nagłówki definicyjne klas Qt:
+#include <qapplication.h>
+#include <qpushbutton.h>
+#include <qfont.h>
+#include <qvbox.h>
+#include <qhbox.h>
+
+// nagłówek z deklaracją klasy naszego okna, ...
+#include "dsp_gui_qt.h"
+
+/** konstruktor klasy naszego okna (funkcja wywoływana przy tworzeniu obiektu tego typu) **/
+MyWindow::MyWindow( QWidget *parent, const char *name ) : QVBox( parent, name )
+{
+	resize( 550, 80 ); // określamy rozmiar naszego pudełka
+	
+	QHBox *box1 = new QHBox( this ), *box2 = new QHBox( this );
+	// tworzymy dwa pudełka poziome będące dziećmi naszego pudełka pionowego box0
+
+	// przyciski
+	QPushButton *button1 = new QPushButton( "TV application", box1 ); // tworzymy przycisk
+	QPushButton *button2 = new QPushButton( "Mixer application", box1 ); // tworzymy przycisk
+	QPushButton *button3 = new QPushButton( "Radio application", box1 ); // tworzymy przycisk
+	QPushButton *button4 = new QPushButton( "Start / Stop", box2 ); // tworzymy przycisk
+	button4->setFont( QFont( "Times", 18, QFont::Bold ) ); // zmieniamy czcionke przycisku
+
+	connect( button1, SIGNAL(clicked()), this, SLOT(button1_action()) );
+	connect( button2, SIGNAL(clicked()), this, SLOT(button2_action()) );
+	connect( button3, SIGNAL(clicked()), this, SLOT(button3_action()) );
+	connect( button4, SIGNAL(clicked()), this, SLOT(button4_action()) );
+}
+
+
+/** klasa naszego okna - funkcje akcji **/
+void MyWindow::button1_action() {
+	// jeżeli nie zamierzamy korzystać z podawanych do funkcji argumentów można ich nie podawać
+	if (fork() == 0) {
+		execlp("xawtv", "xawtv", 0);
+	}
+}
+void MyWindow::button2_action() {
+	if (fork() == 0) {
+		execlp("gamix", "gamix", 0);
+	}
+}
+void MyWindow::button3_action() {
+	if (fork() == 0) {
+		execlp("konsole", "konsole", "-e", "radio", 0);
+	}
+}
+void MyWindow::button4_action() {
+	// w zasadzie możnaby tu umieścić kod tego programu, ale wersja tekstowa jest przydatna na
+	// terminalu (fbtv, radio) oraz wydaje mi się że zaciemniłoby to obraz tego programu
+	if (copy_dsp_work == 0) {
+		pid = fork();
+		if (pid == 0) {
+			execl(DSP_PROG_PATH, DSP_PROG_NAME, 0);
+		} else if (pid != -1){
+			copy_dsp_work = pid;
+		}
+	} else {
+		kill(copy_dsp_work, 15);
+		copy_dsp_work = 0;
+	}
+}
+
+
+/** funkcja główna programu **/
+int main( int argc, char **argv )
+{
+	QApplication a( argc, argv ); // tworzymy obiekt zarządzający zasobami aplikacji
+	
+	MyWindow w; // utworzenie obiektu z klasy moje okno
+	w.copy_dsp_work=0; // ustwienia poczatkowe zmiennej
+	
+	a.setMainWidget( &w ); // ustalamy że pudełko box0 będzie głównym oknem aplikacji
+	w.show(); // pokazujemy nasze okno ...
+
+	return a.exec();
+		// pętla główna programu i zwrócenie kodu zwróconego przez a.exec() do rodzica ...
+}
+
+/* gdybyśmy chcieli nie używać kasy okna funkcja ta wyglądłaby jak poniżej:
+	int main( int argc, char **argv )
+	{
+		QApplication a( argc, argv );
+			// tworzymy obiekt zarządzający zasobami aplikacji
+		
+		QVBox box0;
+			// tworzymy pudełko pionowe (ustawia obiekty wkładane do niego jeden pod drugim)
+		box0.resize( 300, 80 );
+			// określamy rozmiar naszego pudełka
+	
+		QHBox box1( &box0 ), box2 ( &box0 );
+		// tworzymy dwa pudełka poziome będące dziećmi naszego pudełka pionowego box0
+	
+		// przyciski
+		QPushButton button1( "TV application", &box1 ); // tworzymy przycisk
+		QPushButton button2( "Mixer application", &box1 ); // tworzymy przycisk
+		QPushButton button3( "Radio application", &box1 ); // tworzymy przycisk
+		QPushButton button4( "Start / Stop", &box2 ); // tworzymy przycisk
+		button4.setFont( QFont( "Times", 18, QFont::Bold ) ); // zmieniamy czcionke przycisku
+	
+		// wywolania funkcji wiazacych akcje typu:
+		//  QObject::connect( &quit, SIGNAL(clicked()), &a, SLOT(quit()) );
+	
+		a.setMainWidget( &box0 ); // ustalamy że pudełko box0 będzie głównym oknem aplikacji
+		box0.show(); // pokazujemy nasze okno ...
+	
+		return a.exec();
+			// pętla główna programu i zwrócenie kodu zwróconego przez a.exec() do rodzica ...
+	}
+*/

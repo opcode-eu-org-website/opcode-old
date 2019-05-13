@@ -1,0 +1,54 @@
+<article>
+<title>Centralka (nie tylko) alarmowa</title>
+
+<p>Centralka oparta jest na układzie z procesorem ARM, systemem linux i interfejsem ethernetowym (<homepage url="http://www.raspberrypi.org/">raspberry-pi</homepage>) i peryferiach podłączanych z wykorzystaniem i2c i portów szeregowych (jeżeli w danym module ich brakuje można ich ilość zwiększyć z użyciem układu FT4232 np. w formie modułu <homepage url="http://store.propox.com/index.php?p2752,mmusb4232h">MMusb4232H</homepage>). Zapewnia to modularność, elastyczność, łatwość w modyfikacji i rozbudowie takiej konstrukcji, a w przeciwieństwie do stosowanej w poprzedniej wersji magistrali równoległej nie wywołuje aż tak 
+strasznej plątaniny połączeń.</p>
+
+<p>Założeniem jest bezpośrednia (poprzez i2c) obsługa przez sterownik linuxowy linii wejściowych z czujników alarmowych (analogowych, gdyż brakuje otwartego standardu komunikacyjnego dla czujników adresowalnych, stosowane są wewnętrzne protokoły danego producenta systemu co uniemożliwia ich wykorzystanie w takim projekcie) - zarówno włamaniowych (np. PIR) jak i p.poż., a także części linii wejściowych i wyjściowych ogólnego przeznaczenia. Z wykorzystaniem magistral szeregowych RS485 i protokołu modbus-rtu podłączane są moduły rozproszonego DI (klawiatury i przełączniki oświetlenia z własnym uC oparte na Atmega8 i <homepage url="http://www.freemodbus.org/" mirror="soft/electronics_uC/FreeMODBUS">FreeMODBUS</homepage>), sterowniki wykonawcze oświetlenia, gniazd i ogrzewania (moduły triakowe, moduły tranzystorowe do przekaźników z własnym uC oparte na Atmega8 i FreeMODBUS, czujniki oraz mierniki innych producentów używające modbusa (np. analizatory PM710).</p>
+
+<subtitle id="podlaczenie_czujek">Podłączanie czujników alarmowych</subtitle>
+
+<p>Czujniki systemów alarmowych podłączane jako rezystancyjne linie trójstanowe (alarm, sabotaż/awaria, normalny - <sch_link name="czujki_alarmowe">schemat ideowy</sch_link>). Bardzo istotnym zagadnieniem jest zapewnienie niezależności zasilania takich czujników od systemu głównego (zwarcie w linii zasilającej czujnik nie może powodować utraty zasilania przez centralkę). Podobnie linie te powinny być zabezpieczone przepięciowo (przed podaniem zbyt dużego napięcia), a linie sygnałowe powinny być optoizolowane - podanie tam zbyt dużego napięcia nie może uszkodzić lub nawet wyłączyć centralki.</p>
+
+<p>Podłączenie rezystancyjne czujników (przy zachowaniu wyżej opisanych zabezpieczeń) utrudnia dokonanie sabotażu takiej linii w stosunku co do zwykłej linii DI (którą wystarczy przeciąć lub zewrzeć), ale jest on nadal możliwy - wystarczy podłączyć do linii sygnałowej źródło napięcia takiego jakie jest związane z stanem normalnym tej linii, wydawałoby się że problem rozwiąże zastosowanie losowo zmiennego napięcia, ale to też da się obejść. Dodatkowym problemem jest stan przekaźnika w momencie gdy czujka nie ma zasilania - powinien on odpowiadać stanowi usterki, w ostateczności alarmu, ale nigdy stanowi normalnemu linii, tak aby nie dało się obejść systemu przez odłączenie zasilania (lub masy) od czujki. Jedynym rozwiązaniem dającym dużą pewność że odczytywany sygnał jest faktycznie od czujki jest zastosowanie szyfrowanej komunikacji protokolarnej np. poprzez rs485 lub ethernet - wymaga to stosowania zabezpieczonego przed dostępem modułu elektronicznego umieszczanego w samej czujce.  Niezależnie od tego pozostaje kwestia traktowania stanu usterki w zależności od tego w jakim jest to systemie (p.poż czy włamaniowym) oraz czy system jest uzbrojony czy rozbrojony.</p>
+
+<p>Pierwotnie planowana była realizacja detekcja stanu linii trójstanowej poprzez zestaw dwóch komparatorów okienkowych, wytwarzających wytwarza dwa sygnały cyfrowe (alarm i usterka). Zaprojektowana została realizacja takiego układu wraz z systemem detekcji zmiany i zatrzaskiwania informacji o niej (wytwarzanie sygnału INT) oparta na elementach o małym stopniu integracji - moduł dla pojedynczej linii (<sch_link name="detekcja">schemat ideowy</sch_link> i <pcb_link name="detekcja">projekt PCB</pcb_link>) oraz backplane dla 4 takich modułów (<sch_link name="detekcja">schemat ideowy</sch_link> i <pcb_link name="detekcja">projekt PCB</pcb_link>). Niestety rozwiązanie to jest dość skomplikowane i bardzo duże.<br />
+	Próba znalezienia układu scalonego bufora który potrafiłby wykrywać zamianę i zatrzaskiwać informację o niej doprowadziła do znalezienia MCP23008. Zgodnie z dokumentacją układu MCP23008 powinien on być wstanie odnotowywać informacje o liniach wywołujących przerwania w trakcie trwania przerwania, dzięki czemu mógłby posłużyć do realizacji takiej detekcji zmiany znacznie upraszczając ten układ, jednak przeprowadzone testy wskazują że niestety nie działa on w ten sposób. Funkcjonalność taką można realizować też na ADC lub poprzez (odpowiednio szybkie) czytanie sygnałów wychodzących z komparatorów okienkowych (alarm i usterka) i programową ich analizę, jednak tracimy wtedy przewagę szybkości realizacji sprzętowej. Mimo to ostatecznie zostało to zrealizowane z wykorzystaniem przetwornika analogowo-cyfrowego wbudowanego w Atmega8.</p>
+
+
+<subtitle id="moduly">Realizacja centralki - moduły</subtitle>
+
+<p>Wstępne założenia funkcjonalne (jedna szyna i2c -> max. 16 układów) wyglądały:</p><ul>
+	<li>multiplekser magistrali i2c oparty na PCA9544 lub PCA9548</li>
+	<li>płytka analog + 1wire<ul>
+		<li>optoizolacja I2C na bazie P82B96  +  układ zasilania części izolowanej (czyli prawie całej płytki i magistral 1wire)</li>
+		<li>4x lub 8x magistrala 1wire (1x DS2482S-100 + switch 1wire oparty na 4052 lub 4051)</li>
+		<li>8x analog-input  (2x PCF8591)</li>
+		<li>2x rs485 (2x SC16IS760IPW lub 1x SC16IS762IPW + optoizolacja + driver rs485)</li>
+	</ul></li>
+	<li>płytki (jeden z bitów adresowych ustawiany zworką) z zestawem wejść:<ul>
+		<li>32x digital-input (4x MCP23008 + 8x transoptor ISP620-4X, ISP621-4X lub inny)</li>
+	</ul></li>
+</ul>
+<p>Ponaddto planowany był moduł z mikrokontrolerem do obsługi czujnika wilgotności SYH-1S.</p>
+
+<p>Ostatecznie została ona zrealizowana w oparciu o raspberry-pi z podłączonym po USB układem FT4232H (realizującym poprzez odpowiednie interfejsy linie rs485/modbus - <sch_link name="ft4232-rs485">schemat ideowy</sch_link>, <pcb_link name="ft4232-rs485">projekt PCB</pcb_link>) oraz podłączonymi po i2c modułami:</p><ul>
+	<li>wyjść NPN - opartym na MCP23008 i ULN2803APG (patrz <id_link id="sterownik_LED_RGB">sterownik LED</id_link>) do sterowania przekaźników wykonawczych</li>
+	<li>linii 1wire - opartym na DS2482 i multiplekserze analogowym sterowanym poprzez MCP23008 (<sch_link name="i2c-1wire">schemat ideowy</sch_link>, <pcb_link name="i2c-1wire">projekt PCB</pcb_link>)</li>
+	<li>wejść wyjść cyfrowych i wejść analogowych opartym na mikrokontrolerze Atmega8  (<sch_link name="atmega8_i2c-slave">schemat ideowy</sch_link>, <pcb_link name="atmega8_i2c-slave">projekt PCB</pcb_link>, <id_link id="atmega8_i2c-slave.c">program sterujący</id_link>)</li>
+</ul>
+
+<p>Skrypty sterujące dla raspberry-pi:</p><ul>
+	<li><id_link id="centralka_nie_tylko_alarmowa:run.sh">run.sh</id_link> - głowny plik skryptu</li>
+	<li><id_link id="centralka_nie_tylko_alarmowa:output.sh">output.sh</id_link> - obsługa sygnalizacji i sterowanych urządzeń</li>
+	<li><id_link id="centralka_nie_tylko_alarmowa:input.sh">input.sh</id_link> - obsługa wejścia</li>
+</ul>
+<p>Ponaddto zamieszczam przydatne pliki, skrypty dla raspberry-pi</p><ul>
+	<li><a class="int" href="./rpi-config.txt">rpi-config.txt</a> - konfig dla raspberry-pi uruchamiający go z wyjściem HDMI w full-hd nawet gdy nie ma podłączonego monitora</li>
+	<li><a class="int" href="./rpi-rc.local">rpi-rc.local</a> - plik startowy kontrolujący poprawność uruchomienia sieci i odpalający access point wifi</li>
+	<li><a class="int" href="./koncepcja_odczytu_di.c">koncepcja_odczytu_di.c</a> - rozważania koncepcyjne na temat odczytu DI w C</li>
+</ul>
+
+<p class="download"><a class="int" href="./centralka_alarmowa.tgz">Pobierz</a></p>
+
+</article>

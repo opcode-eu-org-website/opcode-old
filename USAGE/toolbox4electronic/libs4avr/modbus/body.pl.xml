@@ -1,0 +1,9 @@
+<article>
+	<title>Modbus dla AVR</title>
+	<p>Oparty na <homepage url="http://www.freemodbus.org/" mirror="soft/electronics_uC/FreeMODBUS">FreeMODBUS</homepage> - open-source implementacji Modbus ASCII/RTU i TCP:</p>
+	<ul>
+		<li><a class="int" href="./Makefile">Makefile</a> - plik Makefile do budowy projektów wykorzystujących modbus</li>
+		<li><a class="int" href="./modbus.tar">modbus.tar</a> - bazowe pliki FreeMODBUS 1.5.0 (2010-05-06) rozpowszechniane na licencji typu BSD, z zmodyfikowanym <kbd class="path">include/mbconfig.h</kbd></li>
+		<li><a class="int" href="./modbus.c">modbus.c</a> i <a class="int" href="./port.h">port.h</a> - pliki związane z portem FreeMODBUS na Atmega8</li>
+	</ul>
+</article>

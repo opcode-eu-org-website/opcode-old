@@ -1,0 +1,10 @@
+<article>
+<title>Asterisk</title>
+
+<p>Popularna w systemach VoIP konfiguracja przez menu telefoniczne jednak nie jest zbyt wygodna i chyba warto umożliwić użytkownikom konfigurację swoich usług poprzez odpowiednie pliki na serwerze - zamieszczam skrypt generujący <id_link id="asterisk_user_conf.sh">zbiorczy plik konfiguracyjny dla Asteriska</id_link> w oparciu o pliki zapisane w katalogach użytkowników (<id_link id="user-asterisk.sample.conf">przykładowy konfig</id_link>). System, automatycznie dodaje do nazw kontekstów identyfikatory użytkowników do których one należą (dzięki czemu nie ma się możliwości grzebania w cudzej konfiguracji), działanie to oparte jest na założeniu że identyfikator odpowiadający użytkownikowi shellowemu jest w prosty sposób zależny od jego UID. System także importuje lub usuwa odpowiednie wpisy bazy danych należące do użytkownika (uwagi i założenia jak poprzednio. A następnie dokonuje zrzutu wpisów bazy danych dotyczących użytkownika do pliku w jego katalogu domowym. Ponadto zamieszczam <id_link id="callme.c">program umożliwiający dzwonienie do samego siebie</id_link> w oparciu o mechanizm "auto-dial out call files" (więcej informacji w komentarzu wprowadzającym).</p>
+
+<p>Konieczne jest aby program callme należał do użytkownika na prawch którego działa serwer asteriska oraz maił ustawiony SUID i GUID (<code>chown asterisk:asterisk /usr/local/bin/callme &amp;&amp; chmod 6755 /usr/local/bin/callme</code>). Dla wygodnego korzystania z systemu należy dodać do <kbd class="path">/etc/sudoers</kbd> następującą linię:</p>
+<pre>ALL ALL =NOPASSWD: /usr/local/bin/asterisk_user_conf.sh</pre>
+
+<p><tmp>Uwaga: prezentowane powyżej programy mają status beta - przechodzą one dopiero testy i mogą pojawić się jakieś błędy.</tmp></p>
+</article>

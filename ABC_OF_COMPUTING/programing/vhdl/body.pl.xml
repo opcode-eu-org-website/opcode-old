@@ -1,0 +1,21 @@
+<article>
+<title>VHDL</title>
+
+<p><wiki pl="VHDL">VHDL</wiki> jest jednym z dwóch (obok <wiki pl="Verilog">Verilog</wiki>) najpopularniejszych <wiki pl="Hardware Description Language">języków opis sprzętu</wiki>. Służy do opisu (na różnych poziomach abstrakcji) cyfrowego układu elektronicznego, celem symulacji jego działania oraz automatycznej syntezy rzeczywistego układu (w postaci schematu złożonego z układów dyskretnych, projektu układu scalonego, czy też wsadu do układów programowalnych <wiki pl="FPGA">FPGA</wiki> itp). Najbardziej abstrakcyjne poziomy opisu mają problemy z syntezowalnością, dlatego jeżeli myślimy o wykorzystaniu VHDL do syntezy najbezpieczniej jest operować poziomem przesłań między-rejestrowych (<wiki en="Register-transfer level">Register transfer level</wiki>). Ponadto należy się stosować do pewnych szablonów tak aby narzędzia syntezy bezproblemowo interpretowały kod. Istnieją także HDL dla układów analogowych oraz kilka innych języków HDL dla układów cyfrowych (np. <wiki pl="AHDL">AHDL</wiki>).</p>
+
+<p>Trochę innym podejściem jest <wiki pl="SystemC">SystemC</wiki>, będący w istocie biblioteką dla C++ umożliwiającą opisywanie (i symulowanie tak zbudowanych systemów) sprzętu w ramach kodu C++. Kod taki może być automatycznie konwertowany na VHDL i z niego może być dokonywana synteza.</p>
+
+<ul>
+	<li><id_link id="vhdl-build.sh">vhdl-build.sh</id_link> - skrypt ułatwiający budowanie i uruchamianie testbench'ów VHDL</li>
+	<li><id_link id="moj_pakiet.vhdl">moj_pakiet.vhdl</id_link> - tworzenie własnego pakietu, deklaracje funkcji i procedur, konwersja pomiędzy liczbami całkowitymi a wektorami bitów</li>
+	<li><id_link id="multiplexer.vhdl">multiplexer.vhdl</id_link> - deklaracja prostego komponentu na przykładzie multipleksera, korzystanie z parametrów ogólnych, kierunki portów</li>
+	<li><id_link id="multiplexer_3to1.vhdl">multiplexer_3to1.vhdl</id_link> - wykorzystanie utworzonej jednostki w tworzeniu innej, zaprezentowanie rożnych instrukcji wyboru (innych pomysłów na multiplekser)</li>
+	<li><id_link id="nor.vhdl">nor.vhdl</id_link> - operacje logiczne, procesy z wait, zmienne, operacje matematyczne, pętle, ...</li>
+	<li><id_link id="przerzutnik.vhdl">przerzutnik.vhdl</id_link> - podstawowy element pamiętający (wspomniane także o tym jak tworzy się zatrzaski)</li>
+	<li><id_link id="rejestr_przesuwny.vhdl">rejestr_przesuwny.vhdl</id_link> - budowa rejestru przesuwnego w oparciu o proces oraz w oparciu o łączenie przerzutników, pokazuje wykorzystanie generate-for oraz generate-if, wybieranie podzestawu bitów z wektora bitowego</li>
+	<li><id_link id="automat.vhdl">automat.vhdl</id_link> - przykład jawnej konstrukcji automatu</li>
+	<li><id_link id="tester.vhdl">tester.vhdl</id_link> - przykład pisania testbench'ów, uwagi na temat syntezowalności, używanie literałów, wygodne wstawianie komponentu</li>
+</ul>
+
+<p>Zobacz w Sieci: <doc url="http://rawski.zpt.tele.pw.edu.pl/pl/node/30">Plansze do wykładów z UCYF</doc>, <doc url="http://www.ee.lsu.edu/v/refcard.pdf" mirror="programowanie/VHDL/refcard">Verilog HDL quick reference card</doc>.</p>
+</article>

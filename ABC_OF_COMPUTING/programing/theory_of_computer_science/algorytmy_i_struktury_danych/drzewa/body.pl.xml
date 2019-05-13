@@ -1,0 +1,64 @@
+<article>
+<title>Drzewa</title>
+<p> Drzewem nazywamy graf acykliczny skierowany.</p>
+<ul>
+	<li>przodek - wierzchołek z którego można przyjść do nas</li>
+	<li>bezpośredni przodek (ojciec) - wierzchołek z którego można przyjść do nas pokonując jedną krawędź</li>
+	<li>potomek - wierzchołek do którego można dojść od nas</li>
+	<li>liście - wierzchołki z których nic nie wychodzi</li>
+	<li>wysokość drzewa liczymy liczbą krawędzi od korzenia do najdalszego liścia</li>
+	<li>głębokość wierzchołka - ilość krawędzi (odległość) od korzenia</li>
+	<li>wysokość wierzchołka - wysokość drzewa minus głębokość wierzchołka</li>
+	<li>zbiór rozłącznych drzew - las</li>
+	<li>m-drzewo - drzewo uporządkowane gdzie każdy węzeł ma maksymalnie m bezpośrednich potomków (dzieci)</li>
+	<li>drzewo zrównoważone - drzewo o minimalnej wysokości</li>
+</ul>
+<ul>
+	<li>kopiec - drzewo pełne (wszystkie wiersze pełne prócz ostatniego, który musi być dosunięty do lewej) w którym każdy element większy lub równy swoim dzieciom</li>
+	<li>drzewo poszukiwań binarnych po lewej mniejsze od danego wierzchołka a po prawej od niego większe, aby miało sens powinno być bliskie zrównoważonemu</li>
+</ul>
+
+<p>Przechodzenie przez drzewa:</p>
+<ul>
+	<li>preorder (VLP) - węzeł, lewe poddrzewo, prawe poddrzewo</li>
+	<li>inorder (LVP) - lewe poddrzewo, węzeł, prawe poddrzewo</li>
+	<li>postorder (LPV) - lewe poddrzewo, prawe poddrzewo, węzeł</li>
+</ul>
+
+<p>Drzewa zrównoważone z definicji:</p>
+<ul>
+	<li>2-3-4 - węzły z dwoma, trzema lub czterema potomkami, węzły typu 4 rozbijane na 3 węzły typu drugiego</li>
+	<li>czerwono-czarne, sprytnie zakodowane drzewo 2-3-4 gdzie są węzły tylko typu drugiego, ale łączone w grupę (kolorowanymi krawędziami) w "wirtualne" węzły innych typów</li>
+</ul>
+
+<p>Znajdowanie MST:</p>
+<ul>
+	<li>algorytm Prima - z pośród wszystkich krawędzi wychodzących z drzewa dobieramy tą o najmniejszej wadze aż dobierzemy n-1 krawędzi (krawędzie wewnątrz drzewa nie stanowiące krawędzi drzewa usuwamy)</li>
+	<li>algorytm Borůvki - podobny do Prima tyle że zaczynamy od wielu wierzchołków na raz - tworzymy las drzew poprzez dobranie dla każdego wierzchołka krawędzi o najmniejszej wadze</li>
+	<li>algorytm Kruskala - sortujemy zbiór krawędzi, wybieramy najtańszą i usuwamy te które już nie wychodzą poza drzewo</li>
+</ul>
+
+<p>Znajdowanie najkrótszej ścieżki w grafie:</p>
+<ul>
+	<li>algorytm Dijkstry:<br />
+		0) każdemu wierzchołkowi dajemy wagę nieskończoną, a startowemu zero<br />
+		1) wierzchołek z najmniejszą wagą etykietuje się jako ostatni (znaleziony)<br />
+		2) jeżeli ostatni jest końcowym to kończymy<br />
+		3) dla wszystkich do tej pory nie zaetykietowanych oblicza się wagi wg zasady że jeżeli jest krawędź pomiędzy ostatnim a tym to nowa waga jest minimum z pośród obecnej i wagi ostatniego powiększonej o wagę tej krawędzi, nie radzi sobie z ujemnymi wagami i krawędziami wychodzącymi i wchodzącymi do tego samego wierzchołka
+	</li>
+	<li>Floyda - rozwinięcie Dijkstry na coś co znajduje wszystkie najkrótsze ścieżki: buduje się N macierzy (N = l. wierzchołków)<br />
+		<eq>w<sub>ij</sub><sup>(0)</sup></eq> = {zawartość (w)  komórki ij macierzy 0} = <eq>d<sub>ij</sub></eq> = odległość gdy bezpośrednie połączenie lub nieskończoność gdy go brak<br />
+		<eq>w<sub>ij</sub><sup>(l)</sup> = min (w<sub>ij</sub><sup>(l-1)</sup>, w<sub>il</sub><sup>(l-1)</sup> + w<sub>lj</sub><sup>(l-1)</sup>)</eq><br />
+		w praktyce wystarczy jedna macierz (bo stare nam nie potrzebne) i dodatkowa macierz w której zapisujemy wartość l (numer wierzchołka) gdy w<sub>il</sub><sup>(l-1)</sup> + w<sub>lj</sub><sup>(l-1)</sup> &lt; w<sub>ij</sub><sup>(l-1)</sup>
+	</li>
+</ul>
+
+<p>bisekcja grafu - Kernighnan-Lin - konstrukcja do wstępnego podziału:</p>
+<ul>
+	<li>dla każdego węzła obliczamy koszt wewnętrzny (I) i zewnętrzny (E) - odpowiednio suma wag krawędzi pozostających w grupie i wychodzących do drugiej grupy</li>
+	<li>dla każdej pary (po jednym węźle z grupy) liczymy zysk związany z zamianą danej pary (<eq>D(v<sub>i</sub>, v<sub>j</sub>) = D(i) + D(j) - 2c(i,j)</eq>, gdzie <eq>D(i)=E(i)-I(i)</eq>, <eq>c(i,j)</eq> - waga krawędzi między i-tym a j-tym)</li>
+	<li>parę z największym zyskiem usuwa się i ponawiamy procedurę</li>
+	<li>ustalamy listę par wraz z wartościami zysku i znajdujemy miejsce gdzie kumulowany zysk jest największy i pary do tego miejsca zamieniamy</li>
+	<li>całą procedurę powtarzamy aż nie będziemy uzyskiwać dodatniego zysku</li>
+</ul>
+</article>

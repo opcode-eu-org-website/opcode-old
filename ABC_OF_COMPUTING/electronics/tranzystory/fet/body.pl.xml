@@ -1,0 +1,22 @@
+<article>
+<title>JFET (FET)</title>
+
+<p><wiki pl="Tranzystor polowy">Tranzystor unipolarny</wiki> (polowy) posiada trzy wyprowadzenia - dren (D), bramka (G), źródło (S), regulacja odbywa się poprzez regulację napięcia między źródłem a bramką. W tranzystorach tych sterowanie odbywa się polem elektrycznym (z tąd nazwa polowy), a prąd bramki (gdy tranzystor jest dobrze spolaryzowany) jest pomijalnie mały. Dzięki temu mogą służyć do uzyskania wejścia o dużej rezystancji wejściowej.</p>
+
+<p>Dostępne na rynku tranzystory <wiki pl="Tranzystor polowy złączowy">JFET</wiki> z kanałem N steruje się poprzez ujemną polaryzację bramki wobec źródła. W przypadku gdy potencjał bramki jest odpowiednio ujemny (mniejszy od charakterystycznego - w zasadzie dla danego egzemplarza - napięcia "odcięcia" <i>U<sub>GS_off</sub> = U<sub>T</sub></i>) tranzystor nie przewodzi (prąd DS pomijalne mały). W przeciwnym wypadku w zależności od przyłożonego napięcia DS tranzystor ten zachowuje się jak regulowane źródło prądowe (gdy to napięcie większe od różnicy pomiędzy obecnym napięciem GS a napięciem odcięcia) lub regulowany rezystor (gdy mniejsze). Maksymalny dla danego napięcia prąd (oznaczany <i>I<sub>DSS</sub></i>) płynie gdy napięcie pomiędzy bramką a źródłem jest równe zero (w zasadzie troszkę większe od zera, ale tak aby nie spolaryzować złącza w stan przewodzenia).<br />
+	Niestety tranzystory te cechują się dużym rozrzutem kluczowych parametrów (napięcie GS przy którym następuje zatkanie oraz maksymalny prąd przewodzenia) pomiędzy egzemplarzami. Najprostszym przykładem zastosowania jest źródło prądowe utworzone poprzez podłączenie bramki do masy oraz źródła poprzez (regulowany) opornik do masy. Tranzystor ten w stanie z otwartym złączem kanał-bramka może być wykorzystany jako dioda mało upływowa.</p>
+
+<eq_latex>I_D = \begin{cases}
+  0,                                                 &amp; U_{GS} &lt; U_T \\
+  \beta \cdot (U_{GS}-U_T)^2,                        &amp; U_{GS} \geq U_T \wedge U_{DS} &gt; U_{GS} - U_T\\
+  \beta \cdot U_{GS} \cdot [2(U_{GS}-U_T) - U_{DS}], &amp; U_{GS} \geq U_T \wedge U_{DS} \leq  U_{GS} - U_T \wedge U_{DS} \geq 0
+\end{cases} \rm{,}</eq_latex>
+
+gdzie <eq_latex>\beta = {I_{DSS} \over {U_T}^2}</eq_latex>
+
+<p>Tranzystory J-FET cechują się symetrią pomiędzy źródłem a drenem, ale przy projektowaniu układów z nimi warto wiedzieć którą elektrodę traktujemy w jaki sposób. Tranzystory J-FET zazwyczaj polaryzuje się poprzez połączenie przez duży opór (<eq>R<sub>B</sub></eq> rzędu giga omów) bramki do masy, co wraz z małym prądem bramki zapewnia na niej potencjał 0V. Jako że J-FET przy <eq>U<sub>GS</sub> = 0</eq> przewodzi (i to maksymalny prąd) to taka polaryzacja powoduje przepływ prądu DS co w związku z oporem <eq>R<sub>S</sub></eq> pomiędzy źródłem a masą prowadzi do podniesienia potencjału na źródle czyli pojawienia się ujemnego napięcia <eq>U<sub>GS</sub> = U<sub>R<sub>S</sub></sub></eq> i ograniczenia prądu.</p>
+
+<p class="center"><img_from_src name="jfet" type="sch" alt="układ polaryzacji tranzystora j-fet z kanałem N" /></p>
+
+<p>Jako że występują dwa tryby pracy JFETów to przy wykonywaniu obliczeń konieczna jest identyfikacja z którym trybem pracy mamy doczynienia. Możemy wykonać to orientacyjnie na podstawie porównania wartości <eq>R<sub>D</sub></eq> i <eq>R<sub>S</sub></eq> - gdy <eq>R<sub>D</sub> &gt;&gt; R<sub>0</sub></eq> to możemy podejrzewać obszar triodowy / nienasycenia (<eq_latex>I_D = \beta \cdot U_{GS} \cdot [2(U_{GS}-U_T) - U_{DS}]</eq_latex>), gdzie tranzystor zachowuje się jak opornik regulowany. Jeżeli jednak nie zgodzą nam się znaki napięć musimy policzyć dla obszaru pentodowego / nasycenia (<eq_latex>I_D = \beta \cdot (U_{GS}-U_T)^2</eq_latex>). Warto także pamiętać że <eq_latex>I_D = {|U_{GS}| \over R_S}</eq_latex></p>
+</article>

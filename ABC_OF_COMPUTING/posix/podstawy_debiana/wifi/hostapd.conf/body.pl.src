@@ -1,0 +1,51 @@
+#########################################################################
+##                      /etc/hostapd/hostapd.conf                      ##
+##              z prostym wsparciem dla WPA-EAP / WPA-PSK              ##
+##                                                                     ##
+## pełen opis pliku w: /usr/share/doc/hostapd/examples/hostapd.conf.gz ##
+#########################################################################
+
+## intrefejs, sterownik, itp
+interface=wlan0
+driver=nl80211
+ctrl_interface=/var/run/hostapd
+ctrl_interface_group=0
+
+## SSID, tryb oraz kanał WiFi
+ssid=my-wifi
+hw_mode=g
+channel=10
+
+## szyfrowanie i autoryzacja - ustawienia ogólne
+##  - standard: 1 = WPA, 2 = WPA2 (RSN), 3 = WPA/WPA2
+wpa=2
+##  - sposób zarządzania kluczami głównymi: WPA-PSK lub WPA-EAP
+wpa_key_mgmt=WPA-EAP
+##  - metoda szyfrowania (transmisji unicast i grupowej) dla WPA i WPA2 (RSN)
+wpa_pairwise=CCMP
+rsn_pairwise=CCMP
+
+## szyfrowanie i autoryzacja - ustawienia dla WPA-EAP
+##  - wsparcie dla autoryzacji IEEE 802.1X (EAP over LAN)
+ieee8021x=1
+##  - używamy wbudowanego serwera EAP
+eap_server=1
+##  - lokalizacja pliku z bazą użytkowników
+##    prosta postać pliku (logowanie użytkownika user z hasłem password po TTLS/PAP lub PEAP/MSCHAPV2):
+##      *       TTLS,PEAP
+##      "user"  TTLS-PAP,MSCHAPV2       "password"      [2]
+##    pełny opis pliku w /usr/share/doc/hostapd/examples/hostapd.eap_user
+eap_user_file=/etc/hostapd/eap_users
+##  - certyfikat i klucz serwera EAP
+ca_cert=/etc/hostapd/ca_cert.pem
+server_cert=/etc/hostapd/ca_cert.pem
+private_key=/etc/hostapd/ca_key.pem
+
+## szyfrowanie i autoryzacja - ustawienia dla WPA-PSK
+##  - ASCII passphrase dla WPA-PSK pre-shared key
+# wpa_passphrase=__SECRET__
+
+## inne
+beacon_int=100
+auth_algs=3
+wmm_enabled=1

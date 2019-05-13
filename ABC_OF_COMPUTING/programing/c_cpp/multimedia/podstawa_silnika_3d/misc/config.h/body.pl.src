@@ -1,0 +1,20 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+class Config {
+	public:
+		enum float_conf_val_index { STEP_MOVE_Z, STEP_MOVE_X, STEP_MOVE_Y, STEP_ROTATE, STEP_ZOOM, MAX_ZOOM, MIN_ZOOM, BACK_CUT, FRONT_CUT, FLOAT_CONF_END };
+		enum int_conf_val_index { KEY_FORWARD, KEY_BACKWARD, KEY_LEFT, KEY_RIGHT, KEY_EXIT, INT_CONF_END };
+		enum bool_conf_val_index { USE_FULLSCREEN, BOOL_CONF_END };
+		
+		float getf(float_conf_val_index index);
+		int geti(int_conf_val_index index);
+		bool getb(bool_conf_val_index index);
+		
+		void load();
+	
+	private:
+		float float_conf_val[FLOAT_CONF_END];
+		int int_conf_val[INT_CONF_END];
+		bool bool_conf_val[BOOL_CONF_END];
+};
+#endif
