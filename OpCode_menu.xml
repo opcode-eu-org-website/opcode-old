@@ -112,7 +112,6 @@
 		<file level="2" path="ABC_OF_COMPUTING/posix/podstawy_debiana/wifi" />
 		<dir pdf_base_level="+3" path="ABC_OF_COMPUTING/posix/podstawy_debiana/wifi/wpa_supplicant.conf" inmenu="0" />
 		<dir pdf_base_level="+3" path="ABC_OF_COMPUTING/posix/podstawy_debiana/wifi/hostapd.conf" inmenu="0" />
-		<file level="2" path="ABC_OF_COMPUTING/posix/podstawy_debiana/mirroring" />
 		
 		<file level="2" path="ABC_OF_COMPUTING/posix/commands/hasla" />
 		<file level="2" path="ABC_OF_COMPUTING/posix/commands/skroty" />
@@ -335,12 +334,22 @@
 			<file level="1" path="ABC_OF_COMPUTING/programing/databases/sql" />
 		</dir>
 		
-		<dir name="xml_xsl_itp" path="ABC_OF_COMPUTING/programing/xml_xsl_itp" title="XML, XSL itp" inmenu=".." />
-		<dir name="latex" path="ABC_OF_COMPUTING/programing/latex" title="TeX i LaTeX" inmenu="..">
-			<file level="1" path="ABC_OF_COMPUTING/programing/latex/office.cls" />
-			<file level="1" path="ABC_OF_COMPUTING/programing/latex/office-demo.tex" />
-			<file level="1" path="ABC_OF_COMPUTING/programing/latex/linki" />
+		<dir name="gnuplot" path="ABC_OF_COMPUTING/programing/gnuplot" title="Gnuplot" inmenu=".." >
+			<file level="1" path="ABC_OF_COMPUTING/programing/gnuplot/moce.plot" download="no" />
 		</dir>
+		
+		<dir name="octave" path="ABC_OF_COMPUTING/programing/octave" title="Octave (matlab)" inmenu=".." />
+		
+		<dir name="lua" path="ABC_OF_COMPUTING/programing/lua" title="Lua" inmenu=".." >
+			<file level="1" path="ABC_OF_COMPUTING/programing/lua/skrypt.lua" download="no" />
+			<dir path="ABC_OF_COMPUTING/programing/lua/c_lua_api.lua" inmenu="0" />
+		</dir>
+		
+		<dir name="tcl_tk" path="ABC_OF_COMPUTING/programing/tcl_tk" title="tcl/tk" inmenu="..">
+			<file level="1" path="ABC_OF_COMPUTING/programing/tcl_tk/przykład.tcl" download="no" />
+		</dir>
+		
+		<dir name="xml_xsl_itp" path="ABC_OF_COMPUTING/programing/xml_xsl_itp" title="XML, XSL itp" inmenu=".." />
 			
 		<dir name="vhdl" path="ABC_OF_COMPUTING/programing/vhdl" title="VHDL" inmenu="..">
 			<dir path="ABC_OF_COMPUTING/programing/vhdl/vhdl-build.sh" />
@@ -367,68 +376,8 @@
 			<file level="1" path="ABC_OF_COMPUTING/programing/tools4programmers/gprof" />
 			<file level="1" path="ABC_OF_COMPUTING/programing/tools4programmers/linking_libs" />
 		</dir>
-		
-		<dir name="more" title="więcej o programowaniu" path="ABC_OF_COMPUTING/programing" inmenu="..">
-			<soft_db level="1" name="programistyczne_i_skryptowe" />
-			
-			<dir name="perl" path="ABC_OF_COMPUTING/programing/perl" title="Perl" />
-			<dir name="lua" path="ABC_OF_COMPUTING/programing/lua" title="Lua">
-				<file level="1" path="ABC_OF_COMPUTING/programing/lua/skrypt.lua" download="no" />
-				<dir path="ABC_OF_COMPUTING/programing/lua/c_lua_api.lua" inmenu="0" />
-			</dir>
-			<dir name="ruby" path="ABC_OF_COMPUTING/programing/ruby" title="Ruby">
-				<file level="1" path="ABC_OF_COMPUTING/programing/ruby/przyklad.ruby" download="no" />
-			</dir>
-			<dir name="tcl_tk" path="ABC_OF_COMPUTING/programing/tcl_tk" title="Tcl/Tk">
-				<file level="1" path="ABC_OF_COMPUTING/programing/tcl_tk/przykład.tcl" download="no" />
-			</dir>
-			<dir name="erlang" path="ABC_OF_COMPUTING/programing/erlang" title="Erlang" />
-			<dir name="octave" path="ABC_OF_COMPUTING/programing/octave" title="Octave (matlab)" />
-			<dir name="gnuplot" path="ABC_OF_COMPUTING/programing/gnuplot" >
-				<file level="1" path="ABC_OF_COMPUTING/programing/gnuplot/moce.plot" download="no" />
-			</dir>
-			
-			<dir name="systemy_kontroli_wersji" path="ABC_OF_COMPUTING/programing/tools4programmers/systemy_kontroli_wersji" title="Systemy kontroli wersji">
-				<file level="1" path="ABC_OF_COMPUTING/programing/tools4programmers/systemy_kontroli_wersji/svn" />
-				<file level="1" path="ABC_OF_COMPUTING/programing/tools4programmers/systemy_kontroli_wersji/bzr" />
-				<file level="1" path="ABC_OF_COMPUTING/programing/tools4programmers/systemy_kontroli_wersji/git" />
-			</dir>
-		
-			<dir name="links" path="ABC_OF_COMPUTING/programing/linki" title="linki" />
-		</dir>
-		
 	</dir>
 
-	<!--
-	<dir name="installations" path="ABC_OF_COMPUTING/buildings_and_installations/" title="Instalacje i budynki">
-		<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/topology" />
-		<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/cable_ducts" />
-		<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/distribution_points" />
-		<file level="2" path="ABC_OF_COMPUTING/buildings_and_installations/distribution_points/19inch_rack" />
-		<file level="2" path="ABC_OF_COMPUTING/buildings_and_installations/distribution_points/electrical" />
-		<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/general_notes" />
-		
-		<dir name="electrical" path="ABC_OF_COMPUTING/buildings_and_installations/electrics" inmenu="..">
-			<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/electrics/odbiory_koncowe" />
-			<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/electrics/rozdzielnia_glowna" />
-			<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/electrics/uklady_sieci" />
-			<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/electrics/prad_zwarciowy" />
-			<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/electrics/obwody_pradu_zmiennego" />
-			<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/electrics/zabezpieczenia_przepieciowe" />
-			<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/electrics/linki" />
-		</dir>
-		
-		<dir name="monitoring_and_security" title="Monitoring i bezpieczeństwo" inmenu="..">
-			<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/control" />
-			<file level="1" path="ABC_OF_COMPUTING/buildings_and_installations/security" />
-		</dir>
-		
-		<dir name="projects_and_realization" path="ABC_OF_COMPUTING/buildings_and_installations/projects_and_realization" title="Projektowanie i wykonawstwo" inmenu="..">
-			<dir name="wytyczne-serwerownia" path="ABC_OF_COMPUTING/buildings_and_installations/projects_and_realization/wytyczne-serwerownia" inmenu="0" />
-		</dir>
-	</dir>
-	-->
-	
 	<dir name="usage_and_config" title="Użytkowanie i konfiguracja" >
 		<dir level="1" path="ABC_OF_COMPUTING/posix/commands" title="Podstawowe polecenia" >
 			<soft_db level="2" name="cmd-pomoc" />
@@ -1008,148 +957,13 @@
 		</dir>
 	</dir>
 	
-	<dir name="inne" title="Inne" >
-		<text><only_pdf><head0>Inne</head0></only_pdf></text>
-		
-		<!-- <dir name="photo" title="Galerie zdjęć" >
-			<gallery path="PHOTO" pdf="no" />
-		</dir> -->
-		
-		<dir name="licenses" title="Licencje">
-			<file level="0" path="ADDITIONS/licenses" />
-			<file level="1" path="ADDITIONS/licenses/pd" />
-			<file level="1" path="ADDITIONS/licenses/liberalne" />
-			<file level="1" path="ADDITIONS/licenses/copyleft" />
-			<file level="1" path="ADDITIONS/licenses/inne_free" />
-			<file level="1" path="ADDITIONS/licenses/semifree" />
-			<file level="1" path="ADDITIONS/licenses/darmowe" />
-			<file level="1" path="ADDITIONS/licenses/komercyjne" />
-			<file level="1" path="ADDITIONS/licenses/podsumowanie" />
-		</dir>
-		
-		<dir name="rfc" title="Standardy (RFC, ...)">
-			<file level="0" path="ADDITIONS/rfc" />
-		</dir>
-		
-		<dir name="rozwiazania_sprzetowe_i_firmware" title="Urządzenia i ich systemy wbudowane">
-			<file level="0" path="ADDITIONS/concepts/rozwiazania_sprzetowe_i_firmware" />
-		</dir>
-		
-		<dir name="dvb" title="DVB - czy to ma przyszłość?">
-			<file level="0" path="ADDITIONS/concepts/dvb" />
-		</dir>
-		
-		<!--<dir name="abc_komputerologii" title="ABC komputerologii">
-			<file level="0" path="ADDITIONS/concepts/abc_komputerologii" />
-		</dir>-->
-		
-		<dir name="bugs" title="BUGi">
-			<file level="0" path="ADDITIONS/concepts/bugs" />
-		</dir>
-		
-		<dir name="wlasnosc_intelektualna" title="Kilka słów o systemie ochrony własności intelektualnej">
-			<file level="0" path="ADDITIONS/concepts/wlasnosc_intelektualna" />
-		</dir>
-		
-		<!--
-		<dir name="polecane" title="Polecane" inmenu="0">
-			<file level="0" path="ADDITIONS/polecane" pdf="no" />
-			<dir name="filmy_i_seriale" title="Filmy i seriale">
-				<file level="1" path="ADDITIONS/polecane/filmy_i_seriale" pdf="no" />
-			</dir>
-			<dir name="gry" title="Gry">
-				<file level="1" path="ADDITIONS/polecane/gry" pdf="no" />
-			</dir>
-			<dir name="cytaty" title="Cytaty">
-				<file level="1" path="ADDITIONS/polecane/cytaty" pdf="no" />
-			</dir>
-			<dir name="dowcipy" title="Dowcipy">
-				<file level="1" path="ADDITIONS/polecane/dowcipy" pdf="no" />
-			</dir>
-			<dir name="inne" title="Inne">
-				<file level="1" path="ADDITIONS/polecane/fotki" pdf="no" />
-				<file level="1" path="ADDITIONS/polecane/muzyka" pdf="no" />
-				<file level="1" path="ADDITIONS/polecane/filmiki_wideo" pdf="no" />
-			</dir>
-		</dir>
-		-->
-		
-		<!-- <menutext><li><a class="int" href="[[!URLPREFIX!]]/archiwum/">Archiwum</a></li></menutext>
-		<cmd name="ln -s &quot;$SRC_DIR/ARCHIVE&quot; &quot;$PAGE_DIR/archiwum&quot;" pdf="no" />
-		<cmd name="echo '&lt;li&gt;&lt;a class=&quot;int&quot; href=&quot;[[!URLPREFIX!]]/archiwum/&quot;&gt;Archiwum&lt;/a&gt;&lt;/li&gt;' &gt;&gt; $PAGE_DIR/$SITE_MAP_DIR/body.xml" pdf="no"/> -->
-		
-		<!-- <menutext><li><a class="int" href="[[!URLPREFIX!]]/~DOWNLOAD/">Download</a></li></menutext>
-		<cmd name="echo '&lt;li&gt;&lt;a class=&quot;int&quot; href=&quot;[[!URLPREFIX!]]/~DOWNLOAD/&quot;&gt;Download&lt;/a&gt;&lt;/li&gt;' &gt;&gt; $PAGE_DIR/$SITE_MAP_DIR/body.xml" pdf="no"/> -->
-		
-		<menutext></ul><hr style="width: 80%;" /><ul class="menu_link"></menutext>
-		
-		<menutext><li><a class="int" href="[[!URLPREFIX!]]/bercik/">O autorze</a></li></menutext>
-		
-		<dir name="site" title="O stronie" art_menu="0">
-			<file level="0" path="ADDITIONS/about_site"  pdf="no" />
-			<file path="ADDITIONS/about_site/_wstepniak"  pdf="no" />
-			<file path="ADDITIONS/about_site/_wstepniak_cd" pdf="no" />
-			<file level="1" path="ADDITIONS/about_site/_tematyka" pdf="no" />
-			<file level="1" path="ADDITIONS/about_site/history" pdf="no" />
-			<dir name="map" title="Mapa serwisu" inmap="0" inmenu="0" />
-		</dir>
-		
-		<!--<dir name="links" path="ADDITIONS/links/" />-->
-	</dir>
-	
-<!--	<dir name="bercik" inmenu="0">
-		<file level="0" path="ADDITIONS/bercik" />
-		<dir name="cv.tex" inmenu="0">
-			<file level="0" path="ADDITIONS/bercik/cv.tex" pdf="no" />
-		</dir>
-		<dir name="wizytowka.tex" inmenu="0">
-			<file level="0" path="ADDITIONS/bercik/wizytowka.tex" pdf="no" />
-		</dir>
-		
-		<dir name="wiecej" title="Więcej o mnie" inmenu="0">
-			<file level="0" path="ADDITIONS/bercik/wiecej" />
-			<file level="1" path="ADDITIONS/bercik/wiecej/wczesniej" />
-			<file level="1" path="ADDITIONS/bercik/wiecej/computers_time_line" />
-			<file level="1" path="ADDITIONS/bercik/wiecej/fuw" />
-			<file level="1" path="ADDITIONS/bercik/wiecej/kim_jestem" />
-		</dir>
-	</dir>-->
-	
 	<!-- dodatkowe pliki silnika -->
 	
 	<file path="USAGE/toolbox4computer/www_engine/_engine_files" pdf="no" />
 	<file path="USAGE/toolbox4computer/www_engine/_google/img" pdf="no" />
 	<cmd name="cp &quot;$SRC_DIR/ADDITIONS/about_site/404/&quot;* &quot;$PAGE_DIR&quot;" pdf="no" />
 	<cmd name="cp &quot;$PAGE_DIR/usage_and_config/toolbox4computer/www_engine/&quot;*.css/*.css &quot;$PAGE_DIR&quot;" pdf="no" />
-	<!--<cmd name="cp &quot;$PAGE_DIR/usage_and_config/toolbox4computer/www_engine/system.php/system.php&quot; &quot;$PAGE_DIR/system.system&quot;" pdf="no" />-->
-	<cmd name="cp &quot;$SRC_DIR/redirect.conf&quot; &quot;$PAGE_DIR&quot;" pdf="no" />
-
-	<!-- <cmd name="ln -rs &quot;$SRC_DIR/MIRRORS&quot; &quot;$PAGE_DIR&quot;" pdf="no" /> -->
-	
-	<!-- finalizacja spisu list todo -->
-	<dir name="inne" inmenu="0"><dir name="bugs" inmenu="0">
-		<file level="1" path="ADDITIONS/concepts/bugs/my" pdf="no" />
-		<cmd name="cat &quot;$TMP_DIR/todo_links.xml&quot; &gt;&gt; &quot;body.xml&quot;" pdf="no" />
-		<file level="1" path="ADDITIONS/concepts/bugs/my/webpage" pdf="no" />
-	</dir></dir>
-	
-	<!-- menu strony głównej - wtedy w glownym tagu dir atrybut menu="no"
-	<text pdf="no"><div id="menu"><ul></text>
-		<cmd name="mkdir -p &quot;$TMP_DIR/menu&quot;" pdf="no" />
-		<cmd name="sed &quot;s%[[!URLPREFIX!]]%.%g&quot; &quot;$PAGE_DIR/menu.xhtml&quot; &gt; &quot;$TMP_DIR/menu/body.xml&quot;" pdf="no" />
-		<file path="$TMP_DIR/menu" pdf="no" />
-	<text pdf="no"></ul></div></text>
-	-->
 
 	<!-- treść strony głównej -->
 	<file path="ADDITIONS/about_site/old_opcode" />
-	<!--
-	<file path="ADDITIONS/about_site/_baner" pdf="no" />
-	<file path="ADDITIONS/about_site/_wstepniak" pdf="no" />
-	<text pdf="no"><p style="text-align: right"><a class="int" href="./site/">więcej ...</a></p><hr /></text>
-	<file path="ADDITIONS/about_site/_vip" pdf="no" />
-	<text pdf="no"><hr /><head1>Ostatnie zmiany na stronie:</head1></text>
-	<file path="ADDITIONS/about_site/_news" pdf="no" />
-	<text pdf="no"><p style="text-align: right"><a class="int" href="./site/#ADDITIONS:about_site:history">więcej ...</a></p></text>
-	-->
 </dir>
