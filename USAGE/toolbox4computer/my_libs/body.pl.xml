@@ -1,0 +1,9 @@
+<article>
+<title>Biblioteczki dla C</title>
+
+<ul>
+	<li><id_link id="error_reporting.h">error_reporting.h</id_link> - makra do reportowania błędów do syslog lub na stderr</li>
+	<li><id_link id="zabbix.c">zabbix.c</id_link>, <id_link id="zabbix.h">zabbix.h</id_link> - obsługa wysyłania danych do serwera Zabbix</li>
+</ul>
+
+</article>

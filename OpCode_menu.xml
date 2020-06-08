@@ -89,7 +89,6 @@
 		<dir path="ABC_OF_COMPUTING/posix/bash/bashrc" inmenu="0" />
 		<file level="2" path="ABC_OF_COMPUTING/posix/bash/stdin_stdout_stderr_pipe" />
 		<file level="2" path="ABC_OF_COMPUTING/posix/bash/laczenie_polecen" />
-		<file level="2" path="ABC_OF_COMPUTING/posix/bash/sterowanie_procesami" />
 		<file level="2" path="ABC_OF_COMPUTING/posix/bash/praca_w_tle" />
 		<file level="2" path="ABC_OF_COMPUTING/posix/bash/znaki_specjalne" />
 		
@@ -113,19 +112,11 @@
 		<dir pdf_base_level="+3" path="ABC_OF_COMPUTING/posix/podstawy_debiana/wifi/wpa_supplicant.conf" inmenu="0" />
 		<dir pdf_base_level="+3" path="ABC_OF_COMPUTING/posix/podstawy_debiana/wifi/hostapd.conf" inmenu="0" />
 		
-		<file level="2" path="ABC_OF_COMPUTING/posix/commands/hasla" />
-		<file level="2" path="ABC_OF_COMPUTING/posix/commands/skroty" />
-		
 		<file level="1" path="ABC_OF_COMPUTING/posix/wycinki_z_debian_reference" />
 		<file level="2" path="ABC_OF_COMPUTING/posix/wycinki_z_debian_reference/podstawy_unixa" />
 		<file level="2" path="ABC_OF_COMPUTING/posix/wycinki_z_debian_reference/warto_wiedziec" />
 		<dir pdf_base_level="+3" path="ABC_OF_COMPUTING/posix/wycinki_z_debian_reference/warto_wiedziec/multiscreen.sh" inmenu="0" />
 		<file level="2" path="ABC_OF_COMPUTING/posix/wycinki_z_debian_reference/dla_admina" />
-		
-		<file level="1" path="ABC_OF_COMPUTING/posix/other_os" />
-		<file level="2" path="ABC_OF_COMPUTING/posix/other_os/bsd" />
-		<file level="2" path="ABC_OF_COMPUTING/posix/other_os/solaris" />
-		<file level="2" path="ABC_OF_COMPUTING/posix/other_os/inne" />
 		
 		<file level="1" path="ABC_OF_COMPUTING/posix/linki" />
 	</dir>
@@ -345,7 +336,7 @@
 			<dir path="ABC_OF_COMPUTING/programing/lua/c_lua_api.lua" inmenu="0" />
 		</dir>
 		
-		<dir name="tcl_tk" path="ABC_OF_COMPUTING/programing/tcl_tk" title="tcl/tk" inmenu="..">
+		<dir name="tcl_tk" path="ABC_OF_COMPUTING/programing/tcl_tk" title="Tcl/Tk" inmenu="..">
 			<file level="1" path="ABC_OF_COMPUTING/programing/tcl_tk/przykład.tcl" download="no" />
 		</dir>
 		
@@ -395,7 +386,6 @@
 			<soft_db level="2" name="cmd-diagnostyczne_i_administracyjne" />
 			<soft_db level="2" name="cmd-konfiguracja_sieci" />
 			<soft_db level="2" name="cmd-shell" />
-			<file level="2" path="ABC_OF_COMPUTING/posix/commands/skroty" />
 		</dir>
 		<dir name="software_db" title="Oprogramowanie użytkowe">
 			<file level="0" path="USAGE/software_db" />
@@ -823,29 +813,30 @@
 		
 		<menutext><li>Narzędzia informatyka</li></menutext>
 		<dir name="toolbox4computer" title="Narzędzia informatyka" inmenu="0">
-			<dir name="libs4c" title="Biblioteczki dla C" inmenu="..">
-				<dir path="USAGE/toolbox4computer/my_libs/error_reporting.h" />
-				<dir path="USAGE/toolbox4computer/my_libs/zabbix.c" />
-				<dir path="USAGE/toolbox4computer/my_libs/zabbix.h" />
+			<dir name="libs4c" title="Biblioteczki dla C" art_menu="0" inmenu="..">
+				<file level="0" path="USAGE/toolbox4computer/my_libs" inmenu="0" />
+				<dir path="USAGE/toolbox4computer/my_libs/error_reporting.h" inmenu="0" />
+				<dir path="USAGE/toolbox4computer/my_libs/zabbix.c" inmenu="0" />
+				<dir path="USAGE/toolbox4computer/my_libs/zabbix.h" inmenu="0" />
 			</dir>
 			
 			<dir name="www_engine" title="Silnik WWW" art_menu="0" inmenu=".." >
-				<file level="0" path="USAGE/toolbox4computer/www_engine" />
-				<dir path="USAGE/toolbox4computer/www_engine/engine-base.sh" />
+				<file level="0" path="USAGE/toolbox4computer/www_engine" inmenu="0" />
+				<dir path="USAGE/toolbox4computer/www_engine/engine-base.sh" inmenu="0" />
 				
-				<dir path="USAGE/toolbox4computer/www_engine/engine-generate.sh" />
-				<dir path="USAGE/toolbox4computer/www_engine/engine-parse_menu.awk" />
-				<dir path="USAGE/toolbox4computer/www_engine/engine-parse_in.sh" />
-				<dir path="USAGE/toolbox4computer/www_engine/engine-parse_out.sh" />
+				<dir path="USAGE/toolbox4computer/www_engine/engine-generate.sh" inmenu="0" />
+				<dir path="USAGE/toolbox4computer/www_engine/engine-parse_menu.awk" inmenu="0" />
+				<dir path="USAGE/toolbox4computer/www_engine/engine-parse_in.sh" inmenu="0" />
+				<dir path="USAGE/toolbox4computer/www_engine/engine-parse_out.sh" inmenu="0" />
 				
-				<dir path="USAGE/toolbox4computer/www_engine/engine-edit_help.sh" />
-				<dir path="USAGE/toolbox4computer/www_engine/engine-config.sh" />
-				<dir path="USAGE/toolbox4computer/www_engine/system.php" />
-				<dir path="USAGE/toolbox4computer/www_engine/base.css" />
-				<dir path="USAGE/toolbox4computer/www_engine/layout_dynamic.css" />
-				<dir path="USAGE/toolbox4computer/www_engine/generate_google_sitemap.sh" />
-				<dir path="USAGE/toolbox4computer/www_engine/softdb.xsl" />
-				<dir path="USAGE/toolbox4computer/www_engine/base.xsl" />
+				<dir path="USAGE/toolbox4computer/www_engine/engine-edit_help.sh" inmenu="0" />
+				<dir path="USAGE/toolbox4computer/www_engine/engine-config.sh" inmenu="0" />
+				<dir path="USAGE/toolbox4computer/www_engine/system.php" inmenu="0" />
+				<dir path="USAGE/toolbox4computer/www_engine/base.css" inmenu="0" />
+				<dir path="USAGE/toolbox4computer/www_engine/layout_dynamic.css" inmenu="0" />
+				<dir path="USAGE/toolbox4computer/www_engine/generate_google_sitemap.sh" inmenu="0" />
+				<dir path="USAGE/toolbox4computer/www_engine/softdb.xsl" inmenu="0" />
+				<dir path="USAGE/toolbox4computer/www_engine/base.xsl" inmenu="0" />
 			</dir>
 		</dir>
 		

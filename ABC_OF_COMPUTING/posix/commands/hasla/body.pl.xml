@@ -1,5 +1,0 @@
-<article>
-<title>Uwagi o hasłach</title>
-
-<p>Do zmiany hasła korzystamy z polecenia <code>passwd</code> (podając następnie stare hasło i dwukrotnie nowe), zmiana ta nie dotyczy jednak zazwyczaj haseł do innych usług (np.: MySQL'a - hasło to zmieniamy poleceniem <code>mysqladmin -unazwa-użytkownika -pstare-hasło password nowe-hasło</code>, uwaga nazwę użytkownika poprzedza u (bez spacji), a stare hasło p (również bez spacji))</p>
-</article>

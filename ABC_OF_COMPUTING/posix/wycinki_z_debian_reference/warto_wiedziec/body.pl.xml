@@ -16,6 +16,5 @@ caption always "%{+b}$USER@%H %{Gk}%{gw} (load: %l | tytul okna (opcja -t): %t |
 	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tips.pl.html#s8.6.32">Usuwanie zawartości plików</a></li>
 	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tips.pl.html#s-chroot">chroot</a></li>
 	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tips.pl.html#s8.6.35">Jak weryfikować dowiązania (hardlink)</a></li>
-	<li><a class="ext_doc" href="http://qref.sourceforge.net/Debian/reference/ch-tips.pl.html#s8.6.36">Montowanie obrazów systemów plików</a></li>
 </ul>
 </article>
