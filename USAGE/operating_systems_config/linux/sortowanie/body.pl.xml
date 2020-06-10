@@ -1,4 +1,0 @@
-<article>
-<title>Sortowanie w polskich localach</title>
-<p>Domyślna konfiguracja sortowania w polskich (i nie tylko) lokalizacjach jest taka że występujące na początku nazw plików znaki takie jak kropki, wykrzykniki, małpy itp. są ignorowane. Mnie to się nie podobało i postanowiłem to zmienić: odnalazłem plik źródłowy dla pl_PL - <kbd class="path">/usr/share/i18n/locales/pl_PL</kbd> i przerobiłem sortowanie na (w mojej opinii) bardziej normalne. <a class="int" href="./i18n-locales-pl_PL">Tutaj</a> zamieszczam zmodyfikowany plik źródłowy należy go wrzucić do podanej lokalizacji (lepiej wcześniej zrobić backup tego co tam jest) i przebudować locale - np. przez rekonfigurację stosownego pakietu.</p>
-</article>

@@ -1,9 +1,0 @@
-! sterowanie odtwarzaniem multimediow
-keycode 144 = XF86AudioPrev
-keycode 162 = XF86AudioPlay
-keycode 164 = XF86AudioStop
-keycode 153 = XF86AudioNext
-
-! inne
-keycode 161 = XF86Calculator
-keycode 223 = F13

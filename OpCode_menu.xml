@@ -526,19 +526,8 @@
 		<dir name="operating_systems_config" title="Porady konfiguracyjne">
 			<file level="0" path="USAGE/operating_systems_config" />
 			
-			<dir name="linux" title="Linux">
-				<file level="0" path="USAGE/operating_systems_config/linux" />
-				<file level="1" path="USAGE/operating_systems_config/linux/klawiatura" />
-				<file level="1" path="USAGE/operating_systems_config/linux/framebuffer_i_gpm" />
-				<file level="1" path="USAGE/operating_systems_config/linux/sortowanie" />
-				
-				<file level="1" path="USAGE/operating_systems_config/linux/fstab" />
-				<file level="1" path="USAGE/operating_systems_config/linux/while_fork" />
-				<file level="1" path="USAGE/operating_systems_config/linux/wydajnosc" />
-				
-				<file level="1" path="USAGE/operating_systems_config/linux/xen" />
-				<file level="1" path="USAGE/operating_systems_config/linux/non-debian" />
-				
+			<menutext><li>Linux</li></menutext>
+			<dir name="linux" title="Linux" inmenu="0">
 				<dir pdf_base_level="2" name="debian" title="Debian" inmenu="..">
 					<file level="0" path="USAGE/operating_systems_config/debian/" />
 					<file level="1" path="USAGE/operating_systems_config/debian/przebudowywanie_pakietu" />
