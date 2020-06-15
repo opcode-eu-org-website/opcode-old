@@ -1,36 +1,3 @@
 <article>
 <title>Układy programowalne</title>
-
-<p>Obecnie bardzo istotną rolę w elektronice (cyfrowej) odgrywają układy programowalne. Można wśród nich spotkać zarówno bardzo proste układziki, jak i bardzo rozbudowane systemy (często oparte o architekturę <wiki pl="Architektura ARM">ARM</wiki>, <wiki pl="Architektura MIPS">MIPS</wiki> lub <wiki pl="X86">x86</wiki> i dysponujące znaczną mocą obliczeniową).</p>
-
-<p>Zasadniczo należy wyróżnić dwa rodzaje ukłądów programowalnych:</p><ul>
-	<li>układy o programowalnej strukturze (<wiki pl="PLD (elektronika)">PLD</wiki>) - programowany jest układ bramek, przerzutników, itp. "umieszczanych" w kości;
-		zamiast wykonywanego kodu (sekwencji instrukcji) program (napisany w <wiki pl="Hardware Description Language">Hardware Description Language</wiki> - typowo <wiki pl="VHDL">VHDL</wiki> lub <wiki pl="Verilog">Verilog</wiki>) opisuje <strong>strukturę</strong> układu logicznego (połączenia bramek, tablice prawdy, etc), która następnie jest programowana w fizycznej kości
-	</li>
-	<li>układy <wiki pl="Mikroprocesor">procesorowe</wiki> (przetwarzające ciąg instrukcji)</li>
-</ul>
-
-<p>Wśród układów o programowalnej strukturze wyróżnić należy:</p><ul>
-	<li><wiki pl="SPLD">SPLD</wiki> (<wiki pl="PLE (elektronika)">PLE</wiki> - programowalna matryca bramek OR, <wiki pl="PAL (elektronika)">PAL</wiki> i <wiki pl="GAL (elektronika)">GAL</wiki> - programowalna matryca AND z dodatkowymi bramkami OR (często także obudowana rejestrami i multiplekserami na wyjściach), <wiki pl="Programmable Logic Arrays (PLA)">PLA</wiki> - programowalne matryce AND i OR)</li>
-	<li><wiki pl="CPLD">CPLD</wiki></li>
-	<li><wiki pl="Field-programmable gate array">FPGA</wiki> - programowalny element pamięciowy (możliwość zdefiniowania dowolnej - na ogół 4 wejściowej - funkcji w każdym elemencie logicznym, programowalne połączenia między elementami logicznymi i pinami, itd)</li>
-</ul>
-
-<p>Wśród układów mikroprocesorowych wyróżnić należy:</p><ul>
-	<li>niewielkie układy (np. <wiki pl="Atmel AVR">AVR</wiki> AtMega &lt;=32, jakieś <wiki pl="Mikrokontroler PIC">PIC</wiki>) nie pozwalające na zastosowanie systemu operacyjnego (tworzona aplikacja bezpośrednio operuje na zasobach sprzętowych układu - jest dla niego dedykowana, wykożystuje niekiedy biblioteki implementujące specjalistyczne funkcjonalności jak <homepage url="http://tuxgraphics.org/electronics/200905/embedded-tcp-ip-stack.shtml" mirror="soft/electronics_uC/AVRWebServer">tuxgraphics TCP/IP stack</homepage>, <homepage url="http://www.freemodbus.org/" mirror="soft/electronics_uC/FreeMODBUS">FreeMODBUS</homepage>)</li>
-	<li>większe układy (np. AtMega128, <wiki pl="Architektura ARM">ARM7</wiki>) programowanie z wykorzystaniem prostych systemów czasu rzeczywistego, takiego jak:
-		<homepage url="http://www.ethernut.de/en/software/" mirror="soft/electronics_uC/Ethernut">NutOS</homepage>,
-		<homepage url="http://www.freertos.org/" mirror="soft/electronics_uC/FreeRTOS">FreeRTOS</homepage>,
-		<homepage url="http://www.uclinux.org/">uCLinux</homepage>,
-		<wiki en="UIP (micro IP)">uIP</wiki> / <homepage url="http://www.contiki-os.org/" mirror="soft/electronics_uC/Contiki">Contiki</homepage>,
-		<homepage url="http://www.olsonet.com/" mirror="soft/electronics_uC/PicOS">PicOS</homepage> (PicOS jest dość ciekawym systemem służącym do tworzenia wielowątkowych aplikacji na małych systemach, wydaje się że możliwe a nawet wartościowa byłaby próba uruchomienia go na platformie AVR. Idea wielowątkowości w tym systemie polega na wykorzystywaniu przez watki współdzielonego stosu i zawieraniu przez nie wywołań "entry point" w których może nastąpić przełączenie wątku.),
-		<homepage url="http://www.lochraster.org/etherrape/?en" mirror="soft/electronics_uC/etherrape">etherrape</homepage>
-	</li>
-	<li>sterowniki <wiki pl="Sterownik PLC">PLC</wiki> - programowanie tablicy przejść/wyjść <wiki pl="Deterministyczny automat skończony">deterministycznego automatu skończonego</wiki>; wykonywany jest cyklicznie program polegający na: 1. odczycie stanu wejść, 2. ustaleniu nowego stanu automatu 3. ustaleniu stanu wyjść 4. realizacji procesów komunikacyjnych. Użytkownik przy pomocy jednej z kilku standardowych metod programuje algorytm ustalania stanu następnego oraz powiązanie stanu automatu z stanem wyjść</li>
-	<li>ARM9, MIPS, ... (systemy wbudowane z prawdziwym, aczkolwiek lekko przykrojonym, systemem operacyjnym - jakiś Linux, *BSD, <wiki en="ECos">ECos</wiki>, <homepage url="http://openwrt.org/">OpenWrt</homepage>, <homepage url="http://www.linux-mips.org/">Linux/MIPS</homepage>)</li>
-	<li>systemy oparte na <wiki pl="Procesor sygnałowy">DSP</wiki> (też "prawie normalny system", ale niekoniecznie)</li>
-	<li><wiki pl="PowerPC">PowerPC</wiki>, <wiki pl="X86">x86</wiki> -> <wiki en="Single-board computer">Single-board computer</wiki>, <wiki en="PC/104">PC/104</wiki>, ... (systemy wbudowane typu PC, w zasadzie bez ograniczeń programowych)</li>
-</ul>
-
-<p>Współcześnie w przypadku układów typu PLD (podobnie zresztą jak ma to miejsce na rynku mikrokontrolerów) ważniejsza jest struktura i możliwości danej serii układów czy konkretnego przedstawiciela niż podział na grupy takie jak FPGA, CPLD,&nbsp;...&nbsp;. Możliwa a często konieczna w jednym systemie jest współpraca kilku wyżej przedstawionych technologi. Szczególnie interesującym wydaje się pomysł zastosowania FPGA (bez pamięci stałej, czyli konfigurowanego niezależnie po każdym restarcie) jako rekonfigurowalnego układu wspierającego system mikroprocesorowy (mikrokontroler czy nawet coś klasy PC), który byłby każdorazowo reprogramowany pod bieżące potrzeby przez zarządzający nim system procesorowy.</p>
 </article>

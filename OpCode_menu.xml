@@ -52,17 +52,8 @@
 		</dir>
 		
 		<dir name="programowalne" path="ABC_OF_COMPUTING/digital/programowalne" inmenu="..">
-			<file level="1" path="ABC_OF_COMPUTING/digital/programowalne/systemy_wbudowane" />
-			<file level="1" path="ABC_OF_COMPUTING/digital/programowalne/avr" />
-			<file level="2" path="ABC_OF_COMPUTING/digital/programowalne/avr/potrzebny_sprzet_i_oprogramowanie" />
-			<file level="2" path="ABC_OF_COMPUTING/digital/programowalne/avr/kompilacja" />
-			<file level="2" path="ABC_OF_COMPUTING/digital/programowalne/avr/debugowanie" />
-			<file level="2" path="ABC_OF_COMPUTING/digital/programowalne/avr/nutos" />
-			<dir pdf_base_level="+3" path="ABC_OF_COMPUTING/digital/programowalne/avr/nut_first.c" inmenu="0" />
-			<file level="1" path="ABC_OF_COMPUTING/digital/programowalne/arm_mips" />
 			<file level="1" path="ABC_OF_COMPUTING/digital/programowalne/dsp" />
 			<file level="1" path="ABC_OF_COMPUTING/digital/computers" />
-			<file level="1" path="ABC_OF_COMPUTING/digital/programowalne/linki" />
 			<file level="1" path="ABC_OF_COMPUTING/digital/magistrale" />
 			<file level="1" path="ABC_OF_COMPUTING/digital/interfejsy" />
 			<file level="2" path="ABC_OF_COMPUTING/digital/interfejsy/more" />

@@ -1,7 +1,0 @@
-<article>
-<title>ARM</title>
-
-<p>ARM czyli <dfn>Advanced RISC Machine</dfn> jest zaawansowaną 32-bitową architekturą procesorów (mikrokontrolerów). Procesory tego typu bardzo często wykorzystywane są w systemach wbudowanych, routerach sprzętowych, telefonach IP itp.</p>
-
-<p>Dużą zaletą w programowaniu większych układów ARM (a także innych tego typu mikrokontrolerów, procesorów, układów system-on-chip, np. <wiki pl="Architektura MIPS">MIPS</wiki>) jest to iż często posiadają one normalny system - dedykowana/okrojona (np. <homepage url="http://www.openwrt.org">OpenWRT</homepage>), albo nawet typowa (np. w <homepage url="http://www.raspberrypi.org">Raspberry Pi</homepage>) dystrybucja systemu Linux. Umożliwia to bardzo wygodne debugowanie kodu sterującego tworzonego na taką platformę, a także tworzenie go z wykorzystaniem standardowych posixowych rozwiązań (system plików, sieć, ...).</p>
-</article>
