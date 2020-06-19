@@ -594,50 +594,6 @@
 			</dir>
 		</dir>
 		
-		<dir name="multimedia" title="Multimedia">
-			<file level="0" path="USAGE/multimedia" />
-			<file level="1" path="USAGE/multimedia/edycja_audio-wideo" />
-			<file level="2" path="USAGE/multimedia/edycja_audio-wideo/cinelerra" />
-			<file level="2" path="USAGE/multimedia/edycja_audio-wideo/transcode_itp" />
-			<file level="3" path="USAGE/multimedia/edycja_audio-wideo/transcode_itp/audio" />
-			<file level="3" path="USAGE/multimedia/edycja_audio-wideo/transcode_itp/wideo" />
-			<file level="3" path="USAGE/multimedia/edycja_audio-wideo/transcode_itp/audio_i_wideo" />
-			<file level="2" path="USAGE/multimedia/edycja_audio-wideo/linki" />
-			<file level="1" path="USAGE/multimedia/uwagi_konfiguracyjne" />
-			<file level="2" path="USAGE/multimedia/uwagi_konfiguracyjne/tuner_rtv" />
-			<file level="2" path="USAGE/multimedia/uwagi_konfiguracyjne/serwer_dzwieku" />
-			<file level="2" path="USAGE/multimedia/uwagi_konfiguracyjne/vlc" />
-			<file level="3" path="USAGE/multimedia/uwagi_konfiguracyjne/vlc/www_plugin" />
-			<file level="3" path="USAGE/multimedia/uwagi_konfiguracyjne/vlc/vlm" />
-			<dir pdf_base_level="+4" path="USAGE/multimedia/uwagi_konfiguracyjne/vlc/tv.vlc.sh" inmenu="0" />
-			<dir pdf_base_level="+4" path="USAGE/multimedia/uwagi_konfiguracyjne/vlc/set_station.sh" inmenu="0" />
-			<dir name="rtv_recorder_and_transmiter" art_menu="0" title="RTV.sh" inmenu="0" >
-				<file level="0" path="USAGE/multimedia/rtv_recorder_and_transmiter" />
-				<file path="USAGE/multimedia/rtv_recorder_and_transmiter/rtv.sh" />
-			</dir>
-			<file level="2" path="USAGE/multimedia/uwagi_konfiguracyjne/v4l2loopback" />
-			<dir name="enigma2_dvb_stb" path="USAGE/multimedia/enigma2_dvb_stb" inmenu="..">
-				<file level="1" path="USAGE/multimedia/enigma2_dvb_stb/mini-rootfs" />
-				<dir pdf_base_level="+2" path="USAGE/multimedia/enigma2_dvb_stb/config/boot.sh" inmenu="0" />
-				<dir pdf_base_level="+2" path="USAGE/multimedia/enigma2_dvb_stb/config/chroot.sh" inmenu="0" />
-				<dir pdf_base_level="+2" path="USAGE/multimedia/enigma2_dvb_stb/config/halt.sh" inmenu="0" />
-				<dir pdf_base_level="+2" path="USAGE/multimedia/enigma2_dvb_stb/config/init.common" inmenu="0" />
-				<dir pdf_base_level="+2" path="USAGE/multimedia/enigma2_dvb_stb/config/init.sh" inmenu="0" />
-				<dir pdf_base_level="+2" path="USAGE/multimedia/enigma2_dvb_stb/config/inittab" inmenu="0" />
-				<file level="1" path="USAGE/multimedia/enigma2_dvb_stb/build-enigma" />
-				<file level="1" path="USAGE/multimedia/enigma2_dvb_stb/build-enigma/build-cmd" />
-				<file level="1" path="USAGE/multimedia/enigma2_dvb_stb/build-enigma/install" />
-				<file level="1" path="USAGE/multimedia/enigma2_dvb_stb/tools" />
-				<dir pdf_base_level="+2" path="USAGE/multimedia/enigma2_dvb_stb/tools/FBclear.c" inmenu="0" />
-				<dir pdf_base_level="+2" path="USAGE/multimedia/enigma2_dvb_stb/tools/FBconsole.c" inmenu="0" />
-				<dir pdf_base_level="+2" path="USAGE/multimedia/enigma2_dvb_stb/tools/TelnetClient/plugin.py" inmenu="0" />
-				<dir pdf_base_level="+2" path="USAGE/multimedia/enigma2_dvb_stb/tools/userbouquet-names.sh" inmenu="0" />
-				<tar name="pluginTelnetClient" path="USAGE/multimedia/enigma2_dvb_stb/tools/TelnetClient/*" />
-				<file level="1" path="USAGE/multimedia/enigma2_dvb_stb/channels_lists" />
-				<file level="1" path="USAGE/multimedia/enigma2_dvb_stb/misc" />
-			</dir>
-		</dir>
-		
 		<dir name="monitoring" title="Monitoring systemów">
 			<file level="0" path="USAGE/monitoring" />
 			<dir name="zabbix" art_menu="0" title="Zabbix">
