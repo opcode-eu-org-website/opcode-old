@@ -281,7 +281,6 @@
 			<dir name="shell_script" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/" title="drobne skrypty shellowe" inmenu="../..">
 				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/progress_bar.sh" />
 				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/kamera.sh" />
-				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/add_md5_to_pdf.sh" />
 				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/arp_log.sh" />
 				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/fs_backup.sh" />
 				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/mysql_backup.sh" />
@@ -471,12 +470,6 @@
 			
 			<menutext></ul><hr style="width: 80%;" /><ul class="menu_link"></menutext>
 			
-			<dir name="cryptography" title="Kryptografia">
-				<file level="0" path="USAGE/network_services/cryptography" />
-				<file level="1" path="USAGE/network_services/cryptography/pgp" />
-				<file level="1" path="USAGE/network_services/cryptography/x509" />
-			</dir>
-			
 			<dir name="router" title="Router - przekazywanie pakietów, DHCP itp">
 				<file level="0" path="USAGE/network_services/router" />
 				
@@ -496,21 +489,6 @@
 				<file level="1" path="USAGE/network_services/router/dhcp" />
 				<file level="1" path="USAGE/network_services/router/nat-pt" />
 				<file level="1" path="USAGE/network_services/router/inne" />
-			</dir>
-			
-			<dir name="user_config" art_menu="0" title="Konfigutracja w ręce użytkowników">
-				<file level="0" path="USAGE/network_services/user_config" />
-				
-				<file level="1" path="USAGE/network_services/user_config/dhcp" />
-				<dir path="USAGE/network_services/user_config/dhcp/dhcp_user_conf.sh" />
-				<dir path="USAGE/network_services/user_config/dhcp/add_mac.php" />
-				<dir path="USAGE/network_services/user_config/dhcp/add_mac.sh" />
-				<dir path="USAGE/network_services/user_config/dhcp/install_in_usermin.sh" />
-				
-				<file level="1" path="USAGE/network_services/user_config/asterisk" />
-				<dir path="USAGE/network_services/user_config/asterisk/asterisk_user_conf.sh" />
-				<dir path="USAGE/network_services/user_config/asterisk/user-asterisk.sample.conf" />
-				<dir path="USAGE/network_services/user_config/asterisk/callme.c" />
 			</dir>
 		</dir>
 		
