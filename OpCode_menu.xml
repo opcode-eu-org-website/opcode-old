@@ -76,13 +76,6 @@
 	</dir>
 	
 	<dir name="debian_and_posix" path="ABC_OF_COMPUTING/posix">
-		<file level="1" path="ABC_OF_COMPUTING/posix/bash" />
-		<dir path="ABC_OF_COMPUTING/posix/bash/bashrc" inmenu="0" />
-		<file level="2" path="ABC_OF_COMPUTING/posix/bash/stdin_stdout_stderr_pipe" />
-		<file level="2" path="ABC_OF_COMPUTING/posix/bash/laczenie_polecen" />
-		<file level="2" path="ABC_OF_COMPUTING/posix/bash/praca_w_tle" />
-		<file level="2" path="ABC_OF_COMPUTING/posix/bash/znaki_specjalne" />
-		
 		<file level="1" path="ABC_OF_COMPUTING/posix/storage" />
 		<file level="2" path="ABC_OF_COMPUTING/posix/storage/gpt" />
 		<file level="2" path="ABC_OF_COMPUTING/posix/storage/raid_lvm" />
@@ -264,53 +257,6 @@
 			<file level="1" path="ABC_OF_COMPUTING/programing/c_cpp/links" />
 		</dir>
 		
-		<dir name="bash" path="ABC_OF_COMPUTING/programing/bash" title="Bash" inmenu="..">
-			<file level="1" path="ABC_OF_COMPUTING/programing/bash/zmienne" />
-			<file level="2" path="ABC_OF_COMPUTING/programing/bash/zmienne/zmienne.sh" download="no" />
-			<file level="1" path="ABC_OF_COMPUTING/programing/bash/petle" />
-			<file level="2" path="ABC_OF_COMPUTING/programing/bash/petle/for.sh" download="no" />
-			<file level="2" path="ABC_OF_COMPUTING/programing/bash/petle/masowa_edycja_pklikow" />
-			<file level="2" path="ABC_OF_COMPUTING/programing/bash/petle/case_if.sh" download="no" />
-			<file level="1" path="ABC_OF_COMPUTING/programing/bash/sterowanie_terminalem" />
-			<file level="1" path="ABC_OF_COMPUTING/programing/bash/funkcje" />
-			<file level="2" path="ABC_OF_COMPUTING/programing/bash/funkcje/function.sh" download="no" />
-			<file level="1" path="ABC_OF_COMPUTING/programing/bash/opcje" />
-			<file level="2" path="ABC_OF_COMPUTING/programing/bash/opcje/opcje.sh" download="no" />
-			<file level="1" path="ABC_OF_COMPUTING/programing/bash/linki" />
-			
-			<dir name="shell_script" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/" title="drobne skrypty shellowe" inmenu="../..">
-				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/progress_bar.sh" />
-				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/kamera.sh" />
-				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/arp_log.sh" />
-				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/fs_backup.sh" />
-				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/mysql_backup.sh" />
-				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/ntpdate_cron.sh" />
-				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/beos_mail2mbox.sh" />
-				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/net_stat.sh" />
-				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/install_dom0.sh" />
-				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/smtp.sh" />
-				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/send_sms.sh" />
-				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/sshfs-via-tunel-mount.sh" />
-				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/tunel_ssh_over_vlan.sh" />
-				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/alarm.sh" />
-				<file level="1" path="ABC_OF_COMPUTING/programing/bash/shell_scripts/zegar.sh" />
-			</dir>
-		</dir>
-		<dir name="awk" path="ABC_OF_COMPUTING/programing/awk" title="(G)AWK" inmenu="..">
-			<file level="1" path="ABC_OF_COMPUTING/programing/awk/heloworld.awk" download="no" />
-			<file path="ABC_OF_COMPUTING/programing/awk/_1" />
-			<file level="1" path="ABC_OF_COMPUTING/programing/awk/heloworld2.awk" download="no" />
-			<file path="ABC_OF_COMPUTING/programing/awk/_2" />
-			<file level="1" path="ABC_OF_COMPUTING/programing/awk/zmienne_funkcje_i_tablice.awk" download="no" />
-			<file path="ABC_OF_COMPUTING/programing/awk/_3" />
-			<file level="1" path="ABC_OF_COMPUTING/programing/awk/linki" />
-		</dir>
-		
-		<dir name="php" path="ABC_OF_COMPUTING/programing/php" title="PHP" inmenu="..">
-			<file level="1" path="ABC_OF_COMPUTING/programing/php/tablica.php" download="no" />
-			<file path="ABC_OF_COMPUTING/programing/php/_koncowka" />
-			<file level="1" path="ABC_OF_COMPUTING/programing/php/linki" />
-		</dir>
 		<dir name="databases" path="ABC_OF_COMPUTING/programing/databases" title="Bazy danych" inmenu="..">
 			<file level="1" path="ABC_OF_COMPUTING/programing/databases/sql" />
 		</dir>

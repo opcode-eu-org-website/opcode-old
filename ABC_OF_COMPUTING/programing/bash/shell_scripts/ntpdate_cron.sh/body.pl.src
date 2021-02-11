@@ -1,7 +1,0 @@
-#!/bin/bash 
-
-# zabezpieczenie przed zapetleniem spowodowanym zmiana czasu przez ntpdate
-# i wywolywaniem skryptu w okreslonej godzinie przez cron'a
-sleep 10
-
-ntpdate-debian > /dev/null

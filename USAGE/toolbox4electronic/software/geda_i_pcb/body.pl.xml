@@ -3,7 +3,7 @@
 
 <p>Jest to zestaw oprogramowania służącego do tworzenia schematów elektronicznych (<code>gschem</code>) oraz projektów płytek drukowanych (<code>pcb</code> / <code>pcb-rnd</code>).</p>
 
-<p><b>Biblioteka symboli, footprintów oraz zbiór narzędzi i konfigów związanych z gschem i pcb-rnd został przeniesiony do repozytorium git: <a href="https://bitbucket.org/RPaciorek/EDA-libs">https://bitbucket.org/RPaciorek/EDA-libs</a>.</b></p>
+<p><b>Biblioteka symboli, footprintów oraz zbiór narzędzi i konfigów związanych z gschem i pcb-rnd został przeniesiony do repozytorium git: <a href="https://bitbucket.org/OpCode-eu-org/EDA-libs">https://bitbucket.org/OpCode-eu-org/EDA-libs</a>.</b></p>
 
 <subtitle>Skróty klawiaturowe w PCB</subtitle>
 <p>Przydatna klawiszologia dla pcb (oraz pcb-rnd w wersji &lt;2.0):</p>

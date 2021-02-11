@@ -1,3 +1,0 @@
-<article>
-<p>Wykonanie ./hello.awk spowoduje oczekiwanie na dane wejściowe z sdtin ... po wpisaniu każdej kolejnej linii program wypisze "Hello World !!!" (aby zkończyć Ctrl+D) ... natomiast ./hello.awk jakis_plik wypisze ileś razy ten napis i zakończy działanie ... ale chyba nie o to chodziło. Spróbujmy wiec tak:</p>
-</article>

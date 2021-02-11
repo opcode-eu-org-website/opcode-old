@@ -1,3 +1,0 @@
-#!/usr/bin/gawk -f
-
-{ printf "Hello World !!!\n" }

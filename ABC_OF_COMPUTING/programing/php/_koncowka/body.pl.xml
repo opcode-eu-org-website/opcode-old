@@ -1,7 +1,0 @@
-<article>
-<p>Do ważnych instrukcji należy zaliczyć <code>include</code> oraz <code>include_once</code>, które włączają podany po nich plik (ta druga sprawdza czy nie był już włączony i włącza tylko gdy nie był - wygodne przy włączaniu plików z definicjami funkcji). Mamy tez możliwości programowania obiektowego.</p>
-
-<p>Reszta programowania i (jak sądzę) siła tego języka tkwi w bogactwie funkcji - do obsługi napisów, protokołów sieciowych (np. header()), plików (np. fopen(), itd.), baz danych, połączeń sieciowych (np. fsockopen()), ... . Więcej w  <doc url="http://pl.php.net/manual/pl/">dokumentacji PHP</doc>.</p>
-
-<p>Na koniec warto zaznaczyć że dziedziny zastosowań PHP nie ograniczają sie tylko do WWW - może służyć do pisania innego rodzaju skryptów i aplikacji. W szczególności skrypty php możemy wykonywać jak każdy inny skrypt - wykonywalny plik tekstowy z <code>#!/usr/bin/php4</code> (uwagi: kod dalej musi być w &lt;?php i ?&gt; oraz wymaga odpowiedniej paczki PHP - np. w Debianie "php4-cli").</p>
-</article>
